@@ -60,8 +60,16 @@ function MonthChart({ label, months, data, color, height = 84 }) {
 }
 
 /* ---------- SCR / ECR writing data (rubric-level, per subject) ---------- */
-const RACE_COLORS = { R: '#e668c9', A: '#6db7f2', C: '#7fd483', E: '#f2b27e' }
-const RACE_MEANING = { R: 'Restate the question', A: 'Answer completely', C: 'Cite evidence', E: 'Explain your thinking' }
+// Anchor chips keyed by label: RACE (ELA / Social Studies) and CER (Science)
+// share letters (C, E, R) with different meanings, so lookups go by label.
+const ANCHOR_COLORS = {
+  Restate: '#e668c9', Answer: '#6db7f2', Cite: '#7fd483', Explain: '#f2b27e',
+  Claim: '#e668c9', Evidence: '#7fd483', Reasoning: '#f2b27e',
+}
+const ANCHOR_MEANING = {
+  Restate: 'Restate the question', Answer: 'Answer completely', Cite: 'Cite evidence', Explain: 'Explain your thinking',
+  Claim: 'Make a clear claim', Evidence: 'Support it with evidence', Reasoning: 'Explain your reasoning',
+}
 
 function DataBar({ pct }) {
   const fill = pct >= 80 ? 'var(--good)' : pct > 0 ? '#e8b33c' : 'transparent'
@@ -80,8 +88,8 @@ function ScrPanel({ rows }) {
       </div>
       <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
         {rows.map((r) => (
-          <div key={r.k} title={`${r.k} = ${RACE_MEANING[r.k]}`} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <span style={{ width: 25, height: 25, borderRadius: 7, background: 'var(--navy)', color: RACE_COLORS[r.k], display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13 }}>{r.k}</span>
+          <div key={r.label} title={`${r.k} = ${ANCHOR_MEANING[r.label] || r.label}`} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+            <span style={{ width: 25, height: 25, borderRadius: 7, background: 'var(--navy)', color: ANCHOR_COLORS[r.label] || '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13 }}>{r.k}</span>
             <span style={{ width: 38, fontSize: 12, fontWeight: 800, textAlign: 'right' }}>{r.pct}%</span>
             <DataBar pct={r.pct} />
             <span style={{ width: 14, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, textAlign: 'right' }} title={`${r.n} response${r.n === 1 ? '' : 's'} assessed`}>{r.n}</span>

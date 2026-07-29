@@ -222,7 +222,8 @@ export function seedState() {
       { id: 'm6', label: 'Editing', status: 'not_started', progress: 0 },
     ],
     // Rubric-level writing data per subject (mirrors the live product's student
-    // data view). SCR = RACE Strategy Anchor Adherence; ECR = STAAR-style domains.
+    // data view). SCR strategy differs by subject: ELA/Social Studies = RACE,
+    // Science = CER (Claim/Evidence/Reasoning). ECR = STAAR-style domains.
     writingData: {
       subjects: ['ELA', 'Science', 'Social Studies'],
       ELA: {
@@ -248,10 +249,9 @@ export function seedState() {
       },
       Science: {
         scr: [
-          { k: 'R', label: 'Restate', pct: 75, n: 2 },
-          { k: 'A', label: 'Answer', pct: 100, n: 2 },
-          { k: 'C', label: 'Cite', pct: 25, n: 1 },
-          { k: 'E', label: 'Explain', pct: 50, n: 1 },
+          { k: 'C', label: 'Claim', pct: 75, n: 2 },
+          { k: 'E', label: 'Evidence', pct: 25, n: 1 },
+          { k: 'R', label: 'Reasoning', pct: 50, n: 1 },
         ],
         ecrOrg: [
           { label: 'Central Idea/Claim', pct: 0 },

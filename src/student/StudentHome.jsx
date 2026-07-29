@@ -926,7 +926,7 @@ function GamePickerModal({ games, grade, onPlayBuiltin, onPlayed, onClose, missi
                 ) : g.kind === 'external' ? (
                   <button className="btn" style={{ padding: mission ? '9px 20px' : '7px 16px', fontSize: 13 }} onClick={() => setPlaying(g)}>Play ▶</button>
                 ) : (
-                  <button className="btn" style={{ padding: mission ? '9px 20px' : '7px 16px', fontSize: 13 }} onClick={onPlayBuiltin}>Play ▶</button>
+                  <button className="btn" style={{ padding: mission ? '9px 20px' : '7px 16px', fontSize: 13 }} onClick={() => onPlayBuiltin(g)}>Play ▶</button>
                 )}
               </div>
             )
@@ -934,7 +934,7 @@ function GamePickerModal({ games, grade, onPlayBuiltin, onPlayed, onClose, missi
         </div>
         {!mission && (
           <p style={{ fontSize: 11.5, color: 'var(--muted)', margin: '12px 0 0', textAlign: 'center' }}>
-            🎮 The library grows all year — games publish straight from the ClearK12 games repo.
+            🎮 Quick rounds, instant feedback — every game plays right here on this screen.
           </p>
         )}
       </div>
@@ -1141,7 +1141,7 @@ function AssignmentsCard({ rows, busy, begin }) {
 export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onBank, onWall, onAssignment, onChange }) {
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
-  const [game, setGame] = useState(false)
+  const [game, setGame] = useState(null) // built-in game key, e.g. 'combine'
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
   const [stuckOpen, setStuckOpen] = useState(false)
@@ -1284,12 +1284,12 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
 
   return (
     <div>
-      {game && <FluencyGame onClose={() => setGame(false)} onFinished={gamePlayed} />}
+      {game && <FluencyGame gameKey={game} onClose={() => setGame(null)} onFinished={gamePlayed} />}
       {gamePicker && (
         <GamePickerModal games={state.fluencyGames || []} grade={me.gradeLevel ?? 6} onPlayed={gamePlayed}
           mission={!!(wp?.steps && wp.steps.includes('games') && !wp.done[wp.steps.indexOf('games')])}
           playedCount={wp?.gamesPlayed ?? 0} seed={`${wp?.date || ''}-${wp?.day ?? ''}`}
-          onPlayBuiltin={() => { setGamePicker(false); setGame(true) }}
+          onPlayBuiltin={(g) => { setGamePicker(false); setGame((g && g.game) || 'stretch') }}
           onClose={() => setGamePicker(false)} />
       )}
       {fwChooser && (
@@ -1353,7 +1353,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
                 ▶ Start Mission {nextIdx + 1} →
               </button>
             )}
-            <button onClick={() => { setPayoff(null); setGame(true) }}
+            <button onClick={() => { setPayoff(null); setGame(['stretch', 'combine', 'transitions', 'fragments', 'wordswap'][Math.floor(Math.random() * 5)]) }}
               style={{ background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.25)', color: '#fff', fontWeight: 800, fontSize: 12, borderRadius: 999, padding: '9px 14px', whiteSpace: 'nowrap', cursor: 'pointer' }}>
               🕹️ Bonus round
             </button>

@@ -19,10 +19,7 @@ This is an early, clickable prototype for team feedback — not production code.
 - **My Growth** — selectable focus **goals** (5 presets + custom, goal → coins on completion), **monthly progress** toggled by SCR/ECR, **trait snapshot**, **writing habits**, a **growth story** (Draft 1 → latest), a **Share Wall**, a **next-step nudge**, and **teacher shout-outs**.
 - **ClassCade** hook — coins reward the *behaviors that make writers* (drafting, conferring, revising, keeping the pen), never the grade.
 
-### Teacher experience
-- **Class Overview** — dashboard mirroring LoneStar's real layout (Writer's Reel activity feed + ClassCade Quick Rewards rail).
-- **Student portfolios** — every draft + full conference transcript (integrity visibility), 6-Traits, milestones.
-- **Trait trends** and the **SCR/ECR module** repositioning.
+> **V1 note:** this fork is the **student experience only** — the teacher views were removed while they're out of scope, and the dashboard no longer runs a weekday mission path: students land straight on the open dashboard with every option available.
 
 ---
 
@@ -33,11 +30,11 @@ npm install
 npm run dev
 ```
 
-Then open **http://localhost:5173**. Use the **"Viewing as"** dropdown (bottom-left) to switch between the student (Kayla Scott) and teacher (Dirk Nowitski) views.
+Then open **http://localhost:5173**. The app opens as the student (Kayla Scott); the floating control bottom-left resets the demo data.
 
 `npm run dev` starts two things together:
 - the **Vite** frontend on `:5173`
-- a tiny zero-dependency **Node API** on `:8787` (Vite proxies `/api` to it)
+- a tiny zero-dependency **Node API** on `:8788` (Vite proxies `/api` to it)
 
 > If Vite fails to start on a fresh install, run `npm rebuild esbuild` once, then `npm run dev` again.
 

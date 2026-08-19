@@ -4,11 +4,11 @@ const j = (r) => r.json()
 
 // Where the API lives, depending on how the app is served:
 //  - Vite dev (:5173)         -> '' (Vite proxies /api to the backend)
-//  - local static preview (:4200, python) -> the separate Node API on :8787
+//  - local static preview (:4200, python) -> the separate Node API on :8788
 //  - everything else (Node serving app+API on one port, or a deployed host / tunnel)
 //    -> same origin, relative
 const PORT = typeof location !== 'undefined' ? location.port : ''
-const BASE = PORT === '5173' ? '' : PORT === '4200' ? 'http://localhost:8787' : ''
+const BASE = PORT === '5173' ? '' : PORT === '4200' ? 'http://localhost:8788' : ''
 const u = (p) => BASE + p
 
 const networkApi = {
@@ -28,11 +28,6 @@ const networkApi = {
   peerRevision: () => fetch(u('/api/peerrevision'), { method: 'POST' }).then(j),
   evaluate: (subId, answers) => fetch(u(`/api/submissions/${subId}/evaluate`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ answers }) }).then(j),
   submitRevision: (subId) => fetch(u(`/api/submissions/${subId}/submit-revision`), { method: 'POST' }).then(j),
-  pathDemoDay: (day) => fetch(u('/api/path/demo-day'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ day }) }).then(j),
-  pathStart: () => fetch(u('/api/path/start'), { method: 'POST' }).then(j),
-  pathAdvance: (step) => fetch(u('/api/path/advance'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ step }) }).then(j),
-  pathGame: () => fetch(u('/api/path/game'), { method: 'POST' }).then(j),
-  pathStuck: () => fetch(u('/api/path/stuck'), { method: 'POST' }).then(j),
   publish: (subId) => fetch(u(`/api/submissions/${subId}/publish`), { method: 'POST' }).then(j),
   discard: (subId) => fetch(u(`/api/submissions/${subId}/discard`), { method: 'POST' }).then(j),
   share: (submissionId) => fetch(u('/api/share'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ submissionId }) }).then(j),

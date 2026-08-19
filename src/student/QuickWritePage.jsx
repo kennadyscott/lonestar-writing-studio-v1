@@ -59,7 +59,6 @@ export default function QuickWritePage({ state, onBack, onChange }) {
     setBusy(true)
     try {
       const r = await api.quickWrite('quick', { title: pick.title, prompt: pick.prompt, content: text.trim(), complete: true })
-      await api.pathAdvance('quickwrite').catch(() => {})
       setResult({ coins: r.coins, words: wc, streakDays: r.streakDays, streakExtended: r.streakExtended })
       setStage('done')
       onChange && onChange()

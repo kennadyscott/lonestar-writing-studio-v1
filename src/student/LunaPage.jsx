@@ -123,7 +123,6 @@ function PathBar({ modules, currentId }) {
 }
 
 export default function LunaPage({ state, onBack, onChange }) {
-  useEffect(() => { api.pathAdvance('luna').then(() => onChange && onChange()).catch(() => {}) }, [])
   const modules = state.modules
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const currentIdx = modules.indexOf(current)

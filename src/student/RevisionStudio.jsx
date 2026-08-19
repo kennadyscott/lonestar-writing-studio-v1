@@ -188,7 +188,6 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
       clearTimeout(timer.current)
       await api.saveContent(working.id, content)
       const r = await api.submitRevision(sub.id)
-      await api.pathAdvance('revision').catch(() => {})
       setResult(r)
       onChange && onChange()
     } finally { setBusy(false) }

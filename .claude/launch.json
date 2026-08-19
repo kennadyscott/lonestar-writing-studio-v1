@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "lonestar-studio",
+      "name": "lonestar-studio-v1",
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "dev"],
-      "port": 5173
+      "port": 8788
     }
   ]
 }

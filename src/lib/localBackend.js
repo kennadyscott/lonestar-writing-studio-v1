@@ -53,88 +53,14 @@ function evaluateMilestones(sub, prev, frozen) {
   return out
 }
 
-const PATH_SCHEDULE = {
-  1: ['assignments', 'quickwrite', 'luna'],
-  2: ['quickwrite', 'assignments', 'games'],
-  3: ['games', 'assignments', 'luna'],
-  4: ['freewrite', 'assignments', 'games'],
-  5: ['quickwrite', 'goal_data', 'games'],
-}
-function ensurePath() {
-  const today = now().slice(0, 10)
-  const dow = state.demoDay ?? new Date().getDay()
-  if (!state.writingPath || state.writingPath.date !== today || state.writingPath.day !== dow) {
-    const steps = PATH_SCHEDULE[dow] || null
-    state.writingPath = { date: today, day: dow, steps, done: steps ? steps.map(() => false) : [], gamesPlayed: 0, started: false, completed: !steps }
-  }
-  return state.writingPath
-}
-function feedStreak() {
-  const today = now().slice(0, 10)
-  const gsum = state.growthSummary
-  if (gsum && gsum.lastStreakDate !== today) { gsum.streakDays += 1; gsum.lastStreakDate = today; return true }
-  return false
-}
-function completePathIfDone(wp) {
-  if (wp.steps && wp.done.every(Boolean) && !wp.completed) {
-    wp.completed = true
-    const coins = 25
-    state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'writing_path', coins, ts: now() })
-    const stu = findStu(ME); if (stu) stu.coins += coins
-    feedStreak()
-    return coins
-  }
-  return 0
-}
-
 export const localApi = {
-  pathDemoDay: async (day) => { state.demoDay = day == null ? undefined : Number(day); state.writingPath = null; return { path: clone(ensurePath()) } },
-  pathStart: async () => { const wp = ensurePath(); wp.started = true; return { path: clone(wp) } },
-  pathAdvance: async (step) => {
-    const wp = ensurePath(); let coins = 0
-    if (wp.steps && wp.started) {
-      let idx = wp.done.findIndex((d) => !d)
-      if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === step)
-      if (idx >= 0 && wp.steps[idx] === step) {
-        wp.done[idx] = true
-        const stu = findStu(ME); if (stu) stu.coins += 10
-        coins = 10 + completePathIfDone(wp)
-      }
-    }
-    return { path: clone(wp), coinsAwarded: coins }
-  },
-  pathStuck: async () => {
-    const wp = ensurePath()
-    if (wp.steps && !wp.completed) {
-      wp.started = true
-      wp.stuck = true
-      const idx = wp.done.findIndex((d) => !d)
-      wp.stuckStep = idx >= 0 ? wp.steps[idx] : null
-    }
-    return { path: clone(wp) }
-  },
-  pathGame: async () => {
-    const wp = ensurePath(); let coins = 0
-    wp.gamesPlayed = (wp.gamesPlayed || 0) + 1
-    if (wp.steps && wp.started) {
-      let idx = wp.done.findIndex((d) => !d)
-      if (wp.stuck) idx = wp.steps.findIndex((st, i) => !wp.done[i] && st === 'games')
-      if (idx >= 0 && wp.steps[idx] === 'games' && wp.gamesPlayed >= 2) {
-        wp.done[idx] = true
-        const stu = findStu(ME); if (stu) stu.coins += 10
-        coins = 10 + completePathIfDone(wp)
-      }
-    }
-    return { path: clone(wp), coinsAwarded: coins }
-  },
   health: async () => ({ ok: true, hasKey: false, model: null }),
   state: async () => {
     const task = todaysTask()
     const stu = findStu(ME)
     const band = bandFor(stu?.gradeLevel ?? 6)
     const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === new Date().toISOString().slice(0, 10))
-    const wp = ensurePath()
-    return { ...clone(state), writingPath: clone(wp), dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } }
+    return { ...clone(state), dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } }
   },
   reset: async () => { state = seedState(); return clone(state) },
   saveContent: async (draftId, content) => { const h = findDraft(draftId); if (h) h.draft.content = content; return { ok: true } },

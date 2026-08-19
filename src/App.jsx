@@ -9,6 +9,7 @@ import ArcadePage from './student/ArcadePage.jsx'
 import LunaPage from './student/LunaPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
+import FeedbackReview from './student/FeedbackReview.jsx'
 
 const ME_STUDENT = 'stu_kscott'
 
@@ -17,6 +18,7 @@ export default function App() {
   const [health, setHealth] = useState({ hasKey: false })
   const [view, setView] = useState('home')
   const [openSub, setOpenSub] = useState(null) // submission id for the studio
+  const [reviewSub, setReviewSub] = useState(null) // completed submission being reviewed
 
   const refresh = useCallback(async () => setState(await api.state()), [])
   useEffect(() => { refresh(); api.health().then(setHealth) }, [refresh])
@@ -30,7 +32,7 @@ export default function App() {
   const me = state.students.find((s) => s.id === ME_STUDENT)
   const who = { name: me.name, sub: state.teacher.school, initials: me.initials }
 
-  const goHome = () => { setView('home'); setOpenSub(null) }
+  const goHome = () => { setView('home'); setOpenSub(null); setReviewSub(null) }
 
   async function resetDemo() {
     await api.reset()
@@ -40,12 +42,15 @@ export default function App() {
 
   let body
   const sub = openSub ? state.submissions.find((s) => s.id === openSub) : null
-  if (view === 'home' && sub) {
+  const reviewing = reviewSub ? state.submissions.find((s) => s.id === reviewSub) : null
+  if (view === 'home' && reviewing) {
+    body = <FeedbackReview state={state} sub={reviewing} onBack={goHome} />
+  } else if (view === 'home' && sub) {
     body = sub.isPeerRevision
       ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
       : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
   } else if (view === 'home') {
-    body = <StudentHome state={state} me={me} onOpen={openSubmission} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
+    body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
   } else if (view === 'luna') {
     body = <LunaPage state={state} onBack={goHome} onChange={refresh} />
   } else if (view === 'quickwrite') {

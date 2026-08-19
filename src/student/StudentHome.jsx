@@ -44,41 +44,43 @@ function WayTile({ icon, title, sub, onClick, busy }) {
   )
 }
 
-function LunaNook({ modules, onLuna }) {
+function LunaNook({ modules, onLuna, compact }) {
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
     <div style={{ borderRadius: 20, background: '#0d2440', border: '2px solid rgba(9,26,52,.6)', overflow: 'hidden', boxShadow: '0 10px 26px rgba(20,15,70,.32)' }}>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 13, padding: '13px 18px',
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: compact ? 10 : 13, padding: compact ? '11px 14px' : '13px 18px',
         background: `linear-gradient(90deg, rgba(13,36,64,.94) 0%, rgba(13,36,64,.5) 42%, rgba(13,36,64,.15) 70%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
-        <span style={{ width: 56, height: 56, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
+        <span style={{ width: compact ? 42 : 56, height: compact ? 42 : 56, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
           <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-            <img src={BRAND.luna} alt="Luna" style={{ height: 40 }} />
+            <img src={BRAND.luna} alt="Luna" style={{ height: compact ? 30 : 40 }} />
           </span>
         </span>
         <div>
-          <b style={{ fontSize: 17, color: '#fff' }}>Luna's Writing Nook</b>
-          <div style={{ fontSize: 12.5, color: '#a8dff5', fontWeight: 700 }}>Your writing path</div>
+          <b style={{ fontSize: compact ? 15 : 17, color: '#fff' }}>Luna's Writing Nook</b>
+          <div style={{ fontSize: compact ? 11.5 : 12.5, color: '#a8dff5', fontWeight: 700 }}>Your writing path</div>
         </div>
       </div>
-      <div style={{ background: '#fdfcf8', margin: '2px 14px 14px', borderRadius: 14, padding: '16px 20px' }}>
-        <b style={{ fontSize: 15, color: '#1c1650' }}>Module {idx + 1}: {current.label}</b>
-        <div style={{ fontSize: 12.5, color: CYAN_TEXT, fontWeight: 800, margin: '4px 0 8px' }}>4 of 6 activities completed</div>
+      <div style={{ background: '#fdfcf8', margin: compact ? '2px 10px 10px' : '2px 14px 14px', borderRadius: 14, padding: compact ? '13px 15px' : '16px 20px' }}>
+        <b style={{ fontSize: compact ? 13.5 : 15, color: '#1c1650' }}>Module {idx + 1}: {current.label}</b>
+        <div style={{ fontSize: 12, color: CYAN_TEXT, fontWeight: 800, margin: '4px 0 8px' }}>4 of 6 activities completed</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{ flex: 1, height: 9, background: '#e8e6f2', borderRadius: 6 }}>
             <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#1479b8)', borderRadius: 6 }} />
           </div>
           <b style={{ fontSize: 13, color: CYAN_TEXT }}>{Math.round(current.progress * 100)}%</b>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 5 : 8, marginTop: 12, flexWrap: 'wrap' }}>
           {modules.map((m) => (
             <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .4 : 1 }}>
-              <ModuleBadge id={m.id} size={30} dim={m.status === 'not_started'} />
+              <ModuleBadge id={m.id} size={compact ? 26 : 30} dim={m.status === 'not_started'} />
             </span>
           ))}
-          <span style={{ flex: 1 }} />
-          <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '10px 26px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
+          {!compact && <span style={{ flex: 1 }} />}
+          <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999,
+            padding: compact ? '10px 0' : '10px 26px', width: compact ? '100%' : 'auto', marginTop: compact ? 10 : 0,
+            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
             Go to my path →
           </button>
         </div>
@@ -413,11 +415,11 @@ function GamePickerModal({ games, grade, onPlayBuiltin, onClose }) {
       <div className="card" style={{ width: 520, maxWidth: '94vw', padding: 24 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
           <span style={{ fontSize: 26 }}>🎮</span>
-          <b style={{ fontSize: 18 }}>Fluency Games</b>
+          <b style={{ fontSize: 18 }}>Fluency Practice</b>
           <button onClick={onClose} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
         <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>
-          Quick games that build writing muscles. New games are added by grade level — you're in <b>Grade {grade}</b>.
+          Quick games that build writing muscles — every round pays <b>double coins</b> in ClassCade. New games are added by grade level; you're in <b>Grade {grade}</b>.
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 420, overflowY: 'auto', paddingRight: 4 }}>
           {games.map((g) => {
@@ -493,77 +495,6 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
   )
 }
 
-/* ---- Assignments tab: companion-product sections ---- */
-function ClearSheetsCard({ sheets }) {
-  return (
-    <div className="card" style={{ padding: 16 }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-        <span style={{ fontSize: 18 }}>🧾</span><b style={{ fontSize: 15 }}>ClearSheets</b>
-        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600 }}>· Worksheets</span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
-        {sheets.map((w) => (
-          <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 0', borderBottom: '1px solid var(--line)' }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700 }}>{w.title}</div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 3 }}>
-                <span className="pill" style={{ fontSize: 10.5, padding: '2px 8px', background: '#e2f2f3', color: 'var(--scr)' }}>{w.subject}</span>
-                {w.status === 'done'
-                  ? <span style={{ fontSize: 11.5, color: 'var(--good)', fontWeight: 700 }}>✓ Done</span>
-                  : <DueChip dueDate={w.due} status="not_started" />}
-              </div>
-            </div>
-            <button className={w.status === 'done' ? 'btn ghost' : 'btn'} style={{ padding: '6px 14px', fontSize: 12.5 }} title="Opens in ClearSheets">
-              {w.status === 'done' ? 'Review' : 'Open'}
-            </button>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// Crystal Instruction brand: magenta gem + pink wordmark.
-function CrystalGem({ size = 20 }) {
-  return (
-    <svg viewBox="0 0 100 130" width={size} height={size * 1.3} aria-hidden="true">
-      <polygon points="50,2 96,52 4,52" fill="#f27bea" />
-      <polygon points="50,2 96,52 50,52" fill="#ee3fe0" />
-      <polygon points="4,52 96,52 50,128" fill="#e62edf" />
-      <polygon points="50,52 96,52 50,128" fill="#c21fb5" />
-    </svg>
-  )
-}
-
-function CrystalQuestCard({ quests }) {
-  return (
-    <div className="card" style={{ padding: 0, overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '12px 16px', background: 'linear-gradient(120deg,#e62edf,#a916a5)', color: '#fff' }}>
-        <CrystalGem size={17} />
-        <b style={{ fontSize: 15 }}>Crystal Quest</b>
-        <span style={{ fontSize: 11.5, opacity: .9, fontWeight: 600 }}>· Independent learning paths</span>
-      </div>
-      <div style={{ padding: '13px 16px', display: 'flex', flexDirection: 'column', gap: 13, flex: 1 }}>
-        {quests.map((q) => (
-          <div key={q.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <span style={{ width: 38, height: 38, borderRadius: 10, background: '#fbe4f9', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
-              <CrystalGem size={17} />
-            </span>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13.5, fontWeight: 700 }}>{q.title}</div>
-              <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, margin: '1px 0 5px' }}>{q.area} · <span style={{ color: '#c21fb5', fontWeight: 800 }}>{q.crystals}</span></div>
-              <div style={{ height: 6, background: '#f7ddf5', borderRadius: 4 }}>
-                <div style={{ height: '100%', width: `${q.progress * 100}%`, background: 'linear-gradient(90deg,#f06ee6,#c21fb5)', borderRadius: 4 }} />
-              </div>
-            </div>
-            <button className="btn" style={{ padding: '6px 14px', fontSize: 12.5, background: '#c21fb5' }} title="Opens in Crystal Quest">Continue</button>
-          </div>
-        ))}
-        <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 'auto' }}>Earn crystals by finishing each step of a path — at your own pace.</div>
-      </div>
-    </div>
-  )
-}
 
 /* ---- Full assignments list (owns its filter state) ---- */
 function AssignmentsCard({ rows, busy, begin }) {
@@ -647,7 +578,7 @@ function AssignmentsCard({ rows, busy, begin }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, onBank, onWall, onChange }) {
+export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onChange }) {
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // built-in game key, e.g. 'combine'
@@ -693,6 +624,8 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
     try { const r = await api.peerRevision(); onOpen(r.submissionId) } finally { setBusy(false) }
   }
   async function begin(row) {
+    // a finished teacher assignment opens its feedback, not the draft editor
+    if (row.sub?.completedAt && !['free', 'quick'].includes(row.a.genre) && onReview) return onReview(row.sub.id)
     if (row.sub) return onOpen(row.sub.id)
     setBusy(true)
     try { const r = await api.start(row.a.id); onOpen(r.submissionId) } finally { setBusy(false) }
@@ -761,13 +694,11 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <BigTask compact icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
             <BigTask compact icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask compact icon="🎮" title="Fluency Games" sub="A whole arcade of writing games" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask compact icon="🎮" title="Fluency Practice" sub="Earn double coins in ClassCade" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
             <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
-            <ClearSheetsCard sheets={state.clearSheets || []} />
-            <CrystalQuestCard quests={state.crystalQuests || []} />
+            <LunaNook modules={state.modules} onLuna={onLuna} compact />
           </div>
         </div>
-        <LunaNook modules={state.modules} onLuna={onLuna} />
         <DailyBanner dc={dc} busy={busy} onGo={peer} />
       </div>
       </>)}

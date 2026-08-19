@@ -1,12 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { api } from '../lib/api.js'
-import ConferencePanel from './ConferencePanel.jsx'
 
 /*
  * Daily Revision Challenge — three parts:
  *   1 (evaluate): score the robot's draft against the RUBRIC (focused layout, no tabs).
  *   2 (rewrite):  revise directly beneath the original, working from the REVISION
- *                 CHECKLIST (their rubric judgments) with the coach one tab away.
+ *                 CHECKLIST (their rubric judgments) beside the draft.
  *   3 (done):     submit for feedback (coach headline + next steps + coins).
  */
 
@@ -37,25 +36,54 @@ function Stepper({ phase }) {
 
 function FeedbackModal({ result, onClose }) {
   if (!result) return null
-  const top = (result.traits?.traits || []).filter((t) => t.level <= 2).slice(0, 2)
+  const rubric = result.rubric
+  const agree = result.agreement
+  const pct = rubric ? Math.round((rubric.met / rubric.total) * 100) : null
+  const tone = pct == null ? 'var(--navy)' : pct >= 80 ? 'var(--good)' : pct >= 50 ? '#c99312' : '#c0392b'
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
-      <div className="card" style={{ padding: 28, width: 480, maxWidth: '92vw' }} onClick={(e) => e.stopPropagation()}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60, padding: 16 }} onClick={onClose}>
+      <div className="card" style={{ padding: 26, width: 520, maxWidth: '94vw', maxHeight: '92vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 46 }}>🎉</div>
+          <div style={{ fontSize: 42 }}>🎉</div>
           <h2 style={{ margin: '4px 0 2px' }}>Revision submitted!</h2>
-          <p style={{ color: 'var(--muted)', margin: '0 0 12px', fontSize: 14 }}>You just did what real writers do — judge, then improve.</p>
+          <p style={{ color: 'var(--muted)', margin: '0 0 14px', fontSize: 14 }}>You just did what real writers do — judge, then improve.</p>
         </div>
-        {result.traits?.headline && (
-          <div style={{ background: '#eef6f9', borderRadius: 12, padding: '12px 14px', fontSize: 14, lineHeight: 1.45, marginBottom: 10 }}>
-            <b>Coach's feedback:</b> {result.traits.headline}
+
+        {rubric && (
+          <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f4f8fb', borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
+              <div style={{ textAlign: 'center', minWidth: 74 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}>RUBRIC</div>
+                <b style={{ fontSize: 22, color: tone }}>{rubric.met}<span style={{ fontSize: 14, color: 'var(--muted)' }}>/{rubric.total}</span></b>
+              </div>
+              <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.5 }}>
+                <b>Your revision was scored on the same rubric you just used.</b>
+                <div style={{ color: 'var(--muted)', marginTop: 2 }}>
+                  {rubric.fixed > 0 ? `You fixed ${rubric.fixed} ${rubric.fixed === 1 ? 'criterion' : 'criteria'} the draft was missing.` : 'None of the missing criteria are fixed yet — the ✗ items below are where to go next.'}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+              {rubric.items.map((it, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 9, fontSize: 13, lineHeight: 1.4, padding: '7px 10px', borderRadius: 9,
+                  background: it.met ? '#f1faf4' : '#fff7f7' }}>
+                  <span style={{ width: 18, height: 18, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, color: '#fff',
+                    background: it.met ? 'var(--good)' : '#c0392b' }}>{it.met ? '✓' : '✕'}</span>
+                  <span style={{ flex: 1 }}>{it.text}</span>
+                  {it.met && !it.wasMet && <span className="pill green" style={{ fontSize: 10.5, padding: '2px 8px' }}>you fixed this</span>}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {agree && (
+          <div style={{ background: '#eef6f9', borderRadius: 12, padding: '12px 14px', fontSize: 13.5, lineHeight: 1.45, marginBottom: 12 }}>
+            <b>Your grader eye:</b> you matched the rubric on <b>{agree.matched} of {agree.total}</b> criteria when you scored the robot's draft.
           </div>
         )}
-        {top.length > 0 && (
-          <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
-            {top.map((t) => <div key={t.key} style={{ marginTop: 4 }}>→ {t.next_step}</div>)}
-          </div>
-        )}
+
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7, margin: '12px 0' }}>
           {result.newMilestones.map((m) => (
             <div key={m.id} className="pill gold" style={{ justifyContent: 'space-between', fontSize: 13, padding: '8px 12px' }}>
@@ -124,25 +152,39 @@ function RubricPanel({ asg, answers, setAnswers, onStartRewrite, busy }) {
 /* ---- Step 2: the revision checklist (their judgments become fix targets) ---- */
 function ChecklistPanel({ asg, sub, answers, fixed, setFixed }) {
   const list = asg.checklist || []
-  const evaluation = sub.evaluation || answers
+  const mine = sub.evaluation || answers
+  const key = sub.rubricKey || null
+  const agree = sub.agreement || null
   return (
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 9, height: '100%', overflowY: 'auto' }}>
+      {agree && (
+        <div style={{ background: agree.matched === agree.total ? '#f1faf4' : '#fff8ec', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, lineHeight: 1.45 }}>
+          <b>You matched the rubric on {agree.matched} of {agree.total}.</b>{' '}
+          {agree.matched === agree.total ? 'You read this draft exactly like a grader would.' : 'The ✗ marks below are the rubric’s own scoring — fix those as you revise.'}
+        </div>
+      )}
       <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
-        Your rubric scores, now your checklist — <b style={{ color: '#d84a57' }}>fix the ✗ items</b> as you revise, and check them off as you go.
+        <b style={{ color: '#d84a57' }}>Fix the ✗ items</b> as you revise, and check them off as you go.
       </div>
       {list.map((item, i) => {
-        const failed = evaluation[i] === false
+        const graderFailed = key ? key[i] === false : mine[i] === false
+        const disagreed = key ? key[i] !== (mine[i] === true) : false
         const done = !!fixed[i]
         return (
           <button key={i} onClick={() => setFixed({ ...fixed, [i]: !done })}
             style={{ display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left', padding: '10px 12px', borderRadius: 12,
-              border: failed && !done ? '1.5px solid #f0b9be' : '1px solid var(--line)',
-              background: done ? '#e6f6ee' : failed ? '#fff8f8' : '#fff' }}>
+              border: graderFailed && !done ? '1.5px solid #f0b9be' : '1px solid var(--line)',
+              background: done ? '#e6f6ee' : graderFailed ? '#fff8f8' : '#fff' }}>
             <span style={{ width: 20, height: 20, borderRadius: 6, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800,
               background: done ? 'var(--good)' : '#fff', border: done ? 'none' : '1.5px solid #c8d6de', color: '#fff' }}>{done ? '✓' : ''}</span>
-            <span style={{ fontSize: 13, fontWeight: 600, color: done ? 'var(--good)' : 'var(--ink)', textDecoration: done ? 'line-through' : 'none' }}>
-              {item}
-              {failed && !done && <span style={{ display: 'block', fontSize: 11, color: '#d84a57', fontWeight: 800, marginTop: 2 }}>✗ You scored this No — fix it!</span>}
+            <span style={{ flex: 1, minWidth: 0 }}>
+              <span style={{ display: 'block', fontSize: 13, fontWeight: 600, lineHeight: 1.4, textDecoration: done ? 'line-through' : 'none', color: done ? 'var(--good)' : 'var(--ink)' }}>{item}</span>
+              <span style={{ display: 'flex', gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10.5, fontWeight: 800, borderRadius: 999, padding: '2px 8px', background: graderFailed ? '#fdecec' : '#e9f7ef', color: graderFailed ? '#c0392b' : 'var(--good)' }}>
+                  rubric: {graderFailed ? '✕ not met' : '✓ met'}
+                </span>
+                {disagreed && <span style={{ fontSize: 10.5, fontWeight: 800, borderRadius: 999, padding: '2px 8px', background: '#fff3d6', color: '#8a6400' }}>you said {mine[i] === true ? 'yes' : 'no'}</span>}
+              </span>
             </span>
           </button>
         )
@@ -159,7 +201,6 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
   const [answers, setAnswers] = useState(() => (sub.evaluation ? Object.fromEntries(sub.evaluation.map((v, i) => [i, v])) : {}))
   const [fixed, setFixed] = useState({})
   const [content, setContent] = useState(working.content)
-  const [tab, setTab] = useState('checklist')
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const timer = useRef(null)
@@ -259,18 +300,12 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
 
           <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 440 }}>
             <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
-              {[{ k: 'checklist', label: '✅ Revision Checklist' }, { k: 'confer', label: '💬 Confer' }].map((t) => (
-                <button key={t.k} onClick={() => setTab(t.k)}
-                  style={{ flex: 1, padding: '12px', fontWeight: 800, fontSize: 13.5, background: tab === t.k ? '#fff' : '#f4f8fa',
-                    color: tab === t.k ? 'var(--navy)' : 'var(--muted)', borderBottom: tab === t.k ? '2px solid var(--navy)' : '2px solid transparent' }}>
-                  {t.label}
-                </button>
-              ))}
+              <div style={{ flex: 1, padding: '12px', fontWeight: 800, fontSize: 13.5, background: '#fff', color: 'var(--navy)', borderBottom: '2px solid var(--navy)', textAlign: 'center' }}>
+                ✅ Revision Checklist
+              </div>
             </div>
             <div style={{ flex: 1, minHeight: 0 }}>
-              {tab === 'checklist'
-                ? <ChecklistPanel asg={asg} sub={sub} answers={answers} fixed={fixed} setFixed={setFixed} />
-                : <ConferencePanel sub={sub} draft={working} readOnly={phase === 'done'} health={health} onChange={onChange} />}
+              <ChecklistPanel asg={asg} sub={sub} answers={answers} fixed={fixed} setFixed={setFixed} />
             </div>
           </div>
         </div>

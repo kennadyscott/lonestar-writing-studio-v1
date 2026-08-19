@@ -45,12 +45,18 @@ const QUICK_PROMPTS = [
   'Should homework be optional? Argue your opinion.',
   'Is it better to be a leader or a helper? Why?',
 ]
-import { PEER_TASKS, bandFor, todaysTask } from './peerTasks.mjs'
+import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from './peerTasks.mjs'
 
 const ME = 'stu_kscott'
 const now = () => new Date().toISOString()
 
 const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)
+// the rubric rules behind a peer-revision submission (kept server-side)
+function bandOf(sub) {
+  const task = PEER_TASKS.find((t) => t.id === sub.peerTaskId)
+  const asg = state.assignments.find((a) => a.id === sub.assignmentId)
+  return task ? task.bands[asg?.gradeBand || 'mid'] : null
+}
 const findSub = (id) => state.submissions.find((s) => s.id === id)
 const findAsg = (id) => state.assignments.find((a) => a.id === id)
 const findStu = (id) => state.students.find((s) => s.id === id)
@@ -206,7 +212,7 @@ const server = http.createServer(async (req, res) => {
         const t = task.bands[band]
         const asg = { id: uid('asg'), title: `Daily Revision Challenge: help ${task.author}`, genre: task.genre, type: 'Revision Challenge',
           format: null, isPeerRevision: true, gradeLevel: stu?.gradeLevel ?? 6, gradeBand: band, teacher: { name: task.author, initials: '🤖' },
-          dateAssigned: today, dueDate: null, scopeStage: 'revision', prompt: t.prompt, originalText: t.weakText, checklist: t.checklist }
+          dateAssigned: today, dueDate: null, scopeStage: 'revision', prompt: t.prompt, originalText: t.weakText, checklist: checklistText(t) }
         sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, isPeerRevision: true,
           peerTaskId: task.id, peerDate: today, phase: 'evaluate', evaluation: null,
           drafts: [
@@ -223,8 +229,15 @@ const server = http.createServer(async (req, res) => {
       const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
       const body = await readBody(req)
       sub.evaluation = Array.isArray(body.answers) ? body.answers : []
+      const band = bandOf(sub)
+      if (band) {
+        // score the student's judging against the rubric's own read of the draft
+        const key = answerKey(band)
+        sub.rubricKey = key
+        sub.agreement = { matched: key.filter((k, i) => k === sub.evaluation[i]).length, total: key.length }
+      }
       sub.phase = 'rewrite'; save()
-      return send(res, 200, { ok: true, phase: sub.phase })
+      return send(res, 200, { ok: true, phase: sub.phase, key: sub.rubricKey || null, agreement: sub.agreement || null })
     }
 
     // POST /api/submissions/:id/submit-revision -> finish challenge: feedback + coins
@@ -234,6 +247,17 @@ const server = http.createServer(async (req, res) => {
       const revision = sub.drafts[sub.drafts.length - 1]
       const traits = await runTraits(sub, revision)
       revision.traits = traits
+      // the grade comes from the same rubric the student was handed
+      const band = bandOf(sub)
+      const before = band ? evaluateChecklist(band.checklist, original.content) : []
+      const after = band ? evaluateChecklist(band.checklist, revision.content, original.content) : []
+      const rubric = {
+        items: after.map((r, i) => ({ text: r.text, met: r.met, wasMet: !!before[i]?.met })),
+        met: after.filter((r) => r.met).length,
+        total: after.length,
+        fixed: after.filter((r, i) => r.met && !before[i]?.met).length,
+      }
+      sub.rubricResult = rubric
       const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 100, ts: now() },
         ...evaluateMilestones(sub, original, revision)]
       sub.milestones.push(...newMilestones)
@@ -242,7 +266,7 @@ const server = http.createServer(async (req, res) => {
         const stu = findStu(sub.studentId); if (stu) stu.coins += m.coins
       }
       sub.completedAt = now(); sub.phase = 'done'; save()
-      return send(res, 200, { traits, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) })
+      return send(res, 200, { traits, rubric, agreement: sub.agreement || null, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) })
     }
 
     // POST /api/share { submissionId } -> publish a finished piece to the Share Wall

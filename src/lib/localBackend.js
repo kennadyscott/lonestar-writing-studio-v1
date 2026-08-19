@@ -3,7 +3,7 @@
 // scripted (no-key) conference/traits logic as the real Node server.
 import { seedState } from '../../server/seed.mjs'
 import { fallbackConference, fallbackTraits, isBegging } from '../../server/fallback.mjs'
-import { bandFor, todaysTask } from '../../server/peerTasks.mjs'
+import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from '../../server/peerTasks.mjs'
 
 const ME = 'stu_kscott'
 const COIN_CAP = 150
@@ -15,6 +15,12 @@ const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)
 const findSub = (id) => state.submissions.find((s) => s.id === id)
 const findAsg = (id) => state.assignments.find((a) => a.id === id)
 const findStu = (id) => state.students.find((s) => s.id === id)
+// the rubric rules behind a peer-revision submission
+function bandOf(sub) {
+  const task = PEER_TASKS.find((t) => t.id === sub.peerTaskId)
+  const asg = state.assignments.find((a) => a.id === sub.assignmentId)
+  return task ? task.bands[asg?.gradeBand || 'mid'] : null
+}
 const findDraft = (id) => {
   for (const sub of state.submissions) { const d = sub.drafts.find((x) => x.id === id); if (d) return { sub, draft: d } }
   return null
@@ -145,7 +151,7 @@ export const localApi = {
       const t = task.bands[band]
       const asg = { id: uid('asg'), title: `Daily Revision Challenge: help ${task.author}`, genre: task.genre, type: 'Revision Challenge',
         format: null, isPeerRevision: true, gradeLevel: stu?.gradeLevel ?? 6, gradeBand: band, teacher: { name: task.author, initials: '🤖' },
-        dateAssigned: today, dueDate: null, scopeStage: 'revision', prompt: t.prompt, originalText: t.weakText, checklist: t.checklist }
+        dateAssigned: today, dueDate: null, scopeStage: 'revision', prompt: t.prompt, originalText: t.weakText, checklist: checklistText(t) }
       sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, isPeerRevision: true,
         peerTaskId: task.id, peerDate: today, phase: 'evaluate', evaluation: null,
         drafts: [
@@ -158,8 +164,15 @@ export const localApi = {
   },
   evaluate: async (subId, answers) => {
     const sub = findSub(subId); if (!sub) return { error: 'no submission' }
-    sub.evaluation = answers; sub.phase = 'rewrite'
-    return { ok: true, phase: 'rewrite' }
+    sub.evaluation = answers
+    const band = bandOf(sub)
+    if (band) {
+      const key = answerKey(band)
+      sub.rubricKey = key
+      sub.agreement = { matched: key.filter((k, i) => k === answers[i]).length, total: key.length }
+    }
+    sub.phase = 'rewrite'
+    return { ok: true, phase: 'rewrite', key: sub.rubricKey || null, agreement: sub.agreement || null }
   },
   submitRevision: async (subId) => {
     const sub = findSub(subId); if (!sub) return { error: 'no submission' }
@@ -167,6 +180,16 @@ export const localApi = {
     const revision = sub.drafts[sub.drafts.length - 1]
     const traits = fallbackTraits({ draft: revision.content })
     revision.traits = traits
+    const band = bandOf(sub)
+    const before = band ? evaluateChecklist(band.checklist, original.content) : []
+    const after = band ? evaluateChecklist(band.checklist, revision.content, original.content) : []
+    const rubric = {
+      items: after.map((r, i) => ({ text: r.text, met: r.met, wasMet: !!before[i]?.met })),
+      met: after.filter((r) => r.met).length,
+      total: after.length,
+      fixed: after.filter((r, i) => r.met && !before[i]?.met).length,
+    }
+    sub.rubricResult = rubric
     const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 100, ts: now() },
       ...evaluateMilestones(sub, original, revision)]
     sub.milestones.push(...newMilestones)
@@ -175,7 +198,7 @@ export const localApi = {
       const stu = findStu(sub.studentId); if (stu) stu.coins += m.coins
     }
     sub.completedAt = now(); sub.phase = 'done'
-    return { traits, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) }
+    return { traits, rubric, agreement: sub.agreement || null, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) }
   },
   publish: async (subId) => {
     const sub = findSub(subId); if (!sub) return { error: 'no submission' }

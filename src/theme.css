@@ -43,9 +43,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* responsive layout grids (media queries need classes, not inline styles) */
 .home-grid { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 400px); gap: 18px; align-items: stretch; }
 .home-split { display: grid; grid-template-columns: 1fr 1.12fr; gap: 18px; align-items: stretch; flex: 1; }
+.home-main { display: grid; grid-template-columns: minmax(0, 1fr) clamp(318px, 25vw, 400px); gap: 18px; align-items: start; }
 .assign-grid { display: grid; grid-template-columns: minmax(0, 1.65fr) clamp(330px, 26vw, 430px); gap: 18px; align-items: stretch; margin-bottom: 18px; }
 @media (max-width: 1120px) {
-  .home-grid, .assign-grid { grid-template-columns: 1fr; }
+  .home-grid, .assign-grid, .home-main { grid-template-columns: 1fr; }
 }
 @media (max-width: 860px) {
   .home-split { grid-template-columns: 1fr; }

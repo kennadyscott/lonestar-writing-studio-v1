@@ -227,9 +227,27 @@ function GoalBanner({ me, onData }) {
 const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
 
 /* ---- the studio dashboard: mockup banner cards with art vignettes ---- */
-function BigTask({ icon, title, sub, grad, art, onClick, busy }) {
+function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
   const [c1, c2] = grad
   const BASE = import.meta.env.BASE_URL || '/'
+  if (compact) {
+    return (
+      <button disabled={busy} onClick={onClick}
+        style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 82, padding: '11px 13px 11px 94px', textAlign: 'left',
+          display: 'flex', alignItems: 'center', gap: 10, background: `linear-gradient(120deg,${c1},${c2})`,
+          border: '2px solid rgba(18,12,58,.5)', boxShadow: '0 8px 20px rgba(20,15,70,.28)', color: '#fff', cursor: 'pointer', width: '100%' }}>
+        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 92,
+          background: `linear-gradient(90deg, transparent 45%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
+        <span style={{ position: 'relative', width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 16,
+          background: 'rgba(255,255,255,.15)', border: '2px solid rgba(255,255,255,.8)', boxShadow: '0 0 14px rgba(255,255,255,.25)' }}>{icon}</span>
+        <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
+          <span style={{ display: 'block', fontSize: 15, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)', whiteSpace: 'nowrap' }}>{title}</span>
+          <span style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 2, lineHeight: 1.3 }}>{sub}</span>
+        </span>
+        <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 800, borderRadius: 999, padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap', boxShadow: '0 3px 10px rgba(0,0,0,.25)' }}>Go →</span>
+      </button>
+    )
+  }
   return (
     <button disabled={busy} onClick={onClick}
       style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, minHeight: 118, padding: '18px 22px 18px 198px', textAlign: 'left',
@@ -685,7 +703,6 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
     try { const r = await api.start(row.a.id); onOpen(r.submissionId) } finally { setBusy(false) }
   }
 
-  const gs = state.growthSummary
   const dc = state.dailyChallenge
 
   // one-sentence orientation: everything is open, so point at what's most urgent
@@ -726,7 +743,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
         </div>
         <div style={{ display: 'inline-flex', background: '#fff', borderRadius: 14, padding: 5, gap: 3, position: 'relative', zIndex: 2,
           border: '1.5px solid #d5e2ec', boxShadow: '0 6px 20px rgba(13,47,85,.16)' }}>
-          {[['home', '🏠 Home'], ['assignments', '📋 Assignments'], ['data', '📊 Data & Goals']].map(([k, label]) => (
+          {[['home', '🏠 Home'], ['data', '📊 Data & Goals']].map(([k, label]) => (
             <button key={k} onClick={() => setHomeTab(k)}
               style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14.5, fontWeight: 800,
                 background: homeTab === k ? 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)' : 'transparent',
@@ -743,30 +760,21 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <div className="home-split" style={{ gridTemplateColumns: '1fr 1fr', flex: 'none' }}>
-          <BigTask icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
-          <BigTask icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-          <BigTask icon="🎮" title="Fluency Games" sub="A whole arcade of writing games" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
-          <BigTask icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
-        </div>
-        <LunaNook modules={state.modules} onLuna={onLuna} />
-        <DailyBanner dc={dc} busy={busy} onGo={peer} />
-      </div>
-      </>)}
-
-      {/* ================= ASSIGNMENTS ================= */}
-      {homeTab === 'assignments' && (<>
         <GoalBanner me={me} onData={() => setHomeTab('data')} />
-        <div className="assign-grid">
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <AssignmentsCard rows={rows} busy={busy} begin={begin} />
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div className="home-main">
+          <AssignmentsCard rows={rows} busy={busy} begin={begin} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <BigTask compact icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
+            <BigTask compact icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
+            <BigTask compact icon="🎮" title="Fluency Games" sub="A whole arcade of writing games" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
             <ClearSheetsCard sheets={state.clearSheets || []} />
             <CrystalQuestCard quests={state.crystalQuests || []} />
           </div>
         </div>
-        {gs && <GrowthSummaryCard gs={gs} onGrowth={() => setHomeTab('data')} />}
+        <LunaNook modules={state.modules} onLuna={onLuna} />
+        <DailyBanner dc={dc} busy={busy} onGo={peer} />
+      </div>
       </>)}
 
       {/* ================= DATA & GOALS ================= */}

@@ -281,7 +281,9 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/goal') {
       const body = await readBody(req)
       const stu = findStu(ME)
-      stu.goal = { id: body.id || uid('g'), trait: body.trait || null, text: (body.text || '').slice(0, 140), setOn: now() }
+      stu.goal = { id: body.id || uid('g'), trait: body.trait || null, text: (body.text || '').slice(0, 140), setOn: now(),
+        source: body.source || null, strength: (body.strength || '').slice(0, 200) || null,
+        teachingPoint: (body.teachingPoint || '').slice(0, 200) || null, strategy: (body.strategy || '').slice(0, 200) || null }
       save()
       return send(res, 200, stu.goal)
     }

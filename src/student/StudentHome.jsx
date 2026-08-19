@@ -198,27 +198,22 @@ function UpNextCard({ row, busy, begin, onAll }) {
 }
 
 /* ---- Assignments tab: active goal banner ---- */
-function GoalBanner({ me, onData }) {
+function GoalBanner({ me }) {
+  // read-only on Home — the goal is set and managed in a writing conference
   return (
     <div className="card" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(120deg,#eef6f9,#fff)' }}>
       <span style={{ fontSize: 28 }}>🎯</span>
       {me.goal ? (
-        <>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="eyebrow">My active goal</div>
-            <div style={{ fontSize: 15.5, fontWeight: 800 }}>{me.goal.text}</div>
-            {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Trait: {TRAIT_LABELS[me.goal.trait]} · your coach keeps this in mind when you confer</div>}
-          </div>
-          <button className="btn ghost" style={{ padding: '7px 16px', whiteSpace: 'nowrap' }} onClick={onData}>Manage goal →</button>
-        </>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div className="eyebrow">My active goal</div>
+          <div style={{ fontSize: 15.5, fontWeight: 800 }}>{me.goal.text}</div>
+          {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Trait: {TRAIT_LABELS[me.goal.trait]} · your coach keeps this in mind when you confer</div>}
+        </div>
       ) : (
-        <>
-          <div style={{ flex: 1 }}>
-            <div className="eyebrow">No goal set</div>
-            <div style={{ fontSize: 15, fontWeight: 700 }}>Pick one thing to focus on — it shapes your coaching.</div>
-          </div>
-          <button className="btn" onClick={onData}>Set a goal →</button>
-        </>
+        <div style={{ flex: 1 }}>
+          <div className="eyebrow">No goal yet</div>
+          <div style={{ fontSize: 15, fontWeight: 700 }}>You'll name your next goal in a writing conference with your teacher.</div>
+        </div>
       )}
     </div>
   )
@@ -760,7 +755,7 @@ export default function StudentHome({ state, me, onOpen, onLuna, onQuickWrite, o
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <GoalBanner me={me} onData={() => setHomeTab('data')} />
+        <GoalBanner me={me} />
         <div className="home-main">
           <AssignmentsCard rows={rows} busy={busy} begin={begin} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

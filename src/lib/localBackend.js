@@ -120,7 +120,13 @@ export const localApi = {
     if (!sub) { sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null, drafts: [{ id: uid('drf'), n: 1, content: '', createdAt: now(), conference: [], traits: null }], milestones: [] }; state.submissions.push(sub) }
     return { submissionId: sub.id }
   },
-  setGoal: async (payload) => { const stu = findStu(ME); stu.goal = { id: payload.id || uid('g'), trait: payload.trait || null, text: (payload.text || '').slice(0, 140), setOn: now() }; return stu.goal },
+  setGoal: async (payload) => {
+    const stu = findStu(ME)
+    stu.goal = { id: payload.id || uid('g'), trait: payload.trait || null, text: (payload.text || '').slice(0, 140), setOn: now(),
+      source: payload.source || null, strength: (payload.strength || '').slice(0, 200) || null,
+      teachingPoint: (payload.teachingPoint || '').slice(0, 200) || null, strategy: (payload.strategy || '').slice(0, 200) || null }
+    return stu.goal
+  },
   achieveGoal: async () => {
     const stu = findStu(ME); if (!stu.goal) return { coins: 0 }
     const coins = 30

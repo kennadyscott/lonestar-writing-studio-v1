@@ -44,75 +44,61 @@ function WayTile({ icon, title, sub, onClick, busy }) {
   )
 }
 
-function LunaNook({ modules, onLuna, compact }) {
+const MODULE_SHORT = { m1: 'SCR', m2: 'ECR', m3: 'Stellar', m4: 'Process', m5: 'Revision', m6: 'Editing' }
+
+function LunaNook({ modules, onLuna }) {
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
-    <div style={{ borderRadius: 20, background: '#0d2440', border: '2px solid rgba(9,26,52,.6)', overflow: 'hidden', boxShadow: '0 10px 26px rgba(20,15,70,.32)' }}>
-      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: compact ? 10 : 13, padding: compact ? '11px 14px' : '13px 18px',
-        background: `linear-gradient(90deg, rgba(13,36,64,.94) 0%, rgba(13,36,64,.5) 42%, rgba(13,36,64,.15) 70%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
-        <span style={{ width: compact ? 42 : 56, height: compact ? 42 : 56, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
-          <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-            <img src={BRAND.luna} alt="Luna" style={{ height: compact ? 30 : 40 }} />
+    <div className="luna-bar" style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', border: '2px solid rgba(9,26,52,.6)', boxShadow: '0 8px 22px rgba(20,15,70,.3)',
+      background: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 46%, rgba(13,36,64,.55) 74%, rgba(13,36,64,.35) 100%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '12px 18px', flexWrap: 'wrap' }}>
+
+        {/* who + where you are */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 11, flex: '1 1 260px', minWidth: 0 }}>
+          <span style={{ width: 46, height: 46, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
+            <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+              <img src={BRAND.luna} alt="Luna" style={{ height: 32 }} />
+            </span>
           </span>
-        </span>
-        <div>
-          <b style={{ fontSize: compact ? 15 : 17, color: '#fff' }}>Luna's Writing Nook</b>
-          <div style={{ fontSize: compact ? 11.5 : 12.5, color: '#a8dff5', fontWeight: 700 }}>Your writing path</div>
-        </div>
-      </div>
-      <div style={{ background: '#fdfcf8', margin: compact ? '2px 10px 10px' : '2px 14px 14px', borderRadius: 14, padding: compact ? '13px 15px' : '16px 20px' }}>
-        <b style={{ fontSize: compact ? 13.5 : 15, color: '#1c1650' }}>Module {idx + 1}: {current.label}</b>
-        <div style={{ fontSize: 12, color: CYAN_TEXT, fontWeight: 800, margin: '4px 0 8px' }}>4 of 6 activities completed</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <div style={{ flex: 1, height: 9, background: '#e8e6f2', borderRadius: 6 }}>
-            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#1479b8)', borderRadius: 6 }} />
-          </div>
-          <b style={{ fontSize: 13, color: CYAN_TEXT }}>{Math.round(current.progress * 100)}%</b>
-        </div>
-        {compact ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 12, flexWrap: 'wrap' }}>
-            {modules.map((m) => (
-              <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .4 : 1 }}>
-                <ModuleBadge id={m.id} size={26} dim={m.status === 'not_started'} />
-              </span>
-            ))}
-            <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999,
-              padding: '10px 0', width: '100%', marginTop: 10,
-              boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
-              Go to my path →
-            </button>
-          </div>
-        ) : (
-          <>
-            <div className="luna-modules" style={{ marginTop: 14 }}>
-              {modules.map((m, mi) => {
-                const cur = m.status === 'in_progress'
-                const done = m.status === 'complete'
-                return (
-                  <button key={m.id} onClick={onLuna} title={m.label}
-                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, padding: '10px 6px', borderRadius: 14, cursor: 'pointer',
-                      background: cur ? '#fff8e6' : 'transparent', border: cur ? '2px solid #f0b429' : '2px solid transparent' }}>
-                    <ModuleBadge id={m.id} size={54} dim={m.status === 'not_started'} />
-                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .7, textTransform: 'uppercase', color: cur ? '#a37400' : done ? 'var(--good)' : '#9fb3c2' }}>
-                      Module {mi + 1}
-                    </span>
-                    <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.25, textAlign: 'center', color: m.status === 'not_started' ? '#8fa5b8' : '#1c1650' }}>
-                      {m.label}
-                    </span>
-                  </button>
-                )
-              })}
+          <div style={{ minWidth: 0 }}>
+            <b style={{ fontSize: 15, color: '#fff' }}>Luna's Writing Nook</b>
+            <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>
+              Module {idx + 1}: {current.label} · 4 of 6 activities
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-              <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999,
-                padding: '10px 26px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
-                Go to my path →
+          </div>
+        </div>
+
+        {/* progress */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flex: '1 1 150px', minWidth: 130, maxWidth: 240 }}>
+          <div style={{ flex: 1, height: 8, background: 'rgba(255,255,255,.22)', borderRadius: 6 }}>
+            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#a5e6ff)', borderRadius: 6 }} />
+          </div>
+          <b style={{ fontSize: 12.5, color: '#a8dff5' }}>{Math.round(current.progress * 100)}%</b>
+        </div>
+
+        {/* the six modules, still readable */}
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4, flexShrink: 0 }}>
+          {modules.map((m, mi) => {
+            const cur = m.status === 'in_progress'
+            return (
+              <button key={m.id} onClick={onLuna} title={`Module ${mi + 1}: ${m.label}`}
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, width: 62, padding: '5px 2px', borderRadius: 10, cursor: 'pointer',
+                  background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
+                <ModuleBadge id={m.id} size={38} dim={m.status === 'not_started'} />
+                <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .3, color: cur ? '#f5c542' : m.status === 'not_started' ? '#7f9bb4' : '#a8dff5', whiteSpace: 'nowrap' }}>
+                  {MODULE_SHORT[m.id] || `M${mi + 1}`}
+                </span>
               </button>
-            </div>
-          </>
-        )}
+            )
+          })}
+        </div>
+
+        <button onClick={onLuna} style={{ flexShrink: 0, background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 999,
+          padding: '10px 22px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+          Go to my path →
+        </button>
       </div>
     </div>
   )
@@ -599,7 +585,7 @@ function AssignmentsCard({ rows, busy, begin }) {
           <option value="teacher">Sort: Teacher</option>
         </select>
       </div>
-      <div>
+      <div style={{ maxHeight: 246, overflowY: 'auto' }}>
         {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>Nothing here — try the other tab or clear filters.</div>}
         {filtered.map((row) => {
           const s = STATUS_CHIP[row.status]
@@ -626,6 +612,11 @@ function AssignmentsCard({ rows, busy, begin }) {
           )
         })}
       </div>
+      {filtered.length > 3 && (
+        <div style={{ padding: '8px 16px', borderTop: '1px solid var(--line)', fontSize: 11.5, fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>
+          ↕ {filtered.length - 3} more — scroll the list
+        </div>
+      )}
     </div>
   )
 }
@@ -750,10 +741,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
             <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
           </div>
         </div>
-        <div className="home-main">
-          <LunaNook modules={state.modules} onLuna={onLuna} />
-          <div aria-hidden className="rail-spacer" />
-        </div>
+        <LunaNook modules={state.modules} onLuna={onLuna} />
         <DailyBanner dc={dc} busy={busy} onGo={peer} />
       </div>
       </>)}

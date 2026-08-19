@@ -71,19 +71,48 @@ function LunaNook({ modules, onLuna, compact }) {
           </div>
           <b style={{ fontSize: 13, color: CYAN_TEXT }}>{Math.round(current.progress * 100)}%</b>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: compact ? 5 : 8, marginTop: 12, flexWrap: 'wrap' }}>
-          {modules.map((m) => (
-            <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .4 : 1 }}>
-              <ModuleBadge id={m.id} size={compact ? 26 : 30} dim={m.status === 'not_started'} />
-            </span>
-          ))}
-          {!compact && <span style={{ flex: 1 }} />}
-          <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999,
-            padding: compact ? '10px 0' : '10px 26px', width: compact ? '100%' : 'auto', marginTop: compact ? 10 : 0,
-            boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
-            Go to my path →
-          </button>
-        </div>
+        {compact ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 12, flexWrap: 'wrap' }}>
+            {modules.map((m) => (
+              <span key={m.id} title={m.label} style={{ opacity: m.status === 'not_started' ? .4 : 1 }}>
+                <ModuleBadge id={m.id} size={26} dim={m.status === 'not_started'} />
+              </span>
+            ))}
+            <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999,
+              padding: '10px 0', width: '100%', marginTop: 10,
+              boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
+              Go to my path →
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="luna-modules" style={{ marginTop: 14 }}>
+              {modules.map((m, mi) => {
+                const cur = m.status === 'in_progress'
+                const done = m.status === 'complete'
+                return (
+                  <button key={m.id} onClick={onLuna} title={m.label}
+                    style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 7, padding: '10px 6px', borderRadius: 14, cursor: 'pointer',
+                      background: cur ? '#fff8e6' : 'transparent', border: cur ? '2px solid #f0b429' : '2px solid transparent' }}>
+                    <ModuleBadge id={m.id} size={54} dim={m.status === 'not_started'} />
+                    <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .7, textTransform: 'uppercase', color: cur ? '#a37400' : done ? 'var(--good)' : '#9fb3c2' }}>
+                      Module {mi + 1}
+                    </span>
+                    <span style={{ fontSize: 12, fontWeight: 700, lineHeight: 1.25, textAlign: 'center', color: m.status === 'not_started' ? '#8fa5b8' : '#1c1650' }}>
+                      {m.label}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
+              <button onClick={onLuna} style={{ background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999,
+                padding: '10px 26px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer' }}>
+                Go to my path →
+              </button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )
@@ -200,23 +229,46 @@ function UpNextCard({ row, busy, begin, onAll }) {
 }
 
 /* ---- Assignments tab: active goal banner ---- */
-function GoalBanner({ me }) {
+function GoalBanner({ me, classFocus }) {
   // read-only on Home — the goal is set and managed in a writing conference
+  const half = { flex: '1 1 320px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 14, padding: '4px 2px' }
   return (
-    <div className="card" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(120deg,#eef6f9,#fff)' }}>
-      <span style={{ fontSize: 28 }}>🎯</span>
-      {me.goal ? (
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div className="eyebrow">My active goal</div>
-          <div style={{ fontSize: 15.5, fontWeight: 800 }}>{me.goal.text}</div>
-          {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Trait: {TRAIT_LABELS[me.goal.trait]} · your coach keeps this in mind when you confer</div>}
+    <div className="card" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
+      background: 'linear-gradient(120deg,#eef6f9,#fff)' }}>
+      <div style={half}>
+        <span style={{ fontSize: 28 }}>🎯</span>
+        {me.goal ? (
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow">My goal</div>
+            <div style={{ fontSize: 15.5, fontWeight: 800 }}>{me.goal.text}</div>
+            {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Trait: {TRAIT_LABELS[me.goal.trait]} · your coach keeps this in mind when you confer</div>}
+          </div>
+        ) : (
+          <div style={{ minWidth: 0 }}>
+            <div className="eyebrow">My goal</div>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>You'll name your next goal in a writing conference with your teacher.</div>
+          </div>
+        )}
+      </div>
+
+      <span aria-hidden className="goal-split" style={{ width: 1, background: 'var(--line)', alignSelf: 'stretch' }} />
+
+      <div style={half}>
+        <span style={{ fontSize: 28 }}>👥</span>
+        <div style={{ minWidth: 0 }}>
+          <div className="eyebrow" style={{ color: CYAN_TEXT }}>Class focus</div>
+          {classFocus ? (
+            <>
+              <div style={{ fontSize: 15.5, fontWeight: 800 }}>{classFocus.text}</div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+                {classFocus.note ? `${classFocus.note} · ` : ''}what the whole class is working on{classFocus.setBy ? ` — set by ${classFocus.setBy}` : ''}
+              </div>
+            </>
+          ) : (
+            <div style={{ fontSize: 15, fontWeight: 700 }}>Your class focus shows up here when your teacher sets one.</div>
+          )}
         </div>
-      ) : (
-        <div style={{ flex: 1 }}>
-          <div className="eyebrow">No goal yet</div>
-          <div style={{ fontSize: 15, fontWeight: 700 }}>You'll name your next goal in a writing conference with your teacher.</div>
-        </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -688,7 +740,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-        <GoalBanner me={me} />
+        <GoalBanner me={me} classFocus={state.classFocus} />
         <div className="home-main">
           <AssignmentsCard rows={rows} busy={busy} begin={begin} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -696,8 +748,11 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
             <BigTask compact icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
             <BigTask compact icon="🎮" title="Fluency Practice" sub="Earn double coins in ClassCade" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
             <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
-            <LunaNook modules={state.modules} onLuna={onLuna} compact />
           </div>
+        </div>
+        <div className="home-main">
+          <LunaNook modules={state.modules} onLuna={onLuna} />
+          <div aria-hidden className="rail-spacer" />
         </div>
         <DailyBanner dc={dc} busy={busy} onGo={peer} />
       </div>

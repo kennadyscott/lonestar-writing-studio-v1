@@ -199,6 +199,13 @@ export function seedState() {
       ],
     },
     // Luna's Writing Nook — the six real modules from the live product.
+    // What the whole class is working on right now — set by the teacher, shown
+    // beside each student's own goal.
+    classFocus: {
+      text: 'Back every answer with evidence from the text',
+      note: 'RACE · Cite the Evidence',
+      setBy: 'Mr. Nowitski',
+    },
     modules: [
       { id: 'm1', label: 'Short Constructed Response', status: 'in_progress', progress: 0.67 },
       { id: 'm2', label: 'Extended Constructed Response', status: 'not_started', progress: 0 },

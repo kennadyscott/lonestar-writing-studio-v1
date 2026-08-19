@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api, TRAIT_LABELS } from '../lib/api.js'
+import { scoreSubmission } from '../lib/writingScore.js'
 
 /*
  * Student "Data & Goals" and "Share Wall" tabs — rendered inside the home page's
@@ -128,7 +129,60 @@ function EcrCombined({ org, conv }) {
   )
 }
 
-function WritingDataCard({ writingData }) {
+function RecentResults({ state, me, onReview }) {
+  const rows = state.submissions
+    .filter((s) => s.studentId === me.id && s.completedAt && !s.isPeerRevision)
+    .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
+    .filter(({ a }) => a && !['free', 'quick'].includes(a.genre))
+    .sort((x, y) => (x.s.completedAt < y.s.completedAt ? 1 : -1))
+    .slice(0, 5)
+
+  if (!rows.length) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f9fc', borderRadius: 10, padding: '14px 16px', fontSize: 13, color: 'var(--muted)' }}>
+        🌵 Nothing turned in yet — finished assignments and their feedback land here.
+      </div>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {rows.map(({ s, a }) => {
+        const sc = scoreSubmission(a, s)
+        const strong = sc.pct >= 75
+        const mid = sc.pct >= 50
+        const tone = strong ? 'var(--good)' : mid ? '#c99312' : '#c0392b'
+        const missed = sc.questions[0].anchors.filter((x) => !x.hit)
+        return (
+          <div key={s.id} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 220px', minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .4, color: '#fff', background: a.format === 'ECR' ? 'var(--ecr)' : 'var(--scr)', padding: '3px 8px', borderRadius: 7 }}>{a.format || 'SCR'}</span>
+                <b style={{ fontSize: 14.5 }}>{a.title}</b>
+              </div>
+              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+                Turned in {fmtDate(s.completedAt)} · {a.teacher?.name}
+                {missed.length > 0 && <> · next step: <b style={{ color: tone }}>{missed[0].label.toLowerCase()}</b></>}
+              </div>
+            </div>
+            <div style={{ textAlign: 'center', minWidth: 78 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}>RUBRIC</div>
+              <b style={{ fontSize: 16, color: tone }}>{sc.rubricScore}<span style={{ fontSize: 12, color: 'var(--muted)' }}>/{sc.rubricMax}</span></b>
+            </div>
+            <div style={{ textAlign: 'center', minWidth: 78 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}>{sc.strategyName}</div>
+              <b style={{ fontSize: 16, color: tone }}>{sc.pct}%</b>
+            </div>
+            <button className="btn ghost" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }} onClick={() => onReview && onReview(s.id)}>See feedback →</button>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function WritingDataCard({ writingData, state, me, onReview }) {
+  const [top, setTop] = useState('data')
   const [subject, setSubject] = useState('ELA')
   const [fmt, setFmt] = useState('SCR')
   const d = writingData[subject]
@@ -146,12 +200,20 @@ function WritingDataCard({ writingData }) {
     <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
         <b style={{ fontSize: 15 }}>📊 My Writing Data</b>
-        <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
+        <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2, flexWrap: 'wrap' }}>
+          <button onClick={() => setTop('recent')} style={toggleStyle(top === 'recent')}>📋 Recently Completed</button>
           {writingData.subjects.map((sub) => (
-            <button key={sub} onClick={() => setSubject(sub)} style={toggleStyle(subject === sub)}>{sub}</button>
+            <button key={sub} onClick={() => { setTop('data'); setSubject(sub) }} style={toggleStyle(top === 'data' && subject === sub)}>{sub}</button>
           ))}
         </div>
       </div>
+
+      {top === 'recent' ? (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginBottom: 10 }}>Your most recent finished assignments — open one to see the feedback again.</div>
+          <RecentResults state={state} me={me} onReview={onReview} />
+        </div>
+      ) : (<>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 12px' }}>
         {hasEcr ? (
@@ -176,6 +238,7 @@ function WritingDataCard({ writingData }) {
       ) : (
         <EcrCombined org={d.ecrOrg} conv={d.ecrConv} />
       )}
+      </>)}
     </div>
   )
 }
@@ -421,7 +484,7 @@ I tried it in my own writing
 const CONF_CYAN = '#0f97c2'
 
 /* ================= Data & Goals tab ================= */
-export function DataGoalsTab({ state, me, onChange }) {
+export function DataGoalsTab({ state, me, onChange, onReview }) {
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const mp = state.monthlyProgress
   const [picking, setPicking] = useState(!me.goal)
@@ -538,7 +601,7 @@ export function DataGoalsTab({ state, me, onChange }) {
 
       {/* writing data + monthly/habits — one balanced row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 18, marginBottom: 18, alignItems: 'stretch' }}>
-        <WritingDataCard writingData={state.writingData} />
+        <WritingDataCard writingData={state.writingData} state={state} me={me} onReview={onReview} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div className="card" style={{ padding: '16px 18px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>

@@ -759,7 +759,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       </>)}
 
       {/* ================= DATA & GOALS ================= */}
-      {homeTab === 'data' && <DataGoalsTab state={state} me={me} onChange={onChange} />}
+      {homeTab === 'data' && <DataGoalsTab state={state} me={me} onChange={onChange} onReview={onReview} />}
     </div>
   )
 }

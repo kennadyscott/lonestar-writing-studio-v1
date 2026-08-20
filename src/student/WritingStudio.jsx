@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
-import ConferencePanel from './ConferencePanel.jsx'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
 
@@ -40,7 +39,6 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   const selected = sub.drafts.find((d) => d.id === selectedId) || currentDraft
   const isCurrent = selected.id === currentDraft.id
   const [content, setContent] = useState(selected.content)
-  const [tab, setTab] = useState('conference')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
   const [pub, setPub] = useState(null) // publish celebration
@@ -203,23 +201,18 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           )}
         </div>
 
-        {/* coach + traits */}
+        {/* prompts for a free write, the trait rubric for an assignment */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 480 }}>
           <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
-            {['conference', asg.genre === 'free' ? 'prompts' : 'traits'].map((t) => (
-              <button key={t} onClick={() => setTab(t)}
-                style={{ flex: 1, padding: '12px', fontWeight: 700, fontSize: 14, background: tab === t ? '#fff' : '#f6f8f9',
-                  color: tab === t ? 'var(--navy-1)' : 'var(--muted)', borderBottom: tab === t ? '2px solid var(--navy-1)' : '2px solid transparent' }}>
-                {t === 'conference' ? '💬 Confer' : t === 'prompts' ? '🎲 Prompts' : '🎯 Traits'}
-              </button>
-            ))}
+            <div style={{ flex: 1, padding: '12px', fontWeight: 700, fontSize: 14, background: '#fff', color: 'var(--navy-1)',
+              borderBottom: '2px solid var(--navy-1)', textAlign: 'center' }}>
+              {asg.genre === 'free' ? '🎲 Prompts' : '🎯 Traits'}
+            </div>
           </div>
           <div style={{ flex: 1, minHeight: 0 }}>
-            {tab === 'conference'
-              ? <ConferencePanel sub={sub} draft={selected} readOnly={!isCurrent} health={health} onChange={onChange} />
-              : tab === 'prompts'
-                ? <PromptsPanel />
-                : <TraitPanel draft={selected} readOnly={!isCurrent} onChange={onChange} />}
+            {asg.genre === 'free'
+              ? <PromptsPanel />
+              : <TraitPanel draft={selected} readOnly={!isCurrent} onChange={onChange} />}
           </div>
         </div>
       </div>

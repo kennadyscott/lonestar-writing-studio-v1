@@ -137,11 +137,11 @@ export function seedState() {
     // Share Wall — finished pieces students chose to publish (classmates' to start).
     shareWall: [
       { id: 'sw_ava', submissionId: null, studentId: 'stu_anicole', studentName: 'Ava Nicole', avatar: '🌻', title: 'Why Dogs Are the Best Pets', genre: 'Argument',
-        excerpt: 'Dogs are the best pets because they are loyal, active, and they help you feel less lonely. When I come home sad, my dog Biscuit always knows.', sharedOn: '2026-06-22', kudos: 19 },
+        excerpt: 'Dogs are the best pets because they are loyal, active, and they help you feel less lonely. When I come home sad, my dog Biscuit always knows.', sharedOn: '2026-06-22', reactions: { like: 12, heart: 19, celebrate: 7 }, myReactions: [] },
       { id: 'sw_kai', submissionId: null, studentId: 'stu_knelson', studentName: 'Kai Nelson', avatar: '🐯', title: 'The Cave Adventure', genre: 'Narrative',
-        excerpt: 'The flashlight flickered as we stepped into the cave. My heart pounded like a drum. Then, in the dark, something moved.', sharedOn: '2026-06-19', kudos: 24 },
+        excerpt: 'The flashlight flickered as we stepped into the cave. My heart pounded like a drum. Then, in the dark, something moved.', sharedOn: '2026-06-19', reactions: { like: 15, heart: 24, celebrate: 11 }, myReactions: [] },
       { id: 'sw_jordan', submissionId: null, studentId: 'stu_jdennis', studentName: 'Jordan Dennis', avatar: '🐲', title: 'How Volcanoes Erupt', genre: 'Informational',
-        excerpt: 'A volcano erupts when hot melted rock called magma pushes up through cracks in the earth. The pressure builds until it finally bursts out.', sharedOn: '2026-06-17', kudos: 15 },
+        excerpt: 'A volcano erupts when hot melted rock called magma pushes up through cracks in the earth. The pressure builds until it finally bursts out.', sharedOn: '2026-06-17', reactions: { like: 9, heart: 15, celebrate: 4 }, myReactions: [] },
     ],
     // Monthly averages across the 2025–26 school year, split by format (out of 4).
     monthlyProgress: {

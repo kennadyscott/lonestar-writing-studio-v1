@@ -48,6 +48,7 @@ const QUICK_PROMPTS = [
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from './peerTasks.mjs'
 
 const ME = 'stu_kscott'
+const REACTIONS = ['like', 'heart', 'celebrate'] // positive only, by design
 const now = () => new Date().toISOString()
 
 const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)
@@ -278,12 +279,28 @@ const server = http.createServer(async (req, res) => {
       const asg = findAsg(sub.assignmentId), stu = findStu(sub.studentId)
       const draft = sub.drafts[sub.drafts.length - 1]
       const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar,
-        title: asg.title, genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), kudos: 0 }
+        title: asg.title, genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
       state.shareWall.unshift(entry); save()
       return send(res, 200, entry)
     }
 
-    // POST /api/share/:id/kudos
+    // POST /api/share/:id/react { type } — positive reactions only, one of each per reader
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'share' && parts[2] && parts[3] === 'react') {
+      const body = await readBody(req)
+      const type = REACTIONS.includes(body.type) ? body.type : null
+      if (!type) return send(res, 400, { error: 'unknown reaction' })
+      const e = state.shareWall.find((x) => x.id === parts[2])
+      if (!e) return send(res, 404, { error: 'no entry' })
+      e.reactions = { like: 0, heart: 0, celebrate: 0, ...(e.reactions || {}) }
+      e.myReactions = e.myReactions || []
+      const had = e.myReactions.includes(type)
+      e.myReactions = had ? e.myReactions.filter((t) => t !== type) : [...e.myReactions, type]
+      e.reactions[type] = Math.max(0, e.reactions[type] + (had ? -1 : 1))
+      save()
+      return send(res, 200, { reactions: e.reactions, myReactions: e.myReactions })
+    }
+
+    // POST /api/share/:id/kudos (legacy)
     if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'share' && parts[2] && parts[3] === 'kudos') {
       const e = state.shareWall.find((x) => x.id === parts[2])
       if (!e) return send(res, 404, { error: 'no entry' })

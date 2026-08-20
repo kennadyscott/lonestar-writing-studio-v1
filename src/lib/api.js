@@ -31,7 +31,7 @@ const networkApi = {
   publish: (subId) => fetch(u(`/api/submissions/${subId}/publish`), { method: 'POST' }).then(j),
   discard: (subId) => fetch(u(`/api/submissions/${subId}/discard`), { method: 'POST' }).then(j),
   share: (submissionId) => fetch(u('/api/share'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ submissionId }) }).then(j),
-  kudos: (id) => fetch(u(`/api/share/${id}/kudos`), { method: 'POST' }).then(j),
+  react: (id, type) => fetch(u(`/api/share/${id}/react`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ type }) }).then(j),
   shoutOut: (payload) => fetch(u('/api/shoutout'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),
 }
 

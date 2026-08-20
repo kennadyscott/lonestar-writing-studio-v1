@@ -225,10 +225,20 @@ export const localApi = {
     const sub = findSub(submissionId); if (!sub) return { error: 'no submission' }
     if (state.shareWall.some((e) => e.submissionId === sub.id)) return { already: true }
     const asg = findAsg(sub.assignmentId), stu = findStu(sub.studentId); const draft = sub.drafts[sub.drafts.length - 1]
-    const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar, title: asg.title, genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), kudos: 0 }
+    const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar, title: asg.title, genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
     state.shareWall.unshift(entry)
     return entry
   },
-  kudos: async (id) => { const e = state.shareWall.find((x) => x.id === id); if (e) { e.kudos = (e.kudos || 0) + 1; return { kudos: e.kudos } } return {} },
+  react: async (id, type) => {
+    if (!['like', 'heart', 'celebrate'].includes(type)) return { error: 'unknown reaction' }
+    const e = state.shareWall.find((x) => x.id === id)
+    if (!e) return { error: 'no entry' }
+    e.reactions = { like: 0, heart: 0, celebrate: 0, ...(e.reactions || {}) }
+    e.myReactions = e.myReactions || []
+    const had = e.myReactions.includes(type)
+    e.myReactions = had ? e.myReactions.filter((t) => t !== type) : [...e.myReactions, type]
+    e.reactions[type] = Math.max(0, e.reactions[type] + (had ? -1 : 1))
+    return { reactions: e.reactions, myReactions: e.myReactions }
+  },
   shoutOut: async (payload) => { const stu = findStu(payload.studentId); if (!stu) return { error: 'no student' }; stu.shoutOut = { from: payload.from || 'Your teacher', initials: payload.initials || 'T', text: (payload.text || '').slice(0, 240), date: now().slice(0, 10) }; return stu.shoutOut },
 }

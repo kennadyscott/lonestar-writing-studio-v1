@@ -665,6 +665,33 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
 }
 
 /* ================= Share Wall tab ================= */
+export const REACTION_KINDS = [
+  { key: 'like', glyph: '👍', label: 'Like', bg: '#eaf3fb', fg: '#2f7fd0', on: '#d3e7f8' },
+  { key: 'heart', glyph: '❤️', label: 'Heart', bg: '#fff0f1', fg: '#d84a57', on: '#fbdcdf' },
+  { key: 'celebrate', glyph: '🎉', label: 'Celebrate', bg: '#fff6e6', fg: '#b97e10', on: '#fbe9c8' },
+]
+
+export function ReactionBar({ entry, onReact, size = 'md' }) {
+  const counts = { like: 0, heart: 0, celebrate: 0, ...(entry.reactions || {}) }
+  const mine = entry.myReactions || []
+  const pad = size === 'sm' ? '4px 9px' : '6px 12px'
+  const font = size === 'sm' ? 12 : 13
+  return (
+    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+      {REACTION_KINDS.map((r) => {
+        const on = mine.includes(r.key)
+        return (
+          <button key={r.key} onClick={() => onReact(entry.id, r.key)} title={on ? `Undo ${r.label.toLowerCase()}` : r.label}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, borderRadius: 999, padding: pad, fontSize: font, fontWeight: 800, cursor: 'pointer',
+              background: on ? r.on : r.bg, color: r.fg, border: on ? `1.5px solid ${r.fg}` : '1.5px solid transparent' }}>
+            <span style={{ fontSize: font + 1 }}>{r.glyph}</span>{counts[r.key]}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function ShareWallTab({ state, me, onChange }) {
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const shareWall = state.shareWall || []
@@ -672,12 +699,15 @@ export function ShareWallTab({ state, me, onChange }) {
   const shareable = subs.filter((s) => s.completedAt && !s.isPeerRevision && !sharedSubIds.has(s.id))
 
   async function share(subId) { await api.share(subId); onChange && onChange() }
-  async function kudo(id) { await api.kudos(id); onChange && onChange() }
+  async function react(id, type) { await api.react(id, type); onChange && onChange() }
 
   return (
     <div className="card" style={{ padding: 22 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <b style={{ fontSize: 17 }}>🌟 Share Wall <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--muted)' }}>See what other students are writing!</span></b>
+        <div>
+          <b style={{ fontSize: 17 }}>🌟 Share Wall <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--muted)' }}>See what other students are writing!</span></b>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>Cheer for each other with a 👍, ❤️, or 🎉 — reactions only, no comments.</div>
+        </div>
       </div>
 
       {shareable.length > 0 && (
@@ -703,10 +733,9 @@ export function ShareWallTab({ state, me, onChange }) {
             </div>
             <div style={{ fontWeight: 700, fontSize: 14 }}>{e.title}</div>
             <div style={{ fontSize: 12, color: '#3a4149', lineHeight: 1.5, marginTop: 4, flex: 1 }}>{e.excerpt}{e.excerpt.length >= 180 ? '…' : ''}</div>
-            <button onClick={() => kudo(e.id)} title="Give kudos"
-              style={{ marginTop: 10, alignSelf: 'flex-start', display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff0f1', color: '#d84a57', border: '1px solid #f6d6d9', borderRadius: 999, padding: '5px 12px', fontSize: 13, fontWeight: 700 }}>
-              ❤️ {e.kudos}
-            </button>
+            <div style={{ marginTop: 10 }}>
+              <ReactionBar entry={e} onReact={react} />
+            </div>
           </div>
         ))}
       </div>

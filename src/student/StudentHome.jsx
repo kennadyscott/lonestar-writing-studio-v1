@@ -3,7 +3,7 @@ import { api, TRAIT_LABELS } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
 import ModuleBadge from '../components/ModuleBadge.jsx'
-import { DataGoalsTab, ShareWallTab } from './GrowthPage.jsx'
+import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const fmt = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
@@ -384,36 +384,36 @@ function relTime(d) {
   return `${Math.floor(days / 7)}w ago`
 }
 
-function ShareWallRail({ state, me, onChange, onViewAll }) {
+function ShareWallStrip({ state, onChange, onViewAll }) {
   const wall = (state.shareWall || []).slice(0, 3)
-  async function kudo(id) { await api.kudos(id); onChange && onChange() }
+  async function react(id, type) { await api.react(id, type); onChange && onChange() }
+  if (!wall.length) return null
   return (
-    <div className="card" style={{ padding: 18, display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+    <div className="card" style={{ padding: '16px 18px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
         <span style={{ fontSize: 20 }}>🌟</span>
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
           <b style={{ fontSize: 16 }}>Share Wall</b>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>See what other students are writing!</div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>See what other students are writing — cheer them on with 👍 ❤️ 🎉</div>
         </div>
-        <button className="btn ghost" style={{ padding: '6px 13px', fontSize: 12.5 }} onClick={onViewAll}>View all →</button>
+        <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} onClick={onViewAll}>View all →</button>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, marginTop: 8 }}>
-        {wall.map((e, i) => (
-          <div key={e.id} style={{ padding: '13px 0', borderBottom: i < wall.length - 1 ? '1px solid var(--line)' : 'none' }}>
+      <div className="wall-strip">
+        {wall.map((e) => (
+          <div key={e.id} style={{ border: '1px solid var(--line)', borderRadius: 14, padding: '13px 15px', display: 'flex', flexDirection: 'column', background: 'linear-gradient(150deg,#fbfdfe,#fff)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-              <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#eef3f6', display: 'grid', placeItems: 'center', fontSize: 17 }}>{e.avatar}</span>
-              <div style={{ minWidth: 0 }}>
+              <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#eef3f6', display: 'grid', placeItems: 'center', fontSize: 17, flexShrink: 0 }}>{e.avatar}</span>
+              <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 13.5, fontWeight: 800, lineHeight: 1.15 }}>{e.studentName}</div>
-                <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>{e.genre}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>{e.genre} · {relTime(e.sharedOn)}</div>
               </div>
             </div>
-            <div style={{ fontSize: 14, fontWeight: 700, margin: '7px 0 6px', color: '#0d2f55' }}>{e.title}</div>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <button onClick={() => kudo(e.id)} title="Give kudos"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 5, color: '#d84a57', fontWeight: 800, fontSize: 13.5, padding: 0 }}>
-                ❤️ {e.kudos}
-              </button>
-              <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>{relTime(e.sharedOn)}</span>
+            <div style={{ fontSize: 14.5, fontWeight: 800, margin: '9px 0 5px', color: '#0d2f55' }}>{e.title}</div>
+            <div style={{ fontSize: 12.5, color: '#41586b', lineHeight: 1.5, flex: 1 }}>
+              {e.excerpt.slice(0, 120)}{e.excerpt.length > 120 ? '…' : ''}
+            </div>
+            <div style={{ marginTop: 11 }}>
+              <ReactionBar entry={e} onReact={react} size="sm" />
             </div>
           </div>
         ))}
@@ -742,6 +742,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           </div>
         </div>
         <LunaNook modules={state.modules} onLuna={onLuna} />
+        <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />
         <DailyBanner dc={dc} busy={busy} onGo={peer} />
       </div>
       </>)}

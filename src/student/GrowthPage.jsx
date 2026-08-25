@@ -317,6 +317,11 @@ function ConferenceEvidence({ state, me }) {
     .filter(({ a }) => a && !['free', 'quick'].includes(a.genre))
   const rows = mine.filter(({ s }) => s.completedAt).sort((x, y) => (x.s.completedAt < y.s.completedAt ? 1 : -1))
   const drafting = mine.filter(({ s }) => !s.completedAt)
+  const freeWrites = state.submissions
+    .filter((s) => s.studentId === me.id && !s.isPeerRevision)
+    .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
+    .filter(({ a }) => a && a.genre === 'free')
+    .sort((x, y) => ((y.s.completedAt || y.s.drafts[y.s.drafts.length - 1].createdAt) > (x.s.completedAt || x.s.drafts[x.s.drafts.length - 1].createdAt) ? 1 : -1))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, height: '100%', overflowY: 'auto', paddingRight: 4 }}>
@@ -419,6 +424,47 @@ function ConferenceEvidence({ state, me }) {
           })}
         </div>
       </div>
+
+      {freeWrites.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#3b5fb8', marginBottom: 8 }}>
+            THEIR OWN FREE WRITES · {freeWrites.length}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {freeWrites.map(({ s, a }) => {
+              const draft = s.drafts[s.drafts.length - 1]
+              const open = openId === s.id
+              const wc = (draft.content || '').trim().split(/\s+/).filter(Boolean).length
+              return (
+                <div key={s.id} style={{ border: '1px solid #d6dffa', borderRadius: 12, overflow: 'hidden', background: '#fbfcff' }}>
+                  <button onClick={() => setOpenId(open ? null : s.id)}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: 'transparent' }}>
+                    <span style={{ fontSize: 14 }}>{s.published ? '🌟' : '✒️'}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
+                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#3b5fb8', whiteSpace: 'nowrap' }}>
+                      {s.published ? 'Published' : `Draft ${draft.n}`} · {wc}w
+                    </span>
+                    <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
+                  </button>
+                  {open && (
+                    <div style={{ padding: '2px 12px 12px', borderTop: '1px solid #d6dffa' }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>
+                        {s.published ? 'THE PIECE THEY PUBLISHED' : 'WHERE THIS ONE STANDS'}
+                      </div>
+                      <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 170, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
+                        {(draft.content || '').trim() || 'Started, but nothing written yet.'}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 7 }}>
+                        Their own choice of topic — no rubric on this one.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {me.goal && (
         <div style={{ background: '#eef6f9', borderRadius: 12, padding: '11px 14px' }}>

@@ -287,42 +287,36 @@ const RDTL_STEPS = [
   },
 ]
 
-function mmss(n) {
-  const m = Math.floor(Math.abs(n) / 60), sec = Math.abs(n) % 60
-  return `${n < 0 ? '+' : ''}${m}:${String(sec).padStart(2, '0')}`
-}
+const mmss = (n) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`
 
-function StepTimer({ seconds, stepKey }) {
-  const [left, setLeft] = useState(seconds)
-  const [running, setRunning] = useState(true)
-  const tick = useRef(null)
-  useEffect(() => { setLeft(seconds); setRunning(true) }, [stepKey, seconds])
+/* One clock for the whole conference — it counts up and never stops, so the
+ * teacher can see how long they have been sitting with this writer. */
+function MeetingClock() {
+  const [secs, setSecs] = useState(0)
   useEffect(() => {
-    if (!running) return
-    tick.current = setInterval(() => setLeft((v) => v - 1), 1000)
-    return () => clearInterval(tick.current)
-  }, [running, stepKey])
-  const over = left < 0
+    const t = setInterval(() => setSecs((v) => v + 1), 1000)
+    return () => clearInterval(t)
+  }, [])
+  const long = secs >= 420 // the protocol asks for 4–7 minutes
   return (
-    <button onClick={() => setRunning((r) => !r)} title={running ? 'Pause the timer' : 'Resume the timer'}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, padding: '6px 14px', fontSize: 13, fontWeight: 800, cursor: 'pointer',
-        background: over ? '#fdecec' : '#eef4f8', color: over ? '#c0392b' : '#16386b', border: '1.5px solid ' + (over ? '#f0b9b4' : '#cfe0ec') }}>
-      <span>{running ? '⏸' : '▶'}</span>{mmss(left)}
-    </button>
+    <span title="Time in this conference"
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 999, padding: '5px 13px', fontSize: 13, fontWeight: 800,
+        fontVariantNumeric: 'tabular-nums', background: long ? 'rgba(245,197,66,.2)' : 'rgba(255,255,255,.14)',
+        color: long ? '#f5c542' : '#a8dff5', border: `1px solid ${long ? 'rgba(245,197,66,.5)' : 'rgba(255,255,255,.22)'}` }}>
+      ⏱ {mmss(secs)}
+    </span>
   )
 }
 
-/* The left half of a conference: what the writing already shows. Open a piece
- * and you can read it and see which anchors it hit, without leaving the steps. */
 function ConferenceEvidence({ state, me }) {
   const [openId, setOpenId] = useState(null)
   const anchors = state.writingData?.ELA?.scr || []
-  const rows = state.submissions
-    .filter((s) => s.studentId === me.id && s.completedAt && !s.isPeerRevision)
+  const mine = state.submissions
+    .filter((s) => s.studentId === me.id && !s.isPeerRevision)
     .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
     .filter(({ a }) => a && !['free', 'quick'].includes(a.genre))
-    .sort((x, y) => (x.s.completedAt < y.s.completedAt ? 1 : -1))
-    .slice(0, 5)
+  const rows = mine.filter(({ s }) => s.completedAt).sort((x, y) => (x.s.completedAt < y.s.completedAt ? 1 : -1))
+  const drafting = mine.filter(({ s }) => !s.completedAt)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, height: '100%', overflowY: 'auto', paddingRight: 4 }}>
@@ -346,8 +340,44 @@ function ConferenceEvidence({ state, me }) {
         ))}
       </div>
 
+      {drafting.length > 0 && (
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#a37400', marginBottom: 8 }}>
+            IN PROGRESS RIGHT NOW · {drafting.length}
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {drafting.map(({ s, a }) => {
+              const draft = s.drafts[s.drafts.length - 1]
+              const open = openId === s.id
+              const wc = (draft.content || '').trim().split(/\s+/).filter(Boolean).length
+              return (
+                <div key={s.id} style={{ border: '1.5px solid #f0d9a8', borderRadius: 12, overflow: 'hidden', background: '#fffdf7' }}>
+                  <button onClick={() => setOpenId(open ? null : s.id)}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: 'transparent' }}>
+                    <span style={{ fontSize: 9.5, fontWeight: 800, color: '#fff', background: a.format === 'ECR' ? 'var(--ecr)' : 'var(--scr)', padding: '2px 7px', borderRadius: 6 }}>{a.format || 'SCR'}</span>
+                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
+                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#a37400', whiteSpace: 'nowrap' }}>Draft {draft.n} · {wc}w</span>
+                    <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
+                  </button>
+                  {open && (
+                    <div style={{ padding: '2px 12px 12px', borderTop: '1px solid #f0d9a8' }}>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>WHERE THE DRAFT IS NOW</div>
+                      <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 170, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
+                        {(draft.content || '').trim() || 'Nothing written yet — this is a good place to start the conference.'}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       <div>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>RECENT FINISHED WRITING</div>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>
+          FINISHED WRITING{rows.length ? ` · ${rows.length}` : ''}
+        </div>
         {rows.length === 0 && (
           <div style={{ fontSize: 12.5, color: 'var(--muted)', background: '#f4f8fb', borderRadius: 10, padding: '12px 14px' }}>
             Nothing turned in yet — talk about what is in progress instead.
@@ -443,7 +473,8 @@ function ConferenceProtocol({ teacher, state, me, onClose, onSetGoal }) {
 You and {teacher} · about 5 minutes · Research · Decide · Teach · Link
               </div>
             </div>
-            <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 22, background: 'none', cursor: 'pointer' }}>×</button>
+            <MeetingClock />
+            <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 22, background: 'none', cursor: 'pointer', marginLeft: 4 }}>×</button>
           </div>
 
           {/* step rail */}
@@ -478,9 +509,7 @@ You and {teacher} · about 5 minutes · Research · Decide · Teach · Link
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 22 }}>{step.icon}</span>
             <b style={{ fontSize: 17 }}>{step.label}</b>
-            <span className="pill" style={{ background: '#eef4f8', color: '#16386b' }}>{step.time}</span>
-            <span style={{ flex: 1 }} />
-            <StepTimer seconds={step.seconds} stepKey={step.key} />
+            <span className="pill" style={{ background: '#eef4f8', color: '#16386b' }}>about {step.time}</span>
           </div>
           <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, margin: '6px 0 12px' }}>{step.aim}</div>
 

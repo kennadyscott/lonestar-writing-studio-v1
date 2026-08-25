@@ -51,7 +51,7 @@ const ME = 'stu_kscott'
 const REACTIONS = ['like', 'heart', 'celebrate'] // positive only, by design
 const TYPING_PASS = 85      // accuracy needed to earn coins
 const TYPING_COINS = 10     // doubled in Fluency Practice
-const TYPING_DAILY_ROUNDS = 3 // paid rounds per day, so practice is not farmed
+const TYPING_DAILY_ROUNDS = 5 // paid rounds per day — generous, because the practice itself is the point
 const now = () => new Date().toISOString()
 
 const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)

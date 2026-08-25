@@ -312,7 +312,96 @@ function StepTimer({ seconds, stepKey }) {
   )
 }
 
-function ConferenceProtocol({ teacher, onClose, onSetGoal }) {
+/* The left half of a conference: what the writing already shows. Open a piece
+ * and you can read it and see which anchors it hit, without leaving the steps. */
+function ConferenceEvidence({ state, me }) {
+  const [openId, setOpenId] = useState(null)
+  const anchors = state.writingData?.ELA?.scr || []
+  const rows = state.submissions
+    .filter((s) => s.studentId === me.id && s.completedAt && !s.isPeerRevision)
+    .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
+    .filter(({ a }) => a && !['free', 'quick'].includes(a.genre))
+    .sort((x, y) => (x.s.completedAt < y.s.completedAt ? 1 : -1))
+    .slice(0, 5)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, height: '100%', overflowY: 'auto', paddingRight: 4 }}>
+      <div>
+        <div className="eyebrow" style={{ color: '#0f97c2' }}>What the writing shows</div>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>Look at this together — it is the evidence for the conversation.</div>
+      </div>
+
+      {/* the anchors, small enough to glance at mid-conversation */}
+      <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 14px' }}>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>SCR · STRATEGY ANCHORS</div>
+        {anchors.map((r) => (
+          <div key={r.k} style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 6 }}>
+            <span style={{ width: 20, height: 20, borderRadius: 6, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, color: '#fff', background: '#16386b' }}>{r.k}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, width: 52, color: 'var(--ink)' }}>{r.label}</span>
+            <div style={{ flex: 1, height: 8, background: '#e3ecf2', borderRadius: 5 }}>
+              <div style={{ height: '100%', width: `${r.pct}%`, borderRadius: 5, background: r.pct >= 75 ? 'var(--good)' : r.pct >= 50 ? '#e0a51c' : '#c0392b' }} />
+            </div>
+            <b style={{ fontSize: 11.5, width: 34, textAlign: 'right', color: r.pct >= 75 ? 'var(--good)' : r.pct >= 50 ? '#a37400' : '#c0392b' }}>{r.pct}%</b>
+          </div>
+        ))}
+      </div>
+
+      <div>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>RECENT FINISHED WRITING</div>
+        {rows.length === 0 && (
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', background: '#f4f8fb', borderRadius: 10, padding: '12px 14px' }}>
+            Nothing turned in yet — talk about what is in progress instead.
+          </div>
+        )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {rows.map(({ s, a }) => {
+            const sc = scoreSubmission(a, s)
+            const open = openId === s.id
+            const tone = sc.pct >= 75 ? 'var(--good)' : sc.pct >= 50 ? '#a37400' : '#c0392b'
+            return (
+              <div key={s.id} style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
+                <button onClick={() => setOpenId(open ? null : s.id)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: open ? '#f4f8fb' : '#fff' }}>
+                  <span style={{ fontSize: 9.5, fontWeight: 800, color: '#fff', background: a.format === 'ECR' ? 'var(--ecr)' : 'var(--scr)', padding: '2px 7px', borderRadius: 6 }}>{a.format || 'SCR'}</span>
+                  <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: tone, whiteSpace: 'nowrap' }}>{sc.rubricScore}/{sc.rubricMax} · {sc.pct}%</span>
+                  <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
+                </button>
+                {open && (
+                  <div style={{ padding: '2px 12px 12px', borderTop: '1px solid var(--line)' }}>
+                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>WHAT THEY WROTE</div>
+                    <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fbfdfe', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 150, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
+                      {sc.questions[0].answer.trim() || 'No response recorded.'}
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '11px 0 5px' }}>{sc.strategyName}</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                      {sc.questions[0].anchors.map((an) => (
+                        <div key={an.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, lineHeight: 1.4 }}>
+                          <span style={{ width: 17, height: 17, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 800, color: '#fff', background: an.hit ? 'var(--good)' : '#c0392b' }}>{an.hit ? '✓' : '✕'}</span>
+                          <span style={{ color: an.hit ? 'var(--muted)' : '#33566e', fontWeight: an.hit ? 600 : 700 }}>{an.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      {me.goal && (
+        <div style={{ background: '#eef6f9', borderRadius: 12, padding: '11px 14px' }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#0f97c2' }}>THE GOAL WE SET LAST TIME</div>
+          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, lineHeight: 1.4 }}>{me.goal.text}</div>
+          {me.goal.teachingPoint && <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3 }}>Taught as: {me.goal.teachingPoint}</div>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ConferenceProtocol({ teacher, state, me, onClose, onSetGoal }) {
   const [i, setI] = useState(0)
   const [notes, setNotes] = useState({ working: '', strength: '', teachingPoint: '', strategy: '', tried: false })
   const [goalText, setGoalText] = useState('')
@@ -342,7 +431,7 @@ function ConferenceProtocol({ teacher, onClose, onSetGoal }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 70, padding: 16 }} onClick={onClose}>
-      <div className="card" style={{ width: 680, maxWidth: '96vw', maxHeight: '92vh', overflowY: 'auto', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+      <div className="card" style={{ width: 1180, maxWidth: '97vw', height: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }} onClick={(e) => e.stopPropagation()}>
 
         {/* header */}
         <div style={{ padding: '18px 22px 14px', background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 62%,#0e2748 100%)', color: '#fff' }}>
@@ -377,8 +466,15 @@ You and {teacher} · about 5 minutes · Research · Decide · Teach · Link
           </div>
         </div>
 
+        {/* evidence on the left, the protocol on the right */}
+        <div className="conf-split" style={{ flex: 1, minHeight: 0 }}>
+          <div style={{ borderRight: '1px solid var(--line)', background: '#fbfdfe', padding: '16px 18px', minHeight: 0, overflow: 'hidden' }}>
+            <ConferenceEvidence state={state} me={me} />
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {/* body */}
-        <div style={{ padding: '20px 22px 8px' }}>
+        <div style={{ padding: '20px 22px 8px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 22 }}>{step.icon}</span>
             <b style={{ fontSize: 17 }}>{step.label}</b>
@@ -476,6 +572,8 @@ I tried it in my own writing
             </button>
           )}
         </div>
+          </div>
+        </div>
       </div>
     </div>
   )
@@ -522,7 +620,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
       )}
 
       {conferring && (
-        <ConferenceProtocol teacher={state.teacher?.name || 'your teacher'} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />
+        <ConferenceProtocol teacher={state.teacher?.name || 'your teacher'} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />
       )}
 
       {/* focus goal */}

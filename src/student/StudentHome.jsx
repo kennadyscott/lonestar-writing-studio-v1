@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { api, TRAIT_LABELS } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
+import TypingGame from './TypingGame.jsx'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
 
@@ -678,7 +679,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
 
   return (
     <div>
-      {game && <FluencyGame gameKey={game} onClose={() => setGame(null)} />}
+      {game === 'typing'
+        ? <TypingGame grade={me.gradeLevel ?? 6} onClose={() => setGame(null)} onChange={onChange} />
+        : game && <FluencyGame gameKey={game} onClose={() => setGame(null)} />}
       {gamePicker && (
         <GamePickerModal games={state.fluencyGames || []} grade={me.gradeLevel ?? 6}
           onPlayBuiltin={(g) => { setGamePicker(false); setGame((g && g.game) || 'stretch') }}

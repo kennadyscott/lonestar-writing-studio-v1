@@ -158,6 +158,7 @@ export function seedState() {
       { id: 'fg_transitions', title: 'Transition Bridge', icon: '🌉', skill: 'Transitions', grades: '3–8', kind: 'builtin', game: 'transitions' },
       { id: 'fg_fragments', title: 'Fragment Fixer', icon: '🧩', skill: 'Complete Sentences', grades: '2–6', kind: 'builtin', game: 'fragments' },
       { id: 'fg_wordswap', title: 'Word Upgrade', icon: '💎', skill: 'Word Choice', grades: '3–8', kind: 'builtin', game: 'wordswap' },
+      { id: 'fg_typing', title: 'Type Right', icon: '⌨️', skill: 'Typing & Conventions', grades: '2–8', kind: 'builtin', game: 'typing' },
       { id: 'fg_punct', title: 'Punctuation Quest', icon: '🐉', skill: 'Conventions', grades: '3–5', kind: 'external', url: 'https://kennadyscott.github.io/punctuation-quest/' },
     ],
     // Teacher-configured settings (from the teacher's system).

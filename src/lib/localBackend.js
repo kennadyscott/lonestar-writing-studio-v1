@@ -229,6 +229,17 @@ export const localApi = {
     state.shareWall.unshift(entry)
     return entry
   },
+  typingFinish: async (payload) => {
+    const accuracy = Number(payload?.accuracy) || 0
+    if (accuracy < 85) return { coins: 0, passed: false }
+    const today = now().slice(0, 10)
+    const paidToday = state.coinEvents.filter((e) => e.type === 'typing_round' && e.ts.slice(0, 10) === today).length
+    if (paidToday >= 3) return { coins: 0, passed: true, capped: true }
+    const coins = 20 // 10, doubled for Fluency Practice
+    state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'typing_round', coins, ts: now() })
+    const stu = findStu(ME); if (stu) stu.coins += coins
+    return { coins, passed: true, doubled: true, roundsLeft: 3 - paidToday - 1 }
+  },
   react: async (id, type) => {
     if (!['like', 'heart', 'celebrate'].includes(type)) return { error: 'unknown reaction' }
     const e = state.shareWall.find((x) => x.id === id)

@@ -49,6 +49,9 @@ import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklis
 
 const ME = 'stu_kscott'
 const REACTIONS = ['like', 'heart', 'celebrate'] // positive only, by design
+const TYPING_PASS = 85      // accuracy needed to earn coins
+const TYPING_COINS = 10     // doubled in Fluency Practice
+const TYPING_DAILY_ROUNDS = 3 // paid rounds per day, so practice is not farmed
 const now = () => new Date().toISOString()
 
 const uid = (p) => p + '_' + Math.random().toString(36).slice(2, 9)
@@ -463,6 +466,22 @@ const server = http.createServer(async (req, res) => {
       state.shareWall = state.shareWall.filter((e) => e.submissionId !== sub.id)
       save()
       return send(res, 200, { ok: true })
+    }
+
+    // POST /api/typing/finish { accuracy, wpm, ... } -> coins for a clean round.
+    // Accuracy is the only gate; nothing about the round is stored as writing data.
+    if (req.method === 'POST' && url.pathname === '/api/typing/finish') {
+      const body = await readBody(req)
+      const accuracy = Number(body.accuracy) || 0
+      if (accuracy < TYPING_PASS) return send(res, 200, { coins: 0, passed: false })
+      const today = now().slice(0, 10)
+      const paidToday = state.coinEvents.filter((e) => e.type === 'typing_round' && e.ts.slice(0, 10) === today).length
+      if (paidToday >= TYPING_DAILY_ROUNDS) return send(res, 200, { coins: 0, passed: true, capped: true })
+      const coins = TYPING_COINS * 2 // Fluency Practice pays double
+      state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'typing_round', coins, ts: now() })
+      const stu = findStu(ME); if (stu) stu.coins += coins
+      save()
+      return send(res, 200, { coins, passed: true, doubled: true, roundsLeft: TYPING_DAILY_ROUNDS - paidToday - 1 })
     }
 
     // POST /api/quickwrite { mode: 'quick' | 'free' } -> spin up a fresh writing space

@@ -71,7 +71,7 @@ export default function QuickWritePage({ state, onBack, onChange }) {
 
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', margin: '4px 0 18px' }}>
         <h1 className="page" style={{ margin: 0 }}>Quick Write</h1>
-        <span className="pill blue" style={{ padding: '8px 12px', fontSize: 13 }}>
+        <span className="pill gold" style={{ padding: '8px 12px', fontSize: 13 }}>
           About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
         </span>
       </div>
@@ -90,8 +90,8 @@ export default function QuickWritePage({ state, onBack, onChange }) {
                   <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>
                   <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>Writing Topic</span>
                 </div>
-                <div style={{ fontSize: 42, fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '10px 0 12px' }}>{pick.title}</div>
-                <div style={{ height: 4, width: 300, maxWidth: '85%', borderRadius: 3, background: 'linear-gradient(90deg,#16386b,#35c3e8 70%,transparent)', marginBottom: 20 }} />
+                <div style={{ fontSize: 42, fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '10px 0 10px' }}>{pick.title}</div>
+                <div className="constellation-rule" aria-hidden><i /><i /><i /><span /></div>
                 <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>Writing Prompt</div>
                 <div style={{ fontSize: 24, fontWeight: 700, color: '#10294a', lineHeight: 1.4, marginBottom: 18 }}>{pick.prompt}</div>
                 <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 14, padding: '13px 16px', marginBottom: 22 }}>

@@ -219,7 +219,7 @@ function GoalBanner({ me, classFocus }) {
   // read-only on Home — the goal is set and managed in a writing conference
   const half = { flex: '1 1 320px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 14, padding: '4px 2px' }
   return (
-    <div className="card" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
+    <div className="card gold-edge" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
       background: 'linear-gradient(120deg,#eef6f9,#fff)' }}>
       <div style={half}>
         <span style={{ fontSize: 28 }}>🎯</span>
@@ -270,11 +270,11 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
       <button disabled={busy} onClick={onClick}
         style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 82, padding: '11px 13px 11px 94px', textAlign: 'left',
           display: 'flex', alignItems: 'center', gap: 10, background: `linear-gradient(120deg,${c1},${c2})`,
-          border: '2px solid rgba(18,12,58,.5)', boxShadow: '0 8px 20px rgba(20,15,70,.28)', color: '#fff', cursor: 'pointer', width: '100%' }}>
+          border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 8px 20px rgba(20,15,70,.28)', color: '#fff', cursor: 'pointer', width: '100%' }}>
         <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 92,
           background: `linear-gradient(90deg, transparent 45%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
         <span style={{ position: 'relative', width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 16,
-          background: 'rgba(255,255,255,.15)', border: '2px solid rgba(255,255,255,.8)', boxShadow: '0 0 14px rgba(255,255,255,.25)' }}>{icon}</span>
+          background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
         <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
           <span style={{ display: 'block', fontSize: 15, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)', whiteSpace: 'nowrap' }}>{title}</span>
           <span style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 2, lineHeight: 1.3 }}>{sub}</span>
@@ -287,14 +287,14 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
     <button disabled={busy} onClick={onClick}
       style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, minHeight: 118, padding: '18px 22px 18px 198px', textAlign: 'left',
         display: 'flex', alignItems: 'center', gap: 16, background: `linear-gradient(120deg,${c1},${c2})`,
-        border: '2px solid rgba(18,12,58,.5)', boxShadow: '0 10px 26px rgba(20,15,70,.32)', color: '#fff', cursor: 'pointer' }}>
+        border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 10px 26px rgba(20,15,70,.32)', color: '#fff', cursor: 'pointer' }}>
       <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 195,
         background: `linear-gradient(90deg, transparent 55%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
       <span style={{ position: 'absolute', top: 12, right: 88, color: 'rgba(255,255,255,.65)', fontSize: 12 }}>✦</span>
       <span style={{ position: 'absolute', bottom: 13, right: 200, color: 'rgba(255,255,255,.4)', fontSize: 9 }}>✦</span>
       <span style={{ position: 'absolute', top: 22, right: 268, color: 'rgba(255,255,255,.5)', fontSize: 8 }}>✦</span>
       <span style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 27,
-        background: 'rgba(255,255,255,.15)', border: '2.5px solid rgba(255,255,255,.8)', boxShadow: '0 0 20px rgba(255,255,255,.3)' }}>{icon}</span>
+        background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
       <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
         <span style={{ display: 'block', fontSize: 20, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)' }}>{title}</span>
         <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.9)', fontWeight: 600, marginTop: 3 }}>{sub}</span>

@@ -25,6 +25,7 @@
   --cc-blue: #0a7dba;
   --shadow: 0 1px 3px rgba(2, 56, 77, 0.07), 0 8px 24px rgba(2, 56, 77, 0.06);
   --radius: 16px;
+  --gold-line: rgba(245, 180, 0, 0.45);
   font-family: 'Manrope', system-ui, sans-serif;
 }
 
@@ -63,7 +64,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 }
 
 /* ===== top bar ===== */
-.topbar { background: rgba(255,255,255,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 1px 0 var(--line); padding: 0 20px 0 16px; display: flex; align-items: center; gap: 14px; min-height: 64px; position: sticky; top: 0; z-index: 20; }
+.topbar { background: rgba(255,255,255,.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 1px 0 var(--gold-line); padding: 0 20px 0 16px; display: flex; align-items: center; gap: 14px; min-height: 64px; position: sticky; top: 0; z-index: 20; }
 .logo-chip { background: linear-gradient(150deg, var(--navy) 0%, var(--navy-deep) 100%); border-radius: 12px; padding: 5px 12px; margin: 8px 0; display: grid; place-items: center; }
 .logo-chip img { height: 36px; display: block; }
 .topnav { display: flex; gap: 4px; }
@@ -71,15 +72,15 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .topnav button:hover { background: #eef6fa; color: var(--ink); }
 .topnav button.on { background: var(--navy); color: #fff; }
 
-.cc-btn { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px 5px 8px; }
-.cc-btn:hover { border-color: #c5d6e0; background: #f7fbfc; }
+.cc-btn { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--gold-line); border-radius: 999px; padding: 5px 12px 5px 8px; }
+.cc-btn:hover { border-color: var(--gold); background: #fffdf6; }
 .cc-btn img { height: 22px; }
 .cc-btn .split { width: 1px; height: 22px; background: var(--line); }
 .cc-btn small { display: block; font-size: 9px; font-weight: 700; letter-spacing: .7px; color: var(--muted); text-align: left; }
 .cc-btn b { font-size: 13px; color: var(--ink); display: block; text-align: left; font-weight: 700; }
 
-.who { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px 4px 4px; }
-.who .av-init { width: 32px; height: 32px; border-radius: 50%; background: #d9f2fb; color: var(--teal); display: grid; place-items: center; font-weight: 800; font-size: 12px; }
+.who { display: flex; align-items: center; gap: 10px; background: #fff; border: 1px solid var(--gold-line); border-radius: 999px; padding: 4px 10px 4px 4px; }
+.who .av-init { width: 32px; height: 32px; border-radius: 50%; background: #d9f2fb; color: var(--teal); display: grid; place-items: center; font-weight: 800; font-size: 12px; border: 1.5px solid var(--gold); }
 .who .nm { font-weight: 700; font-size: 13.5px; line-height: 1.15; color: var(--ink); }
 .who .sub { font-size: 11.5px; color: var(--muted); }
 .who .pwr { font-size: 16px; color: var(--muted); padding: 4px; }
@@ -91,7 +92,11 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 
 /* ===== cards / buttons ===== */
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
-.btn { background: var(--navy); color: #fff; padding: 9px 16px; border-radius: 10px; font-weight: 600; font-size: 13.5px; letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 1px 2px rgba(2,56,77,.14); transition: background .12s ease, box-shadow .12s ease; }
+.btn { background: var(--navy); color: #fff; padding: 9px 16px; border-radius: 10px; font-weight: 600; font-size: 13.5px; letter-spacing: -.01em; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 1px 2px rgba(2,56,77,.14), 0 0 0 1px var(--gold-line); transition: background .12s ease, box-shadow .12s ease; }
+.card.gold-edge { border-color: var(--gold-line); }
+.constellation-rule { display: flex; align-items: center; gap: 6px; margin: 0 0 16px; }
+.constellation-rule i { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px var(--gold); }
+.constellation-rule span { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), rgba(245,180,0,.08)); }
 .btn:hover { background: #03415a; box-shadow: 0 4px 12px rgba(2,56,77,.16); }
 .btn.ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); box-shadow: none; }
 .btn.ghost:hover { background: #f4f8fb; border-color: #c5d6e0; box-shadow: none; }

@@ -45,7 +45,7 @@ function MonthChart({ label, months, data, color, height = 84 }) {
                 const v = data[i]
                 return (
                   <div key={m} style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%' }} title={v != null ? `${m}: ${v}/4` : `${m}: no data`}>
-                    <div style={{ width: '68%', height: v != null ? `${(v / 4) * 100}%` : '2px', background: v != null ? color : '#e6e8ec', borderRadius: '4px 4px 0 0' }} />
+                    <div style={{ width: '62%', height: v != null ? `${(v / 4) * 100}%` : '2px', background: v != null ? color : '#e6e8ec', borderRadius: '7px 7px 2px 2px' }} />
                   </div>
                 )
               })}
@@ -73,31 +73,30 @@ const ANCHOR_MEANING = {
 }
 
 function DataBar({ pct }) {
-  const fill = pct >= 80 ? 'var(--good)' : pct > 0 ? '#e8b33c' : 'transparent'
+  const fill = pct >= 80 ? 'var(--good)' : pct > 0 ? 'var(--gold)' : 'transparent'
   return (
-    <div style={{ flex: 1, height: 10, background: '#e9f0f5', borderRadius: 6 }}>
-      <div style={{ height: '100%', width: `${pct}%`, background: fill, borderRadius: 6, transition: 'width .3s' }} />
+    <div className="data-bar">
+      <i style={{ width: `${pct}%`, background: fill }} />
     </div>
   )
 }
 
 function ScrPanel({ rows }) {
   return (
-    <div style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-      <div style={{ background: 'linear-gradient(120deg,#0a5b76,#035c78)', color: '#fff', padding: '8px 13px', fontWeight: 800, fontSize: 12.5 }}>
-        SCR · Strategy Anchor Adherence
-      </div>
-      <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+    <div>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>Strategy</div>
+      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.02em', marginBottom: 14 }}>Anchor adherence</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rows.map((r) => (
-          <div key={r.label} title={`${r.k} = ${ANCHOR_MEANING[r.label] || r.label}`} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <span style={{ width: 25, height: 25, borderRadius: 7, background: 'var(--navy)', color: ANCHOR_COLORS[r.label] || '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 13 }}>{r.k}</span>
-            <span style={{ width: 38, fontSize: 12, fontWeight: 800, textAlign: 'right' }}>{r.pct}%</span>
+          <div key={r.label} title={`${r.k} = ${ANCHOR_MEANING[r.label] || r.label}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span className="anchor-k" style={{ color: ANCHOR_COLORS[r.label] || 'var(--navy)' }}>{r.k}</span>
+            <span style={{ width: 42, fontSize: 13, fontWeight: 700 }}>{r.pct}%</span>
             <DataBar pct={r.pct} />
-            <span style={{ width: 14, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, textAlign: 'right' }} title={`${r.n} response${r.n === 1 ? '' : 's'} assessed`}>{r.n}</span>
+            <span style={{ width: 16, fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, textAlign: 'right' }} title={`${r.n} response${r.n === 1 ? '' : 's'} assessed`}>{r.n}</span>
           </div>
         ))}
-        <div style={{ fontSize: 10.5, color: 'var(--muted)' }}>R·A·C·E — Restate, Answer, Cite, Explain</div>
       </div>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 14 }}>R-A-C-E — Restate, Answer, Cite, Explain</div>
     </div>
   )
 }
@@ -116,13 +115,12 @@ function EcrCombined({ org, conv }) {
     </>
   )
   return (
-    <div style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
-      <div style={{ background: 'linear-gradient(120deg,#14538c,#123b6d)', color: '#fff', padding: '8px 13px', fontWeight: 800, fontSize: 12.5 }}>
-        ECR · Rubric Domains
-      </div>
-      <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 7 }}>
+    <div>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>Rubric</div>
+      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.02em', marginBottom: 14 }}>ECR domains</div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {section('Organization & Development', org)}
-        <div style={{ borderTop: '1px solid var(--line)', margin: '4px 0' }} />
+        <div style={{ borderTop: '1px solid var(--line)', margin: '6px 0' }} />
         {section('Conventions', conv)}
       </div>
     </div>
@@ -190,41 +188,35 @@ function WritingDataCard({ writingData, state, me, onReview }) {
   const view = hasEcr ? fmt : 'SCR'
   const scrEmpty = d.scr.every((r) => r.pct === 0 && !r.n)
 
-  const toggleStyle = (on) => ({
-    padding: '5px 12px', borderRadius: 7, fontSize: 12, fontWeight: 800,
-    background: on ? '#fff' : 'transparent', color: on ? 'var(--navy)' : 'var(--muted)',
-    boxShadow: on ? 'var(--shadow)' : 'none',
-  })
-
   return (
-    <div className="card" style={{ padding: '16px 18px', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
-        <b style={{ fontSize: 15 }}>📊 My Writing Data</b>
-        <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2, flexWrap: 'wrap' }}>
-          <button onClick={() => setTop('recent')} style={toggleStyle(top === 'recent')}>📋 Recently Completed</button>
+    <div className="card gold-edge" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+        <div className="data-title">My writing data</div>
+        <div className="seg">
+          <button className={top === 'recent' ? 'on' : ''} onClick={() => setTop('recent')}>Recently completed</button>
           {writingData.subjects.map((sub) => (
-            <button key={sub} onClick={() => { setTop('data'); setSubject(sub) }} style={toggleStyle(top === 'data' && subject === sub)}>{sub}</button>
+            <button key={sub} className={top === 'data' && subject === sub ? 'on' : ''} onClick={() => { setTop('data'); setSubject(sub) }}>{sub}</button>
           ))}
         </div>
       </div>
 
       {top === 'recent' ? (
-        <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 11.5, color: 'var(--muted)', marginBottom: 10 }}>Your most recent finished assignments — open one to see the feedback again.</div>
+        <div style={{ marginTop: 14 }}>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 12 }}>Your most recent finished assignments — open one to see the feedback again.</div>
           <RecentResults state={state} me={me} onReview={onReview} />
         </div>
       ) : (<>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 12px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 16px' }}>
         {hasEcr ? (
-          <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
-            <button onClick={() => setFmt('SCR')} style={toggleStyle(view === 'SCR')}>SCR</button>
-            <button onClick={() => setFmt('ECR')} style={toggleStyle(view === 'ECR')}>ECR</button>
+          <div className="seg">
+            <button className={view === 'SCR' ? 'on' : ''} onClick={() => setFmt('SCR')}>SCR</button>
+            <button className={view === 'ECR' ? 'on' : ''} onClick={() => setFmt('ECR')}>ECR</button>
           </div>
         ) : (
-          <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--scr)' }}>✍️ {subject} collects SCR data only</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--scr)' }}>{subject} collects SCR data only</span>
         )}
-        <span style={{ fontSize: 11.5, color: 'var(--muted)', marginLeft: 'auto' }}>vs. the grading rubric</span>
+        <span style={{ fontSize: 12, color: 'var(--muted)', marginLeft: 'auto' }}>vs. the grading rubric</span>
       </div>
 
       {view === 'SCR' ? (
@@ -675,11 +667,6 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const finished = subs.filter((s) => s.completedAt).length
   const growthCoins = state.coinEvents.filter((e) => e.studentId === me.id).reduce((a, e) => a + e.coins, 0)
 
-  const mpToggle = (on) => ({
-    padding: '5px 12px', borderRadius: 7, fontSize: 12, fontWeight: 800,
-    background: on ? '#fff' : 'transparent', color: on ? 'var(--navy)' : 'var(--muted)', boxShadow: on ? 'var(--shadow)' : 'none',
-  })
-
   return (
     <div>
       {toast != null && (
@@ -773,34 +760,37 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
       </div>
 
       {/* writing data + monthly/habits — one balanced row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 18, marginBottom: 18, alignItems: 'stretch' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 18, marginBottom: 18, alignItems: 'start' }}>
         <WritingDataCard writingData={state.writingData} state={state} me={me} onReview={onReview} />
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div className="card" style={{ padding: '16px 18px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-              <b style={{ fontSize: 15 }}>📈 Monthly Progress <span style={{ fontWeight: 600, fontSize: 11.5, color: 'var(--muted)' }}>{mp.year} · avg score /4</span></b>
-              <div style={{ display: 'inline-flex', background: '#eaf1f6', borderRadius: 9, padding: 2 }}>
-                <button onClick={() => setMpTab('scr')} style={mpToggle(mpTab === 'scr')}>SCR</button>
-                <button onClick={() => setMpTab('ecr')} style={mpToggle(mpTab === 'ecr')}>ECR</button>
+          <div className="card gold-edge" style={{ padding: '18px 20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 10, flexWrap: 'wrap' }}>
+              <div>
+                <div className="data-title">Monthly progress</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{mp.year} · average score /4</div>
+              </div>
+              <div className="seg">
+                <button className={mpTab === 'scr' ? 'on' : ''} onClick={() => setMpTab('scr')}>SCR</button>
+                <button className={mpTab === 'ecr' ? 'on' : ''} onClick={() => setMpTab('ecr')}>ECR</button>
               </div>
             </div>
             {mpTab === 'scr'
-              ? <MonthChart label="SCR — Short Response" months={mp.months} data={mp.scr} color="var(--scr)" height={64} />
-              : <MonthChart label="ECR — Extended Response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={64} />}
+              ? <MonthChart label="SCR — Short response" months={mp.months} data={mp.scr} color="var(--scr)" height={88} />
+              : <MonthChart label="ECR — Extended response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={88} />}
           </div>
 
-          <div className="card" style={{ padding: '16px 18px', flex: 1 }}>
-            <b style={{ fontSize: 15 }}>🔥 My Writing Habits</b>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 10 }}>
+          <div className="card gold-edge" style={{ padding: '18px 20px' }}>
+            <div className="data-title">Writing habits</div>
+            <div className="habit-grid">
               {[
-                { k: 'Revisions made', v: revisions, sub: 'Every revision makes you stronger', icon: '📝' },
-                { k: 'Pieces finished', v: finished, sub: 'Start to polished', icon: '⭐' },
-                { k: 'Coins from growing', v: growthCoins.toLocaleString(), sub: 'Earned by how you write', icon: '🪙' },
+                { k: 'Revisions made', v: revisions, sub: 'Each one makes you stronger' },
+                { k: 'Pieces finished', v: finished, sub: 'Start to polished' },
+                { k: 'Coins earned', v: growthCoins.toLocaleString(), sub: 'For how you write' },
               ].map((s) => (
-                <div key={s.k} style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f9fc', borderRadius: 12, padding: '8px 14px' }}>
-                  <div style={{ fontSize: 19, fontWeight: 800, minWidth: 38 }}>{s.v}</div>
-                  <div style={{ flex: 1 }}><div style={{ fontSize: 12.5, fontWeight: 700 }}>{s.k}</div><div style={{ fontSize: 11, color: 'var(--muted)' }}>{s.sub}</div></div>
-                  <div style={{ fontSize: 20 }}>{s.icon}</div>
+                <div key={s.k} className="habit-tile">
+                  <div className="v">{s.v}</div>
+                  <div className="k">{s.k}</div>
+                  <div className="s">{s.sub}</div>
                 </div>
               ))}
             </div>

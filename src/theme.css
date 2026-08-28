@@ -57,6 +57,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .home-split { grid-template-columns: 1fr; }
   .wall-strip { grid-template-columns: 1fr; }
   .luna-modules { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .habit-grid { grid-template-columns: 1fr; }
   .goal-split { display: none; }
   /* a conference on a narrow screen stacks: evidence on top, capped, then the steps */
   .conf-split { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
@@ -97,6 +98,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .constellation-rule { display: flex; align-items: center; gap: 6px; margin: 0 0 16px; }
 .constellation-rule i { width: 5px; height: 5px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 6px var(--gold); }
 .constellation-rule span { flex: 1; height: 1px; background: linear-gradient(90deg, var(--gold), rgba(245,180,0,.08)); }
+
+/* data cards */
+.data-title { font-size: 15px; font-weight: 700; letter-spacing: -.02em; color: var(--ink); }
+.data-bar { flex: 1; height: 7px; background: #eef3f6; border-radius: 99px; overflow: hidden; }
+.data-bar > i { display: block; height: 100%; border-radius: 99px; }
+.anchor-k { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--gold-line); background: #fff; display: grid; place-items: center; font-weight: 800; font-size: 13px; flex: none; }
+.habit-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; }
+.habit-tile { background: #f7fafc; border-radius: 12px; padding: 14px 12px; }
+.habit-tile .v { font-size: 22px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); line-height: 1.1; }
+.habit-tile .k { font-size: 12px; font-weight: 700; margin-top: 6px; }
+.habit-tile .s { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .btn:hover { background: #03415a; box-shadow: 0 4px 12px rgba(2,56,77,.16); }
 .btn.ghost { background: #fff; color: var(--navy); border: 1px solid var(--line); box-shadow: none; }
 .btn.ghost:hover { background: #f4f8fb; border-color: #c5d6e0; box-shadow: none; }

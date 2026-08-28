@@ -70,14 +70,9 @@ export default function QuickWritePage({ state, onBack, onChange }) {
       {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
 
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', margin: '4px 0 18px' }}>
-        <div style={{ position: 'relative', display: 'inline-block' }}>
-          <h1 className="page" style={{ margin: 0, fontSize: 40, color: '#0d2440' }}>Quick Write</h1>
-          <span style={{ position: 'absolute', top: -6, right: -26, color: '#f5c542', fontSize: 16 }}>✦</span>
-          <span style={{ position: 'absolute', top: 14, right: -40, color: '#8b7cf5', fontSize: 11 }}>✦</span>
-          <div style={{ height: 5, width: '70%', borderRadius: 3, background: 'linear-gradient(90deg,#35c3e8,transparent)', marginTop: 4 }} />
-        </div>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e9f5fb', color: '#0e6a94', fontWeight: 800, fontSize: 14.5, borderRadius: 999, padding: '10px 20px' }}>
-          🕐 About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
+        <h1 className="page" style={{ margin: 0 }}>Quick Write</h1>
+        <span className="pill blue" style={{ padding: '8px 12px', fontSize: 13 }}>
+          About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
         </span>
       </div>
 
@@ -105,15 +100,10 @@ export default function QuickWritePage({ state, onBack, onChange }) {
                     <b style={{ color: '#0f97c2' }}>Think about:</b> {pick.hint || 'What details and examples will make your idea clear to a reader?'}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-                  <button onClick={() => setStage('writing')}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 17, borderRadius: 999, padding: '15px 34px',
-                      boxShadow: '0 8px 22px rgba(53,195,232,.45)', cursor: 'pointer' }}>
-                    ✏️ Start Writing
-                  </button>
-                  <span style={{ fontSize: 19, color: '#0f97c2' }}>→</span>
-                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>
-                    ⏱ The {Math.floor(GOAL_SECONDS / 60)}:{String(GOAL_SECONDS % 60).padStart(2, '0')} timer starts right away{setBy ? ` · goal set by ${setBy}` : ''}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+                  <button className="btn lg" onClick={() => setStage('writing')}>Start writing</button>
+                  <span style={{ fontSize: 12.5, fontWeight: 650, color: 'var(--muted)' }}>
+                    The {Math.floor(GOAL_SECONDS / 60)}:{String(GOAL_SECONDS % 60).padStart(2, '0')} timer starts right away{setBy ? ` · goal set by ${setBy}` : ''}
                   </span>
                 </div>
               </div>

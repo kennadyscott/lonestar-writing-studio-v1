@@ -96,9 +96,8 @@ function LunaNook({ modules, onLuna }) {
           })}
         </div>
 
-        <button onClick={onLuna} style={{ flexShrink: 0, background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 999,
-          padding: '10px 22px', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.45)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-          Go to my path →
+        <button className="btn" onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+          Go to my path
         </button>
       </div>
     </div>
@@ -205,8 +204,8 @@ function UpNextCard({ row, busy, begin, onAll }) {
           </div>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 9 }}>
-          <button className="btn" disabled={busy} onClick={() => begin(row)} style={{ padding: '13px 30px', fontSize: 15.5 }}>
-            {row.status === 'in_progress' ? 'Continue →' : 'Begin ▶'}
+          <button className="btn lg" disabled={busy} onClick={() => begin(row)}>
+            {row.status === 'in_progress' ? 'Continue' : 'Begin'}
           </button>
           <button onClick={onAll} style={{ color: 'var(--link)', fontSize: 13, fontWeight: 800 }}>See all assignments →</button>
         </div>
@@ -280,7 +279,7 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
           <span style={{ display: 'block', fontSize: 15, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)', whiteSpace: 'nowrap' }}>{title}</span>
           <span style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 2, lineHeight: 1.3 }}>{sub}</span>
         </span>
-        <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 800, borderRadius: 999, padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap', boxShadow: '0 3px 10px rgba(0,0,0,.25)' }}>Go →</span>
+        <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 8, padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap' }}>Go</span>
       </button>
     )
   }
@@ -300,7 +299,7 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
         <span style={{ display: 'block', fontSize: 20, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)' }}>{title}</span>
         <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.9)', fontWeight: 600, marginTop: 3 }}>{sub}</span>
       </span>
-      <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 800, borderRadius: 999, padding: '10px 24px', fontSize: 14.5, whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(0,0,0,.25)' }}>Go →</span>
+      <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 10, padding: '8px 16px', fontSize: 13.5, whiteSpace: 'nowrap' }}>Go</span>
     </button>
   )
 }
@@ -559,14 +558,14 @@ function AssignmentsCard({ rows, busy, begin }) {
 
   return (
     <div className="card" style={{ overflow: 'hidden', flex: 1 }}>
-      <div style={{ display: 'flex', gap: 8, padding: '14px 16px 12px' }}>
-        {['active', 'completed'].map((t) => (
-          <button key={t} onClick={() => setTab(t)}
-            style={{ padding: '9px 18px', borderRadius: 999, fontWeight: 800, fontSize: 13.5,
-              background: tab === t ? 'var(--teal-mid)' : '#eef3f6', color: tab === t ? '#fff' : 'var(--muted)' }}>
-            {t === 'active' ? '📋 Active Assignments' : '📗 Completed Assignments'}
-          </button>
-        ))}
+      <div style={{ display: 'flex', padding: '12px 16px 10px' }}>
+        <div className="seg">
+          {['active', 'completed'].map((t) => (
+            <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>
+              {t === 'active' ? 'Active assignments' : 'Completed'}
+            </button>
+          ))}
+        </div>
       </div>
       <div style={{ display: 'flex', gap: 8, padding: '10px 16px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', background: '#f8fbfd', flexWrap: 'wrap' }}>
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="🔍 Search assignments…"
@@ -605,8 +604,8 @@ function AssignmentsCard({ rows, busy, begin }) {
               </div>
               <div style={{ width: 112, textAlign: 'right' }}><DueChip dueDate={row.a.dueDate} status={row.status} /></div>
               <div style={{ width: 104, textAlign: 'right' }}>
-                <button className={row.status === 'not_started' ? 'btn' : 'btn ghost'} style={{ padding: '8px 16px' }} disabled={busy} onClick={() => begin(row)}>
-                  {row.status === 'completed' ? 'Review' : row.status === 'in_progress' ? 'Continue' : 'Begin ▶'}
+                <button className={row.status === 'not_started' ? 'btn' : 'btn ghost'} disabled={busy} onClick={() => begin(row)}>
+                  {row.status === 'completed' ? 'Review' : row.status === 'in_progress' ? 'Continue' : 'Begin'}
                 </button>
               </div>
             </div>
@@ -695,14 +694,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
-        <div style={{ display: 'inline-flex', background: '#fff', borderRadius: 14, padding: 5, gap: 3, position: 'relative', zIndex: 2,
-          border: '1.5px solid #d5e2ec', boxShadow: '0 6px 20px rgba(13,47,85,.16)' }}>
-          {[['home', '🏠 Home'], ['data', '📊 Data & Goals']].map(([k, label]) => (
-            <button key={k} onClick={() => setHomeTab(k)}
-              style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14.5, fontWeight: 800,
-                background: homeTab === k ? 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)' : 'transparent',
-                color: homeTab === k ? '#fff' : '#16386b',
-                boxShadow: homeTab === k ? 'inset 0 1.5px 0 rgba(255,255,255,.3), 0 4px 12px rgba(13,47,85,.3)' : 'none' }}>
+        <div className="seg" style={{ position: 'relative', zIndex: 2 }}>
+          {[['home', 'Home'], ['data', 'Data & Goals']].map(([k, label]) => (
+            <button key={k} className={homeTab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
               {label}
             </button>
           ))}

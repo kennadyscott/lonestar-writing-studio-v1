@@ -678,6 +678,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
 
   return (
     <div>
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       {game === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={() => setGame(null)} onChange={onChange} />
         : game && <FluencyGame gameKey={game} onClose={() => setGame(null)} />}
@@ -705,8 +707,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
 
       {/* ================= HOME ================= */}
       {homeTab === 'home' && (<>
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <GoalBanner me={me} classFocus={state.classFocus} />
         <div className="home-main">
@@ -725,7 +725,11 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       </>)}
 
       {/* ================= DATA & GOALS ================= */}
-      {homeTab === 'data' && <DataGoalsTab state={state} me={me} onChange={onChange} onReview={onReview} />}
+      {homeTab === 'data' && (
+        <div style={{ position: 'relative', zIndex: 1 }}>
+          <DataGoalsTab state={state} me={me} onChange={onChange} onReview={onReview} />
+        </div>
+      )}
     </div>
   )
 }

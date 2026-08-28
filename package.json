@@ -9,6 +9,7 @@
     "server": "node server/index.mjs",
     "client": "vite",
     "build": "vite build",
+    "build:pages": "VITE_STATIC=1 vite build",
     "preview": "vite preview"
   },
   "dependencies": {

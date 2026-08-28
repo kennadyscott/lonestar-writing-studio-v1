@@ -11,12 +11,8 @@ export function TopBar({ who, onArcade, onLogo }) {
       <div style={{ flex: 1 }} />
 
       <button className="cc-btn" onClick={onArcade} title="Switch to ClassCade">
-        <img src={BRAND.classcade} alt="ClassCade" />
-        <span className="split" />
-        <span>
-          <small>SWITCH TO</small>
-          <b>ClassCade</b>
-        </span>
+        <img src={BRAND.classcade} alt="" />
+        <b>ClassCade</b>
       </button>
 
       <div className="who">

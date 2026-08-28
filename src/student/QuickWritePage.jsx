@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { api } from '../lib/api.js'
-import { BRAND } from '../lib/brand.js'
 
 /*
  * Quick Write — the live product's 3-part flow, refreshed in the studio brand:
@@ -71,56 +70,70 @@ export default function QuickWritePage({ state, onBack, onChange }) {
       {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
 
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', margin: '4px 0 18px' }}>
-        <h1 className="page" style={{ margin: 0, fontSize: 42, color: '#fff' }}>Quick Write</h1>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(245,180,0,.14)', color: '#a37400', fontWeight: 800, fontSize: 14, borderRadius: 999, padding: '10px 16px', border: '1px solid rgba(245,180,0,.4)' }}>
-          About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
+        <div style={{ position: 'relative', display: 'inline-block' }}>
+          <h1 className="page" style={{ margin: 0, fontSize: 40, color: '#0d2440' }}>Quick Write</h1>
+          <span style={{ position: 'absolute', top: -6, right: -26, color: '#f5c542', fontSize: 16 }}>✦</span>
+          <span style={{ position: 'absolute', top: 14, right: -40, color: '#8b7cf5', fontSize: 11 }}>✦</span>
+          <div style={{ height: 5, width: '70%', borderRadius: 3, background: 'linear-gradient(90deg,#35c3e8,transparent)', marginTop: 4 }} />
+        </div>
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#e9f5fb', color: '#0e6a94', fontWeight: 800, fontSize: 14.5, borderRadius: 999, padding: '10px 20px' }}>
+          🕐 About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
         </span>
       </div>
 
-      <div className={stage === 'intro' ? undefined : 'card'} style={stage === 'intro' ? undefined : { overflow: 'hidden', position: 'relative' }}>
+      <div className="card" style={{ overflow: 'hidden', position: 'relative' }}>
 
 
         {/* ============ intro: one screen, one click ============ */}
         {stage === 'intro' && (
-          <div className="qw-stage">
-            <img className="qw-stage-art" src={`${import.meta.env.BASE_URL || '/'}qw-hero.jpg`} alt="" />
-            <div className="qw-stage-veil" />
-            <article className="qw-paper">
-              <div className="qw-assigned">★ Teacher assigned</div>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', textTransform: 'uppercase', color: '#0f97c2', marginBottom: 6 }}>Writing topic</div>
-              <div style={{ fontSize: 30, fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '0 0 8px', letterSpacing: '-.03em' }}>{pick.title}</div>
-              <div className="constellation-rule" aria-hidden><i /><i /><i /><span /></div>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.16em', textTransform: 'uppercase', color: '#0f97c2', marginBottom: 8 }}>Writing prompt</div>
-              <div style={{ fontSize: 17, fontWeight: 700, color: '#10294a', lineHeight: 1.45, marginBottom: 16 }}>{pick.prompt}</div>
-              <div className="qw-think">
-                <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 8 }}>
-                  <span className="qw-coach-ic">💡</span>
-                  <div style={{ fontSize: 14, color: '#28506b', lineHeight: 1.4 }}>
-                    <b style={{ display: 'block', fontSize: 11, letterSpacing: '.12em', textTransform: 'uppercase', color: '#0f97c2', marginBottom: 2 }}>Think about</b>
-                    {pick.hint || 'What details and examples will make your idea clear to a reader?'}
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,0.95fr) 1.1fr', gap: 34, padding: '26px 30px 22px', alignItems: 'center' }}>
+              <img src={`${import.meta.env.BASE_URL || '/'}qw-hero.jpg`} alt=""
+                style={{ width: '100%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,80,.25)' }} />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>
+                  <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>Writing Topic</span>
+                </div>
+                <div style={{ fontSize: 42, fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '10px 0 12px' }}>{pick.title}</div>
+                <div style={{ height: 4, width: 300, maxWidth: '85%', borderRadius: 3, background: 'linear-gradient(90deg,#16386b,#35c3e8 70%,transparent)', marginBottom: 20 }} />
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>Writing Prompt</div>
+                <div style={{ fontSize: 24, fontWeight: 700, color: '#10294a', lineHeight: 1.4, marginBottom: 18 }}>{pick.prompt}</div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 14, padding: '13px 16px', marginBottom: 22 }}>
+                  <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>💡</span>
+                  <div style={{ fontSize: 14, color: '#28506b', lineHeight: 1.45 }}>
+                    <b style={{ color: '#0f97c2' }}>Think about:</b> {pick.hint || 'What details and examples will make your idea clear to a reader?'}
                   </div>
                 </div>
-                {[
-                  ['★', 'Share your ideas.', 'Your voice matters. Big ideas can spark real change.'],
-                  ['✦', 'Be creative.', 'There are no wrong answers — just your unique voice.'],
-                  ['♥', 'Make it meaningful.', 'Explain the why, and who your idea would help.'],
-                ].map(([ic, title, body]) => (
-                  <div className="qw-coach" key={title}>
-                    <span className="qw-coach-ic">{ic}</span>
-                    <div><b>{title}</b> {body}</div>
-                  </div>
-                ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                  <button onClick={() => setStage('writing')}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 17, borderRadius: 999, padding: '15px 34px',
+                      boxShadow: '0 8px 22px rgba(53,195,232,.45)', cursor: 'pointer' }}>
+                    ✏️ Start Writing
+                  </button>
+                  <span style={{ fontSize: 19, color: '#0f97c2' }}>→</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>
+                    ⏱ The {Math.floor(GOAL_SECONDS / 60)}:{String(GOAL_SECONDS % 60).padStart(2, '0')} timer starts right away{setBy ? ` · goal set by ${setBy}` : ''}
+                  </span>
+                </div>
               </div>
-              <button onClick={() => setStage('writing')}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', color: '#fff', fontWeight: 800, fontSize: 16, borderRadius: 999, padding: '14px 24px',
-                  boxShadow: '0 8px 22px rgba(53,195,232,.35), 0 0 0 1px rgba(245,180,0,.4)', cursor: 'pointer' }}>
-                Start writing
-              </button>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)', marginTop: 10 }}>
-                The {Math.floor(GOAL_SECONDS / 60)}:{String(GOAL_SECONDS % 60).padStart(2, '0')} timer starts right away{setBy ? ` · goal set by ${setBy}` : ''}
-              </div>
-            </article>
-            <img className="qw-luna" src={BRAND.luna} alt="" />
+            </div>
+            {/* benefits strip */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: '1px solid var(--line)' }}>
+              {[
+                ['⭐', '#2e9e6b', 'Share Your Ideas', 'Your voice matters. Big ideas can spark real change!'],
+                ['🚀', '#2f8ceb', 'Be Creative', 'There are no wrong answers — just your unique voice.'],
+                ['💜', '#8b5cf6', 'Make It Meaningful', 'Explain the why behind your idea and how it helps others.'],
+              ].map(([icon, c, title, blurb], i) => (
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '18px 22px', borderLeft: i ? '1px solid var(--line)' : 'none' }}>
+                  <span style={{ fontSize: 24, filter: `drop-shadow(0 1px 2px ${c}55)` }}>{icon}</span>
+                  <span>
+                    <b style={{ display: 'block', fontSize: 14.5, color: '#0d2440' }}>{title}</b>
+                    <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}>{blurb}</span>
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

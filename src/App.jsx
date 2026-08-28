@@ -68,11 +68,8 @@ export default function App() {
     body = <ArcadePage me={me} state={state} onBack={goHome} />
   }
 
-  const sky = (import.meta.env.BASE_URL || '/') + 'bg-stars.jpg'
-
   return (
     <div className="app">
-      <div className="sky" aria-hidden style={{ backgroundImage: `url(${sky})` }} />
       <TopBar
         who={who}
         onArcade={() => { setView('arcade'); setOpenSub(null) }}

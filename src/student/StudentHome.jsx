@@ -220,7 +220,7 @@ function GoalBanner({ me, classFocus }) {
   // read-only on Home — the goal is set and managed in a writing conference
   const half = { flex: '1 1 320px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 14, padding: '4px 2px' }
   return (
-    <div className="card gold-edge" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
+    <div className="card" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
       background: 'linear-gradient(120deg,#eef6f9,#fff)' }}>
       <div style={half}>
         <span style={{ fontSize: 28 }}>🎯</span>
@@ -271,11 +271,11 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
       <button disabled={busy} onClick={onClick}
         style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 82, padding: '11px 13px 11px 94px', textAlign: 'left',
           display: 'flex', alignItems: 'center', gap: 10, background: `linear-gradient(120deg,${c1},${c2})`,
-          border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 8px 20px rgba(20,15,70,.28)', color: '#fff', cursor: 'pointer', width: '100%' }}>
+          border: '2px solid rgba(18,12,58,.5)', boxShadow: '0 8px 20px rgba(20,15,70,.28)', color: '#fff', cursor: 'pointer', width: '100%' }}>
         <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 92,
           background: `linear-gradient(90deg, transparent 45%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
         <span style={{ position: 'relative', width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 16,
-          background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
+          background: 'rgba(255,255,255,.15)', border: '2px solid rgba(255,255,255,.8)', boxShadow: '0 0 14px rgba(255,255,255,.25)' }}>{icon}</span>
         <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
           <span style={{ display: 'block', fontSize: 15, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)', whiteSpace: 'nowrap' }}>{title}</span>
           <span style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 2, lineHeight: 1.3 }}>{sub}</span>
@@ -694,21 +694,14 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
-        <div className="welcome" style={{ margin: 0 }}>
-          <img className="welcome-luna" src={BRAND.luna} alt="Luna" />
-          <div>
-            <h1>{(() => { const h = new Date().getHours(); const hi = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening'; return `${hi}, ${me.name.split(' ')[0]}.` })()}</h1>
-            <p>Tonight’s writing is waiting. Luna saved you a seat.</p>
-          </div>
-        </div>
-        <div style={{ display: 'inline-flex', background: 'rgba(7,21,37,.55)', borderRadius: 14, padding: 5, gap: 3, position: 'relative', zIndex: 2,
-          border: '1.5px solid rgba(245,180,0,.4)', boxShadow: '0 6px 20px rgba(0,0,0,.25)' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'inline-flex', background: '#fff', borderRadius: 14, padding: 5, gap: 3, position: 'relative', zIndex: 2,
+          border: '1.5px solid #d5e2ec', boxShadow: '0 6px 20px rgba(13,47,85,.16)' }}>
           {[['home', '🏠 Home'], ['data', '📊 Data & Goals']].map(([k, label]) => (
             <button key={k} onClick={() => setHomeTab(k)}
               style={{ padding: '11px 22px', borderRadius: 10, fontSize: 14.5, fontWeight: 800,
                 background: homeTab === k ? 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)' : 'transparent',
-                color: homeTab === k ? '#fff' : 'rgba(244,236,215,.88)',
+                color: homeTab === k ? '#fff' : '#16386b',
                 boxShadow: homeTab === k ? 'inset 0 1.5px 0 rgba(255,255,255,.3), 0 4px 12px rgba(13,47,85,.3)' : 'none' }}>
               {label}
             </button>
@@ -718,6 +711,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
 
       {/* ================= HOME ================= */}
       {homeTab === 'home' && (<>
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <GoalBanner me={me} classFocus={state.classFocus} />
         <div className="home-main">

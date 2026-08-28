@@ -71,7 +71,7 @@ export default function QuickWritePage({ state, onBack, onChange }) {
       {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
 
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 14, flexWrap: 'wrap', margin: '4px 0 18px' }}>
-        <h1 className="page" style={{ margin: 0, fontSize: 42, color: '#0d2440' }}>Quick Write</h1>
+        <h1 className="page" style={{ margin: 0, fontSize: 42, color: '#fff' }}>Quick Write</h1>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(245,180,0,.14)', color: '#a37400', fontWeight: 800, fontSize: 14, borderRadius: 999, padding: '10px 16px', border: '1px solid rgba(245,180,0,.4)' }}>
           About {Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))} min
         </span>

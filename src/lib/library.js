@@ -36,4 +36,5 @@ export const library = {
   review: (id) => call('POST', `/paths/${id}/review`),
   restore: (id, version) => call('POST', `/paths/${id}/restore`, { version }),
   seed: (overwrite) => call('POST', '/seed', { overwrite: !!overwrite }),
+  importCatalog: () => call('POST', '/core/import'),
 }

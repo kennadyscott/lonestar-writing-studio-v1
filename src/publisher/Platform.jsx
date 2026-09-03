@@ -272,6 +272,7 @@ function Rail({ paths, sel, onSelect, onChanged, meta }) {
           {busy === 'seed' ? 'Loading…'
             : `Load the ${meta?.shipped?.length || ''} path${meta?.shipped?.length === 1 ? '' : 's'} that ship with the app`.replace('  ', ' ')}
         </button>
+        <CatalogPanel meta={meta} onChanged={onChanged} />
         {oops && (
           <div style={{ marginTop: 8, background: '#fdecea', color: RED, borderRadius: 9, padding: '9px 11px', fontSize: 12.5, fontWeight: 700 }}>
             {oops}
@@ -333,6 +334,52 @@ function coverageOf(t) {
   Object.values(t.skillBuilders || {}).forEach(take)
   take(t.full)
   return seen
+}
+
+/* The shared standards catalog. Importing is a button because the person who
+ * needs to press it should not have to hold a key at a terminal to do it. */
+function CatalogPanel({ meta, onChanged }) {
+  const [busy, setBusy] = useState(false)
+  const [msg, setMsg] = useState(null)
+  const count = typeof meta?.catalog === 'number' ? meta.catalog : null
+  const available = meta?.catalogAvailable || 0
+  const err = meta?.catalog && typeof meta.catalog === 'object' ? meta.catalog.error : null
+
+  async function go() {
+    setBusy(true); setMsg(null)
+    try { const r = await library.importCatalog(); setMsg({ ok: true, text: `${r.count.toLocaleString()} standards in the catalog.` }); await onChanged() }
+    catch (e) { setMsg({ ok: false, text: e.message }) }
+    finally { setBusy(false) }
+  }
+
+  if (meta?.backend !== 'supabase') return null
+
+  return (
+    <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid #e7edf3' }}>
+      <div style={{ ...label, marginBottom: 5 }}>STANDARDS CATALOG</div>
+      {err ? (
+        <div style={{ background: '#fdecea', color: RED, borderRadius: 9, padding: '9px 11px', fontSize: 12, fontWeight: 700, marginBottom: 7 }}>
+          {/schema must be one of|does not exist|permission denied/i.test(err)
+            ? 'The core schema is not reachable yet — check that it is exposed to the API and granted to the service role.'
+            : err}
+        </div>
+      ) : (
+        <div style={{ fontSize: 12, color: '#5b6b7c', fontWeight: 700, marginBottom: 7 }}>
+          {count ? <>{count.toLocaleString()} standards loaded</> : <>Nothing loaded yet</>}
+          {available ? <> · {available.toLocaleString()} available</> : null}
+        </div>
+      )}
+      <button onClick={go} disabled={busy}
+        style={{ ...btn(count ? '#e7edf3' : CYAN, count ? NAVY : '#fff'), width: '100%', fontSize: 12.5 }}>
+        {busy ? 'Importing...' : count ? 'Re-import the TEKS catalog' : `Import the TEKS catalog (${available.toLocaleString()})`}
+      </button>
+      {msg && (
+        <div style={{ marginTop: 7, background: msg.ok ? '#dcf0e4' : '#fdecea', color: msg.ok ? GREEN : RED, borderRadius: 9, padding: '8px 10px', fontSize: 12, fontWeight: 700 }}>
+          {msg.text}
+        </div>
+      )}
+    </div>
+  )
 }
 
 /* ---------- details ---------- */

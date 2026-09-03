@@ -3,9 +3,19 @@ import { library, getKey, setKey } from '../lib/library.js'
 import { ActivityEditor, field, label } from '../student/PublisherConsole.jsx'
 import { Worksheet } from '../student/ProofRoom.jsx'
 import { prepareTopic } from '../../server/proofRoom.mjs'
+import { STATES, GRADES, domainsFor, productFor, parseStandards, joinStandards } from '../../lib/content/taxonomy.mjs'
 
 /*
- * The Path Library — where learning paths are built, proofed and approved.
+ * Crystal Writing — the content platform.
+ *
+ * This is the factory floor. Learning paths are built here and supplied to the
+ * state programs that consume them: Texas content feeds LoneStar CR. The state
+ * is the organiser rather than the product name, because a second state should
+ * arrive as a new shelf and not as a rename of everything.
+ *
+ * Within a state the library is browsed the way the work is actually divided —
+ * grade, then domain — and every worksheet carries the standard it teaches, so
+ * a path can be found by what it covers instead of by who titled it.
  *
  * The shape of the work is the shape of the screen: a path sits on the
  * workbench as a DRAFT for as long as it takes, gets PROOFED against what a
@@ -75,11 +85,11 @@ export default function Platform({ onExit }) {
   return (
     <div style={{ minHeight: '100vh', background: PAPER, fontFamily: 'Manrope, system-ui, sans-serif', color: INK }}>
       <header style={{ background: `linear-gradient(180deg,#2c5a97 0%,${NAVY} 62%,${INK} 100%)`, color: '#fff', padding: '13px 22px', display: 'flex', alignItems: 'center', gap: 13 }}>
-        <span style={{ fontSize: 21 }}>🗂</span>
+        <span style={{ fontSize: 21 }}>💎</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <b style={{ fontSize: 17, letterSpacing: -.2 }}>Path Library</b>
+          <b style={{ fontSize: 17, letterSpacing: -.2 }}>Crystal Writing</b>
           <div style={{ fontSize: 11.5, color: '#a8dff5', fontWeight: 700 }}>
-            LoneStar CR · build, proof and approve learning paths
+            Content platform · build, proof and approve learning paths
           </div>
         </div>
         <span title={meta?.backend === 'supabase' ? 'Content is stored in Supabase' : 'Content is stored in a local file — set SUPABASE_URL to use the database'}
@@ -154,39 +164,97 @@ function KeyGate({ onDone }) {
 
 function Rail({ paths, sel, onSelect, onChanged }) {
   const [busy, setBusy] = useState('')
+  const [stateCode, setStateCode] = useState(STATES[0]?.code || 'TX')
+  const [grade, setGrade] = useState('')
+  const [domain, setDomain] = useState('')
+
   async function seed() { setBusy('seed'); try { await library.seed(); await onChanged() } finally { setBusy('') } }
   async function create() {
     const title = prompt('Name the learning path')
     if (!title) return
     setBusy('new')
-    try { const r = await library.create({ title, short: title }); await onChanged(); onSelect(r.path.id) }
-    catch (e) { alert(e.message) } finally { setBusy('') }
+    try {
+      const r = await library.create({ title, short: title, state: stateCode, grade: grade || null, domain: domain || '' })
+      await onChanged(); onSelect(r.path.id)
+    } catch (e) { alert(e.message) } finally { setBusy('') }
   }
+
+  const inState = paths.filter((p) => (p.state || 'TX') === stateCode)
+  const shown = inState.filter((p) => (!grade || String(p.grade) === grade) && (!domain || p.domain === domain))
+  const unfiled = inState.filter((p) => !p.grade || !p.domain).length
+
+  // Grouped the way the work is divided: grade, then domain.
+  const groups = []
+  for (const p of shown) {
+    const key = p.grade ? `Grade ${p.grade}` : 'Not filed yet'
+    let g = groups.find((x) => x.key === key)
+    if (!g) groups.push((g = { key, grade: p.grade ?? 99, items: [] }))
+    g.items.push(p)
+  }
+  groups.sort((a, b) => a.grade - b.grade)
+
+  const pick = { ...field, padding: '6px 8px', fontSize: 12, fontWeight: 700 }
+
   return (
     <div style={{ position: 'sticky', top: 18, display: 'flex', flexDirection: 'column', gap: 10 }}>
       <Panel pad={12}>
-        <div style={{ ...label, marginBottom: 8 }}>LEARNING PATHS · {paths.length}</div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxHeight: '52vh', overflowY: 'auto' }}>
-          {paths.map((p) => {
-            const on = p.id === sel
-            return (
-              <button key={p.id} onClick={() => onSelect(p.id)}
-                style={{ textAlign: 'left', border: on ? `1.5px solid ${CYAN}` : '1.5px solid transparent', background: on ? '#f2f9fc' : '#fff', borderRadius: 11, padding: '9px 11px', cursor: 'pointer', fontFamily: 'inherit' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                  <span style={{ fontSize: 15 }}>{p.icon || '📘'}</span>
-                  <b style={{ flex: 1, fontSize: 13.5, color: NAVY, lineHeight: 1.25 }}>{p.title}</b>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                  <StatusPill status={p.status} version={p.liveVersion} />
-                  {p.errors > 0 && <span style={{ fontSize: 10.5, fontWeight: 800, color: RED }}>● {p.errors} to fix</span>}
-                  {p.errors === 0 && p.unpublishedChanges && <span style={{ fontSize: 10.5, fontWeight: 800, color: AMBER }}>● changes not live</span>}
-                </div>
-                <div style={{ fontSize: 11, color: '#5b6b7c', fontWeight: 700, marginTop: 4 }}>
-                  {p.grade ? `Grade ${p.grade} · ` : ''}{p.stops} stops · {p.points} pts
-                </div>
-              </button>
-            )
-          })}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+          {STATES.map((st) => (
+            <button key={st.code} onClick={() => setStateCode(st.code)}
+              style={{ ...btn(st.code === stateCode ? NAVY : '#fff', st.code === stateCode ? '#fff' : '#5b6b7c'), border: st.code === stateCode ? 'none' : '1px solid #dde5ec', fontSize: 12, padding: '6px 11px', flex: 1 }}>
+              {st.name}
+            </button>
+          ))}
+        </div>
+        <div style={{ fontSize: 11, color: '#5b6b7c', fontWeight: 700, marginBottom: 10 }}>
+          Supplies <b style={{ color: CYAN }}>{productFor(stateCode)}</b>
+        </div>
+
+        <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+          <select style={{ ...pick, flex: '0 0 82px' }} value={grade} onChange={(e) => setGrade(e.target.value)}>
+            <option value="">All grades</option>
+            {GRADES.map((g) => <option key={g} value={g}>Grade {g}</option>)}
+          </select>
+          <select style={{ ...pick, flex: 1, minWidth: 0 }} value={domain} onChange={(e) => setDomain(e.target.value)}>
+            <option value="">All domains</option>
+            {domainsFor(stateCode).map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+
+        <div style={{ ...label, marginBottom: 8 }}>
+          {shown.length} OF {inState.length} PATHS
+          {unfiled ? <span style={{ color: AMBER }}> · {unfiled} NOT FILED</span> : null}
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: '46vh', overflowY: 'auto' }}>
+          {!shown.length && <div style={{ fontSize: 12.5, color: '#5b6b7c' }}>Nothing here yet.</div>}
+          {groups.map((g) => (
+            <div key={g.key}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: g.key === 'Not filed yet' ? AMBER : '#93a3b3', margin: '2px 0 4px' }}>
+                {g.key.toUpperCase()}
+              </div>
+              {g.items.map((p) => {
+                const on = p.id === sel
+                return (
+                  <button key={p.id} onClick={() => onSelect(p.id)}
+                    style={{ textAlign: 'left', width: '100%', border: on ? `1.5px solid ${CYAN}` : '1.5px solid transparent', background: on ? '#f2f9fc' : '#fff', borderRadius: 11, padding: '9px 11px', marginBottom: 3, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <span style={{ fontSize: 15 }}>{p.icon || '📘'}</span>
+                      <b style={{ flex: 1, fontSize: 13.5, color: NAVY, lineHeight: 1.25 }}>{p.title}</b>
+                    </div>
+                    <div style={{ fontSize: 11, color: '#5b6b7c', fontWeight: 700, marginTop: 4 }}>
+                      {p.domain || <span style={{ color: AMBER }}>No domain</span>} · {p.stops} stops · {p.points} pts
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
+                      <StatusPill status={p.status} version={p.liveVersion} />
+                      {p.errors > 0 && <span style={{ fontSize: 10.5, fontWeight: 800, color: RED }}>● {p.errors} to fix</span>}
+                      {p.errors === 0 && p.unpublishedChanges && <span style={{ fontSize: 10.5, fontWeight: 800, color: AMBER }}>● changes not live</span>}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          ))}
         </div>
       </Panel>
       <Panel pad={12}>
@@ -196,6 +264,75 @@ function Rail({ paths, sel, onSelect, onChanged }) {
         </button>
       </Panel>
     </div>
+  )
+}
+
+/* ---------- details ---------- */
+
+function DetailsTab({ draft, mutate }) {
+  const set = (k) => (e) => mutate((t) => { t[k] = e.target.value })
+  const domains = domainsFor(draft.state || 'TX')
+  const filed = draft.state && draft.grade && draft.domain
+
+  return (
+    <Panel>
+      <b style={{ fontSize: 15.5, color: NAVY }}>Where this path is filed</b>
+      <p style={{ fontSize: 13, color: '#5b6b7c', margin: '3px 0 14px', maxWidth: 620 }}>
+        State, grade and domain are how the library is browsed — and how a teacher finds this without knowing what it is
+        called. {draft.state ? <>Texas content is supplied to <b>{productFor(draft.state)}</b>.</> : null}
+      </p>
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        <div style={{ flex: '0 0 130px' }}>
+          <span style={label}>STATE</span>
+          <select style={field} value={draft.state || ''} onChange={set('state')}>
+            <option value="">Pick one</option>
+            {STATES.map((st) => <option key={st.code} value={st.code}>{st.name}</option>)}
+          </select>
+        </div>
+        <div style={{ flex: '0 0 110px' }}>
+          <span style={label}>GRADE</span>
+          <select style={field} value={draft.grade == null ? '' : String(draft.grade)}
+            onChange={(e) => mutate((t) => { t.grade = e.target.value === '' ? null : (/^\d+$/.test(e.target.value) ? Number(e.target.value) : e.target.value) })}>
+            <option value="">Pick one</option>
+            {GRADES.map((g) => <option key={g} value={g}>Grade {g}</option>)}
+          </select>
+        </div>
+        <div style={{ flex: '1 1 220px' }}>
+          <span style={label}>DOMAIN</span>
+          <select style={field} value={draft.domain || ''} onChange={set('domain')}>
+            <option value="">Pick one</option>
+            {domains.map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+        </div>
+      </div>
+
+      {!filed && <Note color={AMBER}>A path has to be filed under a state, grade and domain before it can go live.</Note>}
+
+      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
+        <div style={{ flex: '1 1 320px' }}>
+          <span style={label}>TITLE</span>
+          <input style={field} value={draft.title || ''} onChange={set('title')} />
+        </div>
+        <div style={{ flex: '0 0 170px' }}>
+          <span style={label}>SHORT NAME</span>
+          <input style={field} value={draft.short || ''} onChange={set('short')} />
+        </div>
+        <div style={{ flex: '0 0 80px' }}>
+          <span style={label}>ICON</span>
+          <input style={field} value={draft.icon || ''} onChange={set('icon')} />
+        </div>
+      </div>
+
+      <div style={{ marginBottom: 12 }}>
+        <span style={label}>STANDARDS SUMMARY (the line a teacher reads on the path card)</span>
+        <input style={field} value={draft.standards || ''} onChange={set('standards')} placeholder="TEKS 5.11D ii · iv · v · vi · vii" />
+      </div>
+      <div>
+        <span style={label}>BLURB</span>
+        <input style={field} value={draft.blurb || ''} onChange={set('blurb')} />
+      </div>
+    </Panel>
   )
 }
 
@@ -229,6 +366,7 @@ function Workbench({ id, onChanged }) {
 
   const p = data.path
   const tabs = [
+    ['details', 'Details'],
     ['build', 'Build'],
     ['proof', `Proof${proof?.errors ? ` · ${proof.errors}` : ''}`],
     ['publish', 'Approve & publish'],
@@ -242,7 +380,8 @@ function Workbench({ id, onChanged }) {
           <div style={{ flex: '1 1 260px', minWidth: 0 }}>
             <h2 style={{ margin: 0, fontSize: 19, color: NAVY, letterSpacing: -.2 }}>{draft.title}</h2>
             <div style={{ fontSize: 12.5, color: '#5b6b7c', fontWeight: 700, marginTop: 2 }}>
-              {draft.standards || 'No standards listed'}{draft.grade ? ` · Grade ${draft.grade}` : ''} · {proof?.points || 0} points
+              {[STATES.find((x) => x.code === draft.state)?.name, draft.grade ? `Grade ${draft.grade}` : null, draft.domain]
+                .filter(Boolean).join(' · ') || 'Not filed yet'} · {proof?.points || 0} points
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -263,6 +402,7 @@ function Workbench({ id, onChanged }) {
         </div>
       </Panel>
 
+      {tab === 'details' && <DetailsTab draft={draft} mutate={mutate} />}
       {tab === 'build' && <BuildTab draft={draft} mutate={mutate} />}
       {tab === 'proof' && <ProofTab draft={draft} proof={proof} dirty={dirty} onSave={save} videos={data.videos} />}
       {tab === 'publish' && <PublishTab path={p} proof={proof} versions={data.versions} dirty={dirty}
@@ -302,7 +442,12 @@ function BuildTab({ draft, mutate }) {
           <button key={s.w.id} onClick={() => setWsId(s.w.id)}
             style={{ display: 'block', width: '100%', textAlign: 'left', background: s.w.id === current?.w.id ? '#f2f9fc' : 'transparent', border: s.w.id === current?.w.id ? `1.5px solid ${CYAN}` : '1.5px solid transparent', borderRadius: 9, padding: '7px 9px', marginBottom: 3, cursor: 'pointer', fontFamily: 'inherit' }}>
             <div style={{ fontSize: 12.5, fontWeight: 800, color: s.kind === 'sb' ? AMBER : NAVY, lineHeight: 1.3 }}>{s.label}</div>
-            <div style={{ fontSize: 10.5, color: '#5b6b7c', fontWeight: 700 }}>{(s.w.activities || []).length} activities</div>
+            <div style={{ fontSize: 10.5, color: '#5b6b7c', fontWeight: 700 }}>
+              {(s.w.activities || []).length} activities
+              {(s.w.standards || []).length
+                ? <> · <span style={{ color: CYAN }}>{joinStandards(s.w.standards)}</span></>
+                : <> · <span style={{ color: AMBER }}>untagged</span></>}
+            </div>
           </button>
         ))}
       </Panel>
@@ -318,6 +463,11 @@ function BuildTab({ draft, mutate }) {
               <div style={{ flex: '1 1 260px' }}>
                 <span style={label}>THE SKILL IT TEACHES</span>
                 <input style={field} value={current.w.skill || ''} onChange={(e) => editSheet((w) => { w.skill = e.target.value })} />
+              </div>
+              <div style={{ flex: '1 1 240px' }}>
+                <span style={label}>STANDARDS — WHAT THIS WORKSHEET TEACHES</span>
+                <input style={field} placeholder="5.11D(ii)" value={joinStandards(current.w.standards)}
+                  onChange={(e) => editSheet((w) => { w.standards = parseStandards(e.target.value) })} />
               </div>
             </div>
             {(current.w.activities || []).map((a, ai) => (

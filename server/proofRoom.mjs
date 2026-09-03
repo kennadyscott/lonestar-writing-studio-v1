@@ -64,12 +64,14 @@ export const TOPICS = [
     title: 'Edit Drafts: Parts of Speech',
     short: 'Parts of Speech',
     grade: 5,
-    standards: 'TEKS 5.11D ii · iv · v · vi',
+    state: 'TX',
+    domain: 'Composition',
+    standards: 'TEKS 5.11D ii · iv · v · vi · vii',
     blurb: 'Five skills, then one full-topic proof to finish the path.',
     icon: '✍️',
     core: [
       {
-        id: 'ws_verbs', title: 'Irregular Verbs', skill: 'Past-tense verbs that break the rules',
+        id: 'ws_verbs', title: 'Irregular Verbs', standards: ['5.11D(ii)'], skill: 'Past-tense verbs that break the rules',
         activities: [
           hunt('Four verbs in this story are wrong. Tyler would not want to turn this in.',
             `After dinner, Tyler looked for his math homework but could not find it anywhere. He [[runned|ran]] upstairs to check his room and searched under his bed. His sister [[catched|caught]] him tossing papers across the floor and offered to help. Tyler suddenly remembered that he had [[writed|written]] part of the assignment in the car after soccer practice. A few minutes later, they [[finded|found]] the homework inside his backpack, and Tyler happily brought it to the kitchen table to finish.`,
@@ -104,7 +106,7 @@ export const TOPICS = [
         ],
       },
       {
-        id: 'ws_adj', title: 'Adjectives', skill: 'Words that describe, and how they compare',
+        id: 'ws_adj', title: 'Adjectives', standards: ['5.11D(iv)'], skill: 'Words that describe, and how they compare',
         activities: [
           hunt('Four describing words are wrong. Find them.',
             `The science fair was the [[goodest|best]] one our school has ever held. Dev built a volcano that was [[more taller|taller]] than he was. Next to it sat the [[beautifulest|most beautiful]] model of the solar system, painted by hand. The judges said choosing a winner was [[difficulter|more difficult]] than they expected, and every project deserved a ribbon.`,
@@ -119,7 +121,7 @@ export const TOPICS = [
         ],
       },
       {
-        id: 'ws_conj', title: 'Conjunctive Adverbs', skill: 'Joining ideas with however, therefore, meanwhile',
+        id: 'ws_conj', title: 'Conjunctive Adverbs', standards: ['5.11D(v)'], skill: 'Joining ideas with however, therefore, meanwhile',
         activities: [
           hunt('Four joining words are the wrong ones for the meaning.',
             `We planned to hike on Saturday. [[Therefore|However]], the forecast called for storms all weekend. My dad checked the radar twice; [[however|therefore]], we moved the trip to Sunday. My sister packed the cooler. [[However|Meanwhile]], I loaded the tent into the truck. The sun came out by noon; [[meanwhile|consequently]], the trail was dry enough to climb.`,
@@ -172,7 +174,7 @@ export const TOPICS = [
         ],
       },
       {
-        id: 'ws_prep', title: 'Prepositions', skill: 'Words that place things in time and space',
+        id: 'ws_prep', title: 'Prepositions', standards: ['5.11D(vi)'], skill: 'Words that place things in time and space',
         activities: [
           hunt('Four prepositions do not fit. Fix them.',
             `Our class waited [[at|in]] line for the bus [[on|at]] eight o'clock. The museum sat [[in|on]] the corner of Fifth and Main, right across from the park. We walked [[through|between]] the two marble lions and up the steps, and a guide met us just inside the door.`,
@@ -187,7 +189,7 @@ export const TOPICS = [
         ],
       },
       {
-        id: 'ws_pron', title: 'Pronouns', skill: 'Words that stand in for nouns — and agree with them',
+        id: 'ws_pron', title: 'Pronouns', standards: ['5.11D(vii)'], skill: 'Words that stand in for nouns — and agree with them',
         activities: [
           hunt('Four pronouns do not match what they stand for.',
             `Marcus and [[me|I]] signed up for the science fair together. The judges gave [[we|us]] a table near the door. Every student brought [[their|his or her]] own poster board. When Ana finished, [[them|she]] helped us carry the last of the supplies inside.`,
@@ -206,7 +208,7 @@ export const TOPICS = [
     // Skill Builders: shorter, more scaffolded, and only ever seen after a miss.
     skillBuilders: {
       ws_verbs: {
-        id: 'sb_verbs', title: 'SB: Irregular Verbs', skill: 'Build it back up, one verb at a time',
+        id: 'sb_verbs', title: 'SB: Irregular Verbs', standards: ['5.11D(ii)'], skill: 'Build it back up, one verb at a time',
         activities: [
           fix('Click the correct past-tense form.', [], [
             { given: 'Yesterday I ____ to the store.', answer: 'went', options: ['goed', 'went', 'gone'] },
@@ -220,7 +222,7 @@ export const TOPICS = [
         ],
       },
       ws_adj: {
-        id: 'sb_adj', title: 'SB: Adjectives', skill: 'Describing and comparing, step by step',
+        id: 'sb_adj', title: 'SB: Adjectives', standards: ['5.11D(iv)'], skill: 'Describing and comparing, step by step',
         activities: [
           fix('Compare two things: add -er, or use more.', ['tall', 'interesting', 'cold', 'careful'], [
             { given: 'A giraffe is ____ than a horse.', answer: 'taller' },
@@ -234,7 +236,7 @@ export const TOPICS = [
         ],
       },
       ws_conj: {
-        id: 'sb_conj', title: 'SB: Conjunctive Adverbs', skill: 'However, therefore, meanwhile — one at a time',
+        id: 'sb_conj', title: 'SB: Conjunctive Adverbs', standards: ['5.11D(v)'], skill: 'However, therefore, meanwhile — one at a time',
         activities: [
           fix('Which word joins these two ideas?', ['however', 'therefore', 'meanwhile'], [
             { given: 'It rained all morning; ____, the game was canceled.', answer: 'therefore' },
@@ -245,7 +247,7 @@ export const TOPICS = [
         ],
       },
       ws_prep: {
-        id: 'sb_prep', title: 'SB: Prepositions', skill: 'In, on, at — and the rest',
+        id: 'sb_prep', title: 'SB: Prepositions', standards: ['5.11D(vi)'], skill: 'In, on, at — and the rest',
         activities: [
           fix('Drag in, on, or at into each sentence.', ['in', 'on', 'at', 'in'], [
             { given: 'We meet ____ 3:00 every Tuesday.', answer: 'at' },
@@ -256,7 +258,7 @@ export const TOPICS = [
         ],
       },
       ws_pron: {
-        id: 'sb_pron', title: 'SB: Pronouns', skill: 'I or me, they or them',
+        id: 'sb_pron', title: 'SB: Pronouns', standards: ['5.11D(vii)'], skill: 'I or me, they or them',
         activities: [
           fix('Choose the pronoun that fits.', ['I', 'me', 'she', 'her'], [
             { given: 'Dad and ____ built the shelf.', answer: 'I' },
@@ -269,7 +271,7 @@ export const TOPICS = [
     },
 
     full: {
-      id: 'ws_full', title: 'Full Topic: Edit Drafts: Parts of Speech',
+      id: 'ws_full', title: 'Full Topic: Edit Drafts: Parts of Speech', standards: ['5.11D(ii)', '5.11D(iv)', '5.11D(v)', '5.11D(vi)', '5.11D(vii)'],
       skill: 'All five skills in one piece of writing',
       activities: [
         passage('Read the draft, then answer the questions about it. The sentences are numbered.',
@@ -360,5 +362,6 @@ export const rawTopics = () => JSON.parse(JSON.stringify(TOPICS))
 
 export const topicList = () => TOPICS.map((t) => ({
   id: t.id, title: t.title, short: t.short, grade: t.grade, standards: t.standards,
+  state: t.state, domain: t.domain,
   blurb: t.blurb, icon: t.icon, stops: t.core.length + 1,
 }))

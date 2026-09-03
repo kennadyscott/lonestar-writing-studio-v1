@@ -4,6 +4,7 @@ import { ActivityEditor, field, label } from '../student/PublisherConsole.jsx'
 import { Worksheet, ActivityPreview } from '../student/ProofRoom.jsx'
 import { prepareTopic } from '../../server/proofRoom.mjs'
 import { STATES, GRADES, domainsFor, productFor, parseStandards, joinStandards, standardLooksRight } from '../../lib/content/taxonomy.mjs'
+import { STAGES, stage as stageOf } from '../../lib/content/pipeline.mjs'
 
 /*
  * Crystal Writing — the content platform.
@@ -36,17 +37,11 @@ const AMBER = '#b47b13'
 const RED = '#c0392b'
 const FLAG = '#7b4bc4'
 
-const STATUS = {
-  draft: { text: 'Draft', bg: '#e7edf3', fg: '#5b6b7c' },
-  in_review: { text: 'Ready for review', bg: '#fdf1d8', fg: AMBER },
-  published: { text: 'Live', bg: '#dcf0e4', fg: GREEN },
-}
-
-function StatusPill({ status, version }) {
-  const s = STATUS[status] || STATUS.draft
+function StatusPill({ status, version, small }) {
+  const st = stageOf(status)
   return (
-    <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .5, background: s.bg, color: s.fg, borderRadius: 999, padding: '3px 9px', whiteSpace: 'nowrap' }}>
-      {s.text}{status === 'published' && version != null ? ` · v${version}` : ''}
+    <span style={{ fontSize: small ? 10 : 10.5, fontWeight: 800, letterSpacing: .5, background: st.bg, color: st.fg, borderRadius: 999, padding: small ? '2px 8px' : '3px 9px', whiteSpace: 'nowrap' }}>
+      {st.label}{status === 'published' && version != null ? ` \u00b7 v${version}` : ''}
     </span>
   )
 }
@@ -71,7 +66,7 @@ export default function Platform({ onExit }) {
       setMeta(m); setLocked(false)
       const { paths } = await library.list()
       setPaths(paths)
-      setSel((s) => s || paths[0]?.id || null)
+      // No auto-select: the library is the front door, not whichever path sorts first.
     } catch (e) {
       if (e.status === 401) { setLocked(true); setMeta(null) } else setErr(e.message)
     }
@@ -88,7 +83,7 @@ export default function Platform({ onExit }) {
       <header style={{ background: `linear-gradient(180deg,#2c5a97 0%,${NAVY} 62%,${INK} 100%)`, color: '#fff', padding: '13px 22px', display: 'flex', alignItems: 'center', gap: 13 }}>
         <span style={{ fontSize: 21 }}>💎</span>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <b style={{ fontSize: 17, letterSpacing: -.2 }}>Crystal Writing</b>
+          <b style={{ fontSize: 17, letterSpacing: -.2 }}>Crystal Writing Content Studio</b>
           <div style={{ fontSize: 11.5, color: '#a8dff5', fontWeight: 700 }}>
             Content platform · build, proof and approve learning paths
           </div>
@@ -100,12 +95,9 @@ export default function Platform({ onExit }) {
         {onExit && <button onClick={onExit} style={{ ...btn('rgba(255,255,255,.14)', '#a8dff5'), padding: '7px 13px', fontSize: 12.5 }}>Student view →</button>}
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '288px 1fr', alignItems: 'start', gap: 18, padding: 18, maxWidth: 1360, margin: '0 auto' }}>
-        <Rail paths={paths} sel={sel} onSelect={setSel} onChanged={load} meta={meta} />
-        {sel
-          ? <Workbench key={sel} id={sel} onChanged={load} />
-          : <Panel><Empty /></Panel>}
-      </div>
+      {sel
+        ? <Workbench key={sel} id={sel} onChanged={load} onBack={() => setSel(null)} />
+        : <Library paths={paths} meta={meta} onOpen={setSel} onChanged={load} />}
     </div>
   )
 }
@@ -377,6 +369,42 @@ function CatalogPanel({ meta }) {
   )
 }
 
+
+/* Where this topic has got to. Published is not in the list because putting a
+ * path live is gated on proofing, so it lives on its own tab with its reasons. */
+function StageControl({ path, onChanged }) {
+  const [busy, setBusy] = useState(false)
+  const [note, setNote] = useState('')
+  const st = stageOf(path.status)
+
+  async function move(next) {
+    if (!next || next === path.status) return
+    if (path.status === 'published' && !confirm('This path is live. Moving it back takes it off the student site. Continue?')) return
+    setBusy(true); setNote('')
+    try {
+      const r = await library.setStage(path.id, next)
+      if (r.tookOffline) setNote('Taken off the live site.')
+      await onChanged()
+    } catch (e) { setNote(e.message) } finally { setBusy(false) }
+  }
+
+  return (
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
+      {path.status === 'published' && <StatusPill status="published" version={path.liveVersion} />}
+      <select value={path.status} disabled={busy} onChange={(e) => move(e.target.value)}
+        title={st.blurb}
+        style={{ ...field, width: 'auto', padding: '6px 9px', fontSize: 12, fontWeight: 800, color: st.fg, background: st.bg, border: `1.5px solid ${st.fg}33`, cursor: 'pointer' }}>
+        {STAGES.map((x) => (
+          <option key={x.id} value={x.id} disabled={x.id === 'published' && path.status !== 'published'}>
+            {x.label}{x.id === 'published' && path.status !== 'published' ? ' (approve to publish)' : ''}
+          </option>
+        ))}
+      </select>
+      {note && <span style={{ fontSize: 11.5, fontWeight: 700, color: '#5b6b7c' }}>{note}</span>}
+    </span>
+  )
+}
+
 /* ---------- details ---------- */
 
 function DetailsTab({ draft, mutate }) {
@@ -463,9 +491,179 @@ function DetailsTab({ draft, mutate }) {
   )
 }
 
+
+/* The library index. Built for a shelf that is going to hold hundreds of paths,
+ * so it browses the way the work divides — state, then grade, then topic — and
+ * leads with where each topic has got to rather than what is inside it. What is
+ * inside is one click away, which is the builder. */
+function Library({ paths, meta, onOpen, onChanged }) {
+  const [stateCode, setStateCode] = useState(STATES[0]?.code || 'TX')
+  const [grade, setGrade] = useState('')
+  const [domain, setDomain] = useState('')
+  const [status, setStatus] = useState('')
+  const [q, setQ] = useState('')
+  const [busy, setBusy] = useState('')
+  const [oops, setOops] = useState('')
+
+  async function seed() {
+    setBusy('seed'); setOops('')
+    try {
+      const r = await library.seed()
+      await onChanged()
+      if (!r.seeded?.length) setOops('Nothing was loaded — those paths are already here.')
+    } catch (e) { setOops(e.message) } finally { setBusy('') }
+  }
+  async function create() {
+    const title = prompt('Name the learning path')
+    if (!title) return
+    setBusy('new'); setOops('')
+    try { const r = await library.create({ title, short: title, state: stateCode, grade: grade || null, domain: domain || '' }); await onChanged(); onOpen(r.path.id) }
+    catch (e) { setOops(e.message) } finally { setBusy('') }
+  }
+
+  const inState = paths.filter((p) => (p.state || 'TX') === stateCode)
+  const counts = Object.fromEntries(STAGES.map((st) => [st.id, inState.filter((p) => p.status === st.id).length]))
+  const needle = q.trim().toLowerCase()
+  const shown = inState.filter((p) =>
+    (!grade || String(p.grade) === grade) &&
+    (!domain || p.domain === domain) &&
+    (!status || p.status === status) &&
+    (!needle || `${p.title} ${p.domain || ''} ${joinStandards(p.standards)}`.toLowerCase().includes(needle)))
+
+  const groups = []
+  for (const p of shown) {
+    const key = p.grade ? `Grade ${p.grade}` : 'Not filed yet'
+    let g = groups.find((x) => x.key === key)
+    if (!g) groups.push((g = { key, order: p.grade === 'K' ? 0 : Number(p.grade) || 99, rows: [] }))
+    g.rows.push(p)
+  }
+  groups.sort((a, b) => a.order - b.order)
+  for (const g of groups) g.rows.sort((a, b) => String(a.title).localeCompare(String(b.title)))
+
+  const pick = { ...field, padding: '7px 9px', fontSize: 12.5, fontWeight: 700 }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <Panel pad={14}>
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+          {STATES.map((st) => (
+            <button key={st.code} onClick={() => setStateCode(st.code)}
+              style={{ ...btn(st.code === stateCode ? NAVY : '#fff', st.code === stateCode ? '#fff' : '#5b6b7c'), border: st.code === stateCode ? 'none' : '1px solid #dde5ec', fontSize: 13, padding: '8px 16px' }}>
+              {st.name}
+            </button>
+          ))}
+          <span style={{ fontSize: 12, color: '#5b6b7c', fontWeight: 700, marginLeft: 4 }}>
+            supplies <b style={{ color: CYAN }}>{productFor(stateCode)}</b>
+          </span>
+          <div style={{ flex: 1 }} />
+          <button onClick={create} disabled={!!busy} style={btn(NAVY)}>+ New topic</button>
+          <button onClick={seed} disabled={!!busy} style={btn('#e7edf3', NAVY)}>
+            {busy === 'seed' ? 'Loading…' : `Load the ${meta?.shipped?.length || ''} that ship with the app`.replace('  ', ' ')}
+          </button>
+        </div>
+        {oops && <div style={{ marginTop: 9, background: '#fdecea', color: RED, borderRadius: 9, padding: '9px 11px', fontSize: 12.5, fontWeight: 700 }}>{oops}</div>}
+      </Panel>
+
+      {/* where everything is, and a way to see only that */}
+      <Panel pad={13}>
+        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+          <StageChip label="All" n={inState.length} on={!status} onClick={() => setStatus('')} fg={NAVY} bg="#eef3f7" />
+          {STAGES.map((st) => (
+            <StageChip key={st.id} label={st.label} n={counts[st.id]} fg={st.fg} bg={st.bg}
+              on={status === st.id} onClick={() => setStatus(status === st.id ? '' : st.id)} title={st.blurb} />
+          ))}
+        </div>
+      </Panel>
+
+      <Panel pad={0}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', padding: '13px 15px', borderBottom: '1px solid #e7edf3' }}>
+          <input style={{ ...pick, flex: '1 1 220px' }} value={q} onChange={(e) => setQ(e.target.value)}
+            placeholder="Search topics, domains, standards…" />
+          <select style={{ ...pick, flex: '0 0 130px' }} value={grade} onChange={(e) => setGrade(e.target.value)}>
+            <option value="">All grades</option>
+            {GRADES.map((g) => <option key={g} value={g}>Grade {g}</option>)}
+          </select>
+          <select style={{ ...pick, flex: '0 0 190px' }} value={domain} onChange={(e) => setDomain(e.target.value)}>
+            <option value="">All domains</option>
+            {domainsFor(stateCode).map((d) => <option key={d} value={d}>{d}</option>)}
+          </select>
+          <span style={{ fontSize: 12, color: '#5b6b7c', fontWeight: 700, alignSelf: 'center' }}>
+            {shown.length} of {inState.length}
+          </span>
+        </div>
+
+        {!shown.length && (
+          <div style={{ padding: '46px 20px', textAlign: 'center', color: '#5b6b7c' }}>
+            <div style={{ fontSize: 30, marginBottom: 8 }}>🗂</div>
+            <b style={{ fontSize: 15.5, color: INK }}>{inState.length ? 'Nothing matches those filters' : 'No topics yet'}</b>
+            <p style={{ fontSize: 13.5, maxWidth: 400, margin: '6px auto 0' }}>
+              {inState.length ? 'Clear a filter to see the rest.' : 'Load the paths that ship with the app, or start an empty topic.'}
+            </p>
+          </div>
+        )}
+
+        {groups.map((g) => (
+          <div key={g.key}>
+            <div style={{ ...label, padding: '10px 15px 6px', background: '#fafcfd', borderBottom: '1px solid #f0f4f7', margin: 0 }}>
+              {g.key.toUpperCase()} · {g.rows.length}
+            </div>
+            {g.rows.map((p) => (
+              <button key={p.id} onClick={() => onOpen(p.id)}
+                style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 12, padding: '12px 15px', background: '#fff', border: 'none', borderBottom: '1px solid #f0f4f7', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+                <span style={{ fontSize: 19, flex: '0 0 auto' }}>{p.icon || '📘'}</span>
+                <span style={{ flex: '1 1 220px', minWidth: 0 }}>
+                  <b style={{ fontSize: 14, color: NAVY, display: 'block' }}>{p.title}</b>
+                  <span style={{ fontSize: 11.5, color: '#5b6b7c', fontWeight: 700 }}>
+                    {p.domain || <span style={{ color: AMBER }}>No domain</span>}
+                    {joinStandards(p.standards) ? ` · ${joinStandards(p.standards)}` : ''}
+                  </span>
+                </span>
+                <span style={{ flex: '0 0 92px', fontSize: 11.5, color: '#5b6b7c', fontWeight: 700, textAlign: 'right' }}>
+                  {p.stops} stops<br />{p.points} pts
+                </span>
+                <span style={{ flex: '0 0 116px', textAlign: 'right' }}>
+                  {p.errors > 0 && <div style={{ fontSize: 11, fontWeight: 800, color: RED }}>● {p.errors} to fix</div>}
+                  {p.flags > 0 && <div style={{ fontSize: 11, fontWeight: 800, color: FLAG }}>⚑ {p.flags} flagged</div>}
+                  {!p.errors && !p.flags && p.unpublishedChanges && <div style={{ fontSize: 11, fontWeight: 800, color: AMBER }}>● not live</div>}
+                  {!p.errors && !p.flags && !p.unpublishedChanges && <div style={{ fontSize: 11, color: '#a9b8c6', fontWeight: 700 }}>clean</div>}
+                </span>
+                <span style={{ flex: '0 0 118px', textAlign: 'right' }}><StatusPill status={p.status} version={p.liveVersion} /></span>
+                <span style={{ flex: '0 0 14px', color: '#a9b8c6', fontSize: 15 }}>›</span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </Panel>
+
+      {meta?.backend === 'supabase' && <CatalogNote meta={meta} />}
+    </div>
+  )
+}
+
+function StageChip({ label: l, n, on, onClick, fg, bg, title }) {
+  return (
+    <button onClick={onClick} title={title}
+      style={{ display: 'flex', alignItems: 'center', gap: 7, borderRadius: 10, padding: '7px 12px', cursor: 'pointer', fontFamily: 'inherit',
+        background: on ? fg : bg, color: on ? '#fff' : fg, border: `1.5px solid ${on ? fg : 'transparent'}` }}>
+      <b style={{ fontSize: 15 }}>{n}</b>
+      <span style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: .3 }}>{l}</span>
+    </button>
+  )
+}
+
+function CatalogNote({ meta }) {
+  const n = typeof meta.catalog === 'number' ? meta.catalog : null
+  if (!n) return null
+  return (
+    <div style={{ fontSize: 12, color: '#5b6b7c', textAlign: 'center', fontWeight: 700 }}>
+      {n.toLocaleString()} standards available to tag against · curated in ClearK12 Studio
+    </div>
+  )
+}
+
 /* ---------- the workbench ---------- */
 
-function Workbench({ id, onChanged }) {
+function Workbench({ id, onChanged, onBack }) {
   const [data, setData] = useState(null)
   const [tab, setTab] = useState('build')
   const [draft, setDraft] = useState(null)
@@ -502,6 +700,10 @@ function Workbench({ id, onChanged }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <Panel pad={16}>
+        <button onClick={onBack}
+          style={{ background: 'none', border: 'none', color: CYAN, fontSize: 12.5, fontWeight: 800, cursor: 'pointer', padding: 0, marginBottom: 10 }}>
+          ← All topics
+        </button>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 26 }}>{draft.icon || '📘'}</span>
           <div style={{ flex: '1 1 260px', minWidth: 0 }}>
@@ -512,7 +714,7 @@ function Workbench({ id, onChanged }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <StatusPill status={p.status} version={p.liveVersion} />
+            <StageControl path={p} onChanged={async () => { await load(); await onChanged() }} />
             {dirty && <span style={{ fontSize: 11.5, fontWeight: 800, color: AMBER }}>unsaved</span>}
             <button onClick={save} disabled={!dirty || saving} style={{ ...btn(dirty ? CYAN : '#e7edf3', dirty ? '#fff' : '#93a3b3'), cursor: dirty ? 'pointer' : 'default' }}>
               {saving ? 'Saving…' : 'Save draft'}
@@ -822,9 +1024,9 @@ function PublishTab({ path, proof, versions, dirty, onRefresh, onProof }) {
             style={{ ...btn(blocked || dirty ? '#e7edf3' : GREEN, blocked || dirty ? '#93a3b3' : '#fff'), cursor: blocked || dirty ? 'default' : 'pointer' }}>
             {busy === 'publish' ? 'Approving…' : path.liveVersion ? 'Approve new version' : 'Approve & go live'}
           </button>
-          {path.status === 'published'
-            ? <button disabled={!!busy} onClick={() => run(() => library.unpublish(path.id), 'unpublish')} style={btn('#e7edf3', NAVY)}>Take off the live site</button>
-            : <button disabled={!!busy} onClick={() => run(() => library.review(path.id), 'review')} style={btn('#e7edf3', NAVY)}>Mark ready for review</button>}
+          {path.status === 'published' && (
+            <button disabled={!!busy} onClick={() => run(() => library.unpublish(path.id), 'unpublish')} style={btn('#e7edf3', NAVY)}>Take off the live site</button>
+          )}
         </div>
       </Panel>
 

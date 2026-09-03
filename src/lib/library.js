@@ -33,7 +33,7 @@ export const library = {
   remove: (id) => call('DELETE', `/paths/${id}`),
   publish: (id, note) => call('POST', `/paths/${id}/publish`, { note }),
   unpublish: (id) => call('POST', `/paths/${id}/unpublish`),
-  review: (id) => call('POST', `/paths/${id}/review`),
+  setStage: (id, stage) => call('POST', `/paths/${id}/stage`, { stage }),
   restore: (id, version) => call('POST', `/paths/${id}/restore`, { version }),
   seed: (overwrite) => call('POST', '/seed', { overwrite: !!overwrite }),
   standards: (q = {}) => call('GET', '/core/standards?' + new URLSearchParams(

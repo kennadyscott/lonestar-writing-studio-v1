@@ -505,12 +505,24 @@ function Library({ paths, meta, onOpen, onChanged }) {
   const [busy, setBusy] = useState('')
   const [oops, setOops] = useState('')
 
-  async function seed() {
+  // Loading skips what is already on the shelf. Re-importing deliberately does
+  // not — it is how content that was fixed in the code reaches a library that
+  // already has an older copy of it, and it will overwrite an edited draft, so
+  // it asks first and says what survives.
+  const shipped = meta?.shipped || []
+  const alreadyHere = shipped.length > 0 && shipped.every((id) => paths.some((p) => p.id === id))
+
+  async function seed(overwrite) {
+    if (overwrite && !confirm(
+      'Re-import replaces the draft of every path that ships with the app, discarding any edits made here.\n\n' +
+      'Its stage and the version students are seeing are kept — the new content arrives as unpublished changes.\n\nContinue?'
+    )) return
     setBusy('seed'); setOops('')
     try {
-      const r = await library.seed()
+      const r = await library.seed(overwrite)
       await onChanged()
-      if (!r.seeded?.length) setOops('Nothing was loaded — those paths are already here.')
+      if (!r.seeded?.length) setOops('Nothing was loaded — those paths are already here. Use Re-import to replace them.')
+      else setOops('')
     } catch (e) { setOops(e.message) } finally { setBusy('') }
   }
   async function create() {
@@ -557,8 +569,11 @@ function Library({ paths, meta, onOpen, onChanged }) {
           </span>
           <div style={{ flex: 1 }} />
           <button onClick={create} disabled={!!busy} style={btn(NAVY)}>+ New topic</button>
-          <button onClick={seed} disabled={!!busy} style={btn('#e7edf3', NAVY)}>
-            {busy === 'seed' ? 'Loading…' : `Load the ${meta?.shipped?.length || ''} that ship with the app`.replace('  ', ' ')}
+          <button onClick={() => seed(alreadyHere)} disabled={!!busy} style={btn('#e7edf3', NAVY)}
+            title={alreadyHere ? 'Replace the shipped paths with the versions in the app' : 'Add the paths that ship with the app'}>
+            {busy === 'seed' ? 'Loading…'
+              : alreadyHere ? `↻ Re-import the ${shipped.length} shipped ${shipped.length === 1 ? 'path' : 'paths'}`
+              : `Load the ${shipped.length || ''} that ship with the app`.replace('  ', ' ')}
           </button>
         </div>
         {oops && <div style={{ marginTop: 9, background: '#fdecea', color: RED, borderRadius: 9, padding: '9px 11px', fontSize: 12.5, fontWeight: 700 }}>{oops}</div>}

@@ -31,6 +31,8 @@ const HOW_TO = {
   hunt: 'Click on each word that is wrong. Type the correct word, then press ✓. Clicking a word that is already correct counts against you.',
   fix: 'Type the missing word in each blank. Use the word bank above — every word is used once. Check your answers when the last blank is filled.',
   compose: 'Write the sentence yourself. The checklist ticks green as you land each move — get all of them and the sentence counts. How you word the rest is up to you.',
+  select: 'Click the word that belongs in each blank. Pick again any time before you check.',
+  drag: 'Drag each word from the bank into the blank where it belongs — or tap a word, then tap its blank. Drop it back in the bank to change your mind.',
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
 }
 
@@ -681,10 +683,12 @@ function ComposeActivity({ act, onDone, onPlay }) {
   )
 }
 
-/* --- activity: fill in the blank from a word bank --- */
+/* --- activity: fill the blanks by typing, clicking, or dragging --- */
 function FixActivity({ act, onDone, onPlay }) {
+  const mode = act.mode || 'type'
   const [answers, setAnswers] = useState(act.items.map(() => ''))
   const [checked, setChecked] = useState(false)
+  const [held, setHeld] = useState(null)          // word picked up in drag mode
   const right = act.items.map((it, i) => norm(answers[i]) === norm(it.answer))
   const score = right.filter(Boolean).length
 
@@ -694,17 +698,49 @@ function FixActivity({ act, onDone, onPlay }) {
     const firstMiss = act.items.findIndex((it, i) => norm(answers[i]) !== norm(it.answer) && it.video)
     if (firstMiss >= 0 && onPlay) onPlay(act.items[firstMiss].video)
   }
+  const put = (i, v) => setAnswers((a) => a.map((x, j) => (j === i ? v : x)))
+
+  // in drag mode every bank word is used once, so track what is still available
+  const used = {}
+  answers.forEach((a) => { if (a) used[norm(a)] = (used[norm(a)] || 0) + 1 })
+  const remaining = (act.bank || []).filter((w, idx) => {
+    const seenBefore = (act.bank || []).slice(0, idx).filter((x) => norm(x) === norm(w)).length
+    return (used[norm(w)] || 0) <= seenBefore
+  })
 
   return (
     <div>
-      <Directions text={act.directions || HOW_TO.fix} />
+      <Directions text={act.directions || HOW_TO[mode] || HOW_TO.fix} />
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
 
-      <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 13 }}>
-        {act.bank.map((w) => (
-          <span key={w} style={{ background: '#eef6f9', color: CYAN, borderRadius: 999, padding: '6px 14px', fontSize: 13, fontWeight: 800 }}>{w}</span>
-        ))}
-      </div>
+      {mode === 'drag' && (
+        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 13, minHeight: 40, background: '#f4f8fb', borderRadius: 12, padding: '9px 11px' }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => { if (held != null && held.from != null) { put(held.from, ''); setHeld(null) } }}>
+          <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', alignSelf: 'center', marginRight: 4 }}>WORD BANK</span>
+          {remaining.map((w, k) => {
+            const picked = held && held.word === w && held.from == null
+            return (
+              <span key={w + k} draggable={!checked}
+                onDragStart={() => setHeld({ word: w, from: null })}
+                onClick={() => !checked && setHeld(picked ? null : { word: w, from: null })}
+                style={{ background: picked ? CYAN : '#fff', color: picked ? '#fff' : CYAN, border: `1.5px solid ${CYAN}`,
+                  borderRadius: 999, padding: '7px 15px', fontSize: 13.5, fontWeight: 800, cursor: checked ? 'default' : 'grab', userSelect: 'none' }}>
+                {w}
+              </span>
+            )
+          })}
+          {!remaining.length && <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700, alignSelf: 'center' }}>Bank empty — every word is placed.</span>}
+        </div>
+      )}
+
+      {mode === 'type' && (act.bank || []).length > 0 && (
+        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 13 }}>
+          {act.bank.map((w) => (
+            <span key={w} style={{ background: '#eef6f9', color: CYAN, borderRadius: 999, padding: '6px 14px', fontSize: 13, fontWeight: 800 }}>{w}</span>
+          ))}
+        </div>
+      )}
 
       <Beside src={KID_READER} flip>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
@@ -712,24 +748,61 @@ function FixActivity({ act, onDone, onPlay }) {
           const [before, after] = it.given.split('____')
           const ok = checked && right[i]
           const bad = checked && !right[i]
+          const filled = answers[i]
           return (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', background: ok ? '#f1faf4' : bad ? '#fff7f7' : '#fbfdfe',
-              border: `1px solid ${ok ? '#b8e6cd' : bad ? '#f0b9be' : 'var(--line)'}`, borderRadius: 11, padding: '10px 13px', fontSize: 14, lineHeight: 1.6 }}>
-              <span style={{ width: 20, fontSize: 11.5, fontWeight: 800, color: 'var(--muted)' }}>{i + 1}.</span>
-              <span style={{ flex: 1, minWidth: 190 }}>
-                {before}
-                <input value={answers[i]} disabled={checked}
-                  onChange={(e) => setAnswers((a) => a.map((v, j) => (j === i ? e.target.value : v)))}
-                  style={{ width: 132, margin: '0 4px', padding: '4px 9px', borderRadius: 7, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 14, background: checked ? '#fff' : '#fff' }} />
-                {after}
-              </span>
-              {checked && (
-                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
-                  <span style={{ fontSize: 12.5, fontWeight: 800, color: ok ? 'var(--good)' : '#c0392b' }}>
-                    {ok ? '✓' : `✕ ${it.answer}`}
-                  </span>
-                  <WatchButton id={it.video} onPlay={onPlay} label={ok ? 'Watch' : 'Why?'} />
+            <div key={i} style={{ background: ok ? '#f1faf4' : bad ? '#fff7f7' : '#fbfdfe',
+              border: `1px solid ${ok ? '#b8e6cd' : bad ? '#f0b9be' : 'var(--line)'}`, borderRadius: 11, padding: '10px 13px', fontSize: 14, lineHeight: 1.7 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
+                <span style={{ width: 20, fontSize: 11.5, fontWeight: 800, color: 'var(--muted)' }}>{i + 1}.</span>
+                <span style={{ flex: 1, minWidth: 190 }}>
+                  {before}
+                  {mode === 'type' ? (
+                    <input value={answers[i]} disabled={checked} onChange={(e) => put(i, e.target.value)}
+                      style={{ width: 132, margin: '0 4px', padding: '4px 9px', borderRadius: 7, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 14 }} />
+                  ) : (
+                    <span
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={() => { if (!held || checked) return; if (held.from != null) put(held.from, ''); put(i, held.word); setHeld(null) }}
+                      onClick={() => {
+                        if (checked) return
+                        if (held) { if (held.from != null) put(held.from, ''); put(i, held.word); setHeld(null) }
+                        else if (filled && mode === 'drag') { setHeld({ word: filled, from: i }); }
+                      }}
+                      style={{ display: 'inline-block', minWidth: 118, margin: '0 5px', padding: '3px 10px', borderRadius: 8, textAlign: 'center',
+                        border: `2px ${filled ? 'solid' : 'dashed'} ${ok ? 'var(--good)' : bad ? '#e0a0a0' : held ? CYAN : '#cfe0ec'}`,
+                        background: filled ? '#fff' : held ? '#eef6f9' : '#f7fafc', color: filled ? NAVY : '#9fb3c2',
+                        fontWeight: filled ? 800 : 600, cursor: checked ? 'default' : 'pointer' }}>
+                      {filled || (mode === 'drag' ? 'drop here' : '?')}
+                    </span>
+                  )}
+                  {after}
                 </span>
+                {checked && (
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 800, color: ok ? 'var(--good)' : '#c0392b' }}>
+                      {ok ? '✓' : `✕ ${it.answer}`}
+                    </span>
+                    <WatchButton id={it.video} onPlay={onPlay} label={ok ? 'Watch' : 'Why?'} />
+                  </span>
+                )}
+              </div>
+
+              {mode === 'select' && (
+                <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 8, paddingLeft: 29 }}>
+                  {(it.options || []).map((opt) => {
+                    const chosen = norm(answers[i]) === norm(opt)
+                    const reveal = checked && norm(opt) === norm(it.answer)
+                    return (
+                      <button key={opt} disabled={checked} onClick={() => put(i, opt)}
+                        style={{ borderRadius: 999, padding: '7px 15px', fontSize: 13.5, fontWeight: 800, cursor: checked ? 'default' : 'pointer',
+                          background: reveal ? '#e6f6ee' : chosen ? CYAN : '#eef3f6',
+                          color: reveal ? 'var(--good)' : chosen ? '#fff' : '#4a627a',
+                          border: `1.5px solid ${reveal ? 'var(--good)' : chosen ? CYAN : 'transparent'}` }}>
+                        {opt}{reveal ? ' ✓' : ''}
+                      </button>
+                    )
+                  })}
+                </div>
               )}
             </div>
           )

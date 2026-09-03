@@ -42,7 +42,7 @@ export function checkCompose(item, text) {
 }
 
 const hunt = (brief, text, hint, videos) => ({ kind: 'hunt', brief, text, hint, videos })
-const fix = (brief, bank, items, hint) => ({ kind: 'fix', brief, bank, items, hint })
+const fix = (brief, bank, items, hint, mode = 'type') => ({ kind: 'fix', brief, bank, items, hint, mode })
 // maze: S start, X finish, # wall, . open, A–J gates. Every gate sits on the only
 // route through, so the verbs get corrected in the order the path meets them.
 const maze = (brief, grid, gates, hint, video) => ({ kind: 'maze', brief, grid, gates, hint, video })
@@ -98,13 +98,13 @@ export const TOPICS = [
           hunt('Four describing words are wrong. Find them.',
             `The science fair was the [[goodest|best]] one our school has ever held. Dev built a volcano that was [[more taller|taller]] than he was. Next to it sat the [[beautifulest|most beautiful]] model of the solar system, painted by hand. The judges said choosing a winner was [[difficulter|more difficult]] than they expected, and every project deserved a ribbon.`,
             'Short words add -er and -est. Long words use more and most.'),
-          fix('Choose the describing word that fits.', ['fastest', 'louder', 'careful', 'enormous', 'happier'], [
+          fix('Drag each describing word into the sentence it belongs in.', ['fastest', 'louder', 'careful', 'enormous', 'happier'], [
             { given: 'A cheetah is the ____ land animal on earth.', answer: 'fastest' },
             { given: 'Thunder is much ____ than rain.', answer: 'louder' },
             { given: 'Be ____ with the glass beaker.', answer: 'careful' },
             { given: 'The whale was ____ — longer than our classroom.', answer: 'enormous' },
             { given: 'She felt ____ after she finished her draft.', answer: 'happier' },
-          ], 'Two of these are comparing words. Which sentences compare?'),
+          ], 'Two of these are comparing words. Which sentences compare?', 'drag'),
         ],
       },
       {
@@ -181,13 +181,13 @@ export const TOPICS = [
           hunt('Four pronouns do not match what they stand for.',
             `Marcus and [[me|I]] signed up for the science fair together. The judges gave [[we|us]] a table near the door. Every student brought [[their|his or her]] own poster board. When Ana finished, [[them|she]] helped us carry the last of the supplies inside.`,
             'Try the sentence with only one person in it and your ear will hear it.'),
-          fix('Choose the pronoun that fits.', ['I', 'me', 'they', 'its', 'whom'], [
-            { given: 'Jorge and ____ walked to the library.', answer: 'I' },
-            { given: 'The coach handed the ball to ____.', answer: 'me' },
-            { given: 'The twins said ____ would bring the poster.', answer: 'they' },
-            { given: 'The plant lost ____ leaves in the cold.', answer: 'its' },
-            { given: 'To ____ should I address the letter?', answer: 'whom' },
-          ], 'Its shows ownership. It is always shortens to it’s.'),
+          fix('Click the pronoun that fits each sentence.', [], [
+            { given: 'Jorge and ____ walked to the library.', answer: 'I', options: ['I', 'me', 'myself'] },
+            { given: 'The coach handed the ball to ____.', answer: 'me', options: ['I', 'me', 'mine'] },
+            { given: 'The twins said ____ would bring the poster.', answer: 'they', options: ['them', 'they', 'their'] },
+            { given: 'The plant lost ____ leaves in the cold.', answer: 'its', options: ["it's", 'its', 'its’'] },
+            { given: 'To ____ should I address the letter?', answer: 'whom', options: ['who', 'whom', 'whose'] },
+          ], 'Take the other person out of the sentence and say it again.', 'select'),
         ],
       },
     ],
@@ -197,12 +197,12 @@ export const TOPICS = [
       ws_verbs: {
         id: 'sb_verbs', title: 'SB: Irregular Verbs', skill: 'Build it back up, one verb at a time',
         activities: [
-          fix('These verbs never add -ed. Type the past tense.', ['go', 'eat', 'see', 'take'], [
-            { given: 'Yesterday I ____ to the store.', answer: 'went' },
-            { given: 'She ____ breakfast before school.', answer: 'ate' },
-            { given: 'We ____ a hawk on the fence.', answer: 'saw' },
-            { given: 'He ____ the bus home.', answer: 'took' },
-          ], 'Say "yesterday I..." before each one.'),
+          fix('Click the correct past-tense form.', [], [
+            { given: 'Yesterday I ____ to the store.', answer: 'went', options: ['goed', 'went', 'gone'] },
+            { given: 'She ____ breakfast before school.', answer: 'ate', options: ['eated', 'ate', 'eaten'] },
+            { given: 'We ____ a hawk on the fence.', answer: 'saw', options: ['seed', 'saw', 'seen'] },
+            { given: 'He ____ the bus home.', answer: 'took', options: ['taked', 'took', 'taken'] },
+          ], 'Say "yesterday I..." before each one.', 'select'),
           hunt('Two verbs are wrong in this short note.',
             `Last night I [[readed|read]] two chapters of my book. Then I [[felled|fell]] asleep with the lamp still on.`,
             'Both of these change their whole shape in the past tense.'),
@@ -236,12 +236,12 @@ export const TOPICS = [
       ws_prep: {
         id: 'sb_prep', title: 'SB: Prepositions', skill: 'In, on, at — and the rest',
         activities: [
-          fix('Choose in, on, or at.', ['in', 'on', 'at'], [
+          fix('Drag in, on, or at into each sentence.', ['in', 'on', 'at', 'in'], [
             { given: 'We meet ____ 3:00 every Tuesday.', answer: 'at' },
             { given: 'My birthday is ____ July.', answer: 'in' },
             { given: 'The test is ____ Friday.', answer: 'on' },
             { given: 'She sat ____ the front row.', answer: 'in' },
-          ], 'At = a clock time. On = a day. In = a month or a space you are inside.'),
+          ], 'At = a clock time. On = a day. In = a month or a space you are inside.', 'drag'),
         ],
       },
       ws_pron: {

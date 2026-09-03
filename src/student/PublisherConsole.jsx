@@ -191,6 +191,22 @@ function ActivityEditor({ act, index, count, onEdit, onRemove }) {
           {act.kind === 'fix' && (
             <>
               <div>
+                <span style={label}>HOW THE STUDENT ANSWERS</span>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[['type', 'Type it'], ['select', 'Click an option'], ['drag', 'Drag from a bank']].map(([m, lbl]) => {
+                    const on = (act.mode || 'type') === m
+                    return (
+                      <button key={m} onClick={() => onEdit((a) => { a.mode = m })}
+                        style={{ borderRadius: 8, padding: '7px 13px', fontSize: 12.5, fontWeight: 800, cursor: 'pointer',
+                          background: on ? NAVY : '#eef3f6', color: on ? '#fff' : '#4a627a' }}>{lbl}</button>
+                    )
+                  })}
+                </div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+                  Click needs options on every item. Drag needs a word bank — one entry per blank.
+                </div>
+              </div>
+              <div>
                 <span style={label}>WORD BANK (comma separated)</span>
                 <input style={field} value={(act.bank || []).join(', ')}
                   onChange={(e) => onEdit((a) => { a.bank = e.target.value.split(',').map((x) => x.trim()).filter(Boolean) })} />
@@ -206,6 +222,13 @@ function ActivityEditor({ act, index, count, onEdit, onRemove }) {
                     <span style={label}>ANSWER</span>
                     <input style={field} value={it.answer} onChange={(e) => onEdit((a) => { a.items[i].answer = e.target.value })} />
                   </div>
+                  {(act.mode === 'select') && (
+                    <div style={{ flex: '2 1 200px' }}>
+                      <span style={label}>OPTIONS (comma separated — one must match the answer)</span>
+                      <input style={field} value={(it.options || []).join(', ')}
+                        onChange={(e) => onEdit((a) => { a.items[i].options = e.target.value.split(',').map((x) => x.trim()).filter(Boolean) })} />
+                    </div>
+                  )}
                   <div style={{ flex: '1 1 90px' }}>
                     <span style={label}>VIDEO ID</span>
                     <input style={field} value={it.video || ''} placeholder="none"

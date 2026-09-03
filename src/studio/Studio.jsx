@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { library, getKey, setKey } from '../lib/library.js'
 import { STATES, GRADES } from '../../lib/content/taxonomy.mjs'
+import { SUBJECT_STATUS, TIMELINE_SOURCE } from '../../lib/content/review-cycle.mjs'
 
 /*
  * ClearK12 Content Studio — the level above the products.
@@ -54,7 +55,7 @@ export default function Studio() {
   if (err) return <Center><b style={{ color: RED }}>{err}</b></Center>
   if (!meta) return <Center>Opening the studio…</Center>
 
-  const tabs = [['standards', 'Standards'], ['vocab', 'Vocabulary'], ['topics', 'Topics'], ['tools', 'Products'], ['cost', 'Cost']]
+  const tabs = [['standards', 'Standards'], ['review', 'Review cycle'], ['vocab', 'Vocabulary'], ['topics', 'Topics'], ['tools', 'Products'], ['cost', 'Cost']]
 
   return (
     <div style={{ minHeight: '100vh', background: PAPER, fontFamily: 'Manrope, system-ui, sans-serif', color: INK }}>
@@ -81,8 +82,9 @@ export default function Studio() {
 
       <div style={{ maxWidth: 1240, margin: '0 auto', padding: 18, display: 'flex', flexDirection: 'column', gap: 12 }}>
         {tab === 'standards' && <Standards meta={meta} onChanged={load} />}
+        {tab === 'review' && <ReviewCycle meta={meta} />}
         {tab === 'tools' && <Products />}
-        {tab !== 'standards' && tab !== 'tools' && <NotYet what={tabs.find(([k]) => k === tab)[1]} />}
+        {!['standards', 'tools', 'review'].includes(tab) && <NotYet what={tabs.find(([k]) => k === tab)[1]} />}
       </div>
     </div>
   )
@@ -250,6 +252,72 @@ function Standards({ meta, onChanged }) {
           )}
         </Panel>
       )}
+    </>
+  )
+}
+
+/* ---------- review cycle ---------- */
+
+function ReviewCycle({ meta }) {
+  const total = typeof meta.catalog === 'number' ? meta.catalog : null
+  return (
+    <>
+      <Panel>
+        <b style={{ fontSize: 15.5, color: NAVY }}>Texas standards overview</b>
+        <p style={{ fontSize: 13, color: '#5b6b7c', margin: '4px 0 0', maxWidth: 700 }}>
+          What is in effect, and when it could change. Every date below is a milestone from the{' '}
+          <a href={TIMELINE_SOURCE.url} target="_blank" rel="noreferrer" style={{ color: CYAN, fontWeight: 700 }}>
+            SBOE review timeline
+          </a>{' '}
+          — {TIMELINE_SOURCE.approved.toLowerCase()}.
+        </p>
+        <div style={{ background: '#eaf4f9', borderRadius: 11, padding: '11px 13px', marginTop: 13, fontSize: 13, color: INK }}>
+          <b style={{ color: NAVY }}>The headline for writing content:</b> the Reading Language Arts review that begins
+          this school year is the <b>vocabulary and book list</b>, not the ELAR content standards. Those are not being
+          rewritten in this cycle, and the earliest a rewrite could reach classrooms is August 2030.
+        </div>
+      </Panel>
+
+      {SUBJECT_STATUS.map((s) => (
+        <Panel key={s.subject}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 340px', minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                <b style={{ fontSize: 15.5, color: NAVY }}>{s.subject}</b>
+                <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .5, background: s.warn ? '#fdf7e8' : '#dcf0e4', color: s.warn ? AMBER : GREEN, borderRadius: 999, padding: '3px 9px' }}>
+                  {s.warn ? 'CHECK BEFORE BUILDING' : 'IN EFFECT'}
+                </span>
+                <span style={{ fontSize: 11.5, color: '#5b6b7c', fontWeight: 700 }}>Adopted {s.adopted}</span>
+              </div>
+              <div style={{ fontSize: 13.5, fontWeight: 700, color: s.warn ? AMBER : INK, marginTop: 6 }}>{s.headline}</div>
+              <p style={{ fontSize: 12.5, color: '#5b6b7c', margin: '5px 0 0', lineHeight: 1.5 }}>{s.detail}</p>
+              <div style={{ fontSize: 11, color: '#93a3b3', fontWeight: 700, marginTop: 7 }}>
+                Catalog document: {s.docVintage}
+              </div>
+            </div>
+            <div style={{ flex: '1 1 300px', minWidth: 0 }}>
+              {s.milestones.map((m, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start', padding: '6px 0', borderBottom: i < s.milestones.length - 1 ? '1px solid #f0f4f7' : 'none' }}>
+                  <span style={{ flex: '0 0 96px', fontSize: 11.5, fontWeight: 800, color: m.warn ? AMBER : m.past ? '#93a3b3' : m.key ? CYAN : NAVY }}>
+                    {m.when}
+                  </span>
+                  <span style={{ flex: 1, fontSize: 12.5, color: m.past ? '#93a3b3' : INK, fontWeight: m.key ? 700 : 400 }}>
+                    {m.what}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+      ))}
+
+      <Panel>
+        <div style={{ fontSize: 12.5, color: '#5b6b7c' }}>
+          {total ? <>{total.toLocaleString()} standards in the catalog. </> : null}
+          Milestones are transcribed from the SBOE timeline; the social studies adoption status is the one thing that
+          document cannot settle, because it was scheduled for a date that has now passed.
+        </div>
+      </Panel>
     </>
   )
 }

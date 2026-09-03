@@ -1,234 +1,417 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
-import { jobsFor } from '../../server/proofRoom.mjs'
+import { topicList, topicFor, PASS_MARK } from '../../server/proofRoom.mjs'
 
 /*
- * The Proof Room — worksheets as jobs. A job is a piece of writing with errors
- * planted in it: hunt them in flowing text, type the fix, and a wrong tap is a
- * false alarm that counts against you. Nothing feeds the writing data; a job
- * reports how clean the copy is when you hand it back, and pays coins at 75%.
+ * The Proof Room — pick a topic, walk its path.
+ *
+ * A worksheet runs whole: its activities play back to back and score as one
+ * piece of work, because they were written to hang together. Clear 85% and the
+ * next stop opens. Miss it and that skill's Skill Builder drops onto the path
+ * and has to be cleared before the core path continues. The last stop is the
+ * full-topic proof.
  */
 
 const NAVY = '#16386b'
 const CYAN = '#0f97c2'
-const PASS_MARK = 75
+const GOLD = '#f0b429'
 
-function scoreOf(fixed, total, falseAlarms) {
-  if (!total) return 0
-  return Math.max(0, Math.round((fixed / (total + falseAlarms)) * 100))
-}
+const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 
 export default function ProofRoom({ grade = 5, onClose, onChange }) {
-  const jobs = useMemo(() => jobsFor(grade), [grade])
-  const [job, setJob] = useState(null)
-  const [caught, setCaught] = useState({})     // error index -> true once tapped
-  const [fixes, setFixes] = useState({})       // error index -> accepted typed fix
-  const [typing, setTyping] = useState(null)   // error index currently being fixed
-  const [draftFix, setDraftFix] = useState('')
-  const [falseAlarms, setFalseAlarms] = useState(0)
-  const [flash, setFlash] = useState(null)     // token index that was a false alarm
-  const [result, setResult] = useState(null)
+  const [topicId, setTopicId] = useState(null)
+  const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
+  const [running, setRunning] = useState(null)   // worksheet being played
+  const topics = useMemo(() => topicList(), [])
+  const topic = useMemo(() => (topicId ? topicFor(topicId) : null), [topicId])
 
-  function open(j) {
-    setJob(j); setCaught({}); setFixes({}); setTyping(null); setDraftFix('')
-    setFalseAlarms(0); setFlash(null); setResult(null)
+  useEffect(() => {
+    try { setProgress(JSON.parse(localStorage.getItem('proofProgress') || '{}')) } catch { setProgress({}) }
+  }, [])
+  function record(wsId, pct) {
+    setProgress((p) => {
+      const prev = p[wsId] || { best: 0, passed: false }
+      const next = { ...p, [wsId]: { best: Math.max(prev.best, pct), passed: prev.passed || pct >= PASS_MARK } }
+      try { localStorage.setItem('proofProgress', JSON.stringify(next)) } catch {}
+      return next
+    })
   }
 
-  function tap(tok, ti) {
-    if (result) return
-    if (!tok.bad) {
-      setFalseAlarms((n) => n + 1)
-      setFlash(ti)
-      setTimeout(() => setFlash(null), 700)
-      return
-    }
-    if (caught[tok.i]) return
-    setCaught((c) => ({ ...c, [tok.i]: true }))
-    setTyping(tok.i)
-    setDraftFix('')
+  if (running) {
+    return <Worksheet ws={running} onQuit={() => setRunning(null)}
+      onDone={(pct) => { record(running.id, pct); onChange && onChange() }}
+      onClose={onClose} topic={topic} progress={progress} onNext={(ws) => setRunning(ws)} />
   }
-
-  function submitFix(tok) {
-    const ok = draftFix.trim().toLowerCase() === tok.fix.trim().toLowerCase()
-    if (!ok) return
-    setFixes((f) => ({ ...f, [tok.i]: tok.fix }))
-    setTyping(null); setDraftFix('')
+  if (topic) {
+    return <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={onClose} />
   }
-
-  async function handIn() {
-    const total = job.errorCount
-    const fixedCount = Object.keys(fixes).length
-    const accuracy = scoreOf(fixedCount, total, falseAlarms)
-    let awarded = null
-    try { awarded = await api.drillFinish({ jobId: job.id, accuracy, fixed: fixedCount, total, falseAlarms }) } catch { awarded = null }
-    setResult({ accuracy, fixed: fixedCount, total, falseAlarms, ...(awarded || {}) })
-    onChange && onChange()
-  }
-
-  /* ---------- the job list ---------- */
-  if (!job) {
-    return (
-      <Shell onClose={onClose} sub="Bring writing in broken, take it out clean">
-        <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.55, marginBottom: 14 }}>
-          Every job is a real piece of writing with mistakes planted in it. Find them, fix them, hand it back clean.
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {jobs.map((j) => (
-            <button key={j.id} onClick={() => open(j)}
-              style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 13, border: '1.5px solid var(--line)', borderRadius: 14,
-                padding: '13px 15px', background: '#fff', cursor: 'pointer' }}>
-              <span style={{ width: 42, height: 42, borderRadius: 11, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 20, background: '#eef6f9' }}>🔍</span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: 15, fontWeight: 800, color: NAVY }}>{j.title}</span>
-                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{j.skill}</span>
-                <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: .5, color: CYAN, marginTop: 5 }}>
-                  {j.strand.toUpperCase()} · GRADE {j.grade}
-                </span>
-              </span>
-              <span style={{ flexShrink: 0, textAlign: 'right' }}>
-                <span style={{ display: 'block', fontSize: 12, fontWeight: 800, color: '#a37400' }}>{j.errorCount} to find</span>
-                <span className="btn" style={{ display: 'inline-block', marginTop: 6, padding: '7px 15px', fontSize: 12.5 }}>Take the job →</span>
-              </span>
-            </button>
-          ))}
-        </div>
-        <div style={{ fontSize: 11.5, color: 'var(--muted)', textAlign: 'center', marginTop: 14 }}>
-          More jobs arrive as your teacher assigns skills.
-        </div>
-      </Shell>
-    )
-  }
-
-  /* ---------- results ---------- */
-  if (result) {
-    const passed = result.accuracy >= PASS_MARK
-    const missed = result.total - result.fixed
-    return (
-      <Shell onClose={onClose} sub={job.title}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 44 }}>{passed ? '🧾' : '💪'}</div>
-          <h2 style={{ margin: '4px 0 2px', fontSize: 23 }}>{passed ? 'Clean copy!' : 'Handed back'}</h2>
-          <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 16px' }}>{job.strand} · Grade {job.grade}</p>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 26, flexWrap: 'wrap', marginBottom: 16 }}>
-            <Stat big label="CLEAN COPY" value={`${result.accuracy}%`} tone={passed ? 'var(--good)' : '#c99312'} />
-            <Stat label="FIXED" value={`${result.fixed}/${result.total}`} sub={missed ? `${missed} slipped through` : 'nothing missed'} />
-            <Stat label="FALSE ALARMS" value={result.falseAlarms} sub={result.falseAlarms ? 'good writing, flagged' : 'none — sharp eye'} />
-          </div>
-
-          {result.coins > 0 ? (
-            <div className="pill gold" style={{ justifyContent: 'center', padding: '10px 16px', fontSize: 14, maxWidth: 400, margin: '0 auto' }}>
-              🪙 +{result.coins} ClassCade coins
-            </div>
-          ) : (
-            <div style={{ background: '#f4f8fb', borderRadius: 10, padding: '11px 16px', fontSize: 13, color: 'var(--muted)', fontWeight: 700, maxWidth: 400, margin: '0 auto' }}>
-              {result.capped
-                ? "You've earned all the Proof Room coins for today — the practice still counts."
-                : `Hand back ${PASS_MARK}% clean copy to earn coins. Flagging good writing costs you, so read before you tap.`}
-            </div>
-          )}
-
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
-            <button className="btn" onClick={() => open(job)}>↻ Run it again</button>
-            <button className="btn ghost" onClick={() => setJob(null)}>Back to the jobs</button>
-          </div>
-        </div>
-      </Shell>
-    )
-  }
-
-  /* ---------- the hunt ---------- */
-  const total = job.errorCount
-  const fixedCount = Object.keys(fixes).length
-  const allFound = Object.keys(caught).length === total && !typing
-  const live = scoreOf(fixedCount, total, falseAlarms)
 
   return (
-    <Shell onClose={onClose} sub={job.title}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
-        <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 200 }}>{job.brief}</span>
-        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{fixedCount} of {total} fixed</span>
-        <span className="pill" style={{ background: falseAlarms ? '#fdecec' : '#f1faf4', color: falseAlarms ? '#c0392b' : 'var(--good)' }}>
-          {falseAlarms} false {falseAlarms === 1 ? 'alarm' : 'alarms'}
-        </span>
-      </div>
-
-      <div style={{ background: '#fbfdfe', border: '1.5px solid var(--line)', borderRadius: 14, padding: '16px 18px', fontSize: 15.5, lineHeight: 2.05 }}>
-        {job.tokens.map((tok, ti) => {
-          if (!tok.bad) {
-            return (
-              <span key={ti} onClick={() => tap(tok, ti)}
-                style={{ cursor: 'pointer', borderRadius: 4, background: flash === ti ? '#fdecec' : 'transparent', transition: 'background .2s' }}>
-                {tok.t}
-              </span>
-            )
-          }
-          const isFixed = fixes[tok.i]
-          const isCaught = caught[tok.i]
-          if (isFixed) {
-            return (
-              <span key={ti} style={{ background: '#e6f6ee', color: 'var(--good)', fontWeight: 800, borderRadius: 5, padding: '1px 6px' }}>{tok.fix}</span>
-            )
-          }
-          if (isCaught && typing === tok.i) {
-            return (
-              <span key={ti} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff8ec', border: '1.5px solid #f0b429', borderRadius: 8, padding: '2px 6px', margin: '0 2px' }}>
-                <s style={{ color: '#c0392b', fontWeight: 700 }}>{tok.t}</s>
-                <input autoFocus value={draftFix} onChange={(e) => setDraftFix(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') submitFix(tok) }}
-                  placeholder="type the fix"
-                  style={{ width: 128, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 14 }} />
-                <button onClick={() => submitFix(tok)} disabled={!draftFix.trim()}
-                  style={{ fontSize: 12, fontWeight: 800, color: draftFix.trim() ? '#fff' : '#9db0c0', background: draftFix.trim() ? NAVY : '#eef0f6', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>✓</button>
-              </span>
-            )
-          }
-          if (isCaught) {
-            return (
-              <span key={ti} onClick={() => { setTyping(tok.i); setDraftFix('') }}
-                style={{ cursor: 'pointer', background: '#fff3d6', color: '#8a6400', fontWeight: 800, borderRadius: 5, padding: '1px 6px', textDecoration: 'underline wavy #e0a51c' }}>
-                {tok.t}
-              </span>
-            )
-          }
+    <Shell onClose={onClose} sub="Bring writing in broken, take it out clean">
+      <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.55, margin: '0 0 14px' }}>
+        Each topic is a path. Work the skills one at a time, then prove the whole topic at the end.
+      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        {topics.map((t) => {
+          const done = t.stops // placeholder count for display
           return (
-            <span key={ti} onClick={() => tap(tok, ti)} style={{ cursor: 'pointer', borderRadius: 4 }}>{tok.t}</span>
+            <button key={t.id} onClick={() => setTopicId(t.id)}
+              style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 14, border: '1.5px solid var(--line)',
+                borderRadius: 16, padding: '15px 17px', background: '#fff', cursor: 'pointer' }}>
+              <span style={{ width: 46, height: 46, borderRadius: 13, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 22, background: '#eef6f9' }}>{t.icon}</span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span style={{ display: 'block', fontSize: 16, fontWeight: 800, color: NAVY }}>{t.title}</span>
+                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t.blurb}</span>
+                <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: .5, color: CYAN, marginTop: 6 }}>
+                  {t.standards} · GRADE {t.grade} · {done} STOPS
+                </span>
+              </span>
+              <span className="btn" style={{ flexShrink: 0, padding: '9px 17px', fontSize: 13 }}>Open path →</span>
+            </button>
           )
         })}
-      </div>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
-        <button className="btn ghost" onClick={() => setJob(null)} style={{ padding: '9px 16px' }}>← Jobs</button>
-        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>
-          {allFound ? 'Every error found — hand it back.' : `💡 ${job.hint}`}
-        </span>
-        <span className="pill" style={{ background: '#eef4f8', color: CYAN }}>clean copy {live}%</span>
-        <button className="btn" onClick={handIn}>{allFound ? 'Hand it back ✓' : 'Hand it back anyway'}</button>
+        <div style={{ border: '1.5px dashed var(--line)', borderRadius: 16, padding: '15px 17px', fontSize: 13, color: 'var(--muted)', textAlign: 'center' }}>
+          More topics arrive as your teacher loads them.
+        </div>
       </div>
     </Shell>
   )
 }
 
-function Stat({ label, value, sub, tone, big }) {
+/* ---------------- the path ---------------- */
+function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
+  // walk the core list; a missed stop drops its Skill Builder in as a detour
+  const stops = []
+  let blocked = false
+  for (const ws of topic.core) {
+    const p = progress[ws.id] || { best: 0, passed: false }
+    const sb = topic.skillBuilders[ws.id]
+    const sbP = progress[sb.id] || { best: 0, passed: false }
+    const needsSb = p.best > 0 && !p.passed && !sbP.passed
+    stops.push({ ws, state: blocked ? 'locked' : p.passed ? 'passed' : needsSb ? 'retry' : 'open', best: p.best })
+    if (needsSb) stops.push({ ws: sb, state: 'sb', best: sbP.best, forId: ws.id })
+    if (!p.passed) blocked = true
+  }
+  const allCore = topic.core.every((w) => (progress[w.id] || {}).passed)
+  const fullP = progress[topic.full.id] || { best: 0, passed: false }
+  stops.push({ ws: topic.full, state: fullP.passed ? 'passed' : allCore ? 'open' : 'locked', best: fullP.best, capstone: true })
+
+  const cleared = topic.core.filter((w) => (progress[w.id] || {}).passed).length
+  const pct = Math.round((cleared / topic.core.length) * 100)
+
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)' }}>{label}</div>
-      <div style={{ fontSize: big ? 38 : 25, fontWeight: 800, color: tone || NAVY, lineHeight: 1.15 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{sub}</div>}
+    <Shell onClose={onClose} sub={topic.title} onBack={onBack}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 22 }}>{topic.icon}</span>
+        <div style={{ flex: 1, minWidth: 170 }}>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{topic.standards} · GRADE {topic.grade}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{cleared} of {topic.core.length} skills cleared</div>
+        </div>
+        <div style={{ flex: '1 1 140px', minWidth: 120, height: 9, background: '#e3ecf2', borderRadius: 6 }}>
+          <div style={{ height: '100%', width: `${pct}%`, borderRadius: 6, background: 'linear-gradient(90deg,#35c3e8,#0f97c2)' }} />
+        </div>
+      </div>
+
+      <div style={{ position: 'relative' }}>
+        {/* the road */}
+        <span aria-hidden style={{ position: 'absolute', left: 27, top: 18, bottom: 18, width: 4, borderRadius: 3,
+          background: 'repeating-linear-gradient(180deg,#d5e2ec 0 10px,transparent 10px 18px)' }} />
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {stops.map((s, i) => <Stop key={s.ws.id} stop={s} n={i + 1} onPlay={onPlay} />)}
+        </div>
+      </div>
+    </Shell>
+  )
+}
+
+function Stop({ stop, onPlay }) {
+  const { ws, state, best } = stop
+  const isSb = state === 'sb'
+  const locked = state === 'locked'
+  const passed = state === 'passed'
+  const capstone = stop.capstone
+
+  const tone = passed ? 'var(--good)' : isSb ? '#a37400' : locked ? '#9fb3c2' : capstone ? GOLD : CYAN
+  const bg = passed ? '#f1faf4' : isSb ? '#fff8ec' : locked ? '#f7f9fb' : '#fff'
+  const border = passed ? '1.5px solid #b8e6cd' : isSb ? '2px solid #f0b429' : locked ? '1.5px solid var(--line)'
+    : capstone ? '2px solid #f0b429' : '2px solid #9fd9ef'
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 13, position: 'relative', zIndex: 1 }}>
+      <span style={{ width: 56, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
+        <span style={{ width: 40, height: 40, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 18, fontWeight: 800,
+          background: passed ? 'var(--good)' : isSb ? GOLD : locked ? '#e3ecf2' : capstone ? GOLD : '#fff',
+          color: passed || isSb || capstone ? '#fff' : locked ? '#9fb3c2' : CYAN,
+          border: passed || isSb || capstone ? '3px solid #fff' : '3px solid #9fd9ef',
+          boxShadow: passed || isSb || capstone ? '0 3px 10px rgba(20,60,90,.25)' : 'none' }}>
+          {passed ? '✓' : locked ? '🔒' : capstone ? '🏆' : isSb ? '🛠' : '📄'}
+        </span>
+      </span>
+
+      <div style={{ flex: 1, minWidth: 0, background: bg, border, borderRadius: 14, padding: '12px 15px',
+        display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 150 }}>
+          {isSb && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>SKILL BUILDER · REQUIRED FIRST</div>}
+          {capstone && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>FULL TOPIC · THE FINISH LINE</div>}
+          <div style={{ fontSize: 14.5, fontWeight: 800, color: locked ? '#8fa5b8' : NAVY, lineHeight: 1.25 }}>{ws.title}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{ws.skill}</div>
+        </div>
+
+        {best > 0 && (
+          <span className="pill" style={{ background: passed ? '#e6f6ee' : '#fdecec', color: passed ? 'var(--good)' : '#c0392b', fontWeight: 800 }}>
+            best {best}%
+          </span>
+        )}
+        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+          {ws.activities.length} activities · {ws.points} pts
+        </span>
+
+        {locked ? (
+          <span style={{ fontSize: 12, fontWeight: 800, color: '#9fb3c2', whiteSpace: 'nowrap' }}>Clear the stop above</span>
+        ) : (
+          <button className={passed ? 'btn ghost' : 'btn'} style={{ padding: '9px 18px', fontSize: 13, whiteSpace: 'nowrap' }}
+            onClick={() => onPlay(ws)}>
+            {passed ? 'Run it again' : isSb ? 'Build it up →' : best > 0 ? 'Try again →' : 'Start →'}
+          </button>
+        )}
+      </div>
     </div>
   )
 }
 
-function Shell({ children, onClose, sub }) {
+/* ---------------- one worksheet, start to finish ---------------- */
+function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
+  const [step, setStep] = useState(0)
+  const [scores, setScores] = useState([])     // points earned per activity
+  const [result, setResult] = useState(null)
+  const act = ws.activities[step]
+
+  function finishActivity(earned) {
+    const next = [...scores, earned]
+    setScores(next)
+    if (step + 1 < ws.activities.length) { setStep(step + 1); return }
+    const got = next.reduce((a, b) => a + b, 0)
+    const pct = Math.max(0, Math.round((got / ws.points) * 100))
+    onDone(pct)
+    api.drillFinish({ worksheetId: ws.id, accuracy: pct }).then((r) => setResult({ pct, got, ...(r || {}) })).catch(() => setResult({ pct, got }))
+  }
+
+  if (result) {
+    const passed = result.pct >= PASS_MARK
+    const sb = topic?.skillBuilders?.[ws.id]
+    const coreIdx = topic ? topic.core.findIndex((w) => w.id === ws.id) : -1
+    const nextCore = coreIdx >= 0 && coreIdx + 1 < (topic?.core.length || 0) ? topic.core[coreIdx + 1] : null
+    return (
+      <Shell onClose={onClose} sub={ws.title}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 46 }}>{passed ? '🎉' : '🛠'}</div>
+          <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? 'Stop cleared!' : 'Not clean enough yet'}</h2>
+          <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 14px' }}>
+            {result.got} of {ws.points} points · {ws.activities.length} activities
+          </p>
+
+          <div style={{ fontSize: 52, fontWeight: 800, color: passed ? 'var(--good)' : '#c99312', lineHeight: 1 }}>{result.pct}%</div>
+          <div style={{ height: 12, borderRadius: 8, background: '#eef3f6', position: 'relative', margin: '12px auto 6px', maxWidth: 420 }}>
+            <div style={{ position: 'absolute', inset: 0, width: `${Math.min(100, result.pct)}%`, borderRadius: 8,
+              background: passed ? 'linear-gradient(90deg,#57d98a,#1e7a4a)' : 'linear-gradient(90deg,#f5c542,#e89a00)' }} />
+            <div style={{ position: 'absolute', left: `${PASS_MARK}%`, top: -5, bottom: -5, width: 2, background: NAVY }} />
+          </div>
+          <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto 16px', textAlign: 'right' }}>
+            ↑ {PASS_MARK}% clears the stop
+          </div>
+
+          {result.coins > 0 && (
+            <div className="pill gold" style={{ justifyContent: 'center', padding: '10px 16px', fontSize: 14, maxWidth: 400, margin: '0 auto 12px' }}>
+              🪙 +{result.coins} ClassCade coins
+            </div>
+          )}
+
+          {!passed && sb && (
+            <div style={{ background: '#fff8ec', border: '1.5px solid #f0d9a8', borderRadius: 12, padding: '13px 16px', maxWidth: 440, margin: '0 auto', textAlign: 'left' }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>SKILL BUILDER UNLOCKED</div>
+              <div style={{ fontSize: 13.5, marginTop: 3, lineHeight: 1.5 }}>
+                <b>{sb.title}</b> just dropped onto your path. Build the skill back up there, then come take this stop again.
+              </div>
+            </div>
+          )}
+          {!passed && !sb && (
+            <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 16px', fontSize: 13, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto' }}>
+              Give it another run — you keep your best score.
+            </div>
+          )}
+
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
+            {passed && nextCore && (
+              <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(nextCore) }}>
+                Next stop: {nextCore.title} →
+              </button>
+            )}
+            {!passed && sb && (
+              <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(sb) }}>
+                🛠 Build it up: {sb.title.replace('SB: ', '')} →
+              </button>
+            )}
+            <button className={passed && nextCore ? 'btn ghost' : !passed && sb ? 'btn ghost' : 'btn'} onClick={onQuit}>Back to the path</button>
+          </div>
+        </div>
+      </Shell>
+    )
+  }
+
+  return (
+    <Shell onClose={onClose} sub={ws.title} onBack={onQuit}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14, flexWrap: 'wrap' }}>
+        {ws.activities.map((a, i) => (
+          <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
+            background: i < step ? '#e6f6ee' : i === step ? '#e9f5fb' : '#eef3f6',
+            color: i < step ? 'var(--good)' : i === step ? CYAN : 'var(--muted)' }}>
+            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : 'Fill it in'}
+          </span>
+        ))}
+        <span style={{ flex: 1 }} />
+        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>one worksheet · scored together</span>
+      </div>
+
+      {act.kind === 'hunt'
+        ? <HuntActivity key={step} act={act} onDone={finishActivity} />
+        : <FixActivity key={step} act={act} onDone={finishActivity} />}
+    </Shell>
+  )
+}
+
+/* --- activity: hunt the planted errors --- */
+function HuntActivity({ act, onDone }) {
+  const [caught, setCaught] = useState({})
+  const [fixes, setFixes] = useState({})
+  const [typing, setTyping] = useState(null)
+  const [draft, setDraft] = useState('')
+  const [misses, setMisses] = useState(0)
+  const [flash, setFlash] = useState(null)
+
+  const fixedCount = Object.keys(fixes).length
+  const done = fixedCount === act.errorCount
+
+  function tap(tok, ti) {
+    if (!tok.bad) { setMisses((n) => n + 1); setFlash(ti); setTimeout(() => setFlash(null), 600); return }
+    if (fixes[tok.i]) return
+    setCaught((c) => ({ ...c, [tok.i]: true })); setTyping(tok.i); setDraft('')
+  }
+  function submit(tok) {
+    if (norm(draft) !== norm(tok.fix)) return
+    setFixes((f) => ({ ...f, [tok.i]: true })); setTyping(null); setDraft('')
+  }
+
+  return (
+    <div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
+        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{fixedCount} of {act.errorCount} fixed</span>
+        <span className="pill" style={{ background: misses ? '#fdecec' : '#f1faf4', color: misses ? '#c0392b' : 'var(--good)' }}>
+          {misses} false {misses === 1 ? 'alarm' : 'alarms'}
+        </span>
+      </div>
+
+      <div style={{ background: '#fbfdfe', border: '1.5px solid var(--line)', borderRadius: 14, padding: '16px 18px', fontSize: 15.5, lineHeight: 2.05 }}>
+        {act.tokens.map((tok, ti) => {
+          if (!tok.bad) return (
+            <span key={ti} onClick={() => tap(tok, ti)}
+              style={{ cursor: 'pointer', borderRadius: 4, background: flash === ti ? '#fdecec' : 'transparent', transition: 'background .2s' }}>{tok.t}</span>
+          )
+          if (fixes[tok.i]) return <span key={ti} style={{ background: '#e6f6ee', color: 'var(--good)', fontWeight: 800, borderRadius: 5, padding: '1px 6px' }}>{tok.fix}</span>
+          if (typing === tok.i) return (
+            <span key={ti} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff8ec', border: '1.5px solid #f0b429', borderRadius: 8, padding: '2px 6px', margin: '0 2px' }}>
+              <s style={{ color: '#c0392b', fontWeight: 700 }}>{tok.t}</s>
+              <input autoFocus value={draft} onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') submit(tok) }} placeholder="type the fix"
+                style={{ width: 140, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 14 }} />
+              <button onClick={() => submit(tok)} disabled={!draft.trim()}
+                style={{ fontSize: 12, fontWeight: 800, color: draft.trim() ? '#fff' : '#9db0c0', background: draft.trim() ? NAVY : '#eef0f6', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>✓</button>
+            </span>
+          )
+          if (caught[tok.i]) return (
+            <span key={ti} onClick={() => { setTyping(tok.i); setDraft('') }}
+              style={{ cursor: 'pointer', background: '#fff3d6', color: '#8a6400', fontWeight: 800, borderRadius: 5, padding: '1px 6px', textDecoration: 'underline wavy #e0a51c' }}>{tok.t}</span>
+          )
+          return <span key={ti} onClick={() => tap(tok, ti)} style={{ cursor: 'pointer' }}>{tok.t}</span>
+        })}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
+        <button className="btn" onClick={() => onDone(Math.max(0, fixedCount - Math.floor(misses / 2)))}>
+          {done ? 'Next activity →' : 'Done with this one →'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* --- activity: fill in the blank from a word bank --- */
+function FixActivity({ act, onDone }) {
+  const [answers, setAnswers] = useState(act.items.map(() => ''))
+  const [checked, setChecked] = useState(false)
+  const right = act.items.map((it, i) => norm(answers[i]) === norm(it.answer))
+  const score = right.filter(Boolean).length
+
+  return (
+    <div>
+      <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
+
+      <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 13 }}>
+        {act.bank.map((w) => (
+          <span key={w} style={{ background: '#eef6f9', color: CYAN, borderRadius: 999, padding: '6px 14px', fontSize: 13, fontWeight: 800 }}>{w}</span>
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        {act.items.map((it, i) => {
+          const [before, after] = it.given.split('____')
+          const ok = checked && right[i]
+          const bad = checked && !right[i]
+          return (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', background: ok ? '#f1faf4' : bad ? '#fff7f7' : '#fbfdfe',
+              border: `1px solid ${ok ? '#b8e6cd' : bad ? '#f0b9be' : 'var(--line)'}`, borderRadius: 11, padding: '10px 13px', fontSize: 14, lineHeight: 1.6 }}>
+              <span style={{ width: 20, fontSize: 11.5, fontWeight: 800, color: 'var(--muted)' }}>{i + 1}.</span>
+              <span style={{ flex: 1, minWidth: 190 }}>
+                {before}
+                <input value={answers[i]} disabled={checked}
+                  onChange={(e) => setAnswers((a) => a.map((v, j) => (j === i ? e.target.value : v)))}
+                  style={{ width: 132, margin: '0 4px', padding: '4px 9px', borderRadius: 7, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 14, background: checked ? '#fff' : '#fff' }} />
+                {after}
+              </span>
+              {checked && (
+                <span style={{ fontSize: 12.5, fontWeight: 800, color: ok ? 'var(--good)' : '#c0392b', whiteSpace: 'nowrap' }}>
+                  {ok ? '✓' : `✕ ${it.answer}`}
+                </span>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
+        {checked
+          ? <button className="btn" onClick={() => onDone(score)}>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></button>
+          : <button className="btn" disabled={answers.every((a) => !a.trim())} onClick={() => setChecked(true)}>Check my answers ✓</button>}
+      </div>
+    </div>
+  )
+}
+
+function Shell({ children, onClose, sub, onBack }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 80, padding: 16 }} onClick={onClose}>
-      <div className="card" style={{ width: 700, maxWidth: '96vw', maxHeight: '94vh', overflowY: 'auto', padding: 0 }} onClick={(e) => e.stopPropagation()}>
+      <div className="card" style={{ width: 760, maxWidth: '96vw', maxHeight: '94vh', overflowY: 'auto', padding: 0 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ padding: '14px 20px', background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 62%,#0e2748 100%)', color: '#fff', display: 'flex', alignItems: 'center', gap: 11 }}>
           <span style={{ fontSize: 22 }}>🧾</span>
           <div style={{ flex: 1, minWidth: 0 }}>
             <b style={{ fontSize: 17 }}>The Proof Room</b>
             <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>{sub}</div>
           </div>
+          {onBack && (
+            <button onClick={onBack} style={{ color: '#a8dff5', fontSize: 12.5, fontWeight: 800, background: 'rgba(255,255,255,.12)', borderRadius: 999, padding: '6px 13px', cursor: 'pointer' }}>← Path</button>
+          )}
           <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 22, background: 'none', cursor: 'pointer' }}>×</button>
         </div>
         <div style={{ padding: '18px 20px 20px' }}>{children}</div>

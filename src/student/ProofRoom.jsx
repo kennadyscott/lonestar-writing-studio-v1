@@ -106,10 +106,10 @@ function SolutionPlayer({ id, onClose }) {
  * instead of a form, so the default view of a worksheet is the worksheet — and
  * because it is the same component the student runs, it cannot drift from it.
  * Takes a RAW activity and prepares it here, so callers hand over the draft. */
-export function ActivityPreview({ act, onPlay, onDone }) {
+export function ActivityPreview({ act, onPlay, onDone, doneLabel }) {
   const ready = useMemo(() => (act && act.kind === 'hunt' ? { ...act, ...parseHunt(act.text), text: undefined } : act), [act])
   if (!ready || !ready.kind) return null
-  const props = { act: ready, onDone: onDone || (() => {}), onPlay: onPlay || (() => {}) }
+  const props = { act: ready, onDone: onDone || (() => {}), onPlay: onPlay || (() => {}), doneLabel }
   if (ready.kind === 'hunt') return <HuntActivity {...props} />
   if (ready.kind === 'maze') return <MazeActivity {...props} />
   if (ready.kind === 'compose') return <ComposeActivity {...props} />
@@ -449,7 +449,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
 }
 
 /* --- activity: hunt the planted errors --- */
-function HuntActivity({ act, onDone, onPlay }) {
+function HuntActivity({ act, onDone, onPlay, doneLabel }) {
   const [caught, setCaught] = useState({})
   const [fixes, setFixes] = useState({})
   const [typing, setTyping] = useState(null)
@@ -524,7 +524,7 @@ function HuntActivity({ act, onDone, onPlay }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" onClick={() => onDone(Math.max(0, fixedCount - Math.floor(misses / 2)))}>
-          {done ? 'Next activity →' : 'Done with this one →'}
+          {doneLabel || (done ? 'Next activity →' : 'Done with this one →')}
         </button>
       </div>
     </div>
@@ -532,7 +532,7 @@ function HuntActivity({ act, onDone, onPlay }) {
 }
 
 /* --- activity: walk the maze, fixing the verb at every gate --- */
-function MazeActivity({ act, onDone, onPlay }) {
+function MazeActivity({ act, onDone, onPlay, doneLabel }) {
   const grid = act.grid
   const H = grid.length, W = grid[0].length
   const cellAt = (r, c) => (r >= 0 && r < H && c >= 0 && c < W ? grid[r][c] : '#')
@@ -683,7 +683,7 @@ function MazeActivity({ act, onDone, onPlay }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" disabled={!done} onClick={() => onDone(firstTry)}>
-          {done ? 'Next activity →' : 'Reach the finish flag first'}
+          {doneLabel || (done ? 'Next activity →' : 'Reach the finish flag first')}
         </button>
       </div>
     </div>
@@ -691,7 +691,7 @@ function MazeActivity({ act, onDone, onPlay }) {
 }
 
 /* --- activity: one numbered passage, several questions about it --- */
-function PassageActivity({ act, onDone, onPlay }) {
+function PassageActivity({ act, onDone, onPlay, doneLabel }) {
   const [focus, setFocus] = useState(0)
   const [picked, setPicked] = useState({})   // q index -> word clicked in the passage
   const [fixes, setFixes] = useState({})     // q index -> the correction typed
@@ -840,7 +840,7 @@ function PassageActivity({ act, onDone, onPlay }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         {checked
-          ? <button className="btn" onClick={() => onDone(score)}>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.questions.length}</b></button>
+          ? <button className="btn" onClick={() => onDone(score)}>{doneLabel || <>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.questions.length}</b></>}</button>
           : <button className="btn" onClick={() => setChecked(true)}>Check my answers ✓</button>}
       </div>
       </WithArt>
@@ -849,7 +849,7 @@ function PassageActivity({ act, onDone, onPlay }) {
 }
 
 /* --- activity: write the sentence yourself, judged only on the moves --- */
-function ComposeActivity({ act, onDone, onPlay }) {
+function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
   const [drafts, setDrafts] = useState(act.items.map(() => ''))
   const [shown, setShown] = useState({})   // item index -> model sentence revealed
   const results = act.items.map((it, i) => checkCompose(it, drafts[i]))
@@ -914,7 +914,7 @@ function ComposeActivity({ act, onDone, onPlay }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" onClick={() => onDone(score)}>
-          Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b>
+          {doneLabel || <>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></>}
         </button>
       </div>
       </WithArt>
@@ -923,7 +923,7 @@ function ComposeActivity({ act, onDone, onPlay }) {
 }
 
 /* --- activity: fill the blanks by typing, clicking, or dragging --- */
-function FixActivity({ act, onDone, onPlay }) {
+function FixActivity({ act, onDone, onPlay, doneLabel }) {
   const mode = act.mode || 'type'
   const [answers, setAnswers] = useState(act.items.map(() => ''))
   const [checked, setChecked] = useState(false)
@@ -1052,7 +1052,7 @@ function FixActivity({ act, onDone, onPlay }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         {checked
-          ? <button className="btn" onClick={() => onDone(score)}>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></button>
+          ? <button className="btn" onClick={() => onDone(score)}>{doneLabel || <>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></>}</button>
           : <button className="btn" disabled={answers.every((a) => !a.trim())} onClick={check}>Check my answers ✓</button>}
       </div>
     </div>

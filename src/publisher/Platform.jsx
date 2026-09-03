@@ -749,7 +749,7 @@ function Workbench({ id, onChanged, onBack }) {
       {tab === 'details' && <DetailsTab draft={draft} mutate={mutate} />}
       {tab === 'build' && <BuildTab draft={draft} mutate={mutate} />}
       {tab === 'proof' && <ProofTab draft={draft} proof={proof} dirty={dirty} onSave={save} videos={data.videos} mutate={mutate} />}
-      {tab === 'publish' && <PublishTab path={p} proof={proof} versions={data.versions} dirty={dirty}
+      {tab === 'publish' && <PublishTab path={p} proof={proof} versions={data.versions} dirty={dirty} draft={draft}
         onRefresh={async () => { await load(); await onChanged() }} onProof={() => setTab('proof')} />}
     </div>
   )
@@ -787,7 +787,13 @@ function BuildTab({ draft, mutate }) {
             style={{ display: 'block', width: '100%', textAlign: 'left', background: s.w.id === current?.w.id ? '#f2f9fc' : 'transparent', border: s.w.id === current?.w.id ? `1.5px solid ${CYAN}` : '1.5px solid transparent', borderRadius: 9, padding: '7px 9px', marginBottom: 3, cursor: 'pointer', fontFamily: 'inherit' }}>
             <div style={{ fontSize: 12.5, fontWeight: 800, color: s.kind === 'sb' ? AMBER : NAVY, lineHeight: 1.3 }}>{s.label}</div>
             <div style={{ fontSize: 10.5, color: '#5b6b7c', fontWeight: 700 }}>
-              {(s.w.activities || []).length} activities
+              {(() => {
+                const acts = s.w.activities || []
+                const ok = acts.filter((a) => a.approved).length
+                return <span style={{ color: acts.length && ok === acts.length ? GREEN : undefined, fontWeight: 800 }}>
+                  {ok}/{acts.length} approved
+                </span>
+              })()}
               {s.w.flag ? <span style={{ color: FLAG }}>⚑ </span> : null}
               {(s.w.standards || []).length
                 ? <> · <span style={{ color: CYAN }}>{joinStandards(s.w.standards)}</span></>
@@ -841,13 +847,27 @@ function ActivityCard({ act, index, count, onEdit, onRemove }) {
   const [editing, setEditing] = useState(false)
   const [replay, setReplay] = useState(0)
   const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
+  const approved = !!act.approved
+
+  // Approving records who and when, because "approved" with nothing behind it is
+  // a tick box. Editing clears it: an activity that changed after sign-off has
+  // not been signed off.
+  const approve = () => onEdit((a) => { a.approved = new Date().toISOString() })
+  const unapprove = () => onEdit((a) => { delete a.approved })
+  const edited = (fn) => onEdit((a) => { fn(a); delete a.approved })
 
   return (
-    <div style={{ border: '1.5px solid var(--line)', borderRadius: 13, marginBottom: 11, background: '#fff', overflow: 'hidden' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#f4f8fb', borderBottom: '1px solid var(--line)' }}>
-        <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#fff', background: NAVY, borderRadius: 6, padding: '3px 8px' }}>{index + 1}</span>
-        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 800, color: NAVY }}>{kindName}</span>
+    <div style={{ border: `1.5px solid ${approved ? GREEN + '55' : 'var(--line)'}`, borderRadius: 13, marginBottom: 11, background: '#fff', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: approved ? '#f2fbf6' : '#f4f8fb', borderBottom: '1px solid var(--line)' }}>
+        <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#fff', background: approved ? GREEN : NAVY, borderRadius: 6, padding: '3px 8px' }}>{index + 1}</span>
+        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 800, color: approved ? GREEN : NAVY }}>{kindName}</span>
         {act.flag && <span style={{ fontSize: 11, fontWeight: 800, color: FLAG }}>⚑ flagged</span>}
+        {approved && (
+          <button onClick={unapprove} title={`Approved ${new Date(act.approved).toLocaleString()} — click to withdraw`}
+            style={{ ...btn('#dcf0e4', GREEN), border: 'none', fontSize: 11.5, padding: '5px 11px' }}>
+            ✓ Approved
+          </button>
+        )}
         {!editing && (
           <button onClick={() => setReplay((n) => n + 1)} title="Start this activity over"
             style={{ ...btn('#fff', '#5b6b7c'), border: '1px solid #dde5ec', fontSize: 11.5, padding: '5px 11px' }}>↺ Reset</button>
@@ -860,11 +880,17 @@ function ActivityCard({ act, index, count, onEdit, onRemove }) {
 
       {editing ? (
         <div style={{ padding: '4px 14px 12px' }}>
-          <ActivityEditor act={act} index={index} count={count} onEdit={onEdit} onRemove={onRemove} alwaysOpen />
+          {approved && (
+            <div style={{ background: '#fdf7e8', color: AMBER, borderRadius: 9, padding: '8px 11px', fontSize: 12, fontWeight: 700, margin: '10px 0 2px' }}>
+              This activity is approved. Changing it withdraws that.
+            </div>
+          )}
+          <ActivityEditor act={act} index={index} count={count} onEdit={edited} onRemove={onRemove} alwaysOpen />
         </div>
       ) : (
         <div style={{ padding: '14px 16px 16px' }}>
-          <ActivityPreview key={replay} act={act} />
+          <ActivityPreview key={replay} act={act} onDone={approve}
+            doneLabel={approved ? '✓ Approved' : '✓ Approve this activity'} />
         </div>
       )}
     </div>
@@ -991,7 +1017,13 @@ const Tally = ({ n, label: l, color }) => (
 
 /* ---------- approve & publish ---------- */
 
-function PublishTab({ path, proof, versions, dirty, onRefresh, onProof }) {
+function PublishTab({ path, proof, versions, dirty, draft, onRefresh, onProof }) {
+  // Approving activities is a person's job and proofing is a machine's; neither
+  // stands in for the other, so publishing shows both and blocks only on the one
+  // that means a student would hit a dead end.
+  const acts = [...(draft?.core || []), ...Object.values(draft?.skillBuilders || {}), ...(draft?.full ? [draft.full] : [])]
+    .flatMap((w) => (w.activities || []).map((a) => ({ ...a, sheet: w.title })))
+  const signedOff = acts.filter((a) => a.approved).length
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState('')
   const [msg, setMsg] = useState(null)
@@ -1028,6 +1060,19 @@ function PublishTab({ path, proof, versions, dirty, onRefresh, onProof }) {
           <Note color={AMBER}>The draft has moved ahead of what students are seeing.</Note>
         )}
         {msg && <Note color={msg.ok ? GREEN : RED}>{msg.text}</Note>}
+
+        {acts.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 11, background: PAPER, borderRadius: 11, padding: '11px 14px', marginTop: 4 }}>
+            <div style={{ flex: '0 0 auto', fontSize: 21, fontWeight: 800, color: signedOff === acts.length ? GREEN : '#93a3b3', lineHeight: 1 }}>
+              {signedOff}/{acts.length}
+            </div>
+            <div style={{ flex: 1, minWidth: 0, fontSize: 12.5, color: '#5b6b7c', fontWeight: 700 }}>
+              {signedOff === acts.length
+                ? 'Every activity has been played through and approved.'
+                : `${acts.length - signedOff} ${acts.length - signedOff === 1 ? 'activity has' : 'activities have'} not been approved yet. Proofing does not check whether anyone has read them.`}
+            </div>
+          </div>
+        )}
 
         <div style={{ display: 'flex', gap: 9, alignItems: 'flex-end', flexWrap: 'wrap', marginTop: 12 }}>
           <div style={{ flex: '1 1 280px' }}>

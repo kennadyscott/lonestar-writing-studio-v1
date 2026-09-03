@@ -45,6 +45,9 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .home-grid { display: grid; grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 400px); gap: 18px; align-items: stretch; }
 .home-split { display: grid; grid-template-columns: 1fr 1.12fr; gap: 18px; align-items: stretch; flex: 1; }
 .home-main { display: grid; grid-template-columns: minmax(0, 1fr) clamp(318px, 25vw, 400px); gap: 18px; align-items: start; }
+/* the worksheet character standing beside an activity — first thing to go when space is tight */
+.act-figure { display: block; }
+@media (max-width: 780px) { .act-figure { display: none; } }
 .conf-split { display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr); }
 .wall-strip { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .luna-modules { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }

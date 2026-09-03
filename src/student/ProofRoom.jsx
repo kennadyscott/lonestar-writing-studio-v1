@@ -33,6 +33,15 @@ const HOW_TO = {
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
 }
 
+function Beside({ src, children, flip }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, flexDirection: flip ? 'row-reverse' : 'row' }}>
+      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+      <img className="act-figure" src={src} alt="" style={{ height: 210, flexShrink: 0, alignSelf: 'flex-end' }} />
+    </div>
+  )
+}
+
 function Directions({ text }) {
   return (
     <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#eef6f9', border: '1.5px solid #cfe6f0',
@@ -76,15 +85,11 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
 
   return (
     <Shell onClose={onClose} sub="Bring writing in broken, take it out clean">
-      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, background: 'linear-gradient(120deg,#e7f2f7,#fff 70%)',
-        borderRadius: 16, padding: '16px 18px 0', marginBottom: 14, overflow: 'hidden' }}>
-        <div style={{ flex: 1, paddingBottom: 16 }}>
-          <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>Pick a topic and start the path.</div>
-          <p style={{ fontSize: 13, color: '#3f5f76', lineHeight: 1.5, margin: '5px 0 0' }}>
-            Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic.
-          </p>
-        </div>
-        <img src={KID_READER} alt="" style={{ height: 118, flexShrink: 0, marginBottom: -2 }} />
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>Pick a topic and start the path.</div>
+        <p style={{ fontSize: 13, color: '#3f5f76', lineHeight: 1.5, margin: '5px 0 0' }}>
+          Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic.
+        </p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {topics.map((t) => {
@@ -137,7 +142,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   return (
     <Shell onClose={onClose} sub={topic.title} onBack={onBack}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
-        <img src={KID_CLIPBOARD} alt="" style={{ height: 72, flexShrink: 0, marginBottom: -12 }} />
+        <span style={{ fontSize: 22 }}>{topic.icon}</span>
         <div style={{ flex: 1, minWidth: 170 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{topic.standards} · GRADE {topic.grade}</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{cleared} of {topic.core.length} skills cleared</div>
@@ -348,6 +353,7 @@ function HuntActivity({ act, onDone }) {
         </span>
       </div>
 
+      <Beside src={KID_CLIPBOARD}>
       <div style={{ background: '#fbfdfe', border: '1.5px solid var(--line)', borderRadius: 14, padding: '16px 18px', fontSize: 15.5, lineHeight: 2.05 }}>
         {act.tokens.map((tok, ti) => {
           if (!tok.bad) return (
@@ -372,6 +378,7 @@ function HuntActivity({ act, onDone }) {
           return <span key={ti} onClick={() => tap(tok, ti)} style={{ cursor: 'pointer' }}>{tok.t}</span>
         })}
       </div>
+      </Beside>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
@@ -554,6 +561,7 @@ function FixActivity({ act, onDone }) {
         ))}
       </div>
 
+      <Beside src={KID_READER} flip>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
         {act.items.map((it, i) => {
           const [before, after] = it.given.split('____')
@@ -579,6 +587,7 @@ function FixActivity({ act, onDone }) {
           )
         })}
       </div>
+      </Beside>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>

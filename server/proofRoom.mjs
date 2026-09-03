@@ -22,7 +22,24 @@
 //
 // Job 1's hunt paragraph is verbatim from "Irregular Verbs.pptx" (Grade 5).
 
+import { checkRule } from './peerTasks.mjs'
+
 export const PASS_MARK = 85
+
+/* A compose item: the student writes the sentence themselves, and the item only
+ * ever judges the moves it is teaching — never style. Each check is a named,
+ * machine-evaluable rule, so "open-ended" still has one solid answer. */
+const compose = (brief, items, hint) => ({ kind: 'compose', brief, items, hint })
+const need = (label, rule) => ({ label, rule })
+const RX = (re) => ({ type: 'regex', re })
+const HAS = (...any) => ({ type: 'contains', any })
+const ALL = (...of) => ({ type: 'all', of })
+const ANY = (...of) => ({ type: 'any', of })
+
+/* Run one compose item's checks over what the student wrote. */
+export function checkCompose(item, text) {
+  return (item.checks || []).map((c) => ({ label: c.label, ok: checkRule(c.rule, text || '') }))
+}
 
 const hunt = (brief, text, hint, videos) => ({ kind: 'hunt', brief, text, hint, videos })
 const fix = (brief, bank, items, hint) => ({ kind: 'fix', brief, bank, items, hint })
@@ -96,6 +113,44 @@ export const TOPICS = [
           hunt('Four joining words are the wrong ones for the meaning.',
             `We planned to hike on Saturday. [[Therefore|However]], the forecast called for storms all weekend. My dad checked the radar twice; [[however|therefore]], we moved the trip to Sunday. My sister packed the cooler. [[However|Meanwhile]], I loaded the tent into the truck. The sun came out by noon; [[meanwhile|consequently]], the trail was dry enough to climb.`,
             'However = but. Therefore = so. Meanwhile = at the same time.'),
+          compose('Combine each pair into one sentence. The joining word does the work.', [
+            {
+              prompt: 'Join these with a conjunctive adverb that shows CONTRAST.',
+              pieces: ['We planned to hike Saturday.', 'The forecast called for storms.'],
+              checks: [
+                need('Uses however', HAS('however')),
+                need('Semicolon or period before it', RX('[;.]\\s*however')),
+                need('Comma right after it', RX('however\\s*,')),
+                need('Keeps both ideas', ALL(HAS('hike'), HAS('storm'))),
+                need('Still one sentence', { type: 'maxSentences', n: 1 }),
+              ],
+              model: 'We planned to hike Saturday; however, the forecast called for storms.',
+            },
+            {
+              prompt: 'Join these with a conjunctive adverb that shows RESULT.',
+              pieces: ['The library closed early.', 'We studied at home.'],
+              checks: [
+                need('Uses therefore or consequently', ANY(HAS('therefore'), HAS('consequently'))),
+                need('Semicolon or period before it', RX('[;.]\\s*(therefore|consequently)')),
+                need('Comma right after it', RX('(therefore|consequently)\\s*,')),
+                need('Keeps both ideas', ALL(HAS('librar'), HAS('home'))),
+                need('Still one sentence', { type: 'maxSentences', n: 1 }),
+              ],
+              model: 'The library closed early; therefore, we studied at home.',
+            },
+            {
+              prompt: 'Join these with a conjunctive adverb that shows TWO THINGS AT ONCE.',
+              pieces: ['Dad cooked dinner.', 'I set the table.'],
+              checks: [
+                need('Uses meanwhile', HAS('meanwhile')),
+                need('Semicolon or period before it', RX('[;.]\\s*meanwhile')),
+                need('Comma right after it', RX('meanwhile\\s*,')),
+                need('Keeps both ideas', ALL(HAS('dinner'), HAS('table'))),
+                need('Still one sentence', { type: 'maxSentences', n: 1 }),
+              ],
+              model: 'Dad cooked dinner; meanwhile, I set the table.',
+            },
+          ], 'The pattern is the same every time: idea ; joining word , idea.'),
           fix('Join the two ideas with the right word.', ['however', 'therefore', 'meanwhile', 'finally', 'instead'], [
             { given: 'The library closed early; ____, we studied at home.', answer: 'therefore' },
             { given: 'I wanted the blue folder; ____, only green ones were left.', answer: 'however' },

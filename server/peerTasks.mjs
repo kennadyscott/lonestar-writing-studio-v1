@@ -46,6 +46,9 @@ export function checkRule(rule, text, original = '') {
       return new Set(firsts.filter(Boolean)).size >= rule.n
     }
     case 'addedWords': return wordList(text).length - wordList(original).length >= rule.n
+    case 'maxSentences': return sentences(text).length <= rule.n && sentences(text).length > 0
+    case 'regex': return new RegExp(rule.re, rule.flags || 'i').test(t)
+    case 'any': return rule.of.some((r) => checkRule(r, text, original))
     case 'all': return rule.of.every((r) => checkRule(r, text, original))
     default: return false
   }

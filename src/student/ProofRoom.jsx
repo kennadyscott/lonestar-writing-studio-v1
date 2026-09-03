@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
-import { topicList, topicFor, PASS_MARK } from '../../server/proofRoom.mjs'
+import { topicList, topicFor, PASS_MARK, checkCompose } from '../../server/proofRoom.mjs'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -30,6 +30,7 @@ const KID_READER = ART('kid-reader.png')
 const HOW_TO = {
   hunt: 'Click on each word that is wrong. Type the correct word, then press ✓. Clicking a word that is already correct counts against you.',
   fix: 'Type the missing word in each blank. Use the word bank above — every word is used once. Check your answers when the last blank is filled.',
+  compose: 'Write the sentence yourself. The checklist ticks green as you land each move — get all of them and the sentence counts. How you word the rest is up to you.',
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
 }
 
@@ -336,7 +337,7 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
             background: i < step ? '#e6f6ee' : i === step ? '#e9f5fb' : '#eef3f6',
             color: i < step ? 'var(--good)' : i === step ? CYAN : 'var(--muted)' }}>
-            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : a.kind === 'maze' ? 'Verb maze' : 'Fill it in'}
+            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : a.kind === 'maze' ? 'Verb maze' : a.kind === 'compose' ? 'Write it' : 'Fill it in'}
           </span>
         ))}
         <span style={{ flex: 1 }} />
@@ -346,6 +347,7 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
       <SolutionPlayer id={video} onClose={() => setVideo(null)} />
       {act.kind === 'hunt' ? <HuntActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'maze' ? <MazeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'compose' ? <ComposeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : <FixActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />}
     </Shell>
   )
@@ -587,6 +589,78 @@ function MazeActivity({ act, onDone, onPlay }) {
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" disabled={!done} onClick={() => onDone(firstTry)}>
           {done ? 'Next activity →' : 'Reach the finish flag first'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* --- activity: write the sentence yourself, judged only on the moves --- */
+function ComposeActivity({ act, onDone, onPlay }) {
+  const [drafts, setDrafts] = useState(act.items.map(() => ''))
+  const [shown, setShown] = useState({})   // item index -> model sentence revealed
+  const results = act.items.map((it, i) => checkCompose(it, drafts[i]))
+  const landed = results.map((r) => r.every((c) => c.ok))
+  const score = landed.filter(Boolean).length
+
+  return (
+    <div>
+      <Directions text={act.directions || HOW_TO.compose} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
+        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{score} of {act.items.length} landed</span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {act.items.map((it, i) => {
+          const checks = results[i]
+          const ok = landed[i]
+          return (
+            <div key={i} style={{ border: `1.5px solid ${ok ? '#b8e6cd' : 'var(--line)'}`, background: ok ? '#f6fdf9' : '#fbfdfe',
+              borderRadius: 14, padding: '13px 15px' }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: ok ? 'var(--good)' : CYAN, letterSpacing: .3 }}>
+                {i + 1}. {it.prompt}
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', margin: '9px 0 10px' }}>
+                {it.pieces.map((pc, j) => (
+                  <span key={j} style={{ background: '#eef3f6', borderRadius: 9, padding: '7px 11px', fontSize: 13, color: '#33566e' }}>{pc}</span>
+                ))}
+              </div>
+              <textarea value={drafts[i]} rows={2}
+                onChange={(e) => setDrafts((d) => d.map((v, j) => (j === i ? e.target.value : v)))}
+                placeholder="Write the combined sentence…"
+                style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${ok ? '#8fd6ae' : '#cfe0ec'}`,
+                  fontFamily: 'inherit', fontSize: 14.5, resize: 'vertical' }} />
+
+              <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 9 }}>
+                {checks.map((c, j) => (
+                  <span key={j} style={{ display: 'inline-flex', alignItems: 'center', gap: 5, borderRadius: 999, padding: '4px 10px', fontSize: 11.5, fontWeight: 800,
+                    background: c.ok ? '#e6f6ee' : '#eef3f6', color: c.ok ? 'var(--good)' : '#8fa5b8' }}>
+                    {c.ok ? '✓' : '○'} {c.label}
+                  </span>
+                ))}
+              </div>
+
+              {shown[i] && (
+                <div style={{ background: '#eef6f9', borderRadius: 10, padding: '10px 12px', marginTop: 9, fontSize: 13, lineHeight: 1.5 }}>
+                  <b style={{ color: CYAN }}>One that works:</b> {it.model}
+                </div>
+              )}
+              {!ok && drafts[i].trim().length > 0 && !shown[i] && (
+                <button onClick={() => setShown((sh) => ({ ...sh, [i]: true }))}
+                  style={{ marginTop: 9, fontSize: 11.5, fontWeight: 800, color: CYAN, background: 'none', cursor: 'pointer', padding: 0 }}>
+                  Show me one that works →
+                </button>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
+        <button className="btn" onClick={() => onDone(score)}>
+          Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b>
         </button>
       </div>
     </div>

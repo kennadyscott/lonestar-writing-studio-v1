@@ -41,11 +41,22 @@ export function checkCompose(item, text) {
   return (item.checks || []).map((c) => ({ label: c.label, ok: checkRule(c.rule, text || '') }))
 }
 
+/* Split a numbered sentence into clickable tokens, keeping punctuation attached
+ * so a student clicks the word they actually see. */
+export const tokenize = (sentence) => (sentence || '').split(/(\s+)/).filter((x) => x !== '')
+
 const hunt = (brief, text, hint, videos) => ({ kind: 'hunt', brief, text, hint, videos })
 const fix = (brief, bank, items, hint, mode = 'type') => ({ kind: 'fix', brief, bank, items, hint, mode })
 // maze: S start, X finish, # wall, . open, A–J gates. Every gate sits on the only
 // route through, so the verbs get corrected in the order the path meets them.
 const maze = (brief, grid, gates, hint, video) => ({ kind: 'maze', brief, grid, gates, hint, video })
+// passage: one numbered paragraph, several questions hanging off it. The
+// questions can say "sentence 3" because the sentences carry numbers, which is
+// how the printed capstone asks everything.
+//   pick   click the error inside a named sentence, then correct it
+//   blank  a single answer, typed or clicked
+//   write  compose against named moves
+const passage = (brief, sentences, questions, hint) => ({ kind: 'passage', brief, sentences, questions, hint })
 
 export const TOPICS = [
   {
@@ -261,9 +272,36 @@ export const TOPICS = [
       id: 'ws_full', title: 'Full Topic: Edit Drafts: Parts of Speech',
       skill: 'All five skills in one piece of writing',
       activities: [
-        hunt('Six errors are hiding in this draft — one from each skill you have practiced, and one extra.',
-          `Our class [[goed|went]] to the state capitol last Friday. It was the [[most big|biggest]] building I had ever walked into. Marcus and [[me|I]] stayed near the front of the group. Our guide met us [[in|at]] the top of the marble stairs. She talked for almost an hour; [[however|therefore]], we understood the whole history by the end. On the bus home, I [[writed|wrote]] two pages about it in my notebook.`,
-          'One irregular verb, one adjective, one pronoun, one preposition, one joining word — and a second verb.'),
+        passage('Read the draft, then answer the questions about it. The sentences are numbered.',
+          [
+            'Our class goed to the state capitol last Friday.',
+            'It was the bigger building I had ever walked into.',
+            'Marcus and me stayed near the front of the group.',
+            'Our guide met us in the top of the marble stairs.',
+            'She talked for almost an hour.',
+            'We understood the whole history by the end.',
+            'On the bus home, I writed two pages about it in my notebook.',
+          ],
+          [
+            { kind: 'pick', sentence: 1, ask: 'Click the irregular verb error in sentence 1, then write the correction.', target: 'goed', answer: 'went' },
+            { kind: 'pick', sentence: 2, ask: 'Click the adjective error in sentence 2, then write the correction.', target: 'bigger', answer: 'biggest' },
+            { kind: 'pick', sentence: 3, ask: 'Click the pronoun error in sentence 3, then write the correction.', target: 'me', answer: 'I' },
+            { kind: 'blank', sentence: 4, ask: 'The word "in" in sentence 4 should be changed to which preposition?', answer: 'at', options: ['on', 'at', 'to'] },
+            {
+              kind: 'write', sentence: '5 and 6',
+              ask: 'Combine sentences 5 and 6 into one sentence using a conjunctive adverb that shows RESULT.',
+              checks: [
+                need('Uses therefore or consequently', ANY(HAS('therefore'), HAS('consequently'))),
+                need('Semicolon or period before it', RX('[;.]\\s*(therefore|consequently)')),
+                need('Comma right after it', RX('(therefore|consequently)\\s*,')),
+                need('Keeps both ideas', ALL(HAS('hour'), HAS('histor'))),
+                need('Still one sentence', { type: 'maxSentences', n: 1 }),
+              ],
+              model: 'She talked for almost an hour; therefore, we understood the whole history by the end.',
+            },
+            { kind: 'pick', sentence: 7, ask: 'Click the irregular verb error in sentence 7, then write the correction.', target: 'writed', answer: 'wrote' },
+          ],
+          'Every question points at one numbered sentence — read that sentence again before you answer.'),
         fix('Finish each sentence with the right word.', ['knew', 'more careful', 'whom', 'during', 'meanwhile'], [
           { given: 'I ____ the answer before she finished asking.', answer: 'knew' },
           { given: 'This draft is ____ than my first one.', answer: 'more careful' },
@@ -294,7 +332,10 @@ export function prepare(ws) {
   const activities = ws.activities.map((a) =>
     a.kind === 'hunt' ? { ...a, ...parseHunt(a.text), text: undefined } : { ...a })
   const points = activities.reduce((n, a) =>
-    n + (a.kind === 'hunt' ? a.errorCount : a.kind === 'maze' ? Object.keys(a.gates).length : a.items.length), 0)
+    n + (a.kind === 'hunt' ? a.errorCount
+      : a.kind === 'maze' ? Object.keys(a.gates).length
+      : a.kind === 'passage' ? a.questions.length
+      : a.items.length), 0)
   return { ...ws, activities, points }
 }
 

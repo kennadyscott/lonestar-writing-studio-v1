@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
-import { prepareTopic, PASS_MARK, checkCompose } from '../../server/proofRoom.mjs'
+import { prepareTopic, PASS_MARK, checkCompose, tokenize } from '../../server/proofRoom.mjs'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -33,6 +33,7 @@ const HOW_TO = {
   compose: 'Write the sentence yourself. The checklist ticks green as you land each move — get all of them and the sentence counts. How you word the rest is up to you.',
   select: 'Click the word that belongs in each blank. Pick again any time before you check.',
   drag: 'Drag each word from the bank into the blank where it belongs — or tap a word, then tap its blank. Drop it back in the bank to change your mind.',
+  passage: 'Read the whole draft first. Each question names the sentence it is about — that sentence lights up when you open the question. For a "click the error" question, click the word inside the passage.',
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
 }
 
@@ -353,7 +354,7 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
             background: i < step ? '#e6f6ee' : i === step ? '#e9f5fb' : '#eef3f6',
             color: i < step ? 'var(--good)' : i === step ? CYAN : 'var(--muted)' }}>
-            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : a.kind === 'maze' ? 'Verb maze' : a.kind === 'compose' ? 'Write it' : 'Fill it in'}
+            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : a.kind === 'maze' ? 'Verb maze' : a.kind === 'compose' ? 'Write it' : a.kind === 'passage' ? 'Read & answer' : 'Fill it in'}
           </span>
         ))}
         <span style={{ flex: 1 }} />
@@ -364,6 +365,7 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
       {act.kind === 'hunt' ? <HuntActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'maze' ? <MazeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'compose' ? <ComposeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'passage' ? <PassageActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : <FixActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />}
     </Shell>
   )
@@ -606,6 +608,148 @@ function MazeActivity({ act, onDone, onPlay }) {
         <button className="btn" disabled={!done} onClick={() => onDone(firstTry)}>
           {done ? 'Next activity →' : 'Reach the finish flag first'}
         </button>
+      </div>
+    </div>
+  )
+}
+
+/* --- activity: one numbered passage, several questions about it --- */
+function PassageActivity({ act, onDone, onPlay }) {
+  const [focus, setFocus] = useState(0)
+  const [picked, setPicked] = useState({})   // q index -> word clicked in the passage
+  const [fixes, setFixes] = useState({})     // q index -> the correction typed
+  const [blanks, setBlanks] = useState({})   // q index -> chosen option
+  const [writes, setWrites] = useState({})   // q index -> composed sentence
+  const [checked, setChecked] = useState(false)
+
+  const clean = (w) => norm(w).replace(/^[^a-z0-9']+|[^a-z0-9']+$/g, '')
+  const judge = (q, i) => {
+    if (q.kind === 'pick') return clean(picked[i] || '') === clean(q.target) && norm(fixes[i] || '') === norm(q.answer)
+    if (q.kind === 'blank') return norm(blanks[i] || '') === norm(q.answer)
+    return checkCompose(q, writes[i] || '').every((c) => c.ok)
+  }
+  const results = act.questions.map(judge)
+  const score = results.filter(Boolean).length
+  const activeQ = act.questions[focus]
+  const liveSentence = activeQ && typeof activeQ.sentence === 'number' ? activeQ.sentence : null
+
+  return (
+    <div>
+      <Directions text={act.directions || HOW_TO.passage} />
+      <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
+
+      {/* the draft, numbered */}
+      <div style={{ background: '#fbfdfe', border: '1.5px solid var(--line)', borderRadius: 14, padding: '15px 17px', fontSize: 15, lineHeight: 2, marginBottom: 14 }}>
+        {act.sentences.map((sent, si) => {
+          const n = si + 1
+          const lit = liveSentence === n
+          const canPick = lit && activeQ.kind === 'pick' && !checked
+          return (
+            <span key={si} style={{ background: lit ? 'rgba(53,195,232,.14)' : 'transparent', borderRadius: 5, padding: lit ? '2px 3px' : 0 }}>
+              <sup style={{ fontSize: 10, fontWeight: 800, color: lit ? CYAN : '#9fb3c2', marginRight: 3 }}>{n}</sup>
+              {tokenize(sent).map((tok, ti) => {
+                if (!tok.trim()) return <span key={ti}>{tok}</span>
+                const isPicked = canPick || lit ? clean(picked[focus] || '') === clean(tok) : false
+                return (
+                  <span key={ti} onClick={() => canPick && setPicked((p) => ({ ...p, [focus]: tok }))}
+                    style={{ cursor: canPick ? 'pointer' : 'default', borderRadius: 4, padding: '1px 2px',
+                      background: isPicked && lit ? (checked ? (results[focus] ? '#d7f2e3' : '#fdd9d9') : '#ffe9b8') : 'transparent',
+                      fontWeight: isPicked && lit ? 800 : 400,
+                      outline: canPick ? '1px dashed rgba(15,151,194,.35)' : 'none' }}>
+                    {tok}
+                  </span>
+                )
+              })}{' '}
+            </span>
+          )
+        })}
+      </div>
+
+      {/* the questions */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
+        {act.questions.map((q, i) => {
+          const on = focus === i
+          const ok = checked && results[i]
+          const bad = checked && !results[i]
+          return (
+            <div key={i} onClick={() => !checked && setFocus(i)}
+              style={{ border: `1.5px solid ${ok ? '#b8e6cd' : bad ? '#f0b9be' : on ? '#9fd9ef' : 'var(--line)'}`,
+                background: ok ? '#f1faf4' : bad ? '#fff7f7' : on ? '#fbfdff' : '#fff',
+                borderRadius: 12, padding: '11px 14px', cursor: checked ? 'default' : 'pointer' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 9 }}>
+                <span style={{ width: 22, height: 22, borderRadius: 7, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800,
+                  background: ok ? 'var(--good)' : bad ? '#c0392b' : on ? CYAN : '#eef3f6', color: ok || bad || on ? '#fff' : 'var(--muted)' }}>
+                  {checked ? (results[i] ? '✓' : '✕') : i + 1}
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 700, color: NAVY, lineHeight: 1.45 }}>{q.ask}</div>
+
+                  {q.kind === 'pick' && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 8, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>You clicked:</span>
+                      <span style={{ background: picked[i] ? '#fff3d6' : '#eef3f6', color: picked[i] ? '#8a6400' : '#9fb3c2',
+                        borderRadius: 8, padding: '4px 12px', fontSize: 13.5, fontWeight: 800 }}>
+                        {picked[i] || (on ? 'click a word above' : '—')}
+                      </span>
+                      <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>→</span>
+                      <input value={fixes[i] || ''} disabled={checked} placeholder="correction"
+                        onChange={(e) => setFixes((f) => ({ ...f, [i]: e.target.value }))}
+                        style={{ width: 140, padding: '5px 10px', borderRadius: 8, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 13.5 }} />
+                      {checked && !results[i] && (
+                        <span style={{ fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>{q.target} → {q.answer}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {q.kind === 'blank' && (
+                    <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 8 }}>
+                      {(q.options || []).map((opt) => {
+                        const chosen = norm(blanks[i]) === norm(opt)
+                        const reveal = checked && norm(opt) === norm(q.answer)
+                        return (
+                          <button key={opt} disabled={checked} onClick={() => setBlanks((b) => ({ ...b, [i]: opt }))}
+                            style={{ borderRadius: 999, padding: '6px 14px', fontSize: 13, fontWeight: 800, cursor: checked ? 'default' : 'pointer',
+                              background: reveal ? '#e6f6ee' : chosen ? CYAN : '#eef3f6',
+                              color: reveal ? 'var(--good)' : chosen ? '#fff' : '#4a627a',
+                              border: `1.5px solid ${reveal ? 'var(--good)' : chosen ? CYAN : 'transparent'}` }}>
+                            {opt}{reveal ? ' ✓' : ''}
+                          </button>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {q.kind === 'write' && (
+                    <div style={{ marginTop: 8 }}>
+                      <textarea value={writes[i] || ''} rows={2} disabled={checked}
+                        onChange={(e) => setWrites((w) => ({ ...w, [i]: e.target.value }))}
+                        placeholder="Write the combined sentence…"
+                        style={{ width: '100%', padding: '9px 11px', borderRadius: 9, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 14, resize: 'vertical' }} />
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 7 }}>
+                        {checkCompose(q, writes[i] || '').map((c, j) => (
+                          <span key={j} style={{ borderRadius: 999, padding: '3px 9px', fontSize: 11, fontWeight: 800,
+                            background: c.ok ? '#e6f6ee' : '#eef3f6', color: c.ok ? 'var(--good)' : '#8fa5b8' }}>
+                            {c.ok ? '✓' : '○'} {c.label}
+                          </span>
+                        ))}
+                      </div>
+                      {checked && !results[i] && (
+                        <div style={{ fontSize: 12.5, color: CYAN, marginTop: 6 }}><b>One that works:</b> {q.model}</div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
+        {checked
+          ? <button className="btn" onClick={() => onDone(score)}>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.questions.length}</b></button>
+          : <button className="btn" onClick={() => setChecked(true)}>Check my answers ✓</button>}
       </div>
     </div>
   )

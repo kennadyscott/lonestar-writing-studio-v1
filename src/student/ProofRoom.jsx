@@ -25,9 +25,38 @@ const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 // visual language from Luna and the robots, and it reads as "the worksheet
 // world" precisely because it does not appear anywhere else in the studio.
 // Do not reuse these on the dashboard, in Luna's Nook, or in Fluency Practice.
-const ART = (f) => (import.meta.env.BASE_URL || '/') + f
-const KID_CLIPBOARD = ART('kid-clipboard.png')
-const KID_READER = ART('kid-reader.png')
+const ART = (f) => (import.meta.env.BASE_URL || '/') + 'art/' + f + '.png'
+
+// The character art from the source worksheets. Each deck drew its own and the
+// drawings are about their own stories — the falconer is Cedric of Thornwick,
+// the waving robot is WOB-7, the silver swan is the one Freya follows. So an
+// activity shows the picture that belongs to its passage rather than the same
+// house mascot everywhere.
+export const ART_CHOICES = [
+  { id: '', label: 'No picture' },
+  { id: 'verbs-clipboard', label: 'Boy with a clipboard' },
+  { id: 'verbs-reader', label: 'Girl reading' },
+  { id: 'adj-crab', label: 'Crab with a book' },
+  { id: 'adj-solar', label: 'Girl with a solar panel' },
+  { id: 'conj-scientist', label: 'Scientist with a sample case' },
+  { id: 'conj-guide', label: 'Guide with a lanyard' },
+  { id: 'prep-researcher', label: 'Field researcher' },
+  { id: 'prep-magnifier', label: 'Boy with a magnifying glass' },
+  { id: 'pron-keeper', label: 'Keeper with a meerkat' },
+  { id: 'sbverbs-reader', label: 'Boy reading' },
+  { id: 'sbverbs-map', label: 'Girl with a map' },
+  { id: 'sbadj-camera', label: 'Girl with a camera' },
+  { id: 'sbconj-swan', label: 'Silver swan' },
+  { id: 'sbconj-robot', label: 'Small robot' },
+  { id: 'sbprep-mentor', label: 'Hiker with a walking stick' },
+  { id: 'sbpron-pizza', label: 'Boy with pizza' },
+  { id: 'sbpron-balloon', label: 'Boy with a water balloon' },
+  { id: 'full-falconer', label: 'Falconer with a falcon' },
+  { id: 'full-robot', label: 'Waving robot' },
+]
+const ART_SRC = Object.fromEntries(ART_CHOICES.filter((c) => c.id).map((c) => [c.id, ART(c.id)]))
+const KID_CLIPBOARD = ART('verbs-clipboard')
+const KID_READER = ART('verbs-reader')
 
 const HOW_TO = {
   hunt: 'Click on each word that is wrong. Type the correct word, then press ✓. Clicking a word that is already correct counts against you.',
@@ -88,13 +117,28 @@ export function ActivityPreview({ act, onPlay, onDone }) {
   return <FixActivity {...props} />
 }
 
-function Beside({ src, children, flip }) {
+/* The worksheet art, and where it stands. A character moved to the other side of
+ * the text ends up facing away from it, so which side and which way round are
+ * two separate choices rather than one. */
+function Beside({ src, children, flip, mirror }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, flexDirection: flip ? 'row-reverse' : 'row' }}>
       <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
-      <img className="act-figure" src={src} alt="" style={{ height: 210, flexShrink: 0, alignSelf: 'flex-end' }} />
+      <img className="act-figure" src={src} alt=""
+        style={{ height: 210, flexShrink: 0, alignSelf: 'flex-end', transform: mirror ? 'scaleX(-1)' : 'none' }} />
     </div>
   )
+}
+
+/* Wraps an activity in its art, or in nothing at all when there is none. The
+ * defaults keep each activity type looking the way it always has, so choosing
+ * nothing changes nothing. */
+function WithArt({ act, art: fallback, side: fallbackSide, children }) {
+  const id = act.art === undefined ? fallback : act.art
+  const src = ART_SRC[id]
+  if (!src) return children
+  const side = act.artSide || fallbackSide
+  return <Beside src={src} flip={side === 'left'} mirror={!!act.artMirror}>{children}</Beside>
 }
 
 function Directions({ text }) {
@@ -444,7 +488,7 @@ function HuntActivity({ act, onDone, onPlay }) {
         </span>
       </div>
 
-      <Beside src={KID_CLIPBOARD}>
+      <WithArt act={act} art="" side="right">
       <div style={{ background: '#fbfdfe', border: '1.5px solid var(--line)', borderRadius: 14, padding: '16px 18px', fontSize: 15.5, lineHeight: 2.05 }}>
         {act.tokens.map((tok, ti) => {
           if (!tok.bad) return (
@@ -475,7 +519,7 @@ function HuntActivity({ act, onDone, onPlay }) {
           return <span key={ti} onClick={() => tap(tok, ti)} style={{ cursor: 'pointer' }}>{tok.t}</span>
         })}
       </div>
-      </Beside>
+      </WithArt>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
@@ -669,6 +713,7 @@ function PassageActivity({ act, onDone, onPlay }) {
   return (
     <div>
       <Directions text={act.directions || HOW_TO.passage} />
+      <WithArt act={act} art="" side="right">
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
 
       {/* the draft, numbered */}
@@ -798,6 +843,7 @@ function PassageActivity({ act, onDone, onPlay }) {
           ? <button className="btn" onClick={() => onDone(score)}>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.questions.length}</b></button>
           : <button className="btn" onClick={() => setChecked(true)}>Check my answers ✓</button>}
       </div>
+      </WithArt>
     </div>
   )
 }
@@ -813,6 +859,7 @@ function ComposeActivity({ act, onDone, onPlay }) {
   return (
     <div>
       <Directions text={act.directions || HOW_TO.compose} />
+      <WithArt act={act} art="" side="right">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
         <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{score} of {act.items.length} landed</span>
@@ -870,6 +917,7 @@ function ComposeActivity({ act, onDone, onPlay }) {
           Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b>
         </button>
       </div>
+      </WithArt>
     </div>
   )
 }
@@ -933,7 +981,7 @@ function FixActivity({ act, onDone, onPlay }) {
         </div>
       )}
 
-      <Beside src={KID_READER} flip>
+      <WithArt act={act} art="" side="left">
       <div style={{ display: 'flex', flexDirection: 'column', gap: 9 }}>
         {act.items.map((it, i) => {
           const [before, after] = it.given.split('____')
@@ -999,7 +1047,7 @@ function FixActivity({ act, onDone, onPlay }) {
           )
         })}
       </div>
-      </Beside>
+      </WithArt>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>

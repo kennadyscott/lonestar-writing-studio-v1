@@ -605,6 +605,48 @@ export const TOPICS = [
   },
 ]
 
+/* Which drawing stands beside which activity, and which way it faces.
+ *
+ * The source decks each drew their own characters, and the drawings are about
+ * their own stories — the falconer is Cedric of Thornwick, the waving robot is
+ * WOB-7, the silver swan is the one Freya follows. Repeating one house mascot
+ * across all of them would throw that away.
+ *
+ * Kept as a table rather than threaded through every constructor so the content
+ * above stays readable as content, and so a publisher can move a picture without
+ * anyone editing an argument list. Entries are [id, side, mirrored]; a null
+ * leaves that activity without a picture.
+ */
+const ART_PLAN = {
+  ws_verbs: [['verbs-clipboard', 'right'], null, ['verbs-reader', 'left']],
+  ws_adj:   [null, null, ['adj-crab', 'right'], ['adj-solar', 'left'], ['prep-magnifier', 'right']],
+  ws_conj:  [['conj-scientist', 'right'], null, ['conj-guide', 'left']],
+  ws_prep:  [['prep-researcher', 'right'], ['prep-magnifier', 'left'], ['sbprep-mentor', 'right']],
+  ws_pron:  [['pron-keeper', 'right'], null, ['pron-keeper', 'left', true]],
+  sb_verbs: [['sbverbs-reader', 'right'], null, ['sbverbs-map', 'left']],
+  sb_adj:   [['sbadj-camera', 'right'], null],
+  sb_conj:  [['sbconj-swan', 'right'], ['sbconj-robot', 'left']],
+  sb_prep:  [['sbprep-mentor', 'right']],
+  sb_pron:  [['sbpron-pizza', 'right'], null, ['sbpron-balloon', 'left'], null],
+  ws_full:  [['full-falconer', 'right'], ['full-robot', 'left']],
+}
+
+/* Stamp the plan onto the authored worksheets, once, at load. */
+for (const topic of TOPICS) {
+  const sheets = [...(topic.core || []), ...Object.values(topic.skillBuilders || {}), ...(topic.full ? [topic.full] : [])]
+  for (const ws of sheets) {
+    const plan = ART_PLAN[ws.id]
+    if (!plan) continue
+    ws.activities.forEach((a, i) => {
+      const spec = plan[i]
+      if (!spec) return
+      a.art = spec[0]
+      a.artSide = spec[1] || 'right'
+      if (spec[2]) a.artMirror = true
+    })
+  }
+}
+
 /* Parse [[wrong|right]] into tokens the client renders and taps. */
 export function parseHunt(text) {
   const parts = (text || '').split(/(\[\[[^\]]+\]\])/g)

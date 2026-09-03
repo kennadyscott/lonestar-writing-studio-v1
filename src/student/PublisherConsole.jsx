@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
+import { ART_CHOICES } from './ProofRoom.jsx'
 
 /*
  * Publisher console — where the questions come from.
@@ -169,6 +170,27 @@ export function ActivityEditor({ act, index, count, onEdit, onRemove, alwaysOpen
             <span style={label}>WHAT THE STUDENT SEES ABOVE THE WORK</span>
             <input style={field} value={act.brief || ''} onChange={(e) => onEdit((a) => { a.brief = e.target.value })} />
           </div>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ flex: '1 1 220px' }}>
+              <span style={label}>PICTURE</span>
+              <select style={field} value={act.art ?? ''} onChange={(e) => onEdit((a) => { a.art = e.target.value })}>
+                {ART_CHOICES.map((c) => <option key={c.id} value={c.id}>{c.label}</option>)}
+              </select>
+            </div>
+            <div style={{ flex: '0 0 120px' }}>
+              <span style={label}>SIDE</span>
+              <select style={field} value={act.artSide || 'right'} onChange={(e) => onEdit((a) => { a.artSide = e.target.value })}>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+            <label style={{ flex: '0 0 auto', display: 'flex', alignItems: 'center', gap: 7, fontSize: 12.5, fontWeight: 800, color: NAVY, padding: '9px 0', cursor: 'pointer' }}>
+              <input type="checkbox" checked={!!act.artMirror}
+                onChange={(e) => onEdit((a) => { a.artMirror = e.target.checked })} />
+              Face the other way
+            </label>
+          </div>
+
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <div style={{ flex: '1 1 240px' }}>
               <span style={label}>HINT</span>

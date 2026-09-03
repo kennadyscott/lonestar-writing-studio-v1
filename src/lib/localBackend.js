@@ -230,6 +230,17 @@ export const localApi = {
     state.shareWall.unshift(entry)
     return entry
   },
+  drillFinish: async (payload) => {
+    const accuracy = Number(payload?.accuracy) || 0
+    if (accuracy < 75) return { coins: 0, passed: false }
+    const today = now().slice(0, 10)
+    const paidToday = state.coinEvents.filter((e) => e.type === 'proof_job' && e.ts.slice(0, 10) === today).length
+    if (paidToday >= 5) return { coins: 0, passed: true, capped: true }
+    const coins = 20
+    state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'proof_job', coins, ts: now() })
+    const stu = findStu(ME); if (stu) stu.coins += coins
+    return { coins, passed: true, jobsLeft: 5 - paidToday - 1 }
+  },
   typingFinish: async (payload) => {
     const accuracy = Number(payload?.accuracy) || 0
     if (accuracy < 85) return { coins: 0, passed: false }

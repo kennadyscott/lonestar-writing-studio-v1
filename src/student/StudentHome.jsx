@@ -3,6 +3,7 @@ import { api, TRAIT_LABELS } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
 import TypingGame from './TypingGame.jsx'
+import ProofRoom from './ProofRoom.jsx'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
 
@@ -535,7 +536,7 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
 
 
 /* ---- Full assignments list (owns its filter state) ---- */
-function AssignmentsCard({ rows, busy, begin }) {
+function AssignmentsCard({ rows, busy, begin, headerAction }) {
   const [tab, setTab] = useState('active')
   const [sort, setSort] = useState('due')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -558,7 +559,7 @@ function AssignmentsCard({ rows, busy, begin }) {
 
   return (
     <div className="card" style={{ overflow: 'hidden', flex: 1 }}>
-      <div style={{ display: 'flex', padding: '12px 16px 10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 10px' }}>
         <div className="seg">
           {['active', 'completed'].map((t) => (
             <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>
@@ -566,6 +567,7 @@ function AssignmentsCard({ rows, busy, begin }) {
             </button>
           ))}
         </div>
+        {headerAction && <><span style={{ flex: 1 }} />{headerAction}</>}
       </div>
       <div style={{ display: 'flex', gap: 8, padding: '10px 16px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', background: '#f8fbfd', flexWrap: 'wrap' }}>
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="🔍 Search assignments…"
@@ -627,6 +629,15 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [game, setGame] = useState(null) // built-in game key, e.g. 'combine'
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
+  const [proofRoom, setProofRoom] = useState(false)
+  // A/B split — prototype only, so the old arrangement stays reviewable
+  const [design, setDesign] = useState(() => {
+    try { return localStorage.getItem('studioDesign') === 'B' ? 'B' : 'A' } catch { return 'A' }
+  })
+  function pickDesign(d) {
+    setDesign(d)
+    try { localStorage.setItem('studioDesign', d) } catch {}
+  }
 
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -683,6 +694,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {game === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={() => setGame(null)} onChange={onChange} />
         : game && <FluencyGame gameKey={game} onClose={() => setGame(null)} />}
+      {proofRoom && <ProofRoom grade={me.gradeLevel ?? 5} onClose={() => setProofRoom(false)} onChange={onChange} />}
       {gamePicker && (
         <GamePickerModal games={state.fluencyGames || []} grade={me.gradeLevel ?? 6}
           onPlayBuiltin={(g) => { setGamePicker(false); setGame((g && g.game) || 'stretch') }}
@@ -695,7 +707,15 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, marginRight: 'auto' }}>
+          <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)' }}>PROTOTYPE</span>
+          <div className="seg">
+            {['A', 'B'].map((d) => (
+              <button key={d} className={design === d ? 'on' : ''} onClick={() => pickDesign(d)}>{d} Design</button>
+            ))}
+          </div>
+        </div>
         <div className="seg" style={{ position: 'relative', zIndex: 2 }}>
           {[['home', 'Home'], ['data', 'Data & Goals']].map(([k, label]) => (
             <button key={k} className={homeTab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
@@ -710,9 +730,18 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <GoalBanner me={me} classFocus={state.classFocus} />
         <div className="home-main">
-          <AssignmentsCard rows={rows} busy={busy} begin={begin} />
+          <AssignmentsCard rows={rows} busy={busy} begin={begin}
+            headerAction={design === 'B' ? (
+              <button onClick={onQuickWrite} disabled={busy}
+                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 999, fontSize: 13, fontWeight: 800, color: '#fff', cursor: 'pointer',
+                  background: 'linear-gradient(120deg,#2f3f96,#1e2a6b)', boxShadow: '0 4px 12px rgba(30,42,107,.35)' }}>
+                ⚡ Quick Write
+              </button>
+            ) : null} />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <BigTask compact icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />
+            {design === 'B'
+              ? <BigTask compact icon="🧾" title="The Proof Room" sub="Find what's broken. Make it right." grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
+              : <BigTask compact icon="⚡" title="Quick Write" sub="A timed prompt to warm up your brain" grad={['#2f3f96', '#1e2a6b']} art="vig-quickwrite.jpg" busy={busy} onClick={onQuickWrite} />}
             <BigTask compact icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
             <BigTask compact icon="🎮" title="Fluency Practice" sub="Earn double coins in ClassCade" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
             <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />

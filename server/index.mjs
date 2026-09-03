@@ -51,6 +51,9 @@ const ME = 'stu_kscott'
 const REACTIONS = ['like', 'heart', 'celebrate'] // positive only, by design
 const TYPING_PASS = 85      // accuracy needed to earn coins
 const TYPING_COINS = 10     // doubled in Fluency Practice
+const DRILL_PASS = 75       // clean-copy percentage a Proof Room job must reach
+const DRILL_COINS = 20      // a job is longer than a typing round, so it pays like one
+const DRILL_DAILY_JOBS = 5  // paid jobs per day
 const TYPING_DAILY_ROUNDS = 5 // paid rounds per day — generous, because the practice itself is the point
 const now = () => new Date().toISOString()
 
@@ -482,6 +485,22 @@ const server = http.createServer(async (req, res) => {
       const stu = findStu(ME); if (stu) stu.coins += coins
       save()
       return send(res, 200, { coins, passed: true, doubled: true, roundsLeft: TYPING_DAILY_ROUNDS - paidToday - 1 })
+    }
+
+    // POST /api/drill/finish -> coins for a clean Proof Room job. Same deal as
+    // typing: accuracy gates it, nothing about the job is stored as writing data.
+    if (req.method === 'POST' && url.pathname === '/api/drill/finish') {
+      const body = await readBody(req)
+      const accuracy = Number(body.accuracy) || 0
+      if (accuracy < DRILL_PASS) return send(res, 200, { coins: 0, passed: false })
+      const today = now().slice(0, 10)
+      const paidToday = state.coinEvents.filter((e) => e.type === 'proof_job' && e.ts.slice(0, 10) === today).length
+      if (paidToday >= DRILL_DAILY_JOBS) return send(res, 200, { coins: 0, passed: true, capped: true })
+      const coins = DRILL_COINS
+      state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'proof_job', coins, ts: now() })
+      const stu = findStu(ME); if (stu) stu.coins += coins
+      save()
+      return send(res, 200, { coins, passed: true, jobsLeft: DRILL_DAILY_JOBS - paidToday - 1 })
     }
 
     // POST /api/quickwrite { mode: 'quick' | 'free' } -> spin up a fresh writing space

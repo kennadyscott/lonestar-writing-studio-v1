@@ -719,7 +719,21 @@ function PassageActivity({ act, onDone, onPlay }) {
                     </div>
                   )}
 
-                  {q.kind === 'blank' && (
+                  {q.kind === 'blank' && !(q.options || []).length && (
+                    // No choices offered means the paper asked them to write it,
+                    // so give them somewhere to write. Without this the question
+                    // renders with nothing to answer with.
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 8, flexWrap: 'wrap' }}>
+                      <input value={blanks[i] || ''} disabled={checked} placeholder="your answer"
+                        onChange={(e) => setBlanks((b) => ({ ...b, [i]: e.target.value }))}
+                        style={{ width: 180, padding: '6px 11px', borderRadius: 8, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 13.5 }} />
+                      {checked && !results[i] && (
+                        <span style={{ fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>{q.answer}</span>
+                      )}
+                    </div>
+                  )}
+
+                  {q.kind === 'blank' && !!(q.options || []).length && (
                     <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 8 }}>
                       {(q.options || []).map((opt) => {
                         const chosen = norm(blanks[i]) === norm(opt)

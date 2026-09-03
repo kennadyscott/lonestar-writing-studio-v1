@@ -20,6 +20,26 @@ const GOLD = '#f0b429'
 
 const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 
+/* A word bank in the order the answers are needed hands the activity away: a
+ * student can work down the list without reading a sentence. Shuffled once when
+ * the activity mounts, so it does not reshuffle under someone mid-drag, and
+ * comes out different on a retry. Guaranteed to move when there is more than one
+ * distinct word, because a shuffle that happens to return the original order is
+ * the bug all over again. */
+function shuffled(list) {
+  const a = [...(list || [])]
+  if (a.length < 2) return a
+  const original = a.join('\u0000')
+  for (let attempt = 0; attempt < 8; attempt++) {
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[a[i], a[j]] = [a[j], a[i]]
+    }
+    if (a.join('\u0000') !== original) break
+  }
+  return a
+}
+
 // The worksheet illustrations, lifted straight out of the source decks.
 // Scoped to the Proof Room on purpose: this 3D character art is a different
 // visual language from Luna and the robots, and it reads as "the worksheet
@@ -692,6 +712,9 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
 
 /* --- activity: one numbered passage, several questions about it --- */
 function PassageActivity({ act, onDone, onPlay, doneLabel }) {
+  const choices = useMemo(
+    () => (act.questions || []).map((q) => (q.options && q.options.length ? shuffled(q.options) : null)),
+    [act])
   const [focus, setFocus] = useState(0)
   const [picked, setPicked] = useState({})   // q index -> word clicked in the passage
   const [fixes, setFixes] = useState({})     // q index -> the correction typed
@@ -795,7 +818,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
 
                   {q.kind === 'blank' && !!(q.options || []).length && (
                     <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 8 }}>
-                      {(q.options || []).map((opt) => {
+                      {(choices[i] || []).map((opt) => {
                         const chosen = norm(blanks[i]) === norm(opt)
                         const reveal = checked && norm(opt) === norm(q.answer)
                         return (
@@ -925,6 +948,13 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
 /* --- activity: fill the blanks by typing, clicking, or dragging --- */
 function FixActivity({ act, onDone, onPlay, doneLabel }) {
   const mode = act.mode || 'type'
+  const bank = useMemo(() => shuffled(act.bank), [act])
+  // Across the authored content the right answer sits first 43% of the time,
+  // which is well above chance for three choices — enough that always picking
+  // the first one beats reading the question. Shuffled per attempt.
+  const choices = useMemo(
+    () => (act.items || []).map((it) => (it.options && it.options.length ? shuffled(it.options) : null)),
+    [act])
   const [answers, setAnswers] = useState(act.items.map(() => ''))
   const [checked, setChecked] = useState(false)
   const [held, setHeld] = useState(null)          // word picked up in drag mode
@@ -942,8 +972,8 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
   // in drag mode every bank word is used once, so track what is still available
   const used = {}
   answers.forEach((a) => { if (a) used[norm(a)] = (used[norm(a)] || 0) + 1 })
-  const remaining = (act.bank || []).filter((w, idx) => {
-    const seenBefore = (act.bank || []).slice(0, idx).filter((x) => norm(x) === norm(w)).length
+  const remaining = bank.filter((w, idx) => {
+    const seenBefore = bank.slice(0, idx).filter((x) => norm(x) === norm(w)).length
     return (used[norm(w)] || 0) <= seenBefore
   })
 
@@ -973,9 +1003,9 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
         </div>
       )}
 
-      {mode === 'type' && (act.bank || []).length > 0 && (
+      {mode === 'type' && bank.length > 0 && (
         <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 13 }}>
-          {act.bank.map((w) => (
+          {bank.map((w) => (
             <span key={w} style={{ background: '#eef6f9', color: CYAN, borderRadius: 999, padding: '6px 14px', fontSize: 13, fontWeight: 800 }}>{w}</span>
           ))}
         </div>
@@ -1028,7 +1058,7 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
 
               {mode === 'select' && (
                 <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 8, paddingLeft: 29 }}>
-                  {(it.options && it.options.length ? it.options : act.bank || []).map((opt) => {
+                  {(choices[i] || bank).map((opt) => {
                     const chosen = norm(answers[i]) === norm(opt)
                     const reveal = checked && norm(opt) === norm(it.answer)
                     return (

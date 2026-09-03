@@ -100,7 +100,7 @@ export default function Platform({ onExit }) {
       </header>
 
       <div style={{ display: 'grid', gridTemplateColumns: '288px 1fr', alignItems: 'start', gap: 18, padding: 18, maxWidth: 1360, margin: '0 auto' }}>
-        <Rail paths={paths} sel={sel} onSelect={setSel} onChanged={load} />
+        <Rail paths={paths} sel={sel} onSelect={setSel} onChanged={load} meta={meta} />
         {sel
           ? <Workbench key={sel} id={sel} onChanged={load} />
           : <Panel><Empty /></Panel>}
@@ -162,21 +162,30 @@ function KeyGate({ onDone }) {
 
 /* ---------- the rail ---------- */
 
-function Rail({ paths, sel, onSelect, onChanged }) {
+function Rail({ paths, sel, onSelect, onChanged, meta }) {
   const [busy, setBusy] = useState('')
+  const [oops, setOops] = useState('')
   const [stateCode, setStateCode] = useState(STATES[0]?.code || 'TX')
   const [grade, setGrade] = useState('')
   const [domain, setDomain] = useState('')
 
-  async function seed() { setBusy('seed'); try { await library.seed(); await onChanged() } finally { setBusy('') } }
+  async function seed() {
+    setBusy('seed'); setOops('')
+    try {
+      const r = await library.seed()
+      await onChanged()
+      if (!r.seeded?.length) setOops('Nothing was loaded — those paths are already in the library.')
+    } catch (e) { setOops(e.message) } finally { setBusy('') }
+  }
   async function create() {
     const title = prompt('Name the learning path')
     if (!title) return
     setBusy('new')
+    setOops('')
     try {
       const r = await library.create({ title, short: title, state: stateCode, grade: grade || null, domain: domain || '' })
       await onChanged(); onSelect(r.path.id)
-    } catch (e) { alert(e.message) } finally { setBusy('') }
+    } catch (e) { setOops(e.message) } finally { setBusy('') }
   }
 
   const inState = paths.filter((p) => (p.state || 'TX') === stateCode)
@@ -260,8 +269,14 @@ function Rail({ paths, sel, onSelect, onChanged }) {
       <Panel pad={12}>
         <button onClick={create} disabled={!!busy} style={{ ...btn(NAVY), width: '100%', marginBottom: 7 }}>+ New learning path</button>
         <button onClick={seed} disabled={!!busy} style={{ ...btn('#e7edf3', NAVY), width: '100%' }}>
-          {busy === 'seed' ? 'Loading…' : 'Load the paths that ship with the app'}
+          {busy === 'seed' ? 'Loading…'
+            : `Load the ${meta?.shipped?.length || ''} path${meta?.shipped?.length === 1 ? '' : 's'} that ship with the app`.replace('  ', ' ')}
         </button>
+        {oops && (
+          <div style={{ marginTop: 8, background: '#fdecea', color: RED, borderRadius: 9, padding: '9px 11px', fontSize: 12.5, fontWeight: 700 }}>
+            {oops}
+          </div>
+        )}
       </Panel>
     </div>
   )

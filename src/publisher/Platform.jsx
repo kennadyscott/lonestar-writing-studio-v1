@@ -770,12 +770,20 @@ function BuildTab({ draft, mutate }) {
   const [wsId, setWsId] = useState(sheets[0]?.w.id || null)
   const current = sheets.find((s) => s.w.id === wsId) || sheets[0]
 
-  const editSheet = (fn) => mutate((t) => {
+  const onSheet = (fn) => mutate((t) => {
     const target = (t.core || []).find((w) => w.id === current.w.id)
       || Object.values(t.skillBuilders || {}).find((w) => w.id === current.w.id)
       || (t.full && t.full.id === current.w.id ? t.full : null)
     if (target) fn(target)
   })
+  // Any change to a worksheet or to something inside it withdraws the set's
+  // approval. Approving is the one edit that does not.
+  const editSheet = (fn) => onSheet((w) => { fn(w); delete w.approved })
+
+  const acts = current?.w.activities || []
+  const approvedActs = acts.filter((a) => a.approved).length
+  const allActsApproved = acts.length > 0 && approvedActs === acts.length
+  const setApproved = !!current?.w.approved
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '230px 1fr', gap: 12, alignItems: 'start' }}>
@@ -785,7 +793,9 @@ function BuildTab({ draft, mutate }) {
         {sheets.map((s) => (
           <button key={s.w.id} onClick={() => setWsId(s.w.id)}
             style={{ display: 'block', width: '100%', textAlign: 'left', background: s.w.id === current?.w.id ? '#f2f9fc' : 'transparent', border: s.w.id === current?.w.id ? `1.5px solid ${CYAN}` : '1.5px solid transparent', borderRadius: 9, padding: '7px 9px', marginBottom: 3, cursor: 'pointer', fontFamily: 'inherit' }}>
-            <div style={{ fontSize: 12.5, fontWeight: 800, color: s.kind === 'sb' ? AMBER : NAVY, lineHeight: 1.3 }}>{s.label}</div>
+            <div style={{ fontSize: 12.5, fontWeight: 800, color: s.kind === 'sb' ? AMBER : NAVY, lineHeight: 1.3 }}>
+              {s.w.approved && <span style={{ color: GREEN }}>✓ </span>}{s.label}
+            </div>
             <div style={{ fontSize: 10.5, color: '#5b6b7c', fontWeight: 700 }}>
               {(() => {
                 const acts = s.w.activities || []
@@ -806,6 +816,38 @@ function BuildTab({ draft, mutate }) {
       <Panel>
         {!current ? <Empty /> : (
           <>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', padding: '11px 14px', marginBottom: 14, borderRadius: 12,
+              background: setApproved ? '#f2fbf6' : allActsApproved ? '#fffdf4' : PAPER,
+              border: `1.5px solid ${setApproved ? GREEN + '55' : allActsApproved ? AMBER + '44' : 'transparent'}` }}>
+              <div style={{ flex: '0 0 auto', fontSize: 20, fontWeight: 800, lineHeight: 1, color: allActsApproved ? GREEN : '#93a3b3' }}>
+                {approvedActs}/{acts.length}
+              </div>
+              <div style={{ flex: 1, minWidth: 160 }}>
+                <div style={{ fontSize: 13.5, fontWeight: 800, color: setApproved ? GREEN : NAVY }}>
+                  {setApproved ? 'This worksheet is approved'
+                    : allActsApproved ? 'Every activity is approved — approve the worksheet'
+                    : 'Activities approved'}
+                </div>
+                <div style={{ fontSize: 11.5, color: '#5b6b7c', fontWeight: 700, marginTop: 1 }}>
+                  {setApproved
+                    ? `Signed off ${new Date(current.w.approved).toLocaleString()}. Any edit withdraws it.`
+                    : allActsApproved ? 'The whole set has been played through.'
+                    : `Play and approve the remaining ${acts.length - approvedActs} to approve the set.`}
+                </div>
+              </div>
+              {setApproved ? (
+                <button onClick={() => onSheet((w) => { delete w.approved })}
+                  style={{ ...btn('#dcf0e4', GREEN), border: 'none', fontSize: 12.5 }}>✓ Approved — withdraw</button>
+              ) : (
+                <button disabled={!allActsApproved}
+                  onClick={() => onSheet((w) => { w.approved = new Date().toISOString() })}
+                  title={allActsApproved ? 'Approve this worksheet' : 'Approve every activity first'}
+                  style={{ ...btn(allActsApproved ? GREEN : '#e7edf3', allActsApproved ? '#fff' : '#93a3b3'), fontSize: 12.5, cursor: allActsApproved ? 'pointer' : 'default' }}>
+                  ✓ Approve this worksheet
+                </button>
+              )}
+            </div>
+
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
               <div style={{ flex: '1 1 260px' }}>
                 <span style={label}>WORKSHEET TITLE</span>
@@ -862,10 +904,18 @@ function ActivityCard({ act, index, count, onEdit, onRemove }) {
         <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#fff', background: approved ? GREEN : NAVY, borderRadius: 6, padding: '3px 8px' }}>{index + 1}</span>
         <span style={{ flex: 1, fontSize: 13.5, fontWeight: 800, color: approved ? GREEN : NAVY }}>{kindName}</span>
         {act.flag && <span style={{ fontSize: 11, fontWeight: 800, color: FLAG }}>⚑ flagged</span>}
-        {approved && (
+        {/* The button at the end of the activity is the natural way to sign off —
+            you have just played it. This is the same action for a reviewer who
+            does not need to answer eight questions to judge the content. */}
+        {approved ? (
           <button onClick={unapprove} title={`Approved ${new Date(act.approved).toLocaleString()} — click to withdraw`}
             style={{ ...btn('#dcf0e4', GREEN), border: 'none', fontSize: 11.5, padding: '5px 11px' }}>
             ✓ Approved
+          </button>
+        ) : (
+          <button onClick={approve} title="Sign this activity off"
+            style={{ ...btn('#fff', GREEN), border: `1px solid ${GREEN}44`, fontSize: 11.5, padding: '5px 11px' }}>
+            ✓ Approve
           </button>
         )}
         {!editing && (
@@ -1021,9 +1071,10 @@ function PublishTab({ path, proof, versions, dirty, draft, onRefresh, onProof })
   // Approving activities is a person's job and proofing is a machine's; neither
   // stands in for the other, so publishing shows both and blocks only on the one
   // that means a student would hit a dead end.
-  const acts = [...(draft?.core || []), ...Object.values(draft?.skillBuilders || {}), ...(draft?.full ? [draft.full] : [])]
-    .flatMap((w) => (w.activities || []).map((a) => ({ ...a, sheet: w.title })))
+  const sheets = [...(draft?.core || []), ...Object.values(draft?.skillBuilders || {}), ...(draft?.full ? [draft.full] : [])]
+  const acts = sheets.flatMap((w) => (w.activities || []).map((a) => ({ ...a, sheet: w.title })))
   const signedOff = acts.filter((a) => a.approved).length
+  const sheetsDone = sheets.filter((w) => w.approved).length
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState('')
   const [msg, setMsg] = useState(null)
@@ -1063,13 +1114,17 @@ function PublishTab({ path, proof, versions, dirty, draft, onRefresh, onProof })
 
         {acts.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 11, background: PAPER, borderRadius: 11, padding: '11px 14px', marginTop: 4 }}>
-            <div style={{ flex: '0 0 auto', fontSize: 21, fontWeight: 800, color: signedOff === acts.length ? GREEN : '#93a3b3', lineHeight: 1 }}>
-              {signedOff}/{acts.length}
+            <div style={{ flex: '0 0 auto', fontSize: 21, fontWeight: 800, color: sheetsDone === sheets.length ? GREEN : '#93a3b3', lineHeight: 1 }}>
+              {sheetsDone}/{sheets.length}
             </div>
             <div style={{ flex: 1, minWidth: 0, fontSize: 12.5, color: '#5b6b7c', fontWeight: 700 }}>
-              {signedOff === acts.length
-                ? 'Every activity has been played through and approved.'
-                : `${acts.length - signedOff} ${acts.length - signedOff === 1 ? 'activity has' : 'activities have'} not been approved yet. Proofing does not check whether anyone has read them.`}
+              {sheetsDone === sheets.length
+                ? 'Every worksheet on this path has been approved.'
+                : <>
+                    {sheets.length - sheetsDone} of {sheets.length} worksheets not approved yet
+                    {' '}({signedOff}/{acts.length} activities signed off).
+                    {' '}Proofing does not check whether anyone has read them.
+                  </>}
             </div>
           </div>
         )}

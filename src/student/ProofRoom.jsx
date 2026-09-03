@@ -373,6 +373,8 @@ function HuntActivity({ act, onDone, onPlay }) {
     if (norm(draft) !== norm(tok.fix)) {
       setTries((t) => ({ ...t, [tok.i]: (t[tok.i] || 0) + 1 }))
       setDraft('')
+      const vid = (act.videos || [])[tok.i]
+      if (vid && onPlay) onPlay(vid)
       return
     }
     setFixes((f) => ({ ...f, [tok.i]: true })); setTyping(null); setDraft('')
@@ -489,6 +491,7 @@ function MazeActivity({ act, onDone, onPlay }) {
     setTries(n); setShake(true); setTimeout(() => setShake(false), 400)
     if (n >= 2) setReveal(true)
     setDraft('')
+    if (act.video && onPlay) onPlay(act.video)
   }
 
   const openedCount = Object.keys(cleared).length
@@ -597,6 +600,13 @@ function FixActivity({ act, onDone, onPlay }) {
   const right = act.items.map((it, i) => norm(answers[i]) === norm(it.answer))
   const score = right.filter(Boolean).length
 
+  // a miss brings up the recording for that item straight away
+  function check() {
+    setChecked(true)
+    const firstMiss = act.items.findIndex((it, i) => norm(answers[i]) !== norm(it.answer) && it.video)
+    if (firstMiss >= 0 && onPlay) onPlay(act.items[firstMiss].video)
+  }
+
   return (
     <div>
       <Directions text={act.directions || HOW_TO.fix} />
@@ -643,7 +653,7 @@ function FixActivity({ act, onDone, onPlay }) {
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         {checked
           ? <button className="btn" onClick={() => onDone(score)}>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></button>
-          : <button className="btn" disabled={answers.every((a) => !a.trim())} onClick={() => setChecked(true)}>Check my answers ✓</button>}
+          : <button className="btn" disabled={answers.every((a) => !a.trim())} onClick={check}>Check my answers ✓</button>}
       </div>
     </div>
   )

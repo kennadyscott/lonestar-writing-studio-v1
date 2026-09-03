@@ -14,33 +14,30 @@
 
 create schema if not exists core;
 
--- A published student expectation: 5.11(D).
+-- A standard, at the grain content is actually tagged at.
+--
+-- The breakout IS the row: 3.11D (xi) is what a worksheet teaches, not 3.11D.
+-- Splitting standards from breakouts across two tables made every tag a join
+-- and every query awkward, for a hierarchy nobody needs to walk. parent_id
+-- keeps the grouping available without paying for it on every read.
+--
+-- standard_name is what makes this usable by a person: a publisher looks for
+-- "Pronouns", not for 3.11D (vii).
 create table if not exists core.standards (
-  id          bigserial primary key,
-  state       text not null default 'TX',
-  subject     text not null,                 -- ela | math | science | social_studies
-  grade       text not null,                 -- 'K' through '12', text so K is not a special case
-  code        text not null,
-  parent_code text,
-  category    text,                          -- strand or reporting category
-  kind        text,                          -- readiness | supporting | process
-  statement   text not null default '',      -- verbatim state language
-  source_url  text,
-  verified    boolean not null default false,
-  updated_at  timestamptz not null default now(),
-  unique (state, subject, grade, code)
-);
-
--- The pieces a standard breaks into: 5.11(D)(ii). This is the grain content is
--- actually tagged at, which is why it is a table and not a text field.
-create table if not exists core.standard_breakouts (
-  id          bigserial primary key,
-  standard_id bigint not null references core.standards(id) on delete cascade,
-  code        text not null,                 -- 5.11D(ii)
-  statement   text not null default '',
-  sort        int not null default 0,
-  verified    boolean not null default false,
-  unique (standard_id, code)
+  id            bigserial primary key,
+  state         text not null default 'TX',    -- stored as a code, shown as "Texas"
+  subject       text not null,                 -- ELAR | Math | Science | Social Studies
+  grade         text not null,                 -- 'K' through '12', text so K is not a special case
+  domain        text not null default '',      -- Composition, Multiple Genres, ...
+  standard_id   text not null,                 -- '3.11D (xi)'
+  standard_name text not null default '',      -- 'Spelling'
+  description   text not null default '',      -- verbatim state language
+  parent_id     text,                          -- '3.11D'
+  kind          text,                          -- readiness | supporting | process
+  source_url    text,
+  verified      boolean not null default false,
+  updated_at    timestamptz not null default now(),
+  unique (state, subject, grade, standard_id)
 );
 
 -- How a year of teaching is grouped. Products hang their content off these.
@@ -115,8 +112,9 @@ create table if not exists core.cost_log (
   created_at         timestamptz not null default now()
 );
 
-create index if not exists standards_browse_idx on core.standards (state, subject, grade);
-create index if not exists breakout_code_idx    on core.standard_breakouts (code);
+create index if not exists standards_browse_idx on core.standards (state, subject, grade, domain);
+create index if not exists standards_name_idx   on core.standards (lower(standard_name));
+create index if not exists standards_parent_idx on core.standards (parent_id);
 create index if not exists topics_browse_idx    on core.topics (state, subject, grade);
 create index if not exists vocab_term_idx       on core.vocab (lower(term));
 create index if not exists cost_product_idx     on core.cost_log (product, created_at desc);
@@ -124,7 +122,6 @@ create index if not exists cost_product_idx     on core.cost_log (product, creat
 -- Same posture as the rest of the platform: RLS on, no policies, so the anon
 -- key reads nothing. Products reach core through a server holding a key.
 alter table core.standards          enable row level security;
-alter table core.standard_breakouts enable row level security;
 alter table core.topics             enable row level security;
 alter table core.vocab              enable row level security;
 alter table core.vocab_grade        enable row level security;

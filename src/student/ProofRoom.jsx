@@ -18,7 +18,11 @@ const GOLD = '#f0b429'
 
 const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 
-// the worksheet illustrations, lifted straight out of the source decks
+// The worksheet illustrations, lifted straight out of the source decks.
+// Scoped to the Proof Room on purpose: this 3D character art is a different
+// visual language from Luna and the robots, and it reads as "the worksheet
+// world" precisely because it does not appear anywhere else in the studio.
+// Do not reuse these on the dashboard, in Luna's Nook, or in Fluency Practice.
 const ART = (f) => (import.meta.env.BASE_URL || '/') + f
 const KID_CLIPBOARD = ART('kid-clipboard.png')
 const KID_READER = ART('kid-reader.png')

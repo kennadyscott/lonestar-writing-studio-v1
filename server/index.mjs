@@ -556,6 +556,7 @@ const server = http.createServer(async (req, res) => {
       const out = await libraryRoute({
         method: req.method, pathname: url.pathname,
         body: req.method === 'GET' ? {} : await readBody(req),
+        query: Object.fromEntries(url.searchParams.entries()),
         authorized: authorized(req.headers),
       })
       return send(res, out.status, out.json)

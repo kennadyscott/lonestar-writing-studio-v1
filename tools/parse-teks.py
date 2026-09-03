@@ -46,6 +46,29 @@ SOURCE = {
 }
 
 SECTION = re.compile(r"^§(\d{3})\.(\d+)\.\s*(.*)$")
+
+# Running headers and footers are separate lines in the extracted text and get
+# swept into whatever paragraph is open, which appends "Page 4 of 27" to a
+# standard's wording. Silent corruption, so it is filtered before parsing.
+_FURNITURE = r"(?:§1\d\d\.[A-Z]\.|Page \d+(?: of \d+)?|of \d+|Elementary|Middle School|High School|[A-Z][a-z]+ \d{4} Update|\d{4} Update)"
+FOOTER = re.compile(rf"^(?:{_FURNITURE}[\s,.]*)+$", re.I)
+
+# The same grade can carry more than one course: Grade 6 Adopted 2012 and Grade 6
+# Middle School Advanced Mathematics Adopted 2025 both define 6.1A. Collapsing
+# them onto one key would quietly merge an advanced course into the regular one,
+# so the course is part of a standard's identity.
+def course_of(head):
+    """What is left of a section title once the subject, the grade and the
+    adoption year are taken out. Usually nothing, which is a plain grade level;
+    when something remains it is a distinct course sharing the grade's codes."""
+    t = re.sub(r",?\s*Adopted\s+\d{4}\.?$", "", head.strip()).rstrip(".")
+    t = re.sub(r"^(English Language Arts and Reading|Mathematics|Science|Social Studies)\b[,\s]*", "", t, flags=re.I)
+    t = re.sub(r"\b(Kindergarten|Grade \d+)\b[,\s]*", "", t, flags=re.I)
+    return t.strip().strip(",").strip() or "Grade Level"
+
+def adopted_of(head):
+    m = re.search(r"Adopted\s+(\d{4})", head)
+    return m.group(1) if m else None
 # (a) and (b) are subsections; (i), (v) and (x) are breakouts, and they are the
 # same shape. Only a marker followed by its heading is a subsection.
 SUBSEC  = re.compile(r"^\(([a-z])\)$")
@@ -86,11 +109,13 @@ def parse(path):
     for page in doc:
         for raw in page.get_text().split("\n"):
             s = raw.strip()
-            if s:
+            if s and not FOOTER.match(s):
                 lines.append(s)
 
     rows, problems = [], []
     grade = None
+    course = "Grade Level"
+    adopted = None
     # Every section opens with "(a) Introduction." — numbered prose paragraphs
     # that restart at "(b) Knowledge and skills.". Reading standards out of the
     # introduction attaches real expectations to the wrong strand, so nothing is
@@ -128,6 +153,8 @@ def parse(path):
             "state": "TX",
             "subject": subject,
             "grade": grade,
+            "course": course,
+            "adopted": adopted,
             "domain": domain_for(ks_text or ""),
             "standard_id": sid,
             "standard_name": short_name(text),
@@ -146,6 +173,8 @@ def parse(path):
             flush(); cur = None
             head = m.group(3).lower()
             grade = next((g for w, g in GRADE_WORDS.items() if w in head), None)
+            course = course_of(m.group(3))
+            adopted = adopted_of(m.group(3))
             ks_num = exp_letter = None
             in_ks = False
             continue

@@ -28,6 +28,8 @@ create table if not exists core.standards (
   state         text not null default 'TX',    -- stored as a code, shown as "Texas"
   subject       text not null,                 -- ELAR | Math | Science | Social Studies
   grade         text not null,                 -- 'K' through '12', text so K is not a special case
+  course        text not null default 'Grade Level',  -- a grade can carry more than one course
+  adopted       text,                          -- the year that course was adopted
   domain        text not null default '',      -- Composition, Multiple Genres, ...
   standard_id   text not null,                 -- '3.11D (xi)'
   standard_name text not null default '',      -- 'Spelling'
@@ -37,7 +39,7 @@ create table if not exists core.standards (
   source_url    text,
   verified      boolean not null default false,
   updated_at    timestamptz not null default now(),
-  unique (state, subject, grade, standard_id)
+  unique (state, subject, grade, course, standard_id)
 );
 
 -- How a year of teaching is grouped. Products hang their content off these.

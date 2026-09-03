@@ -37,4 +37,6 @@ export const library = {
   restore: (id, version) => call('POST', `/paths/${id}/restore`, { version }),
   seed: (overwrite) => call('POST', '/seed', { overwrite: !!overwrite }),
   importCatalog: () => call('POST', '/core/import'),
+  standards: (q = {}) => call('GET', '/core/standards?' + new URLSearchParams(
+    Object.entries(q).filter(([, v]) => v !== '' && v != null)).toString()),
 }

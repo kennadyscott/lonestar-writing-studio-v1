@@ -20,8 +20,9 @@ export default async function handler(req, res) {
   let body = req.body
   if (typeof body === 'string') { try { body = JSON.parse(body) } catch { body = {} } }
   try {
+    const query = Object.fromEntries([...url.searchParams.entries()].filter(([k]) => k !== 'path'))
     const out = await libraryRoute({
-      method: req.method, pathname, body: body || {}, authorized: authorized(req.headers),
+      method: req.method, pathname, body: body || {}, query, authorized: authorized(req.headers),
     })
     res.status(out.status).json(out.json)
   } catch (e) {

@@ -685,6 +685,7 @@ function Workbench({ id, onChanged, onBack }) {
   const [dirty, setDirty] = useState(false)
   const [saving, setSaving] = useState(false)
   const [proof, setProof] = useState(null)
+  const [moved, setMoved] = useState(null)
 
   const load = useCallback(async () => {
     const d = await library.get(id)
@@ -700,8 +701,19 @@ function Workbench({ id, onChanged, onBack }) {
   }
   async function save() {
     setSaving(true)
-    try { const r = await library.save(id, draft); setProof(r.proof); setDirty(false); await onChanged() }
-    catch (e) { alert(e.message) } finally { setSaving(false) }
+    try {
+      const r = await library.save(id, draft)
+      setProof(r.proof); setDirty(false)
+      // The path's own stage follows its worksheets, so a save can move it. Say
+      // so — a stage that changes on its own and silently is worse than one
+      // somebody has to remember to set.
+      setData((d) => (d ? { ...d, path: r.path } : d))
+      if (r.stageMoved) {
+        setMoved(r.stageMoved)
+        setTimeout(() => setMoved(null), 6000)
+      }
+      await onChanged()
+    } catch (e) { alert(e.message) } finally { setSaving(false) }
   }
 
   const p = data.path
@@ -730,6 +742,13 @@ function Workbench({ id, onChanged, onBack }) {
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <StageControl path={p} onChanged={async () => { await load(); await onChanged() }} />
+            {moved && (
+              <span style={{ fontSize: 11.5, fontWeight: 800, color: moved.to === 'approved' ? GREEN : AMBER }}>
+                {moved.to === 'approved'
+                  ? '✓ every worksheet approved — path moved to Approved'
+                  : `approval withdrawn — path moved back to ${stageOf(moved.to).label}`}
+              </span>
+            )}
             {dirty && <span style={{ fontSize: 11.5, fontWeight: 800, color: AMBER }}>unsaved</span>}
             <button onClick={save} disabled={!dirty || saving} style={{ ...btn(dirty ? CYAN : '#e7edf3', dirty ? '#fff' : '#93a3b3'), cursor: dirty ? 'pointer' : 'default' }}>
               {saving ? 'Saving…' : 'Save draft'}

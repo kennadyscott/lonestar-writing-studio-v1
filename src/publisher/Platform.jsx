@@ -3,7 +3,7 @@ import { library, getKey, setKey } from '../lib/library.js'
 import { ActivityEditor, field, label } from '../student/PublisherConsole.jsx'
 import { Worksheet } from '../student/ProofRoom.jsx'
 import { prepareTopic } from '../../server/proofRoom.mjs'
-import { STATES, GRADES, domainsFor, productFor, parseStandards, joinStandards } from '../../lib/content/taxonomy.mjs'
+import { STATES, GRADES, domainsFor, productFor, parseStandards, joinStandards, standardLooksRight } from '../../lib/content/taxonomy.mjs'
 
 /*
  * Crystal Writing — the content platform.
@@ -282,6 +282,59 @@ function Rail({ paths, sel, onSelect, onChanged, meta }) {
   )
 }
 
+
+/* Standards are tags, not a sentence. One code per chip, because the whole
+ * point of tagging is that the library can be asked "what covers 5.11D(ii)?" —
+ * a question a line of prose cannot answer. */
+function StandardsInput({ value, onChange, state = 'TX', placeholder = '5.11D(ii)' }) {
+  const codes = Array.isArray(value) ? value : parseStandards(value)
+  const [typing, setTyping] = useState('')
+
+  const commit = (raw) => {
+    const added = parseStandards(raw)
+    if (!added.length) return
+    const next = [...codes]
+    for (const c of added) if (!next.some((x) => x.toLowerCase() === c.toLowerCase())) next.push(c)
+    onChange(next); setTyping('')
+  }
+  const drop = (i) => onChange(codes.filter((_, j) => j !== i))
+
+  return (
+    <div style={{ border: '1px solid var(--line)', borderRadius: 8, background: '#fff', padding: '5px 6px', display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+      {codes.map((c, i) => {
+        const odd = !standardLooksRight(c, state)
+        return (
+          <span key={i} title={odd ? `This does not look like a ${state} code` : ''}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: odd ? '#fdf7e8' : '#eaf4f9', border: `1px solid ${odd ? AMBER + '55' : CYAN + '44'}`, color: odd ? AMBER : NAVY, borderRadius: 999, padding: '3px 5px 3px 9px', fontSize: 12, fontWeight: 800 }}>
+            {odd && <span style={{ fontSize: 10 }}>⚠</span>}
+            {c}
+            <button onClick={() => drop(i)} aria-label={`Remove ${c}`}
+              style={{ border: 'none', background: 'none', cursor: 'pointer', color: 'inherit', fontSize: 14, lineHeight: 1, padding: '0 2px', opacity: .65 }}>×</button>
+          </span>
+        )
+      })}
+      <input value={typing} placeholder={codes.length ? '' : placeholder}
+        onChange={(e) => { const v = e.target.value; if (v.includes(',')) commit(v); else setTyping(v) }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') { e.preventDefault(); commit(typing) }
+          else if (e.key === 'Backspace' && !typing && codes.length) drop(codes.length - 1)
+        }}
+        onBlur={() => commit(typing)}
+        style={{ flex: '1 1 90px', minWidth: 70, border: 'none', outline: 'none', fontFamily: 'inherit', fontSize: 13, padding: '4px 3px', background: 'transparent' }} />
+    </div>
+  )
+}
+
+/* Every code taught anywhere on the path, in the order the path teaches them. */
+function coverageOf(t) {
+  const seen = []
+  const take = (ws) => { for (const c of ws?.standards || []) if (!seen.includes(c)) seen.push(c) }
+  ;(t.core || []).forEach(take)
+  Object.values(t.skillBuilders || {}).forEach(take)
+  take(t.full)
+  return seen
+}
+
 /* ---------- details ---------- */
 
 function DetailsTab({ draft, mutate }) {
@@ -340,8 +393,25 @@ function DetailsTab({ draft, mutate }) {
       </div>
 
       <div style={{ marginBottom: 12 }}>
-        <span style={label}>STANDARDS SUMMARY (the line a teacher reads on the path card)</span>
-        <input style={field} value={draft.standards || ''} onChange={set('standards')} placeholder="TEKS 5.11D ii · iv · v · vi · vii" />
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 3 }}>
+          <span style={{ ...label, marginBottom: 0 }}>STANDARDS THIS PATH COVERS</span>
+          <button onClick={() => mutate((t) => { t.standards = coverageOf(t) })}
+            style={{ background: 'none', border: 'none', color: CYAN, fontSize: 11.5, fontWeight: 800, cursor: 'pointer', padding: 0 }}>
+            Fill from the worksheets
+          </button>
+        </div>
+        <StandardsInput state={draft.state || 'TX'} value={draft.standards}
+          onChange={(v) => mutate((t) => { t.standards = v })} />
+        {(() => {
+          const cover = coverageOf(draft)
+          const listed = parseStandards(draft.standards)
+          const missing = cover.filter((c) => !listed.some((x) => x.toLowerCase() === c.toLowerCase()))
+          return missing.length
+            ? <div style={{ fontSize: 11.5, color: AMBER, fontWeight: 700, marginTop: 5 }}>
+                Taught but not listed here: {missing.join(', ')}
+              </div>
+            : null
+        })()}
       </div>
       <div>
         <span style={label}>BLURB</span>
@@ -481,8 +551,8 @@ function BuildTab({ draft, mutate }) {
               </div>
               <div style={{ flex: '1 1 240px' }}>
                 <span style={label}>STANDARDS — WHAT THIS WORKSHEET TEACHES</span>
-                <input style={field} placeholder="5.11D(ii)" value={joinStandards(current.w.standards)}
-                  onChange={(e) => editSheet((w) => { w.standards = parseStandards(e.target.value) })} />
+                <StandardsInput state={draft.state || 'TX'} value={current.w.standards}
+                  onChange={(v) => editSheet((w) => { w.standards = v })} />
               </div>
             </div>
             {(current.w.activities || []).map((a, ai) => (

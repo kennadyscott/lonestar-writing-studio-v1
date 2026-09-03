@@ -66,7 +66,7 @@ export const TOPICS = [
     grade: 5,
     state: 'TX',
     domain: 'Composition',
-    standards: 'TEKS 5.11D ii · iv · v · vi · vii',
+    standards: ['5.11D(ii)', '5.11D(iv)', '5.11D(v)', '5.11D(vi)', '5.11D(vii)'],
     blurb: 'Five skills, then one full-topic proof to finish the path.',
     icon: '✍️',
     core: [

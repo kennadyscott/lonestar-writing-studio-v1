@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { library } from '../lib/library.js'
+import { joinStandards } from '../../lib/content/taxonomy.mjs'
 import { prepareTopic, PASS_MARK, checkCompose, tokenize } from '../../server/proofRoom.mjs'
 
 /*
@@ -160,7 +161,7 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
                 <span style={{ display: 'block', fontSize: 16, fontWeight: 800, color: NAVY }}>{t.title}</span>
                 <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t.blurb}</span>
                 <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: .5, color: CYAN, marginTop: 6 }}>
-                  {t.standards} · GRADE {t.grade} · {done} STOPS
+                  {joinStandards(t.standards)} · GRADE {t.grade} · {done} STOPS
                 </span>
               </span>
               <span className="btn" style={{ flexShrink: 0, padding: '9px 17px', fontSize: 13 }}>Open path →</span>
@@ -201,7 +202,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 22 }}>{topic.icon}</span>
         <div style={{ flex: 1, minWidth: 170 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{topic.standards} · GRADE {topic.grade}</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{joinStandards(topic.standards)} · GRADE {topic.grade}</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{cleared} of {topic.core.length} skills cleared</div>
         </div>
         <div style={{ flex: '1 1 140px', minWidth: 120, height: 9, background: '#e3ecf2', borderRadius: 6 }}>

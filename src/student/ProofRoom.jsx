@@ -33,6 +33,35 @@ const HOW_TO = {
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
 }
 
+const SOLUTION = (id) => (import.meta.env.BASE_URL || '/') + 'solutions/' + id + '.mp4'
+
+function WatchButton({ id, onPlay, label = 'Watch the solution' }) {
+  if (!id) return null
+  return (
+    <button onClick={() => onPlay(id)}
+      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#eef6f9', color: CYAN, border: '1.5px solid #cfe6f0',
+        borderRadius: 999, padding: '5px 12px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+      ▶ {label}
+    </button>
+  )
+}
+
+function SolutionPlayer({ id, onClose }) {
+  if (!id) return null
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,14,24,.72)', display: 'grid', placeItems: 'center', zIndex: 90, padding: 20 }} onClick={onClose}>
+      <div style={{ width: 720, maxWidth: '94vw', background: '#0d2440', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.5)' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', color: '#fff' }}>
+          <span style={{ fontSize: 17 }}>▶</span>
+          <b style={{ flex: 1, fontSize: 14.5 }}>How to solve it</b>
+          <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 20, background: 'none', cursor: 'pointer' }}>×</button>
+        </div>
+        <video src={SOLUTION(id)} controls autoPlay style={{ width: '100%', display: 'block', background: '#000' }} />
+      </div>
+    </div>
+  )
+}
+
 function Beside({ src, children, flip }) {
   return (
     <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, flexDirection: flip ? 'row-reverse' : 'row' }}>
@@ -224,6 +253,7 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
   const [step, setStep] = useState(0)
   const [scores, setScores] = useState([])     // points earned per activity
   const [result, setResult] = useState(null)
+  const [video, setVideo] = useState(null)
   const act = ws.activities[step]
 
   function finishActivity(earned) {
@@ -313,21 +343,23 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
         <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>one worksheet · scored together</span>
       </div>
 
-      {act.kind === 'hunt' ? <HuntActivity key={step} act={act} onDone={finishActivity} />
-        : act.kind === 'maze' ? <MazeActivity key={step} act={act} onDone={finishActivity} />
-        : <FixActivity key={step} act={act} onDone={finishActivity} />}
+      <SolutionPlayer id={video} onClose={() => setVideo(null)} />
+      {act.kind === 'hunt' ? <HuntActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'maze' ? <MazeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : <FixActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />}
     </Shell>
   )
 }
 
 /* --- activity: hunt the planted errors --- */
-function HuntActivity({ act, onDone }) {
+function HuntActivity({ act, onDone, onPlay }) {
   const [caught, setCaught] = useState({})
   const [fixes, setFixes] = useState({})
   const [typing, setTyping] = useState(null)
   const [draft, setDraft] = useState('')
   const [misses, setMisses] = useState(0)
   const [flash, setFlash] = useState(null)
+  const [tries, setTries] = useState({})   // error index -> wrong attempts at the fix
 
   const fixedCount = Object.keys(fixes).length
   const done = fixedCount === act.errorCount
@@ -338,7 +370,11 @@ function HuntActivity({ act, onDone }) {
     setCaught((c) => ({ ...c, [tok.i]: true })); setTyping(tok.i); setDraft('')
   }
   function submit(tok) {
-    if (norm(draft) !== norm(tok.fix)) return
+    if (norm(draft) !== norm(tok.fix)) {
+      setTries((t) => ({ ...t, [tok.i]: (t[tok.i] || 0) + 1 }))
+      setDraft('')
+      return
+    }
     setFixes((f) => ({ ...f, [tok.i]: true })); setTyping(null); setDraft('')
   }
 
@@ -369,6 +405,12 @@ function HuntActivity({ act, onDone }) {
                 style={{ width: 140, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 14 }} />
               <button onClick={() => submit(tok)} disabled={!draft.trim()}
                 style={{ fontSize: 12, fontWeight: 800, color: draft.trim() ? '#fff' : '#9db0c0', background: draft.trim() ? NAVY : '#eef0f6', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>✓</button>
+              {(tries[tok.i] || 0) >= 2 && (
+                <>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#a37400' }}>it is <b>{tok.fix}</b></span>
+                  <WatchButton id={(act.videos || [])[tok.i]} onPlay={onPlay} label="Why?" />
+                </>
+              )}
             </span>
           )
           if (caught[tok.i]) return (
@@ -391,7 +433,7 @@ function HuntActivity({ act, onDone }) {
 }
 
 /* --- activity: walk the maze, fixing the verb at every gate --- */
-function MazeActivity({ act, onDone }) {
+function MazeActivity({ act, onDone, onPlay }) {
   const grid = act.grid
   const H = grid.length, W = grid[0].length
   const cellAt = (r, c) => (r >= 0 && r < H && c >= 0 && c < W ? grid[r][c] : '#')
@@ -500,7 +542,12 @@ function MazeActivity({ act, onDone }) {
                 onKeyDown={(e) => { if (e.key === 'Enter') tryGate() }} placeholder="past tense…"
                 style={{ width: '100%', padding: '9px 11px', borderRadius: 9, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 15 }} />
               {tries > 0 && !reveal && <div style={{ fontSize: 12, color: '#c0392b', fontWeight: 700, marginTop: 6 }}>Not it — one more try for the point.</div>}
-              {reveal && <div style={{ fontSize: 12.5, color: '#a37400', fontWeight: 700, marginTop: 6 }}>It is <b>{act.gates[gate.letter].right}</b> — type it to pass.</div>}
+              {reveal && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginTop: 7 }}>
+                  <span style={{ fontSize: 12.5, color: '#a37400', fontWeight: 700 }}>It is <b>{act.gates[gate.letter].right}</b> — type it to pass.</span>
+                  <WatchButton id={act.video} onPlay={onPlay} label="Watch the maze solution" />
+                </div>
+              )}
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
                 <button className="btn" style={{ padding: '8px 16px', fontSize: 13 }} disabled={!draft.trim()} onClick={tryGate}>Unlock →</button>
                 <button className="btn ghost" style={{ padding: '8px 14px', fontSize: 13 }} onClick={() => setGate(null)}>Back up</button>
@@ -544,7 +591,7 @@ function MazeActivity({ act, onDone }) {
 }
 
 /* --- activity: fill in the blank from a word bank --- */
-function FixActivity({ act, onDone }) {
+function FixActivity({ act, onDone, onPlay }) {
   const [answers, setAnswers] = useState(act.items.map(() => ''))
   const [checked, setChecked] = useState(false)
   const right = act.items.map((it, i) => norm(answers[i]) === norm(it.answer))
@@ -579,8 +626,11 @@ function FixActivity({ act, onDone }) {
                 {after}
               </span>
               {checked && (
-                <span style={{ fontSize: 12.5, fontWeight: 800, color: ok ? 'var(--good)' : '#c0392b', whiteSpace: 'nowrap' }}>
-                  {ok ? '✓' : `✕ ${it.answer}`}
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 12.5, fontWeight: 800, color: ok ? 'var(--good)' : '#c0392b' }}>
+                    {ok ? '✓' : `✕ ${it.answer}`}
+                  </span>
+                  <WatchButton id={it.video} onPlay={onPlay} label={ok ? 'Watch' : 'Why?'} />
                 </span>
               )}
             </div>

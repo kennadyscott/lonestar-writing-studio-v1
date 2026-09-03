@@ -13,16 +13,22 @@
 // Activity types
 //   hunt  a paragraph with errors planted inline as [[wrong|right]]
 //   fix   sentences to complete or correct, with a word bank
+//   maze  a grid you walk, with a wrong verb blocking every gate
+//
+// Solution videos: the source folders ship one recording per numbered item
+// ("5th CS SV # 3 Irregular Verbs.mp4"), so items carry the video id that was
+// recorded for them and a student can watch the explanation exactly where they
+// got it wrong.
 //
 // Job 1's hunt paragraph is verbatim from "Irregular Verbs.pptx" (Grade 5).
 
 export const PASS_MARK = 85
 
-const hunt = (brief, text, hint) => ({ kind: 'hunt', brief, text, hint })
+const hunt = (brief, text, hint, videos) => ({ kind: 'hunt', brief, text, hint, videos })
 const fix = (brief, bank, items, hint) => ({ kind: 'fix', brief, bank, items, hint })
 // maze: S start, X finish, # wall, . open, A–J gates. Every gate sits on the only
 // route through, so the verbs get corrected in the order the path meets them.
-const maze = (brief, grid, gates, hint) => ({ kind: 'maze', brief, grid, gates, hint })
+const maze = (brief, grid, gates, hint, video) => ({ kind: 'maze', brief, grid, gates, hint, video })
 
 export const TOPICS = [
   {
@@ -39,7 +45,8 @@ export const TOPICS = [
         activities: [
           hunt('Four verbs in this story are wrong. Tyler would not want to turn this in.',
             `After dinner, Tyler looked for his math homework but could not find it anywhere. He [[runned|ran]] upstairs to check his room and searched under his bed. His sister [[catched|caught]] him tossing papers across the floor and offered to help. Tyler suddenly remembered that he had [[writed|written]] part of the assignment in the car after soccer practice. A few minutes later, they [[finded|found]] the homework inside his backpack, and Tyler happily brought it to the kitchen table to finish.`,
-            'Every one of them is a verb that does not just add -ed.'),
+            'Every one of them is a verb that does not just add -ed.',
+            ['iv-6', 'iv-7', 'iv-8', 'iv-9']),
           maze('Walk from START to FINISH. Every verb in your way is written wrong.',
             [
               'S.A.####',
@@ -58,13 +65,13 @@ export const TOPICS = [
               D: { wrong: 'DRINKED', right: 'drank' },
               E: { wrong: 'SPEAKED', right: 'spoke' },
             },
-            'Dead ends are dead ends — back up and try another way.'),
+            'Dead ends are dead ends — back up and try another way.', 'iv-maze'),
           fix('Put each verb in the past tense.', ['choose', 'win', 'know', 'think', 'draw'], [
-            { given: 'The scientist ____ carefully about the experiment.', answer: 'thought' },
-            { given: 'Maria ____ a topic for her research project.', answer: 'chose' },
-            { given: 'She ____ a detailed map of the trail.', answer: 'drew' },
-            { given: 'The team had ____ every game that season.', answer: 'won' },
-            { given: 'We ____ the answer as soon as the teacher asked the question.', answer: 'knew' },
+            { given: 'The scientist ____ carefully about the experiment.', answer: 'thought', video: 'iv-1' },
+            { given: 'Maria ____ a topic for her research project.', answer: 'chose', video: 'iv-2' },
+            { given: 'She ____ a detailed map of the trail.', answer: 'drew', video: 'iv-3' },
+            { given: 'The team had ____ every game that season.', answer: 'won', video: 'iv-4' },
+            { given: 'We ____ the answer as soon as the teacher asked the question.', answer: 'knew', video: 'iv-5' },
           ], 'Say the sentence out loud with "yesterday" in front of it.'),
         ],
       },

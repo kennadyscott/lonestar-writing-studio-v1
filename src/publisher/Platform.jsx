@@ -34,6 +34,7 @@ const PAPER = '#eef3f7'
 const GREEN = '#1e7a4a'
 const AMBER = '#b47b13'
 const RED = '#c0392b'
+const FLAG = '#7b4bc4'
 
 const STATUS = {
   draft: { text: 'Draft', bg: '#e7edf3', fg: '#5b6b7c' },
@@ -257,6 +258,7 @@ function Rail({ paths, sel, onSelect, onChanged, meta }) {
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
                       <StatusPill status={p.status} version={p.liveVersion} />
                       {p.errors > 0 && <span style={{ fontSize: 10.5, fontWeight: 800, color: RED }}>● {p.errors} to fix</span>}
+                      {p.flags > 0 && <span style={{ fontSize: 10.5, fontWeight: 800, color: FLAG }}>⚑ {p.flags} flagged</span>}
                       {p.errors === 0 && p.unpublishedChanges && <span style={{ fontSize: 10.5, fontWeight: 800, color: AMBER }}>● changes not live</span>}
                     </div>
                   </button>
@@ -493,7 +495,7 @@ function Workbench({ id, onChanged }) {
   const tabs = [
     ['details', 'Details'],
     ['build', 'Build'],
-    ['proof', `Proof${proof?.errors ? ` · ${proof.errors}` : ''}`],
+    ['proof', `Proof${(proof?.errors || 0) + (proof?.flags || 0) ? ` · ${(proof.errors || 0) + (proof.flags || 0)}` : ''}`],
     ['publish', 'Approve & publish'],
   ]
 
@@ -529,7 +531,7 @@ function Workbench({ id, onChanged }) {
 
       {tab === 'details' && <DetailsTab draft={draft} mutate={mutate} />}
       {tab === 'build' && <BuildTab draft={draft} mutate={mutate} />}
-      {tab === 'proof' && <ProofTab draft={draft} proof={proof} dirty={dirty} onSave={save} videos={data.videos} />}
+      {tab === 'proof' && <ProofTab draft={draft} proof={proof} dirty={dirty} onSave={save} videos={data.videos} mutate={mutate} />}
       {tab === 'publish' && <PublishTab path={p} proof={proof} versions={data.versions} dirty={dirty}
         onRefresh={async () => { await load(); await onChanged() }} onProof={() => setTab('proof')} />}
     </div>
@@ -569,6 +571,7 @@ function BuildTab({ draft, mutate }) {
             <div style={{ fontSize: 12.5, fontWeight: 800, color: s.kind === 'sb' ? AMBER : NAVY, lineHeight: 1.3 }}>{s.label}</div>
             <div style={{ fontSize: 10.5, color: '#5b6b7c', fontWeight: 700 }}>
               {(s.w.activities || []).length} activities
+              {s.w.flag ? <span style={{ color: FLAG }}>⚑ </span> : null}
               {(s.w.standards || []).length
                 ? <> · <span style={{ color: CYAN }}>{joinStandards(s.w.standards)}</span></>
                 : <> · <span style={{ color: AMBER }}>untagged</span></>}
@@ -588,6 +591,13 @@ function BuildTab({ draft, mutate }) {
               <div style={{ flex: '1 1 260px' }}>
                 <span style={label}>THE SKILL IT TEACHES</span>
                 <input style={field} value={current.w.skill || ''} onChange={(e) => editSheet((w) => { w.skill = e.target.value })} />
+              </div>
+              <div style={{ flex: '1 1 100%' }}>
+                <span style={label}>⚑ FLAG — SOMETHING HERE NEEDS CONFIRMING BEFORE IT GOES LIVE</span>
+                <input style={{ ...field, borderColor: current.w.flag ? FLAG : 'var(--line)' }}
+                  placeholder="Leave blank if nothing is unsettled"
+                  value={current.w.flag || ''}
+                  onChange={(e) => editSheet((w) => { if (e.target.value.trim()) w.flag = e.target.value; else delete w.flag })} />
               </div>
               <div style={{ flex: '1 1 240px' }}>
                 <span style={label}>STANDARDS — WHAT THIS WORKSHEET TEACHES</span>
@@ -609,14 +619,31 @@ function BuildTab({ draft, mutate }) {
 
 /* ---------- proof ---------- */
 
-function ProofTab({ draft, proof, dirty, onSave, videos }) {
+function ProofTab({ draft, proof, dirty, onSave, videos, mutate }) {
   const [play, setPlay] = useState(null)
   const prepared = React.useMemo(() => { try { return prepareTopic(draft) } catch { return null } }, [draft])
   const sheets = sheetsOf(draft)
 
   const groups = {}
   for (const p of proof?.problems || []) (groups[p.where] ||= []).push(p)
-  const clean = proof && proof.errors === 0 && proof.warnings === 0
+  const clean = proof && proof.errors === 0 && proof.warnings === 0 && (proof.flags || 0) === 0
+
+  /* Clearing a flag is the deliberate act the flag exists to force, so it is a
+   * button on the flag itself rather than a field buried in the editor. The
+   * flag's own words identify it — they are written to be specific. */
+  function clearFlag(msg) {
+    mutate((t) => {
+      const sheets = [...(t.core || []), ...Object.values(t.skillBuilders || {}), ...(t.full ? [t.full] : [])]
+      for (const ws of sheets) {
+        if (ws.flag === msg) delete ws.flag
+        for (const a of ws.activities || []) {
+          if (a.flag === msg) delete a.flag
+          for (const it of a.items || []) if (it && it.flag === msg) delete it.flag
+          for (const q of a.questions || []) if (q && q.flag === msg) delete q.flag
+        }
+      }
+    })
+  }
 
   function open(id) {
     const all = prepared ? [...(prepared.core || []), ...Object.values(prepared.skillBuilders || {}), ...(prepared.full ? [prepared.full] : [])] : []
@@ -639,6 +666,7 @@ function ProofTab({ draft, proof, dirty, onSave, videos }) {
 
         <div style={{ display: 'flex', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
           <Tally n={proof?.errors ?? 0} label="must fix" color={RED} />
+          <Tally n={proof?.flags ?? 0} label="flagged" color={FLAG} />
           <Tally n={proof?.warnings ?? 0} label="worth a look" color={AMBER} />
           <Tally n={proof?.points ?? 0} label="points" color={NAVY} />
           <Tally n={proof?.stops ?? 0} label="stops" color={NAVY} />
@@ -654,14 +682,20 @@ function ProofTab({ draft, proof, dirty, onSave, videos }) {
           <div key={where} style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 12, fontWeight: 800, color: NAVY, marginBottom: 5 }}>{where}</div>
             {list.map((p, i) => (
-              <div key={i} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '9px 11px', borderRadius: 9, background: p.level === 'error' ? '#fdecea' : '#fdf7e8', marginBottom: 4 }}>
-                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .5, color: '#fff', background: p.level === 'error' ? RED : AMBER, borderRadius: 5, padding: '2px 6px', marginTop: 1, whiteSpace: 'nowrap' }}>
-                  {p.level === 'error' ? 'FIX' : 'LOOK'}
+              <div key={i} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', padding: '9px 11px', borderRadius: 9, background: p.level === 'error' ? '#fdecea' : p.level === 'flag' ? '#f3eefb' : '#fdf7e8', marginBottom: 4 }}>
+                <span style={{ fontSize: 10, fontWeight: 800, letterSpacing: .5, color: '#fff', background: p.level === 'error' ? RED : p.level === 'flag' ? FLAG : AMBER, borderRadius: 5, padding: '2px 6px', marginTop: 1, whiteSpace: 'nowrap' }}>
+                  {p.level === 'error' ? 'FIX' : p.level === 'flag' ? 'FLAG' : 'LOOK'}
                 </span>
-                <div style={{ minWidth: 0 }}>
+                <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ fontSize: 13, fontWeight: 700, color: INK }}>{p.msg}</div>
                   {p.fix && <div style={{ fontSize: 12, color: '#5b6b7c', marginTop: 1 }}>{p.fix}</div>}
                 </div>
+                {p.level === 'flag' && (
+                  <button onClick={() => clearFlag(p.msg)} title="I have confirmed this"
+                    style={{ ...btn('#fff', FLAG), border: `1px solid ${FLAG}44`, fontSize: 11.5, padding: '5px 10px', whiteSpace: 'nowrap' }}>
+                    Confirmed
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -707,7 +741,7 @@ function PublishTab({ path, proof, versions, dirty, onRefresh, onProof }) {
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState('')
   const [msg, setMsg] = useState(null)
-  const blocked = (proof?.errors ?? 0) > 0
+  const blocked = (proof?.errors ?? 0) > 0 || (proof?.flags ?? 0) > 0
 
   async function run(fn, kind) {
     setBusy(kind); setMsg(null)
@@ -729,9 +763,11 @@ function PublishTab({ path, proof, versions, dirty, onRefresh, onProof }) {
           <Note color={AMBER}>You have unsaved changes. Save the draft first — approval snapshots what is saved.</Note>
         )}
         {blocked && (
-          <Note color={RED}>
-            {proof.errors} {proof.errors === 1 ? 'problem' : 'problems'} must be fixed before this can go live.{' '}
-            <button onClick={onProof} style={{ background: 'none', border: 'none', color: RED, fontWeight: 800, textDecoration: 'underline', cursor: 'pointer', font: 'inherit', padding: 0 }}>See them →</button>
+          <Note color={(proof?.errors ?? 0) > 0 ? RED : FLAG}>
+            {(proof?.errors ?? 0) > 0
+              ? `${proof.errors} ${proof.errors === 1 ? 'problem' : 'problems'} must be fixed before this can go live.`
+              : `${proof.flags} ${proof.flags === 1 ? 'flag is' : 'flags are'} still raised. Somebody has to confirm these before a class sees them.`}{' '}
+            <button onClick={onProof} style={{ background: 'none', border: 'none', color: 'inherit', fontWeight: 800, textDecoration: 'underline', cursor: 'pointer', font: 'inherit', padding: 0 }}>See them →</button>
           </Note>
         )}
         {!blocked && !dirty && path.unpublishedChanges && (

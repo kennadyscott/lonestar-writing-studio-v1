@@ -946,7 +946,7 @@ function FixActivity({ act, onDone, onPlay }) {
 
               {mode === 'select' && (
                 <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 8, paddingLeft: 29 }}>
-                  {(it.options || []).map((opt) => {
+                  {(it.options && it.options.length ? it.options : act.bank || []).map((opt) => {
                     const chosen = norm(answers[i]) === norm(opt)
                     const reveal = checked && norm(opt) === norm(it.answer)
                     return (

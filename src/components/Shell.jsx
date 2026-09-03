@@ -31,13 +31,20 @@ export function TopBar({ who, onArcade, onLogo }) {
   )
 }
 
-export function DemoTools({ onResetDemo }) {
-  if (!onResetDemo) return null
+export function DemoTools({ onResetDemo, onPublisher }) {
+  if (!onResetDemo && !onPublisher) return null
   return (
-    <div className="rolepick">
-      <button onClick={onResetDemo} style={{ display: 'block', width: '100%', padding: '6px 8px', borderRadius: 8, background: '#eef3f6', color: 'var(--muted)', fontSize: 11.5, fontWeight: 800 }}>
-        ↺ Reset demo data
-      </button>
+    <div className="rolepick" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+      {onPublisher && (
+        <button onClick={onPublisher} style={{ display: 'block', width: '100%', padding: '6px 8px', borderRadius: 8, background: '#eef6f9', color: '#0f97c2', fontSize: 11.5, fontWeight: 800 }}>
+          🛠 Publisher console
+        </button>
+      )}
+      {onResetDemo && (
+        <button onClick={onResetDemo} style={{ display: 'block', width: '100%', padding: '6px 8px', borderRadius: 8, background: '#eef3f6', color: 'var(--muted)', fontSize: 11.5, fontWeight: 800 }}>
+          ↺ Reset demo data
+        </button>
+      )}
     </div>
   )
 }

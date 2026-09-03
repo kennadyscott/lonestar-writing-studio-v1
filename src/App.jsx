@@ -10,6 +10,7 @@ import LunaPage from './student/LunaPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
 import FeedbackReview from './student/FeedbackReview.jsx'
+import PublisherConsole from './student/PublisherConsole.jsx'
 
 const ME_STUDENT = 'stu_kscott'
 
@@ -19,6 +20,7 @@ export default function App() {
   const [view, setView] = useState('home')
   const [openSub, setOpenSub] = useState(null) // submission id for the studio
   const [reviewSub, setReviewSub] = useState(null) // completed submission being reviewed
+  const [publisher, setPublisher] = useState(false)
 
   const refresh = useCallback(async () => setState(await api.state()), [])
   useEffect(() => { refresh(); api.health().then(setHealth) }, [refresh])
@@ -76,7 +78,8 @@ export default function App() {
         onLogo={goHome}
       />
       <div className="content">{body}</div>
-      <DemoTools onResetDemo={resetDemo} />
+      <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)} />
+      {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
     </div>
   )
 }

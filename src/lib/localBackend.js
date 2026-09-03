@@ -4,6 +4,7 @@
 import { seedState } from '../../server/seed.mjs'
 import { fallbackConference, fallbackTraits, isBegging } from '../../server/fallback.mjs'
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from '../../server/peerTasks.mjs'
+import { rawTopics } from '../../server/proofRoom.mjs'
 
 const ME = 'stu_kscott'
 const COIN_CAP = 150
@@ -230,6 +231,17 @@ export const localApi = {
     state.shareWall.unshift(entry)
     return entry
   },
+  proofContent: async () => {
+    if (!state.proofTopics) state.proofTopics = rawTopics()
+    return { topics: clone(state.proofTopics) }
+  },
+  saveTopic: async (topic) => {
+    if (!state.proofTopics) state.proofTopics = rawTopics()
+    const i = state.proofTopics.findIndex((x) => x.id === topic.id)
+    if (i >= 0) state.proofTopics[i] = topic; else state.proofTopics.push(topic)
+    return { ok: true, topics: clone(state.proofTopics) }
+  },
+  revertProof: async () => { state.proofTopics = rawTopics(); return { ok: true, topics: clone(state.proofTopics) } },
   drillFinish: async (payload) => {
     const accuracy = Number(payload?.accuracy) || 0
     if (accuracy < 75) return { coins: 0, passed: false }

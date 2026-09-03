@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
-import { topicList, topicFor, PASS_MARK, checkCompose } from '../../server/proofRoom.mjs'
+import { prepareTopic, PASS_MARK, checkCompose } from '../../server/proofRoom.mjs'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -89,8 +89,16 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
   const [topicId, setTopicId] = useState(null)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
-  const topics = useMemo(() => topicList(), [])
-  const topic = useMemo(() => (topicId ? topicFor(topicId) : null), [topicId])
+  const [raw, setRaw] = useState(null)      // whatever the publisher has published
+  useEffect(() => { api.proofContent().then((r) => setRaw(r.topics || [])).catch(() => setRaw([])) }, [])
+  const topics = useMemo(() => (raw || []).map((t) => ({
+    id: t.id, title: t.title, grade: t.grade, standards: t.standards, blurb: t.blurb, icon: t.icon,
+    stops: (t.core || []).length + 1,
+  })), [raw])
+  const topic = useMemo(() => {
+    if (!topicId || !raw) return null
+    return prepareTopic(raw.find((t) => t.id === topicId))
+  }, [topicId, raw])
 
   useEffect(() => {
     try { setProgress(JSON.parse(localStorage.getItem('proofProgress') || '{}')) } catch { setProgress({}) }
@@ -111,6 +119,12 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
   }
   if (topic) {
     return <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={onClose} />
+  }
+
+  if (!raw) {
+    return <Shell onClose={onClose} sub="Bring writing in broken, take it out clean">
+      <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>Loading today's jobs…</div>
+    </Shell>
   }
 
   return (

@@ -46,6 +46,7 @@ const QUICK_PROMPTS = [
   'Is it better to be a leader or a helper? Why?',
 ]
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from './peerTasks.mjs'
+import { rawTopics } from './proofRoom.mjs'
 
 const ME = 'stu_kscott'
 const REACTIONS = ['like', 'heart', 'celebrate'] // positive only, by design
@@ -485,6 +486,29 @@ const server = http.createServer(async (req, res) => {
       const stu = findStu(ME); if (stu) stu.coins += coins
       save()
       return send(res, 200, { coins, passed: true, doubled: true, roundsLeft: TYPING_DAILY_ROUNDS - paidToday - 1 })
+    }
+
+    // ---- Proof Room content, editable by a publisher ----
+    if (req.method === 'GET' && url.pathname === '/api/proof/content') {
+      if (!state.proofTopics) { state.proofTopics = rawTopics(); save() }
+      return send(res, 200, { topics: state.proofTopics })
+    }
+    // PUT /api/proof/topic { topic } -> replace one topic wholesale
+    if (req.method === 'PUT' && url.pathname === '/api/proof/topic') {
+      const body = await readBody(req)
+      const t = body.topic
+      if (!t || !t.id) return send(res, 400, { error: 'topic required' })
+      if (!state.proofTopics) state.proofTopics = rawTopics()
+      const i = state.proofTopics.findIndex((x) => x.id === t.id)
+      if (i >= 0) state.proofTopics[i] = t
+      else state.proofTopics.push(t)
+      save()
+      return send(res, 200, { ok: true, topics: state.proofTopics })
+    }
+    // POST /api/proof/revert -> back to the content shipped with the app
+    if (req.method === 'POST' && url.pathname === '/api/proof/revert') {
+      state.proofTopics = rawTopics(); save()
+      return send(res, 200, { ok: true, topics: state.proofTopics })
     }
 
     // POST /api/drill/finish -> coins for a clean Proof Room job. Same deal as

@@ -298,15 +298,24 @@ export function prepare(ws) {
   return { ...ws, activities, points }
 }
 
-export function topicFor(id) {
-  const t = TOPICS.find((x) => x.id === id) || TOPICS[0]
+/* Turn an authored topic — seeded here or edited by a publisher — into the
+ * playable shape. Pure, so the client can run it on whatever the API returns. */
+export function prepareTopic(t) {
+  if (!t) return null
   return {
     ...t,
-    core: t.core.map(prepare),
-    skillBuilders: Object.fromEntries(Object.entries(t.skillBuilders).map(([k, v]) => [k, prepare(v)])),
-    full: prepare(t.full),
+    core: (t.core || []).map(prepare),
+    skillBuilders: Object.fromEntries(Object.entries(t.skillBuilders || {}).map(([k, v]) => [k, prepare(v)])),
+    full: t.full ? prepare(t.full) : null,
   }
 }
+
+export function topicFor(id) {
+  return prepareTopic(TOPICS.find((x) => x.id === id) || TOPICS[0])
+}
+
+/* The publisher's view: what a topic looks like before it is prepared. */
+export const rawTopics = () => JSON.parse(JSON.stringify(TOPICS))
 
 export const topicList = () => TOPICS.map((t) => ({
   id: t.id, title: t.title, short: t.short, grade: t.grade, standards: t.standards,

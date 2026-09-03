@@ -39,7 +39,12 @@ const HOW_TO = {
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
 }
 
-const SOLUTION = (id) => (import.meta.env.BASE_URL || '/') + 'solutions/' + id + '.mp4'
+// Where the solution videos are served from. Unset, they come from the app's own
+// /solutions folder, which is what a laptop and the static demo use. Set to an R2
+// bucket's public URL and nothing else changes: activities store a video id, never
+// a URL, so the videos can move hosts without touching a single worksheet.
+const MEDIA_BASE = import.meta.env.VITE_MEDIA_BASE || ((import.meta.env.BASE_URL || '/') + 'solutions/')
+const SOLUTION = (id) => MEDIA_BASE.replace(/\/?$/, '/') + id + '.mp4'
 
 function WatchButton({ id, onPlay, label = 'Watch the solution' }) {
   if (!id) return null

@@ -18,6 +18,24 @@ const GOLD = '#f0b429'
 
 const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 
+const HOW_TO = {
+  hunt: 'Click on each word that is wrong. Type the correct word, then press ✓. Clicking a word that is already correct counts against you.',
+  fix: 'Type the missing word in each blank. Use the word bank above — every word is used once. Check your answers when the last blank is filled.',
+}
+
+function Directions({ text }) {
+  return (
+    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#eef6f9', border: '1.5px solid #cfe6f0',
+      borderRadius: 12, padding: '11px 14px', marginBottom: 12 }}>
+      <span style={{ fontSize: 15, lineHeight: 1.3 }}>📋</span>
+      <div>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: CYAN }}>DIRECTIONS</div>
+        <div style={{ fontSize: 13.5, lineHeight: 1.5, color: '#1f4a68', marginTop: 2 }}>{text}</div>
+      </div>
+    </div>
+  )
+}
+
 export default function ProofRoom({ grade = 5, onClose, onChange }) {
   const [topicId, setTopicId] = useState(null)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
@@ -303,6 +321,7 @@ function HuntActivity({ act, onDone }) {
 
   return (
     <div>
+      <Directions text={act.directions || HOW_TO.hunt} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
         <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{fixedCount} of {act.errorCount} fixed</span>
@@ -355,6 +374,7 @@ function FixActivity({ act, onDone }) {
 
   return (
     <div>
+      <Directions text={act.directions || HOW_TO.fix} />
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
 
       <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 13 }}>

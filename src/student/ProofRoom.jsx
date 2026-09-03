@@ -25,7 +25,7 @@ const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 // visual language from Luna and the robots, and it reads as "the worksheet
 // world" precisely because it does not appear anywhere else in the studio.
 // Do not reuse these on the dashboard, in Luna's Nook, or in Fluency Practice.
-const ART = (f) => (import.meta.env.BASE_URL || '/') + 'art/' + f + '.png'
+const ART = (f) => (import.meta.env.BASE_URL || '/') + 'art/' + f + '.webp'
 
 // The character art from the source worksheets. Each deck drew its own and the
 // drawings are about their own stories — the falconer is Cedric of Thornwick,

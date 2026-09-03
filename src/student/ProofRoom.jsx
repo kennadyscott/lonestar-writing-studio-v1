@@ -18,6 +18,11 @@ const GOLD = '#f0b429'
 
 const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 
+// the worksheet illustrations, lifted straight out of the source decks
+const ART = (f) => (import.meta.env.BASE_URL || '/') + f
+const KID_CLIPBOARD = ART('kid-clipboard.png')
+const KID_READER = ART('kid-reader.png')
+
 const HOW_TO = {
   hunt: 'Click on each word that is wrong. Type the correct word, then press ✓. Clicking a word that is already correct counts against you.',
   fix: 'Type the missing word in each blank. Use the word bank above — every word is used once. Check your answers when the last blank is filled.',
@@ -67,9 +72,16 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
 
   return (
     <Shell onClose={onClose} sub="Bring writing in broken, take it out clean">
-      <p style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.55, margin: '0 0 14px' }}>
-        Each topic is a path. Work the skills one at a time, then prove the whole topic at the end.
-      </p>
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 14, background: 'linear-gradient(120deg,#e7f2f7,#fff 70%)',
+        borderRadius: 16, padding: '16px 18px 0', marginBottom: 14, overflow: 'hidden' }}>
+        <div style={{ flex: 1, paddingBottom: 16 }}>
+          <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>Pick a topic and start the path.</div>
+          <p style={{ fontSize: 13, color: '#3f5f76', lineHeight: 1.5, margin: '5px 0 0' }}>
+            Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic.
+          </p>
+        </div>
+        <img src={KID_READER} alt="" style={{ height: 118, flexShrink: 0, marginBottom: -2 }} />
+      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {topics.map((t) => {
           const done = t.stops // placeholder count for display
@@ -121,7 +133,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   return (
     <Shell onClose={onClose} sub={topic.title} onBack={onBack}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 22 }}>{topic.icon}</span>
+        <img src={KID_CLIPBOARD} alt="" style={{ height: 72, flexShrink: 0, marginBottom: -12 }} />
         <div style={{ flex: 1, minWidth: 170 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{topic.standards} · GRADE {topic.grade}</div>
           <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{cleared} of {topic.core.length} skills cleared</div>
@@ -223,7 +235,8 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
     return (
       <Shell onClose={onClose} sub={ws.title}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 46 }}>{passed ? '🎉' : '🛠'}</div>
+          <img src={passed ? KID_READER : KID_CLIPBOARD} alt=""
+            style={{ height: 150, display: 'block', margin: '0 auto -6px' }} />
           <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? 'Stop cleared!' : 'Not clean enough yet'}</h2>
           <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 14px' }}>
             {result.got} of {ws.points} points · {ws.activities.length} activities

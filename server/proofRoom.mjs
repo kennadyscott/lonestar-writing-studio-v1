@@ -20,6 +20,9 @@ export const PASS_MARK = 85
 
 const hunt = (brief, text, hint) => ({ kind: 'hunt', brief, text, hint })
 const fix = (brief, bank, items, hint) => ({ kind: 'fix', brief, bank, items, hint })
+// maze: S start, X finish, # wall, . open, A–J gates. Every gate sits on the only
+// route through, so the verbs get corrected in the order the path meets them.
+const maze = (brief, grid, gates, hint) => ({ kind: 'maze', brief, grid, gates, hint })
 
 export const TOPICS = [
   {
@@ -37,6 +40,25 @@ export const TOPICS = [
           hunt('Four verbs in this story are wrong. Tyler would not want to turn this in.',
             `After dinner, Tyler looked for his math homework but could not find it anywhere. He [[runned|ran]] upstairs to check his room and searched under his bed. His sister [[catched|caught]] him tossing papers across the floor and offered to help. Tyler suddenly remembered that he had [[writed|written]] part of the assignment in the car after soccer practice. A few minutes later, they [[finded|found]] the homework inside his backpack, and Tyler happily brought it to the kitchen table to finish.`,
             'Every one of them is a verb that does not just add -ed.'),
+          maze('Walk from START to FINISH. Every verb in your way is written wrong.',
+            [
+              'S.A.####',
+              '#.#.####',
+              '###B####',
+              '#C..####',
+              '#.###.##',
+              '#...D..#',
+              '###.##E#',
+              '###.##.X',
+            ],
+            {
+              A: { wrong: 'BLOWED', right: 'blew' },
+              B: { wrong: 'CHOOSED', right: 'chose' },
+              C: { wrong: 'RINGED', right: 'rang' },
+              D: { wrong: 'DRINKED', right: 'drank' },
+              E: { wrong: 'SPEAKED', right: 'spoke' },
+            },
+            'Dead ends are dead ends — back up and try another way.'),
           fix('Put each verb in the past tense.', ['choose', 'win', 'know', 'think', 'draw'], [
             { given: 'The scientist ____ carefully about the experiment.', answer: 'thought' },
             { given: 'Maria ____ a topic for her research project.', answer: 'chose' },
@@ -209,7 +231,8 @@ export function parseHunt(text) {
 export function prepare(ws) {
   const activities = ws.activities.map((a) =>
     a.kind === 'hunt' ? { ...a, ...parseHunt(a.text), text: undefined } : { ...a })
-  const points = activities.reduce((n, a) => n + (a.kind === 'hunt' ? a.errorCount : a.items.length), 0)
+  const points = activities.reduce((n, a) =>
+    n + (a.kind === 'hunt' ? a.errorCount : a.kind === 'maze' ? Object.keys(a.gates).length : a.items.length), 0)
   return { ...ws, activities, points }
 }
 

@@ -21,6 +21,7 @@ const norm = (s) => (s || '').trim().toLowerCase().replace(/\s+/g, ' ')
 const HOW_TO = {
   hunt: 'Click on each word that is wrong. Type the correct word, then press ✓. Clicking a word that is already correct counts against you.',
   fix: 'Type the missing word in each blank. Use the word bank above — every word is used once. Check your answers when the last blank is filled.',
+  maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
 }
 
 function Directions({ text }) {
@@ -283,15 +284,15 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
             background: i < step ? '#e6f6ee' : i === step ? '#e9f5fb' : '#eef3f6',
             color: i < step ? 'var(--good)' : i === step ? CYAN : 'var(--muted)' }}>
-            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : 'Fill it in'}
+            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : a.kind === 'maze' ? 'Verb maze' : 'Fill it in'}
           </span>
         ))}
         <span style={{ flex: 1 }} />
         <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>one worksheet · scored together</span>
       </div>
 
-      {act.kind === 'hunt'
-        ? <HuntActivity key={step} act={act} onDone={finishActivity} />
+      {act.kind === 'hunt' ? <HuntActivity key={step} act={act} onDone={finishActivity} />
+        : act.kind === 'maze' ? <MazeActivity key={step} act={act} onDone={finishActivity} />
         : <FixActivity key={step} act={act} onDone={finishActivity} />}
     </Shell>
   )
@@ -359,6 +360,159 @@ function HuntActivity({ act, onDone }) {
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" onClick={() => onDone(Math.max(0, fixedCount - Math.floor(misses / 2)))}>
           {done ? 'Next activity →' : 'Done with this one →'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+/* --- activity: walk the maze, fixing the verb at every gate --- */
+function MazeActivity({ act, onDone }) {
+  const grid = act.grid
+  const H = grid.length, W = grid[0].length
+  const cellAt = (r, c) => (r >= 0 && r < H && c >= 0 && c < W ? grid[r][c] : '#')
+  const startPos = useMemo(() => {
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) if (grid[r][c] === 'S') return { r, c }
+    return { r: 0, c: 0 }
+  }, [act])
+
+  const [pos, setPos] = useState(startPos)
+  const [trail, setTrail] = useState({ [`${startPos.r},${startPos.c}`]: true })
+  const [cleared, setCleared] = useState({})   // gate letter -> true once opened
+  const [earned, setEarned] = useState({})     // gate letter -> true if right first try
+  const [gate, setGate] = useState(null)       // { letter, r, c }
+  const [draft, setDraft] = useState('')
+  const [tries, setTries] = useState(0)
+  const [shake, setShake] = useState(false)
+  const [reveal, setReveal] = useState(false)
+  const total = Object.keys(act.gates).length
+  const done = cellAt(pos.r, pos.c) === 'X'
+
+  function move(dr, dc) {
+    if (gate || done) return
+    const nr = pos.r + dr, nc = pos.c + dc
+    const ch = cellAt(nr, nc)
+    if (ch === '#') return
+    if (/[A-J]/.test(ch) && !cleared[ch]) { setGate({ letter: ch, r: nr, c: nc }); setDraft(''); setTries(0); setReveal(false); return }
+    setPos({ r: nr, c: nc })
+    setTrail((t) => ({ ...t, [`${nr},${nc}`]: true }))
+  }
+
+  useEffect(() => {
+    const onKey = (e) => {
+      const map = { ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1] }
+      if (!map[e.key]) return
+      e.preventDefault()
+      move(...map[e.key])
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [pos, gate, done])
+
+  function tryGate() {
+    const g = act.gates[gate.letter]
+    if (norm(draft) === norm(g.right)) {
+      setCleared((c) => ({ ...c, [gate.letter]: true }))
+      if (tries === 0) setEarned((e) => ({ ...e, [gate.letter]: true }))
+      setPos({ r: gate.r, c: gate.c })
+      setTrail((t) => ({ ...t, [`${gate.r},${gate.c}`]: true }))
+      setGate(null); setDraft('')
+      return
+    }
+    const n = tries + 1
+    setTries(n); setShake(true); setTimeout(() => setShake(false), 400)
+    if (n >= 2) setReveal(true)
+    setDraft('')
+  }
+
+  const openedCount = Object.keys(cleared).length
+  const firstTry = Object.keys(earned).length
+
+  return (
+    <div>
+      <Directions text={act.directions || HOW_TO.maze} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
+        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{openedCount} of {total} verbs fixed</span>
+        <span className="pill" style={{ background: '#f1faf4', color: 'var(--good)' }}>{firstTry} first-try</span>
+      </div>
+
+      <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${W}, 40px)`, gap: 3, background: '#dbe8f1', padding: 8, borderRadius: 14 }}>
+          {grid.map((row, r) => row.split('').map((ch, c) => {
+            const here = pos.r === r && pos.c === c
+            const walked = trail[`${r},${c}`]
+            const isGate = /[A-J]/.test(ch)
+            const open = isGate && cleared[ch]
+            const wall = ch === '#'
+            const adjacent = Math.abs(pos.r - r) + Math.abs(pos.c - c) === 1 && !wall
+            return (
+              <button key={`${r},${c}`} disabled={!adjacent || !!gate}
+                onClick={() => move(r - pos.r, c - pos.c)}
+                title={isGate ? act.gates[ch].wrong : ''}
+                style={{ width: 40, height: 40, borderRadius: 9, display: 'grid', placeItems: 'center',
+                  fontSize: isGate ? 11 : 15, fontWeight: 800, cursor: adjacent && !gate ? 'pointer' : 'default',
+                  background: wall ? '#16386b' : here ? '#f0b429' : ch === 'X' ? '#e6f6ee'
+                    : isGate ? (open ? '#e6f6ee' : '#fff3d6') : walked ? '#dff1fa' : '#fbfdfe',
+                  color: isGate ? (open ? 'var(--good)' : '#8a6400') : ch === 'X' ? 'var(--good)' : NAVY,
+                  border: here ? '2px solid #b9860c' : adjacent && !gate ? '2px solid #9fd9ef' : '2px solid transparent',
+                  boxShadow: here ? '0 0 0 3px rgba(240,180,41,.3)' : 'none' }}>
+                {here ? '🚶' : ch === 'S' ? 'S' : ch === 'X' ? '🏁' : isGate ? (open ? '✓' : ch) : ''}
+              </button>
+            )
+          }))}
+        </div>
+
+        <div style={{ flex: '1 1 220px', minWidth: 200 }}>
+          {gate ? (
+            <div style={{ background: '#fff8ec', border: '2px solid #f0b429', borderRadius: 14, padding: '14px 16px',
+              transform: shake ? 'translateX(-4px)' : 'none', transition: 'transform .08s' }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>GATE {gate.letter} — BLOCKED</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#c0392b', margin: '6px 0 2px', textDecoration: 'line-through' }}>
+                {act.gates[gate.letter].wrong}
+              </div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 9 }}>Write it correctly to walk through.</div>
+              <input autoFocus value={draft} onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter') tryGate() }} placeholder="past tense…"
+                style={{ width: '100%', padding: '9px 11px', borderRadius: 9, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 15 }} />
+              {tries > 0 && !reveal && <div style={{ fontSize: 12, color: '#c0392b', fontWeight: 700, marginTop: 6 }}>Not it — one more try for the point.</div>}
+              {reveal && <div style={{ fontSize: 12.5, color: '#a37400', fontWeight: 700, marginTop: 6 }}>It is <b>{act.gates[gate.letter].right}</b> — type it to pass.</div>}
+              <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+                <button className="btn" style={{ padding: '8px 16px', fontSize: 13 }} disabled={!draft.trim()} onClick={tryGate}>Unlock →</button>
+                <button className="btn ghost" style={{ padding: '8px 14px', fontSize: 13 }} onClick={() => setGate(null)}>Back up</button>
+              </div>
+            </div>
+          ) : done ? (
+            <div style={{ background: '#f1faf4', border: '2px solid #b8e6cd', borderRadius: 14, padding: '16px' }}>
+              <div style={{ fontSize: 26 }}>🏁</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--good)', marginTop: 4 }}>You made it out.</div>
+              <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 3 }}>
+                {firstTry} of {total} verbs fixed on the first try.
+              </div>
+            </div>
+          ) : (
+            <div style={{ background: '#f4f8fb', borderRadius: 14, padding: '14px 16px' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>VERBS IN YOUR WAY</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {Object.entries(act.gates).map(([k, g]) => (
+                  <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5 }}>
+                    <span style={{ width: 20, height: 20, borderRadius: 6, display: 'grid', placeItems: 'center', fontSize: 10.5, fontWeight: 800,
+                      background: cleared[k] ? 'var(--good)' : '#fff3d6', color: cleared[k] ? '#fff' : '#8a6400' }}>{cleared[k] ? '✓' : k}</span>
+                    <span style={{ textDecoration: cleared[k] ? 'none' : 'line-through', color: cleared[k] ? 'var(--good)' : '#c0392b', fontWeight: 700 }}>
+                      {cleared[k] ? g.right : g.wrong}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
+        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
+        <button className="btn" disabled={!done} onClick={() => onDone(firstTry)}>
+          {done ? 'Next activity →' : 'Reach the finish flag first'}
         </button>
       </div>
     </div>

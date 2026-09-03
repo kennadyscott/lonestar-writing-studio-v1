@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
+import { library } from '../lib/library.js'
 import { prepareTopic, PASS_MARK, checkCompose, tokenize } from '../../server/proofRoom.mjs'
 
 /*
@@ -93,7 +94,16 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
-  useEffect(() => { api.proofContent().then((r) => setRaw(r.topics || [])).catch(() => setRaw([])) }, [])
+  // Students read APPROVED paths from the library. If the library is empty or
+  // unreachable — the static demo build has no server — fall back to the content
+  // that ships in the code, so the Proof Room is never a blank screen.
+  useEffect(() => {
+    let live = true
+    library.live()
+      .then((r) => { if (live && (r.topics || []).length) return setRaw(r.topics) ; throw new Error('empty') })
+      .catch(() => api.proofContent().then((r) => live && setRaw(r.topics || [])).catch(() => live && setRaw([])))
+    return () => { live = false }
+  }, [])
   const topics = useMemo(() => (raw || []).map((t) => ({
     id: t.id, title: t.title, grade: t.grade, standards: t.standards, blurb: t.blurb, icon: t.icon,
     stops: (t.core || []).length + 1,
@@ -267,7 +277,7 @@ function Stop({ stop, onPlay }) {
 }
 
 /* ---------------- one worksheet, start to finish ---------------- */
-function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
+export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext, preview }) {
   const [step, setStep] = useState(0)
   const [scores, setScores] = useState([])     // points earned per activity
   const [result, setResult] = useState(null)
@@ -281,6 +291,8 @@ function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext }) {
     const got = next.reduce((a, b) => a + b, 0)
     const pct = Math.max(0, Math.round((got / ws.points) * 100))
     onDone(pct)
+    // A publisher proofing a worksheet is not a student earning coins.
+    if (preview) { setResult({ pct, got }); return }
     api.drillFinish({ worksheetId: ws.id, accuracy: pct }).then((r) => setResult({ pct, got, ...(r || {}) })).catch(() => setResult({ pct, got }))
   }
 

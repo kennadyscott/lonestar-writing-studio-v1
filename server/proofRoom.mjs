@@ -229,7 +229,7 @@ export const TOPICS = [
             { given: 'Be ____ than you were last time.', answer: 'more careful' },
           ], 'One or two syllables take -er. Three or more take "more".'),
           hunt('Two describing words are wrong here.',
-            `That was the [[funnest|most fun]] field trip of the year, and the bus ride home felt [[shorter|shorter]] than the ride there.`,
+            `That was the [[funnest|most fun]] field trip of the year, and the bus ride home felt [[more short|shorter]] than the ride there.`,
             'Only one of these two is actually broken — read carefully.'),
         ],
       },

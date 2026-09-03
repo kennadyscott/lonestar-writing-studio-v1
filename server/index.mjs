@@ -47,6 +47,8 @@ const QUICK_PROMPTS = [
 ]
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from './peerTasks.mjs'
 import { rawTopics } from './proofRoom.mjs'
+import { libraryRoute } from '../lib/server/library.mjs'
+import { authorized } from '../lib/server/auth.mjs'
 
 const ME = 'stu_kscott'
 const REACTIONS = ['like', 'heart', 'celebrate'] // positive only, by design
@@ -547,6 +549,16 @@ const server = http.createServer(async (req, res) => {
       state.submissions.push(sub)
       save()
       return send(res, 200, { submissionId: sub.id })
+    }
+
+    // ---- the publisher library: same handlers Vercel runs ----
+    if (url.pathname.startsWith('/api/library')) {
+      const out = await libraryRoute({
+        method: req.method, pathname: url.pathname,
+        body: req.method === 'GET' ? {} : await readBody(req),
+        authorized: authorized(req.headers),
+      })
+      return send(res, out.status, out.json)
     }
 
     // ---- static file serving (the built SPA) for any non-/api GET ----

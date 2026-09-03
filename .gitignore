@@ -6,3 +6,5 @@ server/data.json
 
 *.log
 pages-dist
+server/library.json
+.vercel

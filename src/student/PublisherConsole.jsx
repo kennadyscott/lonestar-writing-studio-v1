@@ -19,11 +19,11 @@ import { api } from '../lib/api.js'
 const NAVY = '#16386b'
 const CYAN = '#0f97c2'
 
-const field = {
+export const field = {
   width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid var(--line)',
   fontFamily: 'inherit', fontSize: 13.5, background: '#fff',
 }
-const label = { fontSize: 10.5, fontWeight: 800, letterSpacing: .7, color: 'var(--muted)', display: 'block', marginBottom: 3 }
+export const label = { fontSize: 10.5, fontWeight: 800, letterSpacing: .7, color: 'var(--muted)', display: 'block', marginBottom: 3 }
 
 export default function PublisherConsole({ onClose }) {
   const [topics, setTopics] = useState(null)
@@ -143,9 +143,9 @@ export default function PublisherConsole({ onClose }) {
   )
 }
 
-function ActivityEditor({ act, index, count, onEdit, onRemove }) {
+export function ActivityEditor({ act, index, count, onEdit, onRemove }) {
   const [open, setOpen] = useState(index === 0)
-  const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it' }[act.kind] || act.kind
+  const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
 
   return (
     <div style={{ border: '1.5px solid var(--line)', borderRadius: 13, marginBottom: 11, background: '#fff', overflow: 'hidden' }}>

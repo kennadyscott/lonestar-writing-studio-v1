@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { library } from '../lib/library.js'
 import { joinStandards } from '../../lib/content/taxonomy.mjs'
-import { prepareTopic, PASS_MARK, checkCompose, tokenize } from '../../server/proofRoom.mjs'
+import { prepareTopic, PASS_MARK, checkCompose, tokenize, parseHunt } from '../../server/proofRoom.mjs'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -71,6 +71,21 @@ function SolutionPlayer({ id, onClose }) {
       </div>
     </div>
   )
+}
+
+/* Render a single activity the way a student meets it. The console shows this
+ * instead of a form, so the default view of a worksheet is the worksheet — and
+ * because it is the same component the student runs, it cannot drift from it.
+ * Takes a RAW activity and prepares it here, so callers hand over the draft. */
+export function ActivityPreview({ act, onPlay, onDone }) {
+  const ready = useMemo(() => (act && act.kind === 'hunt' ? { ...act, ...parseHunt(act.text), text: undefined } : act), [act])
+  if (!ready || !ready.kind) return null
+  const props = { act: ready, onDone: onDone || (() => {}), onPlay: onPlay || (() => {}) }
+  if (ready.kind === 'hunt') return <HuntActivity {...props} />
+  if (ready.kind === 'maze') return <MazeActivity {...props} />
+  if (ready.kind === 'compose') return <ComposeActivity {...props} />
+  if (ready.kind === 'passage') return <PassageActivity {...props} />
+  return <FixActivity {...props} />
 }
 
 function Beside({ src, children, flip }) {

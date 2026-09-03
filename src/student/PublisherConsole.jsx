@@ -143,13 +143,15 @@ export default function PublisherConsole({ onClose }) {
   )
 }
 
-export function ActivityEditor({ act, index, count, onEdit, onRemove }) {
-  const [open, setOpen] = useState(index === 0)
+export function ActivityEditor({ act, index, count, onEdit, onRemove, alwaysOpen }) {
+  const [open, setOpen] = useState(alwaysOpen || index === 0)
   const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
 
   return (
-    <div style={{ border: '1.5px solid var(--line)', borderRadius: 13, marginBottom: 11, background: '#fff', overflow: 'hidden' }}>
-      <button onClick={() => setOpen((o) => !o)}
+    <div style={alwaysOpen
+      ? { background: '#fff' }
+      : { border: '1.5px solid var(--line)', borderRadius: 13, marginBottom: 11, background: '#fff', overflow: 'hidden' }}>
+      {!alwaysOpen && <button onClick={() => setOpen((o) => !o)}
         style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '11px 14px', background: open ? '#f4f8fb' : '#fff', cursor: 'pointer', textAlign: 'left' }}>
         <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#fff', background: NAVY, borderRadius: 6, padding: '3px 8px' }}>{index + 1}</span>
         <span style={{ flex: 1, fontSize: 13.5, fontWeight: 800, color: NAVY }}>{kindName}</span>
@@ -157,10 +159,12 @@ export function ActivityEditor({ act, index, count, onEdit, onRemove }) {
           {act.kind === 'hunt' ? 'markup [[wrong|right]]' : act.kind === 'maze' ? `${Object.keys(act.gates || {}).length} gates` : `${(act.items || []).length} items`}
         </span>
         <span style={{ fontSize: 11, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
-      </button>
+      </button>}
 
       {open && (
-        <div style={{ padding: '12px 14px', borderTop: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 11 }}>
+        <div style={alwaysOpen
+          ? { padding: '12px 0 0', display: 'flex', flexDirection: 'column', gap: 11 }
+          : { padding: '12px 14px', borderTop: '1px solid var(--line)', display: 'flex', flexDirection: 'column', gap: 11 }}>
           <div>
             <span style={label}>WHAT THE STUDENT SEES ABOVE THE WORK</span>
             <input style={field} value={act.brief || ''} onChange={(e) => onEdit((a) => { a.brief = e.target.value })} />

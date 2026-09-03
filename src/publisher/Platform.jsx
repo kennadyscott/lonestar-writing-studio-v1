@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { library, getKey, setKey } from '../lib/library.js'
 import { ActivityEditor, field, label } from '../student/PublisherConsole.jsx'
-import { Worksheet } from '../student/ProofRoom.jsx'
+import { Worksheet, ActivityPreview } from '../student/ProofRoom.jsx'
 import { prepareTopic } from '../../server/proofRoom.mjs'
 import { STATES, GRADES, domainsFor, productFor, parseStandards, joinStandards, standardLooksRight } from '../../lib/content/taxonomy.mjs'
 
@@ -606,13 +606,50 @@ function BuildTab({ draft, mutate }) {
               </div>
             </div>
             {(current.w.activities || []).map((a, ai) => (
-              <ActivityEditor key={ai} act={a} index={ai} count={current.w.activities.length}
+              <ActivityCard key={`${current.w.id}-${ai}`} act={a} index={ai} count={current.w.activities.length}
                 onEdit={(fn) => editSheet((w) => fn(w.activities[ai]))}
                 onRemove={() => editSheet((w) => { w.activities.splice(ai, 1) })} />
             ))}
           </>
         )}
       </Panel>
+    </div>
+  )
+}
+
+/* An activity in the console shows as the student meets it, because that is what
+ * a publisher is actually judging. The markup and the fields are one click away
+ * for when they need changing, but they are not the default view of the work. */
+function ActivityCard({ act, index, count, onEdit, onRemove }) {
+  const [editing, setEditing] = useState(false)
+  const [replay, setReplay] = useState(0)
+  const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
+
+  return (
+    <div style={{ border: '1.5px solid var(--line)', borderRadius: 13, marginBottom: 11, background: '#fff', overflow: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#f4f8fb', borderBottom: '1px solid var(--line)' }}>
+        <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#fff', background: NAVY, borderRadius: 6, padding: '3px 8px' }}>{index + 1}</span>
+        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 800, color: NAVY }}>{kindName}</span>
+        {act.flag && <span style={{ fontSize: 11, fontWeight: 800, color: FLAG }}>⚑ flagged</span>}
+        {!editing && (
+          <button onClick={() => setReplay((n) => n + 1)} title="Start this activity over"
+            style={{ ...btn('#fff', '#5b6b7c'), border: '1px solid #dde5ec', fontSize: 11.5, padding: '5px 11px' }}>↺ Reset</button>
+        )}
+        <button onClick={() => setEditing((e) => !e)}
+          style={{ ...btn(editing ? NAVY : '#fff', editing ? '#fff' : NAVY), border: editing ? 'none' : `1px solid ${NAVY}33`, fontSize: 11.5, padding: '5px 12px' }}>
+          {editing ? 'Done editing' : '✎ Edit'}
+        </button>
+      </div>
+
+      {editing ? (
+        <div style={{ padding: '4px 14px 12px' }}>
+          <ActivityEditor act={act} index={index} count={count} onEdit={onEdit} onRemove={onRemove} alwaysOpen />
+        </div>
+      ) : (
+        <div style={{ padding: '14px 16px 16px' }}>
+          <ActivityPreview key={replay} act={act} />
+        </div>
+      )}
     </div>
   )
 }

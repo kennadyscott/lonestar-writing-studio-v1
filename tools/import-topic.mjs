@@ -221,7 +221,7 @@ const deckCount = rawArt.size
 const seenIn = new Map()
 for (const items of rawArt.values()) for (const h of new Set(items.map((a) => a.h))) seenIn.set(h, (seenIn.get(h) || 0) + 1)
 const CHROME = new Set([...seenIn.entries()].filter(([, n]) => n === deckCount && deckCount > 1).map(([h]) => h))
-if (CHROME.size) console.log(`  ignoring ${CHROME.size} image${CHROME.size === 1 ? '' : 's'} that appear in every deck (QR code, banner)`)
+if (CHROME.size) console.log(`  ignoring ${CHROME.size} image${CHROME.size === 1 ? ' that appears' : 's that appear'} in every deck (QR code, banner)`)
 
 const coreSheets = core.map((n, i) => readWorksheet(n, `${topicId}_${slug(n)}`)).filter(Boolean)
 const skillBuilders = {}

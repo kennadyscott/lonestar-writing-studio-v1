@@ -629,7 +629,7 @@ function Library({ paths, meta, onOpen, onChanged }) {
             supplies <b style={{ color: CYAN }}>{productFor(stateCode)}</b>
           </span>
           <div style={{ flex: 1 }} />
-          <ImportPanel onImported={async (id) => { await onChanged(); onSelect(id) }} />
+          <ImportPanel onImported={async (id) => { await onChanged(); onOpen(id) }} />
           <button onClick={create} disabled={!!busy} style={btn('#e7edf3', NAVY)}>+ New topic</button>
           <button onClick={() => seed(alreadyHere)} disabled={!!busy} style={btn('#e7edf3', NAVY)}
             title={alreadyHere ? 'Replace the shipped paths with the versions in the app' : 'Add the paths that ship with the app'}>

@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { library, getKey, setKey } from '../lib/library.js'
+import { readTopicFolder } from './folderImport.js'
 import { ActivityEditor, field, label } from '../student/PublisherConsole.jsx'
 import { Worksheet, ActivityPreview } from '../student/ProofRoom.jsx'
 import { prepareTopic } from '../../server/proofRoom.mjs'
@@ -406,6 +407,65 @@ function StageControl({ path, onChanged }) {
   )
 }
 
+/* Import a topic folder without leaving the console.
+ *
+ * The decks are unzipped and read in the browser, so nothing large is uploaded
+ * and no folder is too big. What does not come is the solution videos: a
+ * hundred recordings is tens of megabytes and belongs in object storage, not a
+ * request body. They are counted and named so nobody assumes they arrived. */
+function ImportPanel({ onImported }) {
+  const [busy, setBusy] = useState(false)
+  const [step, setStep] = useState('')
+  const [result, setResult] = useState(null)
+  const [err, setErr] = useState('')
+  const input = useRef(null)
+
+  async function pick(e) {
+    const files = e.target.files
+    if (!files?.length) return
+    setBusy(true); setErr(''); setResult(null)
+    try {
+      const title = prompt('Name this learning path', files[0].webkitRelativePath.split('/')[0] || '')
+      if (!title) { setBusy(false); return }
+      const { topic, images, stats } = await readTopicFolder(files, { title }, (msg) => setStep(msg))
+      setStep('Saving the path…')
+      await library.createTopic(topic)
+      let art = { saved: 0, missed: images.length }
+      if (images.length) { setStep('Storing artwork…'); art = await library.saveArt(images) }
+      setResult({ ...stats, id: topic.id, title, art })
+      await onImported(topic.id)
+    } catch (e2) { setErr(e2.message) } finally { setBusy(false); setStep(''); if (input.current) input.current.value = '' }
+  }
+
+  return (
+    <>
+      <input ref={input} type="file" webkitdirectory="" directory="" multiple hidden onChange={pick} />
+      <button onClick={() => input.current?.click()} disabled={busy}
+        style={btn(busy ? '#e7edf3' : NAVY, busy ? '#93a3b3' : '#fff')}>
+        {busy ? (step || 'Reading…') : '📂 Import a topic folder'}
+      </button>
+      {err && <div style={{ flexBasis: '100%', marginTop: 9, background: '#fdecea', color: RED, borderRadius: 9, padding: '9px 11px', fontSize: 12.5, fontWeight: 700 }}>{err}</div>}
+      {result && (
+        <div style={{ flexBasis: '100%', marginTop: 9, background: '#eef6f9', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: INK, lineHeight: 1.55 }}>
+          <b style={{ color: NAVY }}>{result.title}</b><br />
+          {result.core} core · {result.skillBuilders} skill builders · {result.capstone ? '1 capstone' : 'no capstone'}<br />
+          {result.art.saved > 0 && <>{result.art.saved} illustrations stored<br /></>}
+          {result.art.reason && <span style={{ color: AMBER }}>{result.art.reason}<br /></span>}
+          {result.videos > 0 && (
+            <span style={{ color: AMBER }}>
+              {result.videos} solution videos were not uploaded — they need object storage.<br />
+            </span>
+          )}
+          {result.orphans?.length > 0 && (
+            <span style={{ color: AMBER }}>No core worksheet matches: {result.orphans.join(', ')}<br /></span>
+          )}
+          <span style={{ color: '#5b6b7c' }}>Every worksheet is flagged and empty until somebody writes its activities.</span>
+        </div>
+      )}
+    </>
+  )
+}
+
 /* ---------- details ---------- */
 
 function DetailsTab({ draft, mutate }) {
@@ -569,7 +629,8 @@ function Library({ paths, meta, onOpen, onChanged }) {
             supplies <b style={{ color: CYAN }}>{productFor(stateCode)}</b>
           </span>
           <div style={{ flex: 1 }} />
-          <button onClick={create} disabled={!!busy} style={btn(NAVY)}>+ New topic</button>
+          <ImportPanel onImported={async (id) => { await onChanged(); onSelect(id) }} />
+          <button onClick={create} disabled={!!busy} style={btn('#e7edf3', NAVY)}>+ New topic</button>
           <button onClick={() => seed(alreadyHere)} disabled={!!busy} style={btn('#e7edf3', NAVY)}
             title={alreadyHere ? 'Replace the shipped paths with the versions in the app' : 'Add the paths that ship with the app'}>
             {busy === 'seed' ? 'Loading…'

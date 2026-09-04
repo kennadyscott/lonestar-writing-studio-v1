@@ -36,6 +36,8 @@ export const library = {
   setStage: (id, stage) => call('POST', `/paths/${id}/stage`, { stage }),
   restore: (id, version) => call('POST', `/paths/${id}/restore`, { version }),
   seed: (overwrite) => call('POST', '/seed', { overwrite: !!overwrite }),
+  createTopic: (topic) => call('POST', '/seed', { topics: [topic], overwrite: true }),
+  saveArt: (images) => call('POST', '/art', { images }),
   standards: (q = {}) => call('GET', '/core/standards?' + new URLSearchParams(
     Object.entries(q).filter(([, v]) => v !== '' && v != null)).toString()),
 }

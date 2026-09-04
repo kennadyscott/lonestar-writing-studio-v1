@@ -571,7 +571,9 @@ function Library({ paths, meta, onOpen, onChanged }) {
   // already has an older copy of it, and it will overwrite an edited draft, so
   // it asks first and says what survives.
   const shipped = meta?.shipped || []
-  const alreadyHere = shipped.length > 0 && shipped.every((id) => paths.some((p) => p.id === id))
+  // Only what is not already here. The old button re-imported everything and
+  // could overwrite real work with sample content; this one can only add.
+  const notHere = shipped.filter((id) => !paths.some((p) => p.id === id))
 
   async function seed(overwrite) {
     if (overwrite && !confirm(
@@ -629,6 +631,12 @@ function Library({ paths, meta, onOpen, onChanged }) {
             supplies <b style={{ color: CYAN }}>{productFor(stateCode)}</b>
           </span>
           <div style={{ flex: 1 }} />
+          {notHere.length > 0 && (
+            <button onClick={() => seed(false)} disabled={!!busy} style={btn('#e7edf3', NAVY)}
+              title="Add the paths that ship with the app. Nothing already here is touched.">
+              {busy === 'seed' ? 'Adding…' : `+ Add ${notHere.length} path${notHere.length === 1 ? '' : 's'} that ship with the app`}
+            </button>
+          )}
           <ImportPanel onImported={async (id) => { await onChanged(); onOpen(id) }} />
           <button onClick={create} disabled={!!busy} style={btn('#e7edf3', NAVY)}>+ New topic</button>
         </div>

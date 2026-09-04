@@ -883,7 +883,10 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
                         onChange={(e) => setFixes((f) => ({ ...f, [i]: e.target.value }))}
                         style={{ width: 140, padding: '5px 10px', borderRadius: 8, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 13.5 }} />
                       {checked && !results[i] && (
-                        <span style={{ fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>{q.target} → {q.answer}</span>
+                        <>
+                          <span style={{ fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>{q.target} → {q.answer}</span>
+                          <WatchButton id={q.video} onPlay={onPlay} label="Why?" />
+                        </>
                       )}
                     </div>
                   )}
@@ -897,7 +900,10 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
                         onChange={(e) => setBlanks((b) => ({ ...b, [i]: e.target.value }))}
                         style={{ width: 180, padding: '6px 11px', borderRadius: 8, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 13.5 }} />
                       {checked && !results[i] && (
-                        <span style={{ fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>{q.answer}</span>
+                        <>
+                          <span style={{ fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>{q.answer}</span>
+                          <WatchButton id={q.video} onPlay={onPlay} label="Why?" />
+                        </>
                       )}
                     </div>
                   )}
@@ -950,7 +956,13 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         {checked
           ? <button className="btn" onClick={() => onDone(score)}>{doneLabel || <>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.questions.length}</b></>}</button>
-          : <button className="btn" onClick={() => setChecked(true)}>Check my answers ✓</button>}
+          : <button className="btn" onClick={() => {
+              setChecked(true)
+              // A wrong answer opens its own explanation, the way every other
+              // activity kind already does.
+              const miss = results.findIndex((ok) => !ok)
+              if (miss >= 0 && act.questions[miss].video && onPlay) onPlay(act.questions[miss].video)
+            }}>Check my answers ✓</button>}
       </div>
       </WithArt>
     </div>

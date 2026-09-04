@@ -1,0 +1,2624 @@
+{
+ "id": "topic_analyze_text",
+ "title": "Analyze a Text",
+ "short": "Analyze a Text",
+ "state": "TX",
+ "grade": 5,
+ "domain": "Multiple Genres",
+ "standards": [
+  "5.8B",
+  "5.8C",
+  "5.8D"
+ ],
+ "blurb": "Setting, plot and relationships — three skills, then one full-topic proof.",
+ "icon": "🔍",
+ "core": [
+  {
+   "id": "at_setting",
+   "title": "How Setting Influences Plot",
+   "standards": [
+    "5.8D"
+   ],
+   "skill": "Where and when a story happens, and what that does to it",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions. The sentences are numbered.",
+     "sentences": [
+      "Twelve-year-old Mai visited her grandparents in Vietnam, where they stayed in a historic town known for its colorful lantern festivals.",
+      "Each month, families gathered along the river after sunset to celebrate traditions that had been passed down for generations.",
+      "On the evening of the festival, Mai was responsible for delivering handmade lanterns to her aunt’s booth before the celebration began.",
+      "As she used her GPS to hurry through the crowded streets, a sudden rainstorm swept into town.",
+      "Vendors rushed to cover their displays, and many of the narrow pathways became slippery and difficult to cross.",
+      "Mai carefully protected the lanterns beneath a woven basket and searched for a safer route.",
+      "She remembered a covered walkway merchants often used during bad weather and followed it to the riverfront.",
+      "When she arrived, the lanterns were dry and ready to be displayed.",
+      "As darkness fell, hundreds of glowing lanterns reflected across the water, and Mai felt proud that she had helped preserve an important community tradition."
+     ],
+     "hint": "Setting is where AND when. One sentence tells you the country; one word tells you the century.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "Which country is the story set in?",
+       "answer": "Vietnam",
+       "options": [
+        "Vietnam",
+        "Peru",
+        "Morocco",
+        "Thailand"
+       ]
+      },
+      {
+       "kind": "pick",
+       "sentence": 4,
+       "ask": "Click the word in sentence 4 that tells you this story is modern, then write which century that makes it.",
+       "target": "GPS",
+       "answer": "twenty-first"
+      },
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which detail is a cultural element of the story?",
+       "answer": "Families gather for a festival that celebrates traditions.",
+       "options": [
+        "Mai searches for a covered walkway during the storm.",
+        "Rain makes the streets slippery and difficult to cross.",
+        "Families gather for a festival that celebrates traditions.",
+        "Mai carries the lanterns beneath a woven basket."
+       ]
+      },
+      {
+       "kind": "write",
+       "sentence": 5,
+       "ask": "How does the setting add difficulty to the story?",
+       "checks": [
+        {
+         "label": "Names what the setting did",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "rain"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "storm"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "slippery"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "wet"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says what it made hard",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "cross"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "path"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "street"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "walk"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "deliver"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "route"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "A sudden rainstorm made the narrow pathways slippery and difficult to cross, so Mai had to find another route to deliver the lanterns."
+      },
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "Finish the sentence: the time period affects the challenges Mai faces by…",
+       "checks": [
+        {
+         "label": "Says she does it herself",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "herself"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "her own"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "carry"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "deliver"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "protect"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions modern services or technology",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "delivery"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "technology"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "gps"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "modern"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "phone"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "In 2008 Mai must protect and deliver the lanterns herself during the storm instead of relying on modern delivery services or technology."
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Read each excerpt. Which time period is it most likely set in?",
+     "hint": "Look for the technology, or the lack of it. You may use an answer more than once.",
+     "items": [
+      {
+       "given": "Scientists aboard an ocean research station used advanced sensors to track changes in marine ecosystems.  →  ____",
+       "answer": "Future",
+       "options": [
+        "Middle Ages",
+        "Twenty-First Century",
+        "Future"
+       ]
+      },
+      {
+       "given": "During the community meeting, residents reviewed digital maps showing proposed changes to local parks.  →  ____",
+       "answer": "Twenty-First Century",
+       "options": [
+        "Middle Ages",
+        "Twenty-First Century",
+        "Future"
+       ]
+      },
+      {
+       "given": "Merchants crowded the marketplace during the annual trade fair, displaying wool, spices, and handmade pottery.  →  ____",
+       "answer": "Middle Ages",
+       "options": [
+        "Middle Ages",
+        "Twenty-First Century",
+        "Future"
+       ]
+      },
+      {
+       "given": "Scribes spent months carefully copying texts by hand, making each book rare and expensive.  →  ____",
+       "answer": "Middle Ages",
+       "options": [
+        "Middle Ages",
+        "Twenty-First Century",
+        "Future"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more passage.",
+     "sentences": [
+      "Amina belonged to the Tuareg people, and lived near the Sahara Desert in North Africa.",
+      "Each year, her community held a festival where families shared traditional music, stories, and handcrafted goods.",
+      "This year, Amina helped prepare an exhibit of silver jewelry and woven mats.",
+      "On the morning of the festival, strong desert winds covered many display signs with sand.",
+      "Amina and her cousins cleaned the exhibits and replaced the damaged labels before visitors arrived.",
+      "By afternoon, people from nearby communities explored the festival and learned about Tuareg traditions.",
+      "Amina felt proud to help share her culture with others."
+     ],
+     "hint": "Cultural setting is what the people of a place do, not what the weather does.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which sentence best establishes the cultural setting?",
+       "answer": "Families shared traditional music, stories, and handcrafted goods.",
+       "options": [
+        "Families shared traditional music, stories, and handcrafted goods.",
+        "Strong desert winds covered many display signs with sand.",
+        "People from nearby communities explored the festival."
+       ]
+      },
+      {
+       "kind": "write",
+       "sentence": 5,
+       "ask": "How does the cultural setting influence Amina’s actions?",
+       "checks": [
+        {
+         "label": "Says what she does",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "prepare"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "exhibit"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "clean"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "replace"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Connects it to her culture",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "tuareg"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "tradition"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "culture"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "festival"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "The cultural setting influences Amina because she helps prepare exhibits and preserve Tuareg traditions for the festival."
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "Which detail best shows the importance of cultural traditions?",
+       "answer": "People from nearby communities explored the festival and learned about Tuareg traditions.",
+       "options": [
+        "Strong desert winds covered many display signs with sand.",
+        "People from nearby communities explored the festival and learned about Tuareg traditions.",
+        "Amina helped prepare an exhibit of silver jewelry and woven mats."
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "at_plot",
+   "title": "Plot Elements",
+   "standards": [
+    "5.8C"
+   ],
+   "skill": "The parts of a story, and what each one is doing",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Every spring, the town hosted a seed exchange where gardeners traded seeds they had saved from the previous year’s harvest.",
+      "This year, Kieran volunteered to organize the event for the first time.",
+      "He spent weeks labeling envelopes, arranging tables, and creating signs so visitors could easily find what they needed.",
+      "On the morning of the exchange, Kieran unlocked the community center and froze.",
+      "Several boxes of seed packets had been stacked in the wrong sections.",
+      "Tomatoes were mixed with peppers, herbs were scattered among flower seeds, and people were already beginning to arrive.",
+      "“Start with one table,” Mrs. Navarro suggested. “You don’t have to fix everything at once.”",
+      "Kieran took a deep breath and began sorting.",
+      "A few visitors noticed the confusion and offered to help.",
+      "By opening time, every packet was in the correct place, and Kieran felt proud that he’d been able to solve the problem calmly."
+     ],
+     "hint": "Tension is built by what goes wrong, and by the clock running.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "How does the author create tension before the seed exchange begins?",
+       "checks": [
+        {
+         "label": "Names what went wrong",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "wrong section"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "mixed"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "scattered"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "stacked"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "confusion"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "mess"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the pressure of time",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "already"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "arriv"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "opening"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "time"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "people"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "The seeds had been stacked in the wrong sections and mixed together, and people were already beginning to arrive, so there was very little time to fix it."
+      },
+      {
+       "kind": "write",
+       "sentence": 7,
+       "ask": "Why is Mrs. Navarro a significant character in the story?",
+       "checks": [
+        {
+         "label": "Says what she does",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "advice"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "suggest"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "tells"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "helps"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "calm"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "one table"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says what it changes",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "kieran"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "start"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "sort"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "step"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "solve"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "She gives Kieran the advice to start with one table, which calms him down and shows him how to solve the problem step by step."
+      },
+      {
+       "kind": "blank",
+       "sentence": 8,
+       "ask": "Which sentence marks the climax of the story?",
+       "answer": "Kieran took a deep breath and began sorting.",
+       "options": [
+        "Every spring, the town hosted a seed exchange.",
+        "Kieran took a deep breath and began sorting.",
+        "He spent weeks labeling envelopes, arranging tables, and creating signs."
+       ]
+      },
+      {
+       "kind": "blank",
+       "sentence": 10,
+       "ask": "Which character trait best describes Kieran at the end of the story?",
+       "answer": "calm and composed",
+       "options": [
+        "calm and composed",
+        "careless and rushed",
+        "shy and quiet",
+        "competitive"
+       ]
+      },
+      {
+       "kind": "write",
+       "sentence": 10,
+       "ask": "What does Kieran learn through his experience organizing the seed exchange?",
+       "checks": [
+        {
+         "label": "Mentions staying calm",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "calm"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "deep breath"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "panic"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions working through it",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "step"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "one table"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "at a time"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "solve"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "problem"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "Staying calm and solving problems step by step can help you overcome a challenge."
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage.",
+     "sentences": [
+      "Nicole and her cousin Rowan spent a Saturday afternoon exploring a creek that flowed into the Redstone River.",
+      "The creek twisted through tall grasses and clusters of willow trees.",
+      "As they followed the water upstream, Rowan spotted an old metal marker attached to a fallen log.",
+      "Curious, they stepped off the path to investigate.",
+      "The marker was covered in dirt, but Nicole brushed it clean and revealed a faded arrow.",
+      "Wondering where it pointed, the cousins followed its direction along the creek bank.",
+      "After several minutes, they reached a narrow bend where Rowan noticed a small wooden box wedged between two rocks.",
+      "Inside was a weathered notebook filled with observations and sketches made by scientists who had studied the creek years earlier.",
+      "Excited by their discovery, Nicole and Rowan carefully returned the notebook to the box and reported it to the park ranger before heading home."
+     ],
+     "hint": "The climax is the moment of the discovery, not what happens afterwards.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Why is the metal marker important to the plot of the story?",
+       "answer": "It helps the cousins find a notebook connected to the creek’s history.",
+       "options": [
+        "It shows that the cousins are experienced explorers.",
+        "It explains why scientists stopped studying the creek.",
+        "It helps the cousins find a notebook connected to the creek’s history.",
+        "It warns visitors about dangerous conditions near the river."
+       ]
+      },
+      {
+       "kind": "blank",
+       "sentence": 7,
+       "ask": "Which sentence best shows the climax of the story?",
+       "answer": "Rowan noticed a small wooden box wedged between two rocks.",
+       "options": [
+        "The creek twisted through tall grasses and clusters of willow trees.",
+        "Rowan noticed a small wooden box wedged between two rocks.",
+        "They reported it to the park ranger before heading home."
+       ]
+      },
+      {
+       "kind": "write",
+       "sentence": 8,
+       "ask": "Finish the sentence: finding the notebook is important to the plot because…",
+       "checks": [
+        {
+         "label": "Calls it the discovery",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "discover"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "find"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "found"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "main"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Connects it to the marker or the arrow",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "marker"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "arrow"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "follow"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "point"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "it is the main discovery they make after following the arrow on the marker."
+      },
+      {
+       "kind": "blank",
+       "sentence": 9,
+       "ask": "Which sentence shows the plot’s resolution?",
+       "answer": "They carefully returned the notebook to the box and reported it to the park ranger.",
+       "options": [
+        "They carefully returned the notebook to the box and reported it to the park ranger.",
+        "Rowan spotted an old metal marker attached to a fallen log.",
+        "Nicole brushed it clean and revealed a faded arrow."
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "drag",
+     "brief": "Put the right plot element in each blank.",
+     "bank": [
+      "rising action",
+      "resolution",
+      "climax",
+      "beginning"
+     ],
+     "hint": "One of these four is not used.",
+     "items": [
+      {
+       "given": "____ builds suspense and leads up to the most exciting part of the story.",
+       "answer": "rising action"
+      },
+      {
+       "given": "____ shows the solution to the problem and wraps up the story.",
+       "answer": "resolution"
+      },
+      {
+       "given": "____ is the most important part of the story, where the most action takes place.",
+       "answer": "climax"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "at_rel",
+   "title": "Analyze Relationships",
+   "standards": [
+    "5.8B"
+   ],
+   "skill": "What characters are to each other, and how the text shows it",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Evan enjoyed spending Saturdays in his grandfather’s workshop.",
+      "While others saw shelves of tools, Evan saw a place where he could learn valuable things from his grandfather.",
+      "He rarely explained every step.",
+      "Instead, he showed Evan how to begin and expected him to think through problems on his own.",
+      "One weekend, they worked together to build a shelf.",
+      "When Evan measured a board incorrectly, he became frustrated and wanted to start over.",
+      "His grandfather asked him to check his measurements again.",
+      "After looking carefully, Evan found his mistake and fixed it himself.",
+      "As they finished the project, Evan noticed his grandfather smiling quietly.",
+      "Evan felt proud because he knew he had solved the problem without giving up."
+     ],
+     "hint": "What the grandfather does NOT do says as much as what he does.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "What can be inferred about Evan’s grandfather?",
+       "answer": "He believes that solving problems helps people learn.",
+       "options": [
+        "He becomes frustrated when Evan makes mistakes.",
+        "He would rather build projects by himself than teach others.",
+        "He expects Evan to complete projects perfectly.",
+        "He believes that solving problems helps people learn."
+       ],
+       "video": "at_rel-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which sentence best shows that Evan respects his grandfather?",
+       "answer": "Evan saw a place where he could learn valuable things from his grandfather.",
+       "options": [
+        "Evan saw a place where he could learn valuable things from his grandfather.",
+        "When Evan measured a board incorrectly, he became frustrated.",
+        "One weekend, they worked together to build a shelf."
+       ],
+       "video": "at_rel-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A squirrel and a badger.",
+     "sentences": [
+      "Zibble the squirrel peered into the hollow log. “My acorn is gone!” he cried.",
+      "Mattias the badger sniffed the ground. “I’ll help you find it.”",
+      "They searched under ferns and behind rocks.",
+      "When Zibble tripped over a root, Mattias steadied him.",
+      "At last, they found the acorn near a berry bush.",
+      "“You always lose things,” Mattias teased.",
+      "Together, they carried the acorn home, laughing the whole way."
+     ],
+     "hint": "Teasing that is followed by laughing is not the same as teasing that is not.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "What is the relationship between Zibble and Mattias?",
+       "checks": [
+        {
+         "label": "Names the relationship",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "friend"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "close"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "care"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Points at something in the text",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "steadied"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "search"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "laugh"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "together"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 7
+         }
+        }
+       ],
+       "model": "They are close friends, because Mattias helps Zibble look for the acorn and steadies him when he trips.",
+       "video": "at_rel-3"
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "What can the reader infer about the length of their relationship?",
+       "answer": "They know each other well and care about each other.",
+       "options": [
+        "They are still learning basic things about each other.",
+        "They know each other well and care about each other.",
+        "They rarely spend time together.",
+        "They only see each other during events."
+       ],
+       "video": "at_rel-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Three penguins on the ice.",
+     "sentences": [
+      "Milo, Tuck, and Poppy waddled across the ice toward a patch of fish.",
+      "“Last one there is a rotten fish,” Tuck called with a grin.",
+      "As they hurried along, Tuck shoved Poppy to the side.",
+      "She tripped and fell to the side, while Tuck hurried on ahead.",
+      "“Are you okay?” Milo asked, helping her to her feet.",
+      "Later, when the wind picked up, Milo guided Poppy behind a ridge for shelter.",
+      "Tuck arrived a moment later. “Good spot,” he said, settling in beside them."
+     ],
+     "hint": "One of them stops. One of them keeps going.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Who is a better friend to Poppy?",
+       "answer": "Milo",
+       "options": [
+        "Milo",
+        "Tuck"
+       ],
+       "video": "at_rel-5"
+      },
+      {
+       "kind": "write",
+       "sentence": 5,
+       "ask": "What does the relationship between Poppy and Milo show about Milo?",
+       "checks": [
+        {
+         "label": "Names a trait",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "kind"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "caring"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "thoughtful"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "helpful"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "looks out"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "considerate"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Points at what he did",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "feet"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "shelter"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "ridge"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "guided"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "asked"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 7
+         }
+        }
+       ],
+       "model": "It shows Milo is kind and caring, because he stops to help Poppy up and later guides her to shelter.",
+       "video": "at_rel-6"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which conclusion can be made about the three penguins’ relationships?",
+       "answer": "Milo and Poppy seem to trust one another, while Tuck is more competitive.",
+       "options": [
+        "Milo and Poppy seem to trust one another, while Tuck is more competitive.",
+        "Tuck and Poppy are close friends because they spend the most time together.",
+        "Milo prefers to travel alone and does not want to spend time with either penguin.",
+        "All three penguins treat one another in exactly the same way."
+       ],
+       "video": "at_rel-7"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "Macy, her younger brother Ron, and their dad spent the afternoon cleaning the yard.",
+      "When a strong gust of wind scattered Ron’s pile of leaves, he groaned in frustration.",
+      "“Need a hand?” Macy asked.",
+      "Their dad handed Ron a rake and said, “Challenges are easier when we work together.”",
+      "Macy helped Ron gather the leaves again, and before long, the yard looked neat and tidy."
+     ],
+     "hint": "Look for the moment someone offers something without being asked.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which sentence shows how Macy and Ron support each other?",
+       "answer": "“Need a hand?” Macy asked.",
+       "options": [
+        "“Need a hand?” Macy asked.",
+        "A strong gust of wind scattered Ron’s pile of leaves.",
+        "The yard looked neat and tidy."
+       ],
+       "video": "at_rel-8"
+      },
+      {
+       "kind": "write",
+       "sentence": 5,
+       "ask": "How would you describe the relationship Macy has with her family?",
+       "checks": [
+        {
+         "label": "Names the relationship",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "support"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "close"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "caring"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "together"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Points at the text",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "leaves"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "rake"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "hand"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "yard"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "ron"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 7
+         }
+        }
+       ],
+       "model": "They are a supportive family who help each other, because Macy offers Ron a hand and they gather the leaves together.",
+       "video": "at_rel-9"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "skillBuilders": {
+  "at_setting": {
+   "id": "at_sb_setting",
+   "title": "SB: Setting",
+   "standards": [
+    "5.8D"
+   ],
+   "skill": "Finding where and when, one story at a time",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "In 1915, Elena lived in a small village high in the Andes Mountains of Peru.",
+      "Because the steep mountain roads were difficult to travel, nearby communities often depended on messengers to deliver important news and supplies.",
+      "Each spring, villagers celebrated the Festival of the Condor, a community event that included traditional music, woven textiles, and dances honoring the region’s history.",
+      "The day before the festival, Elena’s grandfather asked her to carry a bundle of decorated ribbons to a neighboring village.",
+      "The ribbons were needed for a ceremonial display at the celebration.",
+      "As Elena followed the narrow mountain path, dark clouds rolled over the peaks and a heavy rainstorm began.",
+      "The rocky trail became slippery, and a fast-moving stream blocked her usual route.",
+      "Remembering a safer path used by local shepherds, Elena carefully crossed the hillside and reached the village before sunset.",
+      "The next day, the ribbons were displayed at the festival, and Elena felt proud that she had helped continue an important community tradition."
+     ],
+     "hint": "Sentence 1 gives you both halves of the setting at once.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "Where and when is the story set?",
+       "answer": "the Andes Mountains of Peru, in 1915",
+       "options": [
+        "the Andes Mountains of Peru, in 1915",
+        "the Sahara Desert in Morocco, hundreds of years ago",
+        "a historic town in Vietnam, in 2008"
+       ],
+       "video": "at_sb_setting-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "Which detail from the setting creates a challenge for Elena?",
+       "answer": "the rainstorm",
+       "options": [
+        "the rainstorm",
+        "the ribbons",
+        "the festival",
+        "the shepherds"
+       ],
+       "video": "at_sb_setting-2"
+      },
+      {
+       "kind": "write",
+       "sentence": 3,
+       "ask": "Give one example of a cultural detail from the story.",
+       "checks": [
+        {
+         "label": "Names something cultural",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "festival"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "condor"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "music"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "textile"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "dance"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "tradition"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "ceremon"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 5
+         }
+        }
+       ],
+       "model": "The Festival of the Condor included traditional music, woven textiles, and dances honouring the region’s history.",
+       "video": "at_sb_setting-3"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage.",
+     "sentences": [
+      "Hundreds of years ago in Morocco, a girl named Samira lived near the edge of the Sahara Desert.",
+      "Every autumn, families from nearby villages gathered for a trading festival.",
+      "Merchants filled the marketplace with woven rugs, colorful pottery, dried fruits, and carved wooden tools.",
+      "In the center of the square stood a large water fountain where travelers rested after long journeys across the desert.",
+      "On the morning of the festival, Samira noticed that the fountain had stopped flowing.",
+      "Without water, many travelers would have nowhere to refill their supplies before continuing their trips.",
+      "Village leaders worried that visitors might leave early and miss the celebration.",
+      "Samira remembered hearing her grandfather explain how water reached the fountain through a narrow underground channel.",
+      "Following the channel’s path, she discovered that shifting sand from a recent windstorm had blocked part of the system.",
+      "After several villagers worked together to clear the blockage, water began flowing again.",
+      "By midday, travelers gathered around the fountain, and the festival continued as planned."
+     ],
+     "hint": "A unique feature of a setting is something this place has that another would not.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which detail shows a cultural element of the setting?",
+       "answer": "Families gathered for a trading festival each autumn.",
+       "options": [
+        "A windstorm moved sand across the desert.",
+        "Families gathered for a trading festival each autumn.",
+        "Samira followed the underground channel."
+       ],
+       "video": "at_sb_setting-4"
+      },
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "Where does the story take place?",
+       "answer": "Morocco, near the edge of the Sahara Desert",
+       "options": [
+        "Morocco, near the edge of the Sahara Desert",
+        "Peru, high in the Andes Mountains",
+        "Vietnam, in a historic riverside town"
+       ],
+       "video": "at_sb_setting-5"
+      },
+      {
+       "kind": "blank",
+       "sentence": 9,
+       "ask": "How does the setting create problems for the story?",
+       "answer": "Shifting sand blocks the water system that serves the festival.",
+       "options": [
+        "Desert animals scare visitors away from the festival.",
+        "Travelers become lost while crossing the marketplace.",
+        "Shifting sand blocks the water system that serves the festival."
+       ],
+       "video": "at_sb_setting-6"
+      },
+      {
+       "kind": "write",
+       "sentence": 8,
+       "ask": "What is one unique feature of this setting that affects the plot and characters?",
+       "checks": [
+        {
+         "label": "Names the feature",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "water"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fountain"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "channel"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "underground"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says what it does to the story",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "festival"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "travel"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "block"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "sand"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "depend"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "The village depends on an underground water channel in the desert, so when sand blocks it the festival is affected.",
+       "video": "at_sb_setting-7"
+      }
+     ]
+    }
+   ]
+  },
+  "at_plot": {
+   "id": "at_sb_plot",
+   "title": "SB: Plot Elements",
+   "standards": [
+    "5.8C"
+   ],
+   "skill": "Naming the parts of a story, then finding them",
+   "activities": [
+    {
+     "kind": "fix",
+     "mode": "drag",
+     "bank": [
+      "rising action",
+      "climax",
+      "resolution",
+      "beginning"
+     ],
+     "brief": "Which plot element does each sentence describe?",
+     "hint": "All four are used this time.",
+     "items": [
+      {
+       "given": "The ____ builds suspense and leads up to the most exciting part of the story.",
+       "answer": "rising action",
+       "video": "at_sb_plot-1"
+      },
+      {
+       "given": "The ____ is the most important part of the story, where the most action takes place.",
+       "answer": "climax",
+       "video": "at_sb_plot-2"
+      },
+      {
+       "given": "The ____ shows the solution to the problem and wraps up the story.",
+       "answer": "resolution",
+       "video": "at_sb_plot-3"
+      },
+      {
+       "given": "The ____ establishes the setting, key characters, and what normal life looks like.",
+       "answer": "beginning",
+       "video": "at_sb_plot-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer.",
+     "sentences": [
+      "Luna, a curious Arctic fox, explored the winding streets of a new town.",
+      "At dusk, she followed a trail that led into a wooded park.",
+      "As darkness settled, she realized she could no longer see the path back to town.",
+      "Her heart raced as unfamiliar sounds echoed through the trees.",
+      "Instead of panicking, Luna stopped, studied a park map, and followed the trail to safety."
+     ],
+     "hint": "Getting lost is the problem. What does the problem make happen?",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 3,
+       "ask": "How does Luna getting lost advance the plot?",
+       "checks": [
+        {
+         "label": "Names the problem",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "lost"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "path"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "dark"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "cannot see"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "could not see"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says what it causes",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "map"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "solve"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "safety"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "calm"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "stop"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "find"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "Getting lost is the problem that makes Luna stop, study the park map, and find her own way back to safety.",
+       "video": "at_sb_plot-5"
+      },
+      {
+       "kind": "write",
+       "sentence": 5,
+       "ask": "Finish the statement: by the end of the story, Luna has learned to…",
+       "checks": [
+        {
+         "label": "Mentions staying calm",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "calm"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "not panic"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "panic"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "stop"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions solving it",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "think"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "map"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "solve"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "problem"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "work out"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "stay calm instead of panicking, and think a problem through until she solves it.",
+       "video": "at_sb_plot-6"
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Put these events in the order they happen. The last one is done for you.",
+     "hint": "Read them as a story, from the ordinary morning to the award.",
+     "items": [
+      {
+       "given": "First  →  ____",
+       "answer": "Lorelei was excited to inspect the newly built mountain bridge.",
+       "options": [
+        "Lorelei was excited to inspect the newly built mountain bridge.",
+        "A support cable snapped and sent debris toward the hikers.",
+        "Lorelei activated the emergency barrier and redirected the rocks.",
+        "The hikers applauded as the trail reopened."
+       ],
+       "video": "at_sb_plot-7"
+      },
+      {
+       "given": "Second  →  ____",
+       "answer": "A support cable snapped and sent debris toward the hikers.",
+       "options": [
+        "Lorelei was excited to inspect the newly built mountain bridge.",
+        "A support cable snapped and sent debris toward the hikers.",
+        "Lorelei activated the emergency barrier and redirected the rocks.",
+        "The hikers applauded as the trail reopened."
+       ]
+      },
+      {
+       "given": "Third  →  ____",
+       "answer": "Lorelei activated the emergency barrier and redirected the rocks.",
+       "options": [
+        "Lorelei was excited to inspect the newly built mountain bridge.",
+        "A support cable snapped and sent debris toward the hikers.",
+        "Lorelei activated the emergency barrier and redirected the rocks.",
+        "The hikers applauded as the trail reopened."
+       ]
+      },
+      {
+       "given": "Fourth  →  ____",
+       "answer": "The hikers applauded as the trail reopened.",
+       "options": [
+        "Lorelei was excited to inspect the newly built mountain bridge.",
+        "A support cable snapped and sent debris toward the hikers.",
+        "Lorelei activated the emergency barrier and redirected the rocks.",
+        "The hikers applauded as the trail reopened."
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more passage.",
+     "sentences": [
+      "Mina the Margay was a student researcher at the Northern Science Center.",
+      "She loved solving problems and collecting information about local wildlife.",
+      "One afternoon, her team prepared to present the results of an important migration study.",
+      "However, just before the presentation, Mina discovered that the digital file containing months of survey data had disappeared.",
+      "Without the information, the team could not share its findings with the community.",
+      "The researchers searched every computer and storage device, but the file remained missing.",
+      "Then Mina remembered seeing a backup drive connected to a field tablet during a recent expedition.",
+      "She hurried to the equipment room and found the tablet charging on a shelf.",
+      "After opening the backup folder, she located the missing data and transferred it to the presentation computer.",
+      "The team successfully shared its research that evening, and the community gained valuable information about protecting local wildlife."
+     ],
+     "hint": "The climax is the moment the problem turns, not the moment it starts.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 9,
+       "ask": "Which sentence best describes the climax of the story?",
+       "answer": "She located the missing data and transferred it to the presentation computer.",
+       "options": [
+        "She located the missing data and transferred it to the presentation computer.",
+        "Mina was a student researcher at the Northern Science Center.",
+        "The researchers searched every computer and storage device."
+       ],
+       "video": "at_sb_plot-11"
+      },
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "Which sentence best describes the beginning of the story?",
+       "answer": "Mina the Margay was a student researcher at the Northern Science Center.",
+       "options": [
+        "Mina the Margay was a student researcher at the Northern Science Center.",
+        "The digital file containing months of survey data had disappeared.",
+        "The team successfully shared its research that evening."
+       ],
+       "video": "at_sb_plot-12"
+      },
+      {
+       "kind": "write",
+       "sentence": 7,
+       "ask": "Why is the backup drive significant to the story?",
+       "checks": [
+        {
+         "label": "Says what it holds or does",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "data"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "file"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "copy"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "information"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says what it lets them do",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "present"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "share"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "solve"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "find"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "research"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "The backup drive holds a copy of the missing data, which is what lets Mina solve the problem and the team share its research.",
+       "video": "at_sb_plot-13"
+      }
+     ]
+    }
+   ]
+  },
+  "at_rel": {
+   "id": "at_sb_rel",
+   "title": "SB: Analyze Relationships",
+   "standards": [
+    "5.8B"
+   ],
+   "skill": "Friends, rivals, enemies — and how to tell which",
+   "activities": [
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Read each passage. What relationship does it describe?",
+     "hint": "Friends care about each other. Rivals compete. Enemies may try to hurt each other.",
+     "items": [
+      {
+       "given": "Cam slid his notebook across the table so Elle could compare her calculations. Later, they revised their presentation together, exchanging suggestions and laughing about the experiment.  →  ____",
+       "answer": "friends",
+       "options": [
+        "friends",
+        "rivals",
+        "enemies"
+       ],
+       "video": "at_sb_rel-1"
+      },
+      {
+       "given": "The fox froze when it noticed the hawk tracing wide circles overhead. It searched for cover while the hawk continued scanning the hillside, waiting for an opportunity to strike.  →  ____",
+       "answer": "enemies",
+       "options": [
+        "friends",
+        "rivals",
+        "enemies"
+       ],
+       "video": "at_sb_rel-2"
+      },
+      {
+       "given": "Jeff checked the scoreboard before turning toward Harper. He knew she was studying it just as carefully so she could find a way to beat him next time.  →  ____",
+       "answer": "rivals",
+       "options": [
+        "friends",
+        "rivals",
+        "enemies"
+       ],
+       "video": "at_sb_rel-3"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer.",
+     "sentences": [
+      "Zuri and Callan were both running for class president.",
+      "During lunch, they handed out campaign flyers and explained their ideas to classmates.",
+      "When Callan’s poster accidentally tore, Zuri lent him some tape so he could fix it.",
+      "Later, Callan congratulated Zuri after her speech earned loud applause.",
+      "On election day, they eagerly awaited the results.",
+      "Although each hoped to win, both respected the effort and leadership skills the other had shown throughout the campaign."
+     ],
+     "hint": "They want the same job. Watch how they treat each other anyway.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "Finish the sentence: Zuri and Callan show that competitors can also be…",
+       "checks": [
+        {
+         "label": "Names what they also are",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "friend"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "kind"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "respect"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "support"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 4
+         }
+        }
+       ],
+       "model": "friendly and respectful towards each other, even while they are both trying to win.",
+       "video": "at_sb_rel-4"
+      },
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "How does Callan show care for Zuri?",
+       "checks": [
+        {
+         "label": "Names what he did",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "congratulat"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "speech"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "applause"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 5
+         }
+        }
+       ],
+       "model": "He congratulated Zuri after her speech earned loud applause, even though she was his opponent.",
+       "video": "at_sb_rel-5"
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "Which sentence best describes Zuri and Callan’s relationship?",
+       "answer": "Zuri and Callan are friendly rivals competing for the position of class president.",
+       "options": [
+        "Zuri and Callan are classmates who work together to improve their school.",
+        "Zuri and Callan are opponents who refuse to support one another during the election.",
+        "Zuri and Callan are friendly rivals competing for the position of class president."
+       ],
+       "video": "at_sb_rel-6"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "Aiko and Keiko spent the afternoon repairing kites before the town’s annual kite festival.",
+      "When a bamboo support snapped on Aiko’s kite, Keiko showed her how to replace it without damaging the paper.",
+      "Later, Aiko noticed that one of Keiko’s kites had a loose string and quickly fixed it.",
+      "As colorful kites filled the sky the next morning, they smiled, glad their hard work had paid off."
+     ],
+     "hint": "Help going both ways is the thing to look for.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which sentence shows Aiko and Keiko helping one another?",
+       "answer": "Keiko showed her how to replace it without damaging the paper.",
+       "options": [
+        "Keiko showed her how to replace it without damaging the paper.",
+        "Colorful kites filled the sky the next morning.",
+        "They spent the afternoon repairing kites before the festival."
+       ],
+       "video": "at_sb_rel-7"
+      },
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "How would you describe the relationship between Aiko and Keiko?",
+       "answer": "Aiko and Keiko are friends who support each other.",
+       "options": [
+        "Aiko and Keiko are friends who support each other.",
+        "Aiko and Keiko are competitors who each want their own kite to be more successful.",
+        "Aiko and Keiko are neighbors who rarely spend time together."
+       ],
+       "video": "at_sb_rel-8"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "full": {
+  "id": "at_full",
+  "title": "Full Topic: Analyze a Text",
+  "standards": [
+   "5.8B",
+   "5.8C",
+   "5.8D"
+  ],
+  "skill": "Relationships, plot and setting, in one piece of writing",
+  "activities": [
+   {
+    "kind": "passage",
+    "brief": "Read the passage, then answer the questions.",
+    "sentences": [
+     "Mara spent Saturday morning helping her aunt build a small birdhouse for the garden.",
+     "Her aunt showed her how to read the instructions and use the measuring tape, but Mara completed most of the work herself.",
+     "Everything was going well until she attached the roof.",
+     "One side stuck up higher than the other, making the birdhouse wobble.",
+     "Mara felt disappointed and thought about starting over.",
+     "Instead, she carefully looked at each step and compared her work to the directions.",
+     "After checking her measurements, she discovered that one piece had been placed upside down.",
+     "Mara removed the piece, fixed the mistake, and attached the roof again.",
+     "This time the birdhouse stood straight and sturdy.",
+     "Mara felt proud because she had solved the problem by being patient and paying close attention to the details."
+    ],
+    "hint": "She thought about starting over — and then did something else instead.",
+    "questions": [
+     {
+      "kind": "blank",
+      "sentence": 8,
+      "ask": "Which character trait does Mara demonstrate most clearly?",
+      "answer": "Mara shows determination by fixing her mistake.",
+      "options": [
+       "Mara shows impatience by rushing her work.",
+       "Mara shows determination by fixing her mistake.",
+       "Mara shows curiosity by asking many questions.",
+       "Mara shows generosity by helping others."
+      ],
+      "video": "at_full-1"
+     },
+     {
+      "kind": "blank",
+      "sentence": 1,
+      "ask": "Which sentence describes the setting?",
+      "answer": "Mara spent Saturday morning helping her aunt build a small birdhouse for the garden.",
+      "options": [
+       "Mara spent Saturday morning helping her aunt build a small birdhouse for the garden.",
+       "One side stuck up higher than the other, making the birdhouse wobble.",
+       "Mara felt proud because she had solved the problem."
+      ],
+      "video": "at_full-2"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "A second passage.",
+    "sentences": [
+     "Aaron and his sister Allie hiked along an overgrown trail behind their grandfather’s farm.",
+     "They were searching for a landmark mentioned in his old journal.",
+     "As the path became harder to follow, they worried they had taken a wrong turn.",
+     "Then Allie spotted a weathered stone marker hidden by tall grass.",
+     "Nearby, they uncovered a small notebook filled with sketches and observations about the area’s wildlife."
+    ],
+    "hint": "Tension is the worry before the discovery.",
+    "questions": [
+     {
+      "kind": "write",
+      "sentence": 3,
+      "ask": "How does the author create tension before the notebook is discovered?",
+      "checks": [
+       {
+        "label": "Names the worry",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "worr"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "wrong turn"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "lost"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "harder"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Names the trail",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "path"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "trail"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "follow"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "overgrown"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 8
+        }
+       }
+      ],
+      "model": "The author creates tension by showing that Aaron and Allie are worried they took a wrong turn when the path becomes harder to follow.",
+      "video": "at_full-3"
+     },
+     {
+      "kind": "blank",
+      "sentence": 5,
+      "ask": "Why is the notebook important to the plot of the story?",
+      "answer": "It helps Aaron and Allie learn more about the area’s wildlife.",
+      "options": [
+       "It proves that Aaron and Allie followed the wrong trail.",
+       "It explains why the farm was abandoned.",
+       "It warns visitors about dangerous animals.",
+       "It helps Aaron and Allie learn more about the area’s wildlife."
+      ],
+      "video": "at_full-4"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "A last passage.",
+    "sentences": [
+     "During a weekend visit to their grandpa’s remote cabin, Elena and her younger brother, Marcus, uncovered a weathered journal hidden beneath a loose floorboard.",
+     "Intrigued by its mysterious entries, the siblings deciphered clues that described landmarks scattered throughout the surrounding forest.",
+     "They located a long-abandoned lookout tower, where they were able to take a photo with Elena’s phone.",
+     "At the top, they secretly thanked their grandpa for showing them his home."
+    ],
+    "hint": "One object in sentence 3 tells you the century.",
+    "questions": [
+     {
+      "kind": "pick",
+      "sentence": 3,
+      "ask": "Click the word in sentence 3 that tells you the time period, then write which century it makes this.",
+      "target": "phone",
+      "answer": "twenty-first",
+      "video": "at_full-5"
+     },
+     {
+      "kind": "write",
+      "sentence": 2,
+      "ask": "What characteristic do Elena and Marcus share?",
+      "checks": [
+       {
+        "label": "Names the trait",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "curious"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "curiosity"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "intrigued"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "interested"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Points at the text",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "journal"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "clue"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "mystery"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "mysterious"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "learn"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 7
+        }
+       }
+      ],
+      "model": "Elena and Marcus are both curious, because they want to learn more about the mysterious journal and its clues.",
+      "video": "at_full-6"
+     },
+     {
+      "kind": "blank",
+      "sentence": 3,
+      "ask": "What detail starts the resolution of the story?",
+      "answer": "The resolution begins when Elena and Marcus locate the abandoned lookout tower.",
+      "options": [
+       "The resolution begins when Elena and Marcus locate the abandoned lookout tower.",
+       "The resolution begins when the siblings uncover the journal.",
+       "The resolution begins when they decipher the clues.",
+       "The resolution begins when they begin searching for answers."
+      ],
+      "video": "at_full-7"
+     },
+     {
+      "kind": "write",
+      "sentence": 4,
+      "ask": "How does the journal impact the relationship between the siblings and their grandpa?",
+      "checks": [
+       {
+        "label": "Says what it does for them",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "closer"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "thank"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "connect"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "understand"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "learn"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "share"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions grandpa or his home",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "grandpa"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "home"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "cabin"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "his"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 8
+        }
+       }
+      ],
+      "model": "The journal brings them closer to their grandpa, because it shows them his home and they end up secretly thanking him for it.",
+      "video": "at_full-8"
+     }
+    ]
+   },
+   {
+    "kind": "fix",
+    "mode": "drag",
+    "bank": [
+     "rising action",
+     "resolution",
+     "climax",
+     "beginning"
+    ],
+    "brief": "Put the right plot element in each blank.",
+    "hint": "One of these four is not used.",
+    "items": [
+     {
+      "given": "____ builds suspense and leads up to the most exciting part of the story.",
+      "answer": "rising action",
+      "video": "at_full-9"
+     },
+     {
+      "given": "____ shows the solution to the problem and wraps up the story.",
+      "answer": "resolution",
+      "video": "at_full-9"
+     },
+     {
+      "given": "____ is the most important part of the story, where the most action takes place.",
+      "answer": "climax",
+      "video": "at_full-9"
+     }
+    ]
+   }
+  ]
+ }
+}

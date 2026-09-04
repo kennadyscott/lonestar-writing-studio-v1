@@ -1046,6 +1046,10 @@ function BuildTab({ draft, mutate, commit, saving, onDraft, drafting }) {
 function ActivityCard({ act, index, count, onEdit, onRemove, onSignOff }) {
   const [editing, setEditing] = useState(false)
   const [replay, setReplay] = useState(0)
+  // The preview never had anywhere to put a solution video, so a wrong answer
+  // silently played nothing. Checking whether the right recording is attached to
+  // the right question is most of what proofing an imported worksheet is.
+  const [video, setVideo] = useState(null)
   const kindName = { hunt: 'Error hunt', choose: 'Inline choice', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
   const approved = !!act.approved
 
@@ -1089,6 +1093,20 @@ function ActivityCard({ act, index, count, onEdit, onRemove, onSignOff }) {
         </button>
       </div>
 
+      {video && (
+        <div onClick={() => setVideo(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.6)', display: 'grid', placeItems: 'center', zIndex: 90, padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#000', borderRadius: 12, overflow: 'hidden', maxWidth: 760, width: '100%' }}>
+            <video src={(import.meta.env.VITE_MEDIA_BASE || '/solutions/').replace(/\/?$/, '/') + video + '.mp4'}
+              controls autoPlay style={{ width: '100%', display: 'block' }} />
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 12px', background: '#0e2748' }}>
+              <code style={{ flex: 1, fontSize: 11.5, color: '#a8dff5' }}>{video}.mp4</code>
+              <button onClick={() => setVideo(null)} style={{ ...btn('rgba(255,255,255,.14)', '#a8dff5'), fontSize: 12, padding: '5px 12px' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {editing ? (
         <div style={{ padding: '4px 14px 12px' }}>
           {approved && (
@@ -1100,7 +1118,7 @@ function ActivityCard({ act, index, count, onEdit, onRemove, onSignOff }) {
         </div>
       ) : (
         <div style={{ padding: '14px 16px 16px' }}>
-          <ActivityPreview key={replay} act={act} onDone={approve}
+          <ActivityPreview key={replay} act={act} onDone={approve} onPlay={setVideo}
             doneLabel={approved ? '✓ Approved' : '✓ Approve this activity'} />
         </div>
       )}

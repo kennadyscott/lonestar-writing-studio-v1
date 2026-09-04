@@ -137,7 +137,8 @@
          }
         }
        ],
-       "model": "It means there is no point being upset about something that has already happened, because you cannot change it."
+       "model": "It means there is no point being upset about something that has already happened, because you cannot change it.",
+       "video": "ap_adages-1"
       },
       {
        "kind": "blank",
@@ -149,7 +150,8 @@
         "Mina realized she needed to stop worrying about the accident and focus on fixing the problem.",
         "She repaired the volcano as best she could.",
         "Mina groaned, “My project is ruined!”"
-       ]
+       ],
+       "video": "ap_adages-2"
       },
       {
        "kind": "write",
@@ -234,7 +236,8 @@
          }
         }
        ],
-       "model": "encourage Mina to focus on fixing the problem instead of feeling upset"
+       "model": "encourage Mina to focus on fixing the problem instead of feeling upset",
+       "video": "ap_adages-3"
       }
      ]
     },
@@ -334,7 +337,8 @@
          }
         }
        ],
-       "model": "It means being too curious about something that is not yours can get you into trouble."
+       "model": "It means being too curious about something that is not yours can get you into trouble.",
+       "video": "ap_adages-4"
       }
      ]
     },
@@ -351,7 +355,8 @@
        "options": [
         "right",
         "wrong"
-       ]
+       ],
+       "video": "ap_adages-5"
       },
       {
        "given": "“Don’t judge a book by its cover.” — Books with nice covers are usually interesting.  →  ____",
@@ -359,7 +364,8 @@
        "options": [
         "right",
         "wrong"
-       ]
+       ],
+       "video": "ap_adages-6"
       },
       {
        "given": "“The early bird catches the worm.” — People who prepare early often have an advantage.  →  ____",
@@ -367,7 +373,8 @@
        "options": [
         "right",
         "wrong"
-       ]
+       ],
+       "video": "ap_adages-7"
       },
       {
        "given": "“Practice makes perfect.” — Only talented people become successful.  →  ____",
@@ -375,7 +382,8 @@
        "options": [
         "right",
         "wrong"
-       ]
+       ],
+       "video": "ap_adages-8"
       }
      ]
     },
@@ -394,7 +402,8 @@
         "a backpack and a watch",
         "a camera and a watch",
         "a backpack and sandals"
-       ]
+       ],
+       "video": "ap_adages-9"
       }
      ]
     },
@@ -421,7 +430,8 @@
         "Every cloud has a silver lining",
         "a waste of time",
         "the championship round"
-       ]
+       ],
+       "video": "ap_adages-10"
       },
       {
        "kind": "blank",
@@ -433,7 +443,8 @@
         "Disappointing situations can still lead to something positive.",
         "Vocabulary teams are harder than spelling bees.",
         "Coaches should encourage students after contests."
-       ]
+       ],
+       "video": "ap_adages-11"
       }
      ]
     }
@@ -470,14 +481,16 @@
         "I loaf making customers smile!",
         "We always rise to the occasion!",
         "That’s just how we roll."
-       ]
+       ],
+       "video": "ap_puns-1"
       },
       {
        "kind": "pick",
        "sentence": 4,
        "ask": "Click the word in sentence 4 that creates the pun, then write the other thing it means.",
        "target": "rise",
-       "answer": "dough rising"
+       "answer": "dough rising",
+       "video": "ap_puns-2"
       },
       {
        "kind": "write",
@@ -562,7 +575,8 @@
          }
         }
        ],
-       "model": "It is funny because bread dough really does rise, and rising to the occasion also means doing well when something is asked of you."
+       "model": "It is funny because bread dough really does rise, and rising to the occasion also means doing well when something is asked of you.",
+       "video": "ap_puns-3"
       },
       {
        "kind": "write",
@@ -647,7 +661,8 @@
          }
         }
        ],
-       "model": "A bakery sells rolls, and “how we roll” is also a saying that means the way we do things."
+       "model": "A bakery sells rolls, and “how we roll” is also a saying that means the way we do things.",
+       "video": "ap_puns-4"
       },
       {
        "kind": "blank",
@@ -659,7 +674,8 @@
         "“The bakery opens every morning at six.”",
         "“Fresh bread is sold daily at the festival.”",
         "“Customers lined up near the front door.”"
-       ]
+       ],
+       "video": "ap_puns-5"
       }
      ]
     },
@@ -688,14 +704,16 @@
         "The cave is filled with loud noises.",
         "The cave is dangerous to enter.",
         "The cave is difficult to explore."
-       ]
+       ],
+       "video": "ap_puns-6"
       },
       {
        "kind": "pick",
        "sentence": 8,
        "ask": "Click the pun in the dragon’s warning, then write the word it is playing on.",
        "target": "granite",
-       "answer": "granted"
+       "answer": "granted",
+       "video": "ap_puns-7"
       },
       {
        "kind": "write",
@@ -739,7 +757,8 @@
          }
         }
        ],
-       "model": "Granite is a rock found in a cave, and it sounds like granted, so the dragon is asking them not to take its jokes for granted."
+       "model": "Granite is a rock found in a cave, and it sounds like granted, so the dragon is asking them not to take its jokes for granted.",
+       "video": "ap_puns-8"
       }
      ]
     },
@@ -765,7 +784,8 @@
        "options": [
         "Agree",
         "Disagree"
-       ]
+       ],
+       "video": "ap_puns-9"
       },
       {
        "kind": "write",
@@ -850,7 +870,8 @@
          }
         }
        ],
-       "model": "It is a pun because rooting means cheering someone on, and roots are also part of the plants they sell at the garden centre."
+       "model": "It is a pun because rooting means cheering someone on, and roots are also part of the plants they sell at the garden centre.",
+       "video": "ap_puns-10"
       }
      ]
     }
@@ -881,7 +902,8 @@
         "Rushing can cause mistakes.",
         "Do not assume success before it happens.",
         "Taking a risk can lead to a reward."
-       ]
+       ],
+       "video": "ap_sb_adages-1"
       },
       {
        "given": "Ava rushed through her science project the night before it was due, and parts fell apart in class. Her brother said, “Haste makes waste.”  →  ____",
@@ -891,7 +913,8 @@
         "Rushing can cause mistakes.",
         "Do not assume success before it happens.",
         "Taking a risk can lead to a reward."
-       ]
+       ],
+       "video": "ap_sb_adages-2"
       },
       {
        "given": "Jordan bragged he would win first place at the talent show. His teacher warned, “Don’t count your chickens before they hatch.”  →  ____",
@@ -901,7 +924,8 @@
         "Rushing can cause mistakes.",
         "Do not assume success before it happens.",
         "Taking a risk can lead to a reward."
-       ]
+       ],
+       "video": "ap_sb_adages-3"
       },
       {
        "given": "Leila felt nervous about joining robotics club, went anyway, and made new friends. Her grandmother said, “Nothing ventured, nothing gained.”  →  ____",
@@ -911,7 +935,8 @@
         "Rushing can cause mistakes.",
         "Do not assume success before it happens.",
         "Taking a risk can lead to a reward."
-       ]
+       ],
+       "video": "ap_sb_adages-4"
       }
      ]
     },
@@ -938,7 +963,8 @@
         "His coach handed him a practice jersey",
         "Look before you leap",
         "reminded him"
-       ]
+       ],
+       "video": "ap_sb_adages-5"
       },
       {
        "kind": "blank",
@@ -949,7 +975,8 @@
         "Basketball players should always arrive early for games.",
         "People should think carefully before acting too quickly.",
         "Championship games are difficult to prepare for."
-       ]
+       ],
+       "video": "ap_sb_adages-6"
       }
      ]
     },
@@ -974,7 +1001,8 @@
         "She stacked too many supplies in her arms at once.",
         "She was carrying posters for the fundraiser.",
         "Malik helped gather the papers."
-       ]
+       ],
+       "video": "ap_sb_adages-7"
       },
       {
        "kind": "write",
@@ -1077,7 +1105,8 @@
          }
         }
        ],
-       "model": "It means being too proud or too sure of yourself often comes right before you make a mistake."
+       "model": "It means being too proud or too sure of yourself often comes right before you make a mistake.",
+       "video": "ap_sb_adages-8"
       }
      ]
     }
@@ -1104,7 +1133,8 @@
        "options": [
         "pun",
         "not a pun"
-       ]
+       ],
+       "video": "ap_sb_puns-1"
       },
       {
        "given": "A gardener watered the flowers early every morning.  →  ____",
@@ -1112,7 +1142,8 @@
        "options": [
         "pun",
         "not a pun"
-       ]
+       ],
+       "video": "ap_sb_puns-2"
       },
       {
        "given": "A fisherman opens a seafood restaurant and says the business is off the hook.  →  ____",
@@ -1120,7 +1151,8 @@
        "options": [
         "pun",
         "not a pun"
-       ]
+       ],
+       "video": "ap_sb_puns-3"
       },
       {
        "given": "A cat becomes famous for its purr-fect singing voice.  →  ____",
@@ -1128,7 +1160,8 @@
        "options": [
         "pun",
         "not a pun"
-       ]
+       ],
+       "video": "ap_sb_puns-4"
       },
       {
        "given": "A scientist completed an experiment in the chemistry lab.  →  ____",
@@ -1136,7 +1169,8 @@
        "options": [
         "pun",
         "not a pun"
-       ]
+       ],
+       "video": "ap_sb_puns-5"
       },
       {
        "given": "The sunburned banana said, “I’m peeling terrible today!”  →  ____",
@@ -1144,7 +1178,8 @@
        "options": [
         "pun",
         "not a pun"
-       ]
+       ],
+       "video": "ap_sb_puns-6"
       }
      ]
     },
@@ -1247,7 +1282,8 @@
          }
         }
        ],
-       "model": "A bakery rolls dough, and business rolling along also means it is busy and going well."
+       "model": "A bakery rolls dough, and business rolling along also means it is busy and going well.",
+       "video": "ap_sb_puns-7"
       },
       {
        "kind": "blank",
@@ -1258,14 +1294,16 @@
         "The bakery opens early each morning for customers.",
         "The phrase refers to bread dough rising and succeeding during challenges.",
         "The bakery sells fresh bread during weekend festivals."
-       ]
+       ],
+       "video": "ap_sb_puns-8"
       },
       {
        "kind": "pick",
        "sentence": 8,
        "ask": "Click the word in sentence 8 that creates the pun, then write the word it sounds like.",
        "target": "crumby",
-       "answer": "crummy"
+       "answer": "crummy",
+       "video": "ap_sb_puns-9"
       },
       {
        "kind": "write",
@@ -1344,7 +1382,8 @@
          }
         }
        ],
-       "model": "Baked goods leave crumbs, and crumby sounds like crummy, which means bad — so it is a joke about business being both."
+       "model": "Baked goods leave crumbs, and crumby sounds like crummy, which means bad — so it is a joke about business being both.",
+       "video": "ap_sb_puns-10"
       }
      ]
     }
@@ -1382,7 +1421,8 @@
        "I guess I really broke the ice today!",
        "Many hands make light work.",
        "clearing the snow would take forever"
-      ]
+      ],
+      "video": "ap_full-1"
      },
      {
       "kind": "blank",
@@ -1393,7 +1433,8 @@
        "I guess I really broke the ice today!",
        "Many hands make light work.",
        "passing shovels back and forth"
-      ]
+      ],
+      "video": "ap_full-2"
      },
      {
       "kind": "write",
@@ -1484,7 +1525,8 @@
         }
        }
       ],
-      "model": "Theo really did fall into the ice and snow, and breaking the ice also means starting things off in a friendly way."
+      "model": "Theo really did fall into the ice and snow, and breaking the ice also means starting things off in a friendly way.",
+      "video": "ap_full-3"
      },
      {
       "kind": "write",
@@ -1575,14 +1617,16 @@
         }
        }
       ],
-      "model": "It means a job gets easier and faster when more people help with it."
+      "model": "It means a job gets easier and faster when more people help with it.",
+      "video": "ap_full-4"
      },
      {
       "kind": "pick",
       "sentence": 3,
       "ask": "Theo says another joke: “Ice to meet this snowstorm!” Click the word in sentence 3 that his new joke plays on, then write the word it sounds like.",
       "target": "ice",
-      "answer": "nice"
+      "answer": "nice",
+      "video": "ap_full-5"
      }
     ]
    },
@@ -1605,7 +1649,8 @@
       "sentence": 3,
       "ask": "Click the word that makes Marcus’s joke a pun, then write the word it sounds like.",
       "target": "Orange",
-      "answer": "aren’t"
+      "answer": "aren’t",
+      "video": "ap_full-7"
      },
      {
       "kind": "blank",
@@ -1617,7 +1662,8 @@
        "Marcus believes oranges are better than apples.",
        "Marcus wants Jada to buy more fruit from the store.",
        "Marcus thinks the groceries are too heavy to carry."
-      ]
+      ],
+      "video": "ap_full-8"
      },
      {
       "kind": "write",
@@ -1720,7 +1766,8 @@
         }
        }
       ],
-      "model": "It means that when something bad happens you should make the best of it and find something good in it."
+      "model": "It means that when something bad happens you should make the best of it and find something good in it.",
+      "video": "ap_full-9"
      }
     ]
    },
@@ -1746,7 +1793,8 @@
       "options": [
        "Agree",
        "Disagree"
-      ]
+      ],
+      "video": "ap_full-10"
      },
      {
       "kind": "write",
@@ -1831,7 +1879,8 @@
         }
        }
       ],
-      "model": "It is an adage because it is a well-known saying that teaches a lesson: do not risk everything on one plan."
+      "model": "It is an adage because it is a well-known saying that teaches a lesson: do not risk everything on one plan.",
+      "video": "ap_full-11"
      }
     ]
    }

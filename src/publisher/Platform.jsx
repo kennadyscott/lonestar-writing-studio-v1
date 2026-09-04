@@ -631,12 +631,6 @@ function Library({ paths, meta, onOpen, onChanged }) {
           <div style={{ flex: 1 }} />
           <ImportPanel onImported={async (id) => { await onChanged(); onOpen(id) }} />
           <button onClick={create} disabled={!!busy} style={btn('#e7edf3', NAVY)}>+ New topic</button>
-          <button onClick={() => seed(alreadyHere)} disabled={!!busy} style={btn('#e7edf3', NAVY)}
-            title={alreadyHere ? 'Replace the shipped paths with the versions in the app' : 'Add the paths that ship with the app'}>
-            {busy === 'seed' ? 'Loading…'
-              : alreadyHere ? `↻ Re-import the ${shipped.length} shipped ${shipped.length === 1 ? 'path' : 'paths'}`
-              : `Load the ${shipped.length || ''} that ship with the app`.replace('  ', ' ')}
-          </button>
         </div>
         {oops && <div style={{ marginTop: 9, background: '#fdecea', color: RED, borderRadius: 9, padding: '9px 11px', fontSize: 12.5, fontWeight: 700 }}>{oops}</div>}
       </Panel>
@@ -685,8 +679,9 @@ function Library({ paths, meta, onOpen, onChanged }) {
               {g.key.toUpperCase()} · {g.rows.length}
             </div>
             {g.rows.map((p) => (
-              <button key={p.id} onClick={() => onOpen(p.id)}
-                style={{ display: 'flex', width: '100%', alignItems: 'center', gap: 12, padding: '12px 15px', background: '#fff', border: 'none', borderBottom: '1px solid #f0f4f7', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
+              <div key={p.id} style={{ display: 'flex', alignItems: 'stretch', borderBottom: '1px solid #f0f4f7', background: '#fff' }}>
+              <button onClick={() => onOpen(p.id)}
+                style={{ display: 'flex', flex: 1, minWidth: 0, alignItems: 'center', gap: 12, padding: '12px 15px', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit' }}>
                 <span style={{ fontSize: 19, flex: '0 0 auto' }}>{p.icon || '📘'}</span>
                 <span style={{ flex: '1 1 220px', minWidth: 0 }}>
                   <b style={{ fontSize: 14, color: NAVY, display: 'block' }}>{p.title}</b>
@@ -707,6 +702,8 @@ function Library({ paths, meta, onOpen, onChanged }) {
                 <span style={{ flex: '0 0 118px', textAlign: 'right' }}><StatusPill status={p.status} version={p.liveVersion} /></span>
                 <span style={{ flex: '0 0 14px', color: '#a9b8c6', fontSize: 15 }}>›</span>
               </button>
+              <DeleteTopic path={p} onDeleted={onChanged} />
+              </div>
             ))}
           </div>
         ))}
@@ -714,6 +711,37 @@ function Library({ paths, meta, onOpen, onChanged }) {
 
       {meta?.backend === 'supabase' && <CatalogNote meta={meta} />}
     </div>
+  )
+}
+
+/* Deleting a path is not undoable and there is no bin, so it asks once and says
+ * exactly what goes. Published paths are refused outright — a class could be
+ * working through it — which is enforced on the server too. */
+function DeleteTopic({ path, onDeleted }) {
+  const [busy, setBusy] = useState(false)
+  const live = path.status === 'published'
+
+  async function go(e) {
+    e.stopPropagation()
+    if (live) { alert('Take this path off the live site before deleting it.'); return }
+    const what = [
+      `${path.stops} ${path.stops === 1 ? 'stop' : 'stops'}`,
+      path.points ? `${path.points} points` : null,
+    ].filter(Boolean).join(', ')
+    if (!confirm(`Delete "${path.title}"?\n\n${what}. This cannot be undone and there is no bin.`)) return
+    setBusy(true)
+    try { await library.remove(path.id); await onDeleted() }
+    catch (e2) { alert(e2.message) } finally { setBusy(false) }
+  }
+
+  return (
+    <button onClick={go} disabled={busy} title={live ? 'Take it off the live site first' : `Delete ${path.title}`}
+      style={{ flex: '0 0 auto', width: 40, background: 'transparent', border: 'none', cursor: live ? 'not-allowed' : 'pointer',
+        color: live ? '#dde5ec' : '#b9c7d4', fontSize: 15, fontFamily: 'inherit' }}
+      onMouseEnter={(e) => { if (!live) e.currentTarget.style.color = RED }}
+      onMouseLeave={(e) => { e.currentTarget.style.color = live ? '#dde5ec' : '#b9c7d4' }}>
+      {busy ? '…' : '🗑'}
+    </button>
   )
 }
 
@@ -902,7 +930,26 @@ function BuildTab({ draft, mutate, commit, saving, onDraft, drafting }) {
             <div style={{ fontSize: 12.5, fontWeight: 800, color: s.kind === 'sb' ? AMBER : NAVY, lineHeight: 1.3 }}>
               {s.w.approved && <span style={{ color: GREEN }}>✓ </span>}{s.label}
             </div>
-            <div style={{ fontSize: 10.5, color: '#5b6b7c', fontWeight: 700 }}>
+            <div style={{ fontSize: 10.5, color: '#5b6b7c', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span
+                role="button"
+                title={`Remove ${s.w.title} from this path`}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const acts = (s.w.activities || []).length
+                  if (!confirm(`Remove "${s.w.title}" from this path?\n\n${acts} ${acts === 1 ? 'activity' : 'activities'}. This cannot be undone.`)) return
+                  commit((t) => {
+                    t.core = (t.core || []).filter((w) => w.id !== s.w.id)
+                    for (const [k, w] of Object.entries(t.skillBuilders || {})) {
+                      if (w.id === s.w.id) delete t.skillBuilders[k]
+                    }
+                    // a skill builder hangs off a core worksheet; if that goes, so does it
+                    if (t.skillBuilders?.[s.w.id]) delete t.skillBuilders[s.w.id]
+                    if (t.full && t.full.id === s.w.id) t.full = null
+                  })
+                  if (wsId === s.w.id) setWsId(null)
+                }}
+                style={{ color: '#c3d0da', cursor: 'pointer', fontSize: 11 }}>✕</span>
               {(() => {
                 const acts = s.w.activities || []
                 const ok = acts.filter((a) => a.approved).length

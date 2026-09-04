@@ -167,7 +167,8 @@ function Rail({ paths, sel, onSelect, onChanged, meta }) {
     try {
       const r = await library.seed()
       await onChanged()
-      if (!r.seeded?.length) setOops('Nothing was loaded — those paths are already in the library.')
+      if (r.warning) setOops(r.warning)
+      else if (!r.seeded?.length) setOops('Nothing was loaded — those paths are already in the library.')
     } catch (e) { setOops(e.message) } finally { setBusy('') }
   }
   async function create() {
@@ -699,10 +700,24 @@ function Workbench({ id, onChanged, onBack }) {
     setDraft((d) => { const c = JSON.parse(JSON.stringify(d)); fn(c); return c })
     setDirty(true)
   }
-  async function save() {
+
+  /* Signing something off is a commitment, not a work in progress. It saves on
+   * the spot rather than sitting in the browser waiting for someone to notice
+   * the Save button — a tick that disappears on reload is worse than no tick,
+   * and is exactly how a morning of approvals gets lost. Saves the object it
+   * just computed, because setState has not landed yet. */
+  async function commit(fn) {
+    const next = JSON.parse(JSON.stringify(draft))
+    fn(next)
+    setDraft(next)
+    await save(next)
+  }
+
+  async function save(explicit) {
+    const body = explicit || draft
     setSaving(true)
     try {
-      const r = await library.save(id, draft)
+      const r = await library.save(id, body)
       setProof(r.proof); setDirty(false)
       // The path's own stage follows its worksheets, so a save can move it. Say
       // so — a stage that changes on its own and silently is worse than one
@@ -766,7 +781,7 @@ function Workbench({ id, onChanged, onBack }) {
       </Panel>
 
       {tab === 'details' && <DetailsTab draft={draft} mutate={mutate} />}
-      {tab === 'build' && <BuildTab draft={draft} mutate={mutate} />}
+      {tab === 'build' && <BuildTab draft={draft} mutate={mutate} commit={commit} saving={saving} />}
       {tab === 'proof' && <ProofTab draft={draft} proof={proof} dirty={dirty} onSave={save} videos={data.videos} mutate={mutate} />}
       {tab === 'publish' && <PublishTab path={p} proof={proof} versions={data.versions} dirty={dirty} draft={draft}
         onRefresh={async () => { await load(); await onChanged() }} onProof={() => setTab('proof')} />}
@@ -784,12 +799,12 @@ function sheetsOf(t) {
   ]
 }
 
-function BuildTab({ draft, mutate }) {
+function BuildTab({ draft, mutate, commit, saving }) {
   const sheets = sheetsOf(draft)
   const [wsId, setWsId] = useState(sheets[0]?.w.id || null)
   const current = sheets.find((s) => s.w.id === wsId) || sheets[0]
 
-  const onSheet = (fn) => mutate((t) => {
+  const onSheet = (fn) => commit((t) => {
     const target = (t.core || []).find((w) => w.id === current.w.id)
       || Object.values(t.skillBuilders || {}).find((w) => w.id === current.w.id)
       || (t.full && t.full.id === current.w.id ? t.full : null)
@@ -855,10 +870,10 @@ function BuildTab({ draft, mutate }) {
                 </div>
               </div>
               {setApproved ? (
-                <button onClick={() => onSheet((w) => { delete w.approved })}
+                <button disabled={saving} onClick={() => onSheet((w) => { delete w.approved })}
                   style={{ ...btn('#dcf0e4', GREEN), border: 'none', fontSize: 12.5 }}>✓ Approved — withdraw</button>
               ) : (
-                <button disabled={!allActsApproved}
+                <button disabled={!allActsApproved || saving}
                   onClick={() => onSheet((w) => { w.approved = new Date().toISOString() })}
                   title={allActsApproved ? 'Approve this worksheet' : 'Approve every activity first'}
                   style={{ ...btn(allActsApproved ? GREEN : '#e7edf3', allActsApproved ? '#fff' : '#93a3b3'), fontSize: 12.5, cursor: allActsApproved ? 'pointer' : 'default' }}>
@@ -892,6 +907,7 @@ function BuildTab({ draft, mutate }) {
             {(current.w.activities || []).map((a, ai) => (
               <ActivityCard key={`${current.w.id}-${ai}`} act={a} index={ai} count={current.w.activities.length}
                 onEdit={(fn) => editSheet((w) => fn(w.activities[ai]))}
+                onSignOff={(fn) => onSheet((w) => { fn(w.activities[ai]); delete w.approved })}
                 onRemove={() => editSheet((w) => { w.activities.splice(ai, 1) })} />
             ))}
           </>
@@ -904,7 +920,7 @@ function BuildTab({ draft, mutate }) {
 /* An activity in the console shows as the student meets it, because that is what
  * a publisher is actually judging. The markup and the fields are one click away
  * for when they need changing, but they are not the default view of the work. */
-function ActivityCard({ act, index, count, onEdit, onRemove }) {
+function ActivityCard({ act, index, count, onEdit, onRemove, onSignOff }) {
   const [editing, setEditing] = useState(false)
   const [replay, setReplay] = useState(0)
   const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
@@ -913,8 +929,10 @@ function ActivityCard({ act, index, count, onEdit, onRemove }) {
   // Approving records who and when, because "approved" with nothing behind it is
   // a tick box. Editing clears it: an activity that changed after sign-off has
   // not been signed off.
-  const approve = () => onEdit((a) => { a.approved = new Date().toISOString() })
-  const unapprove = () => onEdit((a) => { delete a.approved })
+  // Sign-off saves immediately; editing does not. onEdit marks the draft dirty
+  // for a later Save, which is right for typing and wrong for a commitment.
+  const approve = () => onSignOff((a) => { a.approved = new Date().toISOString() })
+  const unapprove = () => onSignOff((a) => { delete a.approved })
   const edited = (fn) => onEdit((a) => { fn(a); delete a.approved })
 
   return (

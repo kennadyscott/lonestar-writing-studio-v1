@@ -183,6 +183,31 @@ function Directions({ text }) {
   )
 }
 
+/* Walk one path exactly as a student walks it, on a draft nobody has published.
+ *
+ * The console could already show a single activity, which is enough to judge one
+ * question and not enough to judge a worksheet: a numbered passage with six
+ * questions hanging off it is a different experience from six questions in a
+ * row, and the only way to know whether it reads is to read it. This is the same
+ * TopicPath and the same Worksheet the student gets — nothing is scored, no
+ * coins are paid, and progress is kept in memory so a preview cannot mark a
+ * stop cleared for the person previewing it. */
+export function PathPreview({ topic: raw, onClose }) {
+  const topic = useMemo(() => prepareTopic(raw), [raw])
+  const [progress, setProgress] = useState({})
+  const [running, setRunning] = useState(null)
+  if (!topic) return null
+
+  if (running) {
+    return <Worksheet ws={running} topic={topic} progress={progress} preview
+      onQuit={() => setRunning(null)} onClose={onClose} onNext={(ws) => setRunning(ws)}
+      onDone={(pct) => setProgress((p) => ({
+        ...p, [running.id]: { best: Math.max(p[running.id]?.best || 0, pct), passed: (p[running.id]?.passed) || pct >= PASS_MARK },
+      }))} />
+  }
+  return <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={onClose} onClose={onClose} />
+}
+
 export default function ProofRoom({ grade = 5, onClose, onChange }) {
   const [topicId, setTopicId] = useState(null)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
@@ -930,7 +955,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
                     <div style={{ marginTop: 8 }}>
                       <textarea value={writes[i] || ''} rows={2} disabled={checked}
                         onChange={(e) => setWrites((w) => ({ ...w, [i]: e.target.value }))}
-                        placeholder="Write the combined sentence…"
+                        placeholder={q.placeholder || "Write your answer…"}
                         style={{ width: '100%', padding: '9px 11px', borderRadius: 9, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 14, resize: 'vertical' }} />
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 7 }}>
                         {checkCompose(q, writes[i] || '').map((c, j) => (
@@ -1003,7 +1028,7 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
               </div>
               <textarea value={drafts[i]} rows={2}
                 onChange={(e) => setDrafts((d) => d.map((v, j) => (j === i ? e.target.value : v)))}
-                placeholder="Write the combined sentence…"
+                placeholder={it.placeholder || "Write your answer…"}
                 style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${ok ? '#8fd6ae' : '#cfe0ec'}`,
                   fontFamily: 'inherit', fontSize: 14.5, resize: 'vertical' }} />
 

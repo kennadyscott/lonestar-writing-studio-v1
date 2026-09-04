@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { library, getKey, setKey } from '../lib/library.js'
 import { readTopicFolder } from './folderImport.js'
 import { ActivityEditor, field, label } from '../student/PublisherConsole.jsx'
-import { Worksheet, ActivityPreview } from '../student/ProofRoom.jsx'
+import { Worksheet, ActivityPreview, PathPreview } from '../student/ProofRoom.jsx'
 import { prepareTopic } from '../../server/proofRoom.mjs'
 import { STATES, GRADES, domainsFor, productFor, parseStandards, joinStandards, standardLooksRight } from '../../lib/content/taxonomy.mjs'
 import { STAGES, stage as stageOf } from '../../lib/content/pipeline.mjs'
@@ -785,6 +785,7 @@ function Workbench({ id, onChanged, onBack }) {
   const [proof, setProof] = useState(null)
   const [moved, setMoved] = useState(null)
   const [drafting, setDrafting] = useState(false)
+  const [walking, setWalking] = useState(false)
 
   async function draftActivities(worksheetId) {
     setDrafting(true)
@@ -864,6 +865,10 @@ function Workbench({ id, onChanged, onBack }) {
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <button onClick={() => setWalking(true)} title="Walk this path the way a student does"
+              style={{ ...btn('#fff', CYAN), border: `1px solid ${CYAN}55`, fontSize: 12.5 }}>
+              ▶ Student view
+            </button>
             <StageControl path={p} onChanged={async () => { await load(); await onChanged() }} />
             {moved && (
               <span style={{ fontSize: 11.5, fontWeight: 800, color: moved.to === 'approved' ? GREEN : AMBER }}>
@@ -888,6 +893,7 @@ function Workbench({ id, onChanged, onBack }) {
         </div>
       </Panel>
 
+      {walking && <PathPreview topic={draft} onClose={() => setWalking(false)} />}
       {tab === 'details' && <DetailsTab draft={draft} mutate={mutate} />}
       {tab === 'build' && <BuildTab draft={draft} mutate={mutate} commit={commit} saving={saving} onDraft={draftActivities} drafting={drafting} />}
       {tab === 'proof' && <ProofTab draft={draft} proof={proof} dirty={dirty} onSave={save} videos={data.videos} mutate={mutate} />}

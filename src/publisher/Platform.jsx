@@ -748,6 +748,17 @@ function Workbench({ id, onChanged, onBack }) {
   const [saving, setSaving] = useState(false)
   const [proof, setProof] = useState(null)
   const [moved, setMoved] = useState(null)
+  const [drafting, setDrafting] = useState(false)
+
+  async function draftActivities(worksheetId) {
+    setDrafting(true)
+    try {
+      const r = await library.draftActivities(id, worksheetId)
+      await load()
+      setMoved(null)
+      alert(`Drafted ${r.drafted} ${r.drafted === 1 ? 'activity' : 'activities'}. Every one is flagged until you have checked it against the source.${r.notes ? `\n\nThe drafter was unsure about: ${r.notes}` : ''}`)
+    } catch (e) { alert(e.message) } finally { setDrafting(false) }
+  }
 
   const load = useCallback(async () => {
     const d = await library.get(id)
@@ -842,7 +853,7 @@ function Workbench({ id, onChanged, onBack }) {
       </Panel>
 
       {tab === 'details' && <DetailsTab draft={draft} mutate={mutate} />}
-      {tab === 'build' && <BuildTab draft={draft} mutate={mutate} commit={commit} saving={saving} />}
+      {tab === 'build' && <BuildTab draft={draft} mutate={mutate} commit={commit} saving={saving} onDraft={draftActivities} drafting={drafting} />}
       {tab === 'proof' && <ProofTab draft={draft} proof={proof} dirty={dirty} onSave={save} videos={data.videos} mutate={mutate} />}
       {tab === 'publish' && <PublishTab path={p} proof={proof} versions={data.versions} dirty={dirty} draft={draft}
         onRefresh={async () => { await load(); await onChanged() }} onProof={() => setTab('proof')} />}
@@ -860,7 +871,7 @@ function sheetsOf(t) {
   ]
 }
 
-function BuildTab({ draft, mutate, commit, saving }) {
+function BuildTab({ draft, mutate, commit, saving, onDraft, drafting }) {
   const sheets = sheetsOf(draft)
   const [wsId, setWsId] = useState(sheets[0]?.w.id || null)
   const current = sheets.find((s) => s.w.id === wsId) || sheets[0]
@@ -942,6 +953,10 @@ function BuildTab({ draft, mutate, commit, saving }) {
                 </button>
               )}
             </div>
+
+            {current.w.source?.slides?.length > 0 && (
+              <SourcePanel ws={current.w} onDraft={onDraft} drafting={drafting} />
+            )}
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
               <div style={{ flex: '1 1 260px' }}>
@@ -1102,6 +1117,53 @@ function TypeChanger({ act, onEdit }) {
             Only swaps that keep every word are offered. Anything else would mean
             throwing the content away and guessing at a replacement.
           </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* The deck this worksheet came from, kept beside the activities rather than in a
+ * file somebody has to go and open. Checking a drafted answer means reading the
+ * source, so the source is here. */
+function SourcePanel({ ws, onDraft, drafting }) {
+  const [open, setOpen] = useState(false)
+  const acts = (ws.activities || []).length
+  const lines = ws.source.slides.reduce((n, sl) => n + sl.length, 0)
+
+  return (
+    <div style={{ border: `1.5px solid ${acts ? '#e3edf4' : AMBER + '44'}`, background: acts ? '#fbfdfe' : '#fffdf4',
+      borderRadius: 12, padding: '11px 14px', marginBottom: 14 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 11, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 17 }}>📄</span>
+        <div style={{ flex: 1, minWidth: 180 }}>
+          <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY }}>
+            {acts ? 'Imported from a deck' : 'Imported — no activities yet'}
+          </div>
+          <div style={{ fontSize: 11.5, color: '#5b6b7c', fontWeight: 700, marginTop: 1 }}>
+            {ws.source.deck} · {ws.source.slides.length} slides, {lines} lines of text
+          </div>
+        </div>
+        <button onClick={() => setOpen((o) => !o)}
+          style={{ ...btn('#fff', NAVY), border: '1px solid #dde5ec', fontSize: 12 }}>
+          {open ? 'Hide the source' : 'Read the source'}
+        </button>
+        <button onClick={() => onDraft(ws.id)} disabled={drafting}
+          title="Read the deck text and write a first pass at the activities"
+          style={btn(drafting ? '#e7edf3' : CYAN, drafting ? '#93a3b3' : '#fff')}>
+          {drafting ? 'Reading the deck…' : acts ? '↻ Draft again from the deck' : '✨ Draft the activities'}
+        </button>
+      </div>
+      {open && (
+        <div style={{ marginTop: 11, maxHeight: 320, overflowY: 'auto', background: '#fff', border: '1px solid #e7edf3', borderRadius: 10, padding: '11px 13px' }}>
+          {ws.source.slides.map((sl, i) => (
+            <div key={i} style={{ marginBottom: 12 }}>
+              <div style={{ ...label, marginBottom: 4 }}>SLIDE {i + 1}</div>
+              {sl.map((line, j) => (
+                <div key={j} style={{ fontSize: 12.5, color: INK, lineHeight: 1.55 }}>{line}</div>
+              ))}
+            </div>
+          ))}
         </div>
       )}
     </div>

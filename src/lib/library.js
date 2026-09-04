@@ -34,6 +34,7 @@ export const library = {
   publish: (id, note) => call('POST', `/paths/${id}/publish`, { note }),
   unpublish: (id) => call('POST', `/paths/${id}/unpublish`),
   setStage: (id, stage) => call('POST', `/paths/${id}/stage`, { stage }),
+  draftActivities: (id, worksheetId) => call('POST', `/paths/${id}/draft`, { worksheetId }),
   restore: (id, version) => call('POST', `/paths/${id}/restore`, { version }),
   seed: (overwrite) => call('POST', '/seed', { overwrite: !!overwrite }),
   createTopic: (topic) => call('POST', '/seed', { topics: [topic], overwrite: true }),

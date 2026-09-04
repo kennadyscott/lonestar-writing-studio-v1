@@ -79,6 +79,7 @@ const KID_CLIPBOARD = ART('verbs-clipboard')
 const KID_READER = ART('verbs-reader')
 
 const HOW_TO = {
+  choose: 'Each box hides a choice. Pick the word that belongs, then press ✓.',
   hunt: 'Click on each word that is wrong. Type the correct word, then press ✓. Clicking a word that is already correct counts against you.',
   fix: 'Type the missing word in each blank. Use the word bank above — every word is used once. Check your answers when the last blank is filled.',
   compose: 'Write the sentence yourself. The checklist ticks green as you land each move — get all of them and the sentence counts. How you word the rest is up to you.',
@@ -127,10 +128,18 @@ function SolutionPlayer({ id, onClose }) {
  * because it is the same component the student runs, it cannot drift from it.
  * Takes a RAW activity and prepares it here, so callers hand over the draft. */
 export function ActivityPreview({ act, onPlay, onDone, doneLabel }) {
-  const ready = useMemo(() => (act && act.kind === 'hunt' ? { ...act, ...parseHunt(act.text), text: undefined } : act), [act])
+  // Both marked-passage kinds need their [[wrong|right]] parsed into tokens
+  // before any renderer sees them. Missing one here is invisible until the
+  // component reaches for act.tokens and finds nothing.
+  const ready = useMemo(
+    () => (act && (act.kind === 'hunt' || act.kind === 'choose')
+      ? { ...act, ...parseHunt(act.text), text: undefined }
+      : act),
+    [act])
   if (!ready || !ready.kind) return null
   const props = { act: ready, onDone: onDone || (() => {}), onPlay: onPlay || (() => {}), doneLabel }
   if (ready.kind === 'hunt') return <HuntActivity {...props} />
+  if (ready.kind === 'choose') return <ChooseActivity {...props} />
   if (ready.kind === 'maze') return <MazeActivity {...props} />
   if (ready.kind === 'compose') return <ComposeActivity {...props} />
   if (ready.kind === 'passage') return <PassageActivity {...props} />
@@ -460,6 +469,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
 
       <SolutionPlayer id={video} onClose={() => setVideo(null)} />
       {act.kind === 'hunt' ? <HuntActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'choose' ? <ChooseActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'maze' ? <MazeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'compose' ? <ComposeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'passage' ? <PassageActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
@@ -469,6 +479,82 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
 }
 
 /* --- activity: hunt the planted errors --- */
+/* Inline choice: the same passage a hunt uses, with a short list at each spot.
+ *
+ * The distractors are the other corrections from the same passage rather than
+ * invented ones, which is what makes this worth doing — in a paragraph about
+ * however / therefore / meanwhile, the wrong answers are exactly the words the
+ * student has to tell apart. A list of unrelated words would be a different,
+ * easier question. */
+function ChooseActivity({ act, onDone, onPlay, doneLabel }) {
+  const spots = act.tokens.filter((t) => t.bad)
+  const [picked, setPicked] = useState({})
+  const [checked, setChecked] = useState(false)
+
+  const options = useMemo(() => {
+    const pool = [...new Set(spots.map((t) => t.fix))]
+    return spots.map((t) => {
+      const others = pool.filter((w) => norm(w) !== norm(t.fix))
+      const near = [t.t, ...others].filter((w) => norm(w) !== norm(t.fix))
+      return shuffled([t.fix, ...near.slice(0, 3)])
+    })
+  }, [act])
+
+  const right = spots.filter((t, i) => norm(picked[i]) === norm(t.fix)).length
+  let seen = -1
+
+  return (
+    <WithArt act={act} art="" side="right">
+      <Directions text={act.directions || HOW_TO.choose} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1 }}>{act.brief}</span>
+        <span className="pill">{right} of {spots.length} right</span>
+      </div>
+
+      <div style={{ background: '#fbfdfe', border: '1.5px solid #e3edf4', borderRadius: 12, padding: '16px 18px', lineHeight: 2.5, fontSize: 15.5 }}>
+        {act.tokens.map((t, i) => {
+          if (!t.bad) return <span key={i}>{t.t}</span>
+          seen += 1
+          const k = seen
+          const chosen = picked[k]
+          const ok = checked && norm(chosen) === norm(spots[k].fix)
+          const wrong = checked && chosen && !ok
+          return (
+            <select key={i} value={chosen || ''} disabled={checked}
+              onChange={(e) => setPicked((pk) => ({ ...pk, [k]: e.target.value }))}
+              style={{ margin: '0 3px', padding: '3px 7px', borderRadius: 8, fontFamily: 'inherit', fontSize: 15,
+                fontWeight: 700, cursor: checked ? 'default' : 'pointer',
+                background: ok ? '#e6f6ee' : wrong ? '#fdecea' : chosen ? '#eaf4f9' : '#fff',
+                color: ok ? 'var(--good)' : wrong ? '#c0392b' : NAVY,
+                border: `1.5px solid ${ok ? 'var(--good)' : wrong ? '#c0392b' : chosen ? CYAN : '#cfe0ec'}` }}>
+              <option value="">choose…</option>
+              {options[k].map((o) => <option key={o} value={o}>{o}</option>)}
+            </select>
+          )
+        })}
+      </div>
+
+      {checked && (
+        <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 11 }}>
+          {spots.map((t, i) => norm(picked[i]) === norm(t.fix) ? null : (
+            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#fdecea', borderRadius: 999, padding: '5px 12px', fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>
+              {t.t} → {t.fix}
+              <WatchButton id={(act.videos || [])[i]} onPlay={onPlay} label="Why?" />
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
+        {act.hint && <span style={{ flex: 1, fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>}
+        {!checked
+          ? <button className="btn" disabled={Object.keys(picked).length < spots.length} onClick={() => setChecked(true)}>Check my answers ✓</button>
+          : <button className="btn" onClick={() => onDone(right)}>{doneLabel || <>Done with this one →</>}</button>}
+      </div>
+    </WithArt>
+  )
+}
+
 function HuntActivity({ act, onDone, onPlay, doneLabel }) {
   const [caught, setCaught] = useState({})
   const [fixes, setFixes] = useState({})

@@ -984,7 +984,7 @@ function BuildTab({ draft, mutate, commit, saving }) {
 function ActivityCard({ act, index, count, onEdit, onRemove, onSignOff }) {
   const [editing, setEditing] = useState(false)
   const [replay, setReplay] = useState(0)
-  const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
+  const kindName = { hunt: 'Error hunt', choose: 'Inline choice', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
   const approved = !!act.approved
 
   // Approving records who and when, because "approved" with nothing behind it is
@@ -1016,6 +1016,7 @@ function ActivityCard({ act, index, count, onEdit, onRemove, onSignOff }) {
             ✓ Approve
           </button>
         )}
+        {!editing && <TypeChanger act={act} onEdit={onEdit} />}
         {!editing && (
           <button onClick={() => setReplay((n) => n + 1)} title="Start this activity over"
             style={{ ...btn('#fff', '#5b6b7c'), border: '1px solid #dde5ec', fontSize: 11.5, padding: '5px 11px' }}>↺ Reset</button>
@@ -1039,6 +1040,68 @@ function ActivityCard({ act, index, count, onEdit, onRemove, onSignOff }) {
         <div style={{ padding: '14px 16px 16px' }}>
           <ActivityPreview key={replay} act={act} onDone={approve}
             doneLabel={approved ? '✓ Approved' : '✓ Approve this activity'} />
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* What an activity can be turned into, and what that costs.
+ *
+ * Only conversions that lose nothing are offered. A hunt and an inline choice
+ * hold identical data — the same passage, the same [[wrong|right]] at each spot
+ * — so switching is a relabel. A fill-in's three answer modes are the same
+ * items answered differently. Anything else would mean discarding content and
+ * guessing at replacements, so it is not offered at all: an editor that quietly
+ * throws away a passage to become a maze is worse than one that says no. */
+const CONVERSIONS = {
+  hunt: [{ to: 'choose', label: 'Inline choice', how: 'Same passage. The student picks from a short list at each spot instead of finding the errors.' }],
+  choose: [{ to: 'hunt', label: 'Error hunt', how: 'Same passage. The student finds the wrong words and types the corrections.' }],
+}
+const MODES = [
+  { id: 'type', label: 'Type the answer' },
+  { id: 'select', label: 'Click the answer' },
+  { id: 'drag', label: 'Drag the answer' },
+]
+
+function TypeChanger({ act, onEdit }) {
+  const [open, setOpen] = useState(false)
+  const swaps = CONVERSIONS[act.kind] || []
+  const isFix = act.kind === 'fix'
+  if (!swaps.length && !isFix) return null
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <button onClick={() => setOpen((o) => !o)} title="Change how this activity is answered"
+        style={{ ...btn('#fff', '#5b6b7c'), border: '1px solid #dde5ec', fontSize: 11.5, padding: '5px 11px' }}>
+        ⇄ Type
+      </button>
+      {open && (
+        <div onMouseLeave={() => setOpen(false)}
+          style={{ position: 'absolute', right: 0, top: '110%', zIndex: 30, width: 300, background: '#fff',
+            border: '1px solid #dde5ec', borderRadius: 12, boxShadow: '0 10px 28px rgba(16,40,70,.16)', padding: 9 }}>
+          {isFix && MODES.map((m) => {
+            const on = (act.mode || 'type') === m.id
+            return (
+              <button key={m.id} disabled={on}
+                onClick={() => { onEdit((a) => { a.mode = m.id }); setOpen(false) }}
+                style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 9,
+                  background: on ? '#eaf4f9' : 'transparent', border: 'none', cursor: on ? 'default' : 'pointer', fontFamily: 'inherit' }}>
+                <div style={{ fontSize: 12.5, fontWeight: 800, color: on ? CYAN : NAVY }}>{m.label}{on ? ' · now' : ''}</div>
+              </button>
+            )
+          })}
+          {swaps.map((sw) => (
+            <button key={sw.to} onClick={() => { onEdit((a) => { a.kind = sw.to }); setOpen(false) }}
+              style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', borderRadius: 9, background: 'transparent', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>
+              <div style={{ fontSize: 12.5, fontWeight: 800, color: NAVY }}>{sw.label}</div>
+              <div style={{ fontSize: 11.5, color: '#5b6b7c', marginTop: 2, lineHeight: 1.4 }}>{sw.how}</div>
+            </button>
+          ))}
+          <div style={{ fontSize: 11, color: '#93a3b3', padding: '7px 10px 3px', borderTop: '1px solid #f0f4f7', marginTop: 4, lineHeight: 1.45 }}>
+            Only swaps that keep every word are offered. Anything else would mean
+            throwing the content away and guessing at a replacement.
+          </div>
         </div>
       )}
     </div>

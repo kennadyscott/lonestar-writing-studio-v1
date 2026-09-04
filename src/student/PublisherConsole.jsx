@@ -146,7 +146,7 @@ export default function PublisherConsole({ onClose }) {
 
 export function ActivityEditor({ act, index, count, onEdit, onRemove, alwaysOpen }) {
   const [open, setOpen] = useState(alwaysOpen || index === 0)
-  const kindName = { hunt: 'Error hunt', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
+  const kindName = { hunt: 'Error hunt', choose: 'Inline choice', fix: 'Fill it in', maze: 'Maze', compose: 'Write it', passage: 'Read & answer' }[act.kind] || act.kind
 
   return (
     <div style={alwaysOpen
@@ -157,7 +157,7 @@ export function ActivityEditor({ act, index, count, onEdit, onRemove, alwaysOpen
         <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#fff', background: NAVY, borderRadius: 6, padding: '3px 8px' }}>{index + 1}</span>
         <span style={{ flex: 1, fontSize: 13.5, fontWeight: 800, color: NAVY }}>{kindName}</span>
         <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>
-          {act.kind === 'hunt' ? 'markup [[wrong|right]]' : act.kind === 'maze' ? `${Object.keys(act.gates || {}).length} gates` : `${(act.items || []).length} items`}
+          {act.kind === 'hunt' || act.kind === 'choose' ? 'markup [[wrong|right]]' : act.kind === 'maze' ? `${Object.keys(act.gates || {}).length} gates` : `${(act.items || []).length} items`}
         </span>
         <span style={{ fontSize: 11, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
       </button>}
@@ -203,7 +203,7 @@ export function ActivityEditor({ act, index, count, onEdit, onRemove, alwaysOpen
             </div>
           </div>
 
-          {act.kind === 'hunt' && (
+          {(act.kind === 'hunt' || act.kind === 'choose') && (
             <div>
               <span style={label}>PASSAGE — mark each planted error as [[wrong|right]]</span>
               <textarea style={{ ...field, minHeight: 130, lineHeight: 1.6, resize: 'vertical' }} value={act.text || ''}

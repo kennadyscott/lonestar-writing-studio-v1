@@ -46,6 +46,12 @@ export function checkCompose(item, text) {
 export const tokenize = (sentence) => (sentence || '').split(/(\s+)/).filter((x) => x !== '')
 
 const hunt = (brief, text, hint, videos) => ({ kind: 'hunt', brief, text, hint, videos })
+// choose: the same passage and the same [[wrong|right]] markup as a hunt, but the
+// student picks from a short list at each spot instead of finding the spots
+// themselves. Identical data on purpose — it is the same authored content asking
+// a different question, so a worksheet can be switched between the two without
+// anything being rewritten or lost.
+const choose = (brief, text, hint, videos) => ({ kind: 'choose', brief, text, hint, videos })
 const fix = (brief, bank, items, hint, mode = 'type') => ({ kind: 'fix', brief, bank, items, hint, mode })
 // maze: S start, X finish, # wall, . open, A–J gates. Every gate sits on the only
 // route through, so the verbs get corrected in the order the path meets them.
@@ -663,9 +669,9 @@ export function parseHunt(text) {
 /* A worksheet with its activities ready to play, and its point total. */
 export function prepare(ws) {
   const activities = ws.activities.map((a) =>
-    a.kind === 'hunt' ? { ...a, ...parseHunt(a.text), text: undefined } : { ...a })
+    a.kind === 'hunt' || a.kind === 'choose' ? { ...a, ...parseHunt(a.text), text: undefined } : { ...a })
   const points = activities.reduce((n, a) =>
-    n + (a.kind === 'hunt' ? a.errorCount
+    n + (a.kind === 'hunt' || a.kind === 'choose' ? a.errorCount
       : a.kind === 'maze' ? Object.keys(a.gates).length
       : a.kind === 'passage' ? a.questions.length
       : a.items.length), 0)

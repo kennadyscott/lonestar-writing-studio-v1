@@ -1,0 +1,1624 @@
+{
+ "id": "topic_argumentative",
+ "title": "Argumentative Texts",
+ "short": "Argumentative Texts",
+ "state": "TX",
+ "grade": 5,
+ "domain": "Multiple Genres",
+ "standards": [
+  "5.9E (i)",
+  "5.9E (ii)",
+  "5.9E (iii)"
+ ],
+ "blurb": "Claim, evidence and audience — three skills, then one full-topic proof.",
+ "icon": "⚖️",
+ "core": [
+  {
+   "id": "arg_claim",
+   "title": "Identify the Claim",
+   "standards": [
+    "5.9E (i)"
+   ],
+   "skill": "Finding the sentence the whole text is trying to make you agree with",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Many schools should schedule outdoor learning days several times each year.",
+      "Learning outside can help students stay focused and engaged during lessons.",
+      "Science activities become more meaningful when students can observe plants, animals, and weather conditions firsthand.",
+      "Outdoor learning also encourages movement, which can improve attention and reduce stress.",
+      "Students often have opportunities to work together on hands-on projects while exploring their surroundings.",
+      "Some people worry that students may become distracted outside.",
+      "However, teachers can plan structured activities that keep students focused on learning.",
+      "For these reasons, schools should include outdoor learning days as part of the school year."
+     ],
+     "hint": "The claim is usually the first or last sentence, and it says what SHOULD happen.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "Which sentence best states the author’s claim?",
+       "answer": "Many schools should schedule outdoor learning days several times each year.",
+       "options": [
+        "Many schools should schedule outdoor learning days several times each year.",
+        "Some people worry that students may become distracted outside.",
+        "Outdoor learning also encourages movement, which can improve attention and reduce stress."
+       ],
+       "video": "arg_claim-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which detail supports the claim?",
+       "answer": "Science activities become more meaningful when students can observe plants, animals, and weather conditions firsthand.",
+       "options": [
+        "Science activities become more meaningful when students can observe plants, animals, and weather conditions firsthand.",
+        "Some people worry that students may become distracted outside.",
+        "Many schools should schedule outdoor learning days several times each year."
+       ],
+       "video": "arg_claim-2"
+      },
+      {
+       "kind": "write",
+       "sentence": 8,
+       "ask": "In your own words, what is the main claim the author makes?",
+       "checks": [
+        {
+         "label": "Names outdoor learning",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "outdoor"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "outside"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says schools should do it",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "should"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "ought"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "need to"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "The author claims that schools should schedule outdoor learning days as part of the school year.",
+       "video": "arg_claim-3"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second argument.",
+     "sentences": [
+      "Communities should build more skate parks for children and teens.",
+      "Skate parks provide a safe place for people to practice skateboarding, roller skating, and other activities.",
+      "When riders have a designated area to use, they are less likely to skate in parking lots or busy streets.",
+      "Skate parks can also encourage exercise and help people spend more time outdoors.",
+      "Some residents worry that skate parks might create noise in nearby neighborhoods.",
+      "However, communities can choose locations that reduce disruptions while still giving young people a place to gather.",
+      "For these reasons, communities should invest in more skate parks."
+     ],
+     "hint": "An opposing claim is the one the author disagrees with.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which sentence supports the author’s claim?",
+       "answer": "Skate parks provide a safe place for people to practice skateboarding, roller skating, and other activities.",
+       "options": [
+        "Skate parks provide a safe place for people to practice skateboarding, roller skating, and other activities.",
+        "Some residents worry that skate parks might create noise in nearby neighborhoods.",
+        "Communities should build more skate parks for children and teens."
+       ],
+       "video": "arg_claim-4"
+      },
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Which sentence presents an opposing claim?",
+       "answer": "Some residents worry that skate parks might create noise in nearby neighborhoods.",
+       "options": [
+        "Some residents worry that skate parks might create noise in nearby neighborhoods.",
+        "Skate parks can also encourage exercise and help people spend more time outdoors.",
+        "For these reasons, communities should invest in more skate parks."
+       ],
+       "video": "arg_claim-5"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A third argument.",
+     "sentences": [
+      "Students should learn basic cooking skills before they enter middle school.",
+      "Learning how to prepare simple meals can help children become more independent and responsible.",
+      "Cooking also teaches important skills such as following directions, measuring ingredients, and managing time.",
+      "Many children enjoy helping in the kitchen and trying new foods.",
+      "These experiences can build confidence and encourage healthy eating habits.",
+      "Basic cooking skills may also help families save money by preparing meals at home.",
+      "Some people believe cooking should only be taught by family members.",
+      "Even so, many adults agree that cooking is an important life skill that benefits children in many ways.",
+      "For these reasons, students should learn basic cooking skills at a young age."
+     ],
+     "hint": "Two sentences support the claim. One argues against it.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which sentence supports the author’s claim?",
+       "answer": "Learning how to prepare simple meals can help children become more independent and responsible.",
+       "options": [
+        "Learning how to prepare simple meals can help children become more independent and responsible.",
+        "Some people believe cooking should only be taught by family members.",
+        "Many children enjoy helping in the kitchen and trying new foods."
+       ],
+       "video": "arg_claim-6"
+      },
+      {
+       "kind": "blank",
+       "sentence": 7,
+       "ask": "Which sentence presents an opposing claim?",
+       "answer": "Some people believe cooking should only be taught by family members.",
+       "options": [
+        "Some people believe cooking should only be taught by family members.",
+        "Cooking also teaches important skills such as following directions, measuring ingredients, and managing time.",
+        "Basic cooking skills may also help families save money by preparing meals at home."
+       ],
+       "video": "arg_claim-7"
+      },
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "What is one claim the author makes in the selection?",
+       "answer": "Students should learn basic cooking skills before they enter middle school.",
+       "options": [
+        "Learning how to prepare simple meals can help children become more independent and responsible.",
+        "Some people believe cooking should only be taught by family members.",
+        "Students should learn basic cooking skills before they enter middle school.",
+        "Basic cooking skills may also help families save money by preparing meals at home."
+       ],
+       "video": "arg_claim-8"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "Free outdoor movie nights can be a valuable addition to community events.",
+      "Supporters argue that these events bring neighbors together in a fun and welcoming setting.",
+      "Families can enjoy entertainment without spending money on expensive tickets.",
+      "Outdoor movie nights also encourage residents to spend time in local parks and public spaces.",
+      "Some people think communities should spend money on other activities instead.",
+      "However, many residents believe movie nights help strengthen community connections while providing affordable entertainment."
+     ],
+     "hint": "Work backwards: what claim would this sentence be a reason FOR?",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which claim does this sentence support? “Families can enjoy entertainment without spending money on expensive tickets.”",
+       "answer": "Free outdoor movie nights can be a valuable addition to community events.",
+       "options": [
+        "Free outdoor movie nights can be a valuable addition to community events.",
+        "Some people think communities should spend money on other activities instead.",
+        "Outdoor movie nights also encourage residents to spend time in local parks."
+       ],
+       "video": "arg_claim-9"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "arg_audience",
+   "title": "The Audience",
+   "standards": [
+    "5.9E (iii)"
+   ],
+   "skill": "Working out who the author is actually talking to",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Schools are considering adding more hands-on science activities to their classrooms.",
+      "Experiments and investigations allow students to apply concepts they learn from textbooks.",
+      "Research suggests that active participation can improve understanding and retention of information.",
+      "These activities also encourage collaboration and problem-solving skills.",
+      "Although additional materials may be required, the educational benefits can outweigh the costs.",
+      "School administrators should consider expanding opportunities for hands-on learning."
+     ],
+     "hint": "The last sentence usually names who is being asked to act.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "Who is the author most likely addressing?",
+       "checks": [
+        {
+         "label": "Names the audience",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "administrator"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "principal"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "school leader"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "leaders"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "teachers"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 4
+         }
+        }
+       ],
+       "model": "The author is addressing school administrators, who are asked to expand hands-on learning.",
+       "video": "arg_audience-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "Which reader would most likely agree with the author’s argument?",
+       "answer": "A principal looking for ways to improve instruction",
+       "options": [
+        "A principal looking for ways to improve instruction",
+        "A scientist conducting research in a laboratory",
+        "A student studying for a college entrance exam"
+       ],
+       "video": "arg_audience-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second argument.",
+     "sentences": [
+      "Many neighborhoods would benefit from establishing a community farmers market.",
+      "Farmers markets provide residents with access to fresh fruits, vegetables, and other locally produced goods.",
+      "Purchasing food from local growers can support small businesses and strengthen the local economy.",
+      "These markets also create opportunities for community members to gather and learn about healthy food choices.",
+      "Although organizing a market requires planning and coordination, the long-term benefits can positively affect many residents.",
+      "Community leaders should consider supporting this initiative."
+     ],
+     "hint": "Who is being asked to do something here?",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which detail would most interest the intended audience?",
+       "answer": "Purchasing food from local growers can support small businesses and strengthen the local economy.",
+       "options": [
+        "Purchasing food from local growers can support small businesses and strengthen the local economy.",
+        "Organizing a market requires planning and coordination.",
+        "Farmers markets provide residents with fresh fruits and vegetables."
+       ],
+       "video": "arg_audience-3"
+      },
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "Who would most likely support this idea?",
+       "checks": [
+        {
+         "label": "Names the audience",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "community leader"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "leaders"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "council"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "resident"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "official"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 4
+         }
+        }
+       ],
+       "model": "Community leaders would most likely support it, because they are the ones asked to back the initiative.",
+       "video": "arg_audience-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A third argument.",
+     "sentences": [
+      "Many families should consider adopting pets from local animal shelters.",
+      "Shelters care for animals that need safe and permanent homes.",
+      "Adopting a pet can provide companionship while also giving an animal a second chance.",
+      "Many shelters offer information about pet care and help families find animals that fit their lifestyles.",
+      "Although adopting a pet requires responsibility and commitment, the rewards can be meaningful for both families and animals.",
+      "People looking for a pet should visit their local shelter before purchasing one elsewhere."
+     ],
+     "hint": "Look at who the text keeps mentioning.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 1,
+       "ask": "Who is most likely the intended audience of this passage?",
+       "checks": [
+        {
+         "label": "Names the audience",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "famil"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "people looking"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "pet owner"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "adopt"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 4
+         }
+        }
+       ],
+       "model": "The intended audience is families who are thinking about getting a pet.",
+       "video": "arg_audience-5"
+      },
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "Which reader would most likely agree with the author’s argument?",
+       "answer": "A family deciding whether to adopt a pet",
+       "options": [
+        "A family deciding whether to adopt a pet",
+        "A veterinarian performing surgery on animals",
+        "A scientist studying animal behavior",
+        "A zookeeper caring for exotic animals"
+       ],
+       "video": "arg_audience-6"
+      },
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "Which detail would most interest the intended audience?",
+       "answer": "Many shelters offer information about pet care and help families find animals that fit their lifestyles.",
+       "options": [
+        "Shelters provide safe homes for animals while they await adoption.",
+        "Many shelters offer information about pet care and help families find animals that fit their lifestyles.",
+        "Adopting a pet requires time, effort, and daily responsibility.",
+        "Pets often provide companionship and comfort for their owners."
+       ],
+       "video": "arg_audience-7"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "More students should join school chess clubs.",
+      "Playing chess requires strategic thinking and careful decision-making.",
+      "Students who participate often strengthen their problem-solving abilities while learning from both victories and mistakes.",
+      "Students should consider joining a chess club if one is available."
+     ],
+     "hint": "Short text, but it says who it is for twice.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "Who is most likely the intended audience of this text?",
+       "checks": [
+        {
+         "label": "Names students",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "student"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 4
+         }
+        }
+       ],
+       "model": "The intended audience is students who might join a school chess club.",
+       "video": "arg_audience-8"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "arg_facts",
+   "title": "For or Against an Argument",
+   "standards": [
+    "5.9E (ii)"
+   ],
+   "skill": "Spotting the facts an author uses, and what each one is doing",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Community centers should offer more esports tournaments for students.",
+      "Esports are video game competitions where players work together as a team.",
+      "These games help students practice teamwork and quick thinking.",
+      "According to a survey by several youth programs, more students joined community activities after esports events were added.",
+      "Some people believe community centers should focus only on traditional sports.",
+      "However, many organizers say esports give students another fun way to stay active and involved.",
+      "For these reasons, community centers should offer more esports tournaments."
+     ],
+     "hint": "A fact usually says where it came from — a survey, a study, records.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "Which sentence uses a fact to support the claim about esports?",
+       "answer": "According to a survey by several youth programs, more students joined community activities after esports events were added.",
+       "options": [
+        "According to a survey by several youth programs, more students joined community activities after esports events were added.",
+        "Esports are video game competitions where players work together as a team.",
+        "Some people believe community centers should focus only on traditional sports."
+       ],
+       "video": "arg_facts-1"
+      },
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "“Some people believe community centers should focus only on traditional sports.” How does the author argue against this idea?",
+       "checks": [
+        {
+         "label": "Points at the answer sentence",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "organizer"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "another"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "active"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "involved"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fun"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 7
+         }
+        }
+       ],
+       "model": "The author answers it by saying many organizers think esports give students another fun way to stay active and involved.",
+       "video": "arg_facts-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second argument.",
+     "sentences": [
+      "Public libraries should offer more hands-on workshops for children.",
+      "In these workshops, kids can learn skills like coding, building, and art.",
+      "Library attendance records from several cities show that more people visit when workshops are offered often.",
+      "Workshops also help children discover new interests and solve problems in creative ways.",
+      "Some people believe libraries should focus only on books and reading.",
+      "However, many communities have found that workshops bring in more visitors while helping kids learn outside the classroom.",
+      "For these reasons, libraries should offer more workshops for children."
+     ],
+     "hint": "Attendance records are evidence. Ask what they are evidence OF.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which sentence provides factual evidence that workshops benefit libraries?",
+       "answer": "Library attendance records from several cities show that more people visit when workshops are offered often.",
+       "options": [
+        "Library attendance records from several cities show that more people visit when workshops are offered often.",
+        "In these workshops, kids can learn skills like coding, building, and art.",
+        "Some people believe libraries should focus only on books and reading."
+       ],
+       "video": "arg_facts-3"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Why did the author include the information about attendance records?",
+       "answer": "To provide evidence that workshops attract more visitors",
+       "options": [
+        "To explain how libraries organize books",
+        "To provide evidence that workshops attract more visitors",
+        "To show that workshops are difficult to plan",
+        "To compare libraries in different cities"
+       ],
+       "video": "arg_facts-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A third argument.",
+     "sentences": [
+      "Many communities should build more bike trails for residents.",
+      "Bike trails provide safe places for people to ride away from busy roads and traffic.",
+      "According to transportation studies, communities with dedicated bike paths often report fewer bicycle-related accidents than areas without them.",
+      "Bike trails also encourage people to spend more time exercising outdoors.",
+      "Some people believe communities should spend money on different projects instead.",
+      "However, many residents argue that safer routes and healthier lifestyles make bike trails a worthwhile investment."
+     ],
+     "hint": "One sentence raises the objection. The next one answers it.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which sentence uses a fact to support the argument that bike trails improve safety?",
+       "answer": "According to transportation studies, communities with dedicated bike paths often report fewer bicycle-related accidents than areas without them.",
+       "options": [
+        "According to transportation studies, communities with dedicated bike paths often report fewer bicycle-related accidents than areas without them.",
+        "Bike trails provide safe places for people to ride away from busy roads and traffic.",
+        "Bike trails also encourage people to spend more time exercising outdoors."
+       ],
+       "video": "arg_facts-5"
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "Which sentence argues against the idea that communities should spend money on different projects instead?",
+       "answer": "However, many residents argue that safer routes and healthier lifestyles make bike trails a worthwhile investment.",
+       "options": [
+        "However, many residents argue that safer routes and healthier lifestyles make bike trails a worthwhile investment.",
+        "Some people believe communities should spend money on different projects instead.",
+        "Many communities should build more bike trails for residents."
+       ],
+       "video": "arg_facts-6"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "How does the fact about transportation studies support the author’s argument?",
+       "answer": "It provides evidence that bike trails can reduce accidents and make riding safer.",
+       "options": [
+        "It describes why some people disagree with building bike trails.",
+        "It shows that all residents use bike trails every day.",
+        "It explains how communities build bike trails.",
+        "It provides evidence that bike trails can reduce accidents and make riding safer."
+       ],
+       "video": "arg_facts-7"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "Communities should install more free water bottle refill stations in public parks.",
+      "These stations make it easier for visitors to stay hydrated while spending time outdoors.",
+      "Refill stations can also reduce the use of single-use plastic bottles, which helps decrease waste.",
+      "In addition, families can save money by refilling reusable bottles instead of purchasing drinks.",
+      "Some people think installing refill stations would cost too much money.",
+      "However, many residents believe the benefits to health and the environment make refill stations a worthwhile investment."
+     ],
+     "hint": "Ask what reason this sentence gives for agreeing with the claim.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 3,
+       "ask": "How does this sentence support the author’s argument? “Refill stations can also reduce the use of single-use plastic bottles, which helps decrease waste.”",
+       "checks": [
+        {
+         "label": "Names the benefit",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "waste"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "plastic"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "environment"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "pollut"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Connects it to the claim",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "reason"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "support"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "why"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "station"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "install"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "It gives a reason to install the stations by showing they cut down on single-use plastic and reduce waste.",
+       "video": "arg_facts-8"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "skillBuilders": {
+  "arg_claim": {
+   "id": "arg_sb_claim",
+   "title": "SB: Identify the Claim",
+   "standards": [
+    "5.9E (i)"
+   ],
+   "skill": "Claim, reason, opposing view — one passage at a time",
+   "activities": [
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "In each passage, which sentence is the author’s claim?",
+     "hint": "A claim says what SHOULD happen. An opposing view starts with “Some people…”.",
+     "items": [
+      {
+       "given": "Schools should start the day a little later in the morning. Many students do not get enough sleep on school nights… Some people believe an early start helps families keep a steady routine.  →  ____",
+       "answer": "Schools should start the day a little later in the morning.",
+       "options": [
+        "Schools should start the day a little later in the morning.",
+        "Many students do not get enough sleep on school nights.",
+        "Some people believe an early start helps families keep a steady routine."
+       ],
+       "video": "arg_sb_claim-1"
+      },
+      {
+       "given": "Students should learn to type on a keyboard in elementary school. Typing helps kids finish their schoolwork faster… Some people think students should focus only on handwriting.  →  ____",
+       "answer": "Students should learn to type on a keyboard in elementary school.",
+       "options": [
+        "Students should learn to type on a keyboard in elementary school.",
+        "Typing helps kids finish their schoolwork faster and with fewer mistakes.",
+        "Some people think students should focus only on handwriting."
+       ],
+       "video": "arg_sb_claim-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer.",
+     "sentences": [
+      "Children should help with chores around the house.",
+      "Doing chores teaches kids how to be responsible and care for their home.",
+      "It also helps them learn skills they will use as adults.",
+      "Many families find that sharing chores makes the work easier for everyone.",
+      "Some people believe children are too busy with school to help at home.",
+      "Still, many parents agree that chores teach lessons that last a lifetime."
+     ],
+     "hint": "The claim is the opinion. The rest are reasons for it.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "What is the main claim the author makes in the passage?",
+       "answer": "Children should help with chores around the house.",
+       "options": [
+        "Doing chores teaches kids how to be responsible and care for their home.",
+        "Children should help with chores around the house.",
+        "Some people believe children are too busy with school to help at home."
+       ],
+       "video": "arg_sb_claim-3"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage.",
+     "sentences": [
+      "Neighborhoods should build more public pickleball courts for families and residents.",
+      "Pickleball is a fast-growing sport that people of many ages can enjoy together.",
+      "Public courts provide a place for exercise, recreation, and community events.",
+      "Families can spend time outdoors while staying active and meeting new people.",
+      "The courts may also encourage residents to participate in healthy activities more often.",
+      "Some people think parks should use their space for other activities instead.",
+      "However, many residents believe pickleball courts give communities another way to stay active and connect with neighbors."
+     ],
+     "hint": "One of these three is the claim and one is the opposing claim.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "What is the main claim the author makes in the passage?",
+       "answer": "Neighborhoods should build more public pickleball courts for families and residents.",
+       "options": [
+        "Neighborhoods should build more public pickleball courts for families and residents.",
+        "Public courts provide a place for exercise, recreation, and community events.",
+        "Some people think parks should use their space for other activities instead."
+       ],
+       "video": "arg_sb_claim-4"
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "Which sentence best states the opposing claim?",
+       "answer": "Some people think parks should use their space for other activities instead.",
+       "options": [
+        "Neighborhoods should build more public pickleball courts for families and residents.",
+        "Public courts provide a place for exercise, recreation, and community events.",
+        "Some people think parks should use their space for other activities instead."
+       ],
+       "video": "arg_sb_claim-5"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "Students should keep a daily journal at school.",
+      "Writing each day helps students improve their spelling and grammar.",
+      "A journal also gives students a private place to share their ideas and feelings.",
+      "Over time, students can look back and see how their writing has grown.",
+      "Some people believe journaling takes time away from other lessons.",
+      "However, many teachers find that daily writing makes students stronger and more confident."
+     ],
+     "hint": "A reason answers \"why should we?\"",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which sentence is a reason the author gives to support the claim?",
+       "answer": "Writing each day helps students improve their spelling and grammar.",
+       "options": [
+        "Writing each day helps students improve their spelling and grammar.",
+        "Some people believe journaling takes time away from other lessons.",
+        "Students should keep a daily journal at school."
+       ],
+       "video": "arg_sb_claim-6"
+      }
+     ]
+    }
+   ]
+  },
+  "arg_audience": {
+   "id": "arg_sb_audience",
+   "title": "SB: The Audience",
+   "standards": [
+    "5.9E (iii)"
+   ],
+   "skill": "Reading the clues that say who an argument is for",
+   "activities": [
+    {
+     "kind": "fix",
+     "mode": "drag",
+     "bank": [
+      "knights",
+      "wizards",
+      "dragon riders",
+      "potion makers",
+      "musicians",
+      "villagers"
+     ],
+     "brief": "Each argument is written for one group. Which one?",
+     "hint": "Look at what the writer wants built. One group in the bank is never used.",
+     "items": [
+      {
+       "given": "Our winged beasts deserve new landing pads and roomy stables, because they need a safe place to rest their wings between long flights.  →  ____",
+       "answer": "dragon riders",
+       "video": "arg_sb_audience-1"
+      },
+      {
+       "given": "A grand stage with bright enchanted lanterns is worth fighting for, because your songs and tales deserve a place to be heard by cheering crowds.  →  ____",
+       "answer": "musicians",
+       "video": "arg_sb_audience-2"
+      },
+      {
+       "given": "Training matters, so insist on a practice yard with dummies and shields, because you must sharpen your sword and shield before the next great battle.  →  ____",
+       "answer": "knights",
+       "video": "arg_sb_audience-3"
+      },
+      {
+       "given": "Mastering powerful magic requires a tower library of ancient scrolls, because spells cannot be learned without a quiet place to study them in peace.  →  ____",
+       "answer": "wizards",
+       "video": "arg_sb_audience-4"
+      },
+      {
+       "given": "Healing the whole kingdom starts with a cauldron room of rare herbs, because brewing strong potions all year long demands the right space and ingredients.  →  ____",
+       "answer": "potion makers",
+       "video": "arg_sb_audience-5"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Students should be allowed to create a class pet rock museum.",
+      "Each student could decorate a rock, give it a funny name, and write a short description about its “personality.”",
+      "The museum would give students a creative way to practice writing and speaking.",
+      "It could also help classmates learn more about one another through humor and imagination.",
+      "Some people may think pet rocks are silly, but fun projects can still build useful classroom skills.",
+      "Teachers should consider adding a pet rock museum as a creative class activity."
+     ],
+     "hint": "A different audience needs a different reason. Ask what each group cares about.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "Who is most likely the intended audience of this text?",
+       "checks": [
+        {
+         "label": "Names the audience",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "teacher"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "educator"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 4
+         }
+        }
+       ],
+       "model": "The audience is teachers, because the last sentence asks them to add the museum.",
+       "video": "arg_sb_audience-6"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "What detail might they include to be more convincing for parents?",
+       "answer": "The project could help students practice writing and speaking skills.",
+       "options": [
+        "Some pet rocks might be painted with bright colors and patterns.",
+        "Students could give their pet rocks funny names and personalities.",
+        "The project could help students practice writing and speaking skills."
+       ],
+       "video": "arg_sb_audience-7"
+      },
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "What detail might they include to be more convincing for students?",
+       "answer": "Students could vote for the funniest pet rock in the museum.",
+       "options": [
+        "Students could vote for the funniest pet rock in the museum.",
+        "Teachers could use the project to practice writing skills.",
+        "The museum could be displayed near the classroom door."
+       ],
+       "video": "arg_sb_audience-8"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "Students should join a lunchroom comedy club if one is offered at school.",
+      "Telling jokes and writing short skits can help students become more confident speakers.",
+      "Club members would learn how to organize ideas, use appropriate humor, and perform for an audience.",
+      "The club could also give students a fun way to make friends during the school year.",
+      "Although performing can feel nervous at first, practice can make it easier.",
+      "Students who enjoy making others laugh should consider joining the club."
+     ],
+     "hint": "Who does the text keep saying \"you\" to?",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "Who is the intended audience of the passage above?",
+       "checks": [
+        {
+         "label": "Names students",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "student"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 4
+         }
+        }
+       ],
+       "model": "The audience is students, especially ones who enjoy making other people laugh.",
+       "video": "arg_sb_audience-9"
+      }
+     ]
+    }
+   ]
+  },
+  "arg_facts": {
+   "id": "arg_sb_facts",
+   "title": "SB: Facts For an Argument",
+   "standards": [
+    "5.9E (ii)"
+   ],
+   "skill": "Which facts help an argument, and which just sit there",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Schools should give students the chance to plant and care for their own gardens.",
+      "Working in a garden teaches young people responsibility, because seeds must be watered and weeded regularly in order to grow.",
+      "Studies have found that students who help grow vegetables are more willing to taste healthy foods they once avoided.",
+      "Gardening also lets children spend time outdoors instead of staring at screens all afternoon.",
+      "Gardens look most colorful when the flowers bloom in late spring.",
+      "By caring for living plants, students learn patience and discover how their own effort can produce something valuable."
+     ],
+     "hint": "One sentence is true but does nothing for the argument.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Which sentence does NOT support the claim that gardening helps students?",
+       "answer": "Gardens look most colorful when the flowers bloom in late spring.",
+       "options": [
+        "Gardens look most colorful when the flowers bloom in late spring.",
+        "Working in a garden teaches young people responsibility.",
+        "Gardening also lets children spend time outdoors instead of staring at screens."
+       ],
+       "video": "arg_sb_facts-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Which sentence would be a strong replacement?",
+       "answer": "Caring for a garden can teach students how plants change with the seasons.",
+       "options": [
+        "Some students prefer to eat lunch outside with their friends.",
+        "Caring for a garden can teach students how plants change with the seasons.",
+        "Many gardens are surrounded by tall wooden fences."
+       ],
+       "video": "arg_sb_facts-2"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which fact best supports the author’s claim that gardening helps students?",
+       "answer": "Growing vegetables can encourage students to eat healthier foods.",
+       "options": [
+        "Growing vegetables can encourage students to eat healthier foods.",
+        "Gardens often attract bees and colorful butterflies in the spring.",
+        "Many families grow flowers in their backyards at home."
+       ],
+       "video": "arg_sb_facts-3"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage.",
+     "sentences": [
+      "Communities should plant more trees along their neighborhood streets.",
+      "Tall trees provide cooling shade that lowers temperatures on hot summer days, which helps people stay comfortable outdoors.",
+      "Their leaves also clean the air by absorbing harmful gases and releasing fresh oxygen for everyone to breathe.",
+      "Trees give birds and squirrels safe places to build nests and search for food.",
+      "Some people think planting trees costs too much money.",
+      "But cities save far more over time because shade trees lower cooling bills and reduce costly road repairs.",
+      "In addition, neighborhoods filled with trees often look more peaceful and welcoming to the families who live there."
+     ],
+     "hint": "An author raises an objection on purpose, then knocks it down.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Which sentence is the opposing fact?",
+       "answer": "Some people think planting trees costs too much money.",
+       "options": [
+        "Some people think planting trees costs too much money.",
+        "Tall trees provide cooling shade that lowers temperatures on hot summer days.",
+        "Trees give birds and squirrels safe places to build nests."
+       ],
+       "video": "arg_sb_facts-4"
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "Which sentence disproves it?",
+       "answer": "But cities save far more over time because shade trees lower cooling bills and reduce costly road repairs.",
+       "options": [
+        "But cities save far more over time because shade trees lower cooling bills and reduce costly road repairs.",
+        "Their leaves also clean the air by absorbing harmful gases.",
+        "Communities should plant more trees along their neighborhood streets."
+       ],
+       "video": "arg_sb_facts-5"
+      },
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Why did the author include a fact that argues against planting trees?",
+       "answer": "To show the opposing idea is wrong and make the argument stronger.",
+       "options": [
+        "To prove that trees really are too expensive to plant.",
+        "To show the opposing idea is wrong and make the argument stronger.",
+        "To change the subject to something new."
+       ],
+       "video": "arg_sb_facts-6"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more.",
+     "sentences": [
+      "Schools should set aside time each day for students to read books they choose themselves.",
+      "Reading for enjoyment helps students build larger vocabularies and become stronger, more confident readers.",
+      "When children pick their own books, they are far more likely to stay interested and finish the story.",
+      "Quiet reading time also gives busy students a calm break during a long school day.",
+      "Recess usually lasts about twenty minutes.",
+      "Because reading widens the imagination and strengthens the mind, daily reading time is a valuable use of the school schedule."
+     ],
+     "hint": "Ask what the sentence proves about the claim.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "How did including this sentence support the author’s argument? “Reading for enjoyment helps students build larger vocabularies and become stronger, more confident readers.”",
+       "answer": "It supports the claim by giving a reason that free reading improves students’ skills.",
+       "options": [
+        "It explains that students should only read during recess.",
+        "It supports the claim by giving a reason that free reading improves students’ skills.",
+        "It describes how teachers choose books for the class library."
+       ],
+       "video": "arg_sb_facts-7"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "full": {
+  "id": "arg_full",
+  "title": "Full Topic: Argumentative Texts",
+  "standards": [
+   "5.9E (i)",
+   "5.9E (ii)",
+   "5.9E (iii)"
+  ],
+  "skill": "Claim, evidence and audience, in one piece of writing",
+  "activities": [
+   {
+    "kind": "passage",
+    "brief": "Read the passage, then answer the questions.",
+    "sentences": [
+     "Every student knows the worst part of lunch: staring at a warm, gooey brownie while choking down a pile of cold, rubbery green beans.",
+     "For this reason, our cafeteria should serve dessert before the main meal.",
+     "Eating dessert first would actually improve our health, because hungry students would still have plenty of room left for vegetables afterward.",
+     "Scientists have never officially proven that brownies cause harm, which practically means they are good for you.",
+     "Some adults claim that sugar makes children wild and impossible to control.",
+     "However, anyone who has watched a fifth grader after gym class knows that we were already wild to begin with.",
+     "A happy stomach leads to a happy brain, so the cafeteria should flip the menu and let dessert lead the way."
+    ],
+    "hint": "One of these reasons proves nothing at all, even though it sounds scientific.",
+    "questions": [
+     {
+      "kind": "blank",
+      "sentence": 2,
+      "ask": "Which sentence best states the author’s claim?",
+      "answer": "For this reason, our cafeteria should serve dessert before the main meal.",
+      "options": [
+       "For this reason, our cafeteria should serve dessert before the main meal.",
+       "Some adults claim that sugar makes children wild and impossible to control.",
+       "Every student knows the worst part of lunch."
+      ],
+      "video": "arg_full-1"
+     },
+     {
+      "kind": "blank",
+      "sentence": 4,
+      "ask": "Which sentence gives the weakest support for the claim?",
+      "answer": "Scientists have never officially proven that brownies cause harm, which practically means they are good for you.",
+      "options": [
+       "Scientists have never officially proven that brownies cause harm, which practically means they are good for you.",
+       "Eating dessert first would actually improve our health, because hungry students would still have room for vegetables.",
+       "A happy stomach leads to a happy brain."
+      ],
+      "video": "arg_full-2"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "A second argument.",
+    "sentences": [
+     "Parents, it is time to face an uncomfortable truth.",
+     "Children deserve to be paid for doing their chores.",
+     "Cleaning a messy bedroom is exhausting work, and no skilled worker should be expected to fold laundry for free.",
+     "Paying us for chores would also teach valuable money skills, since we would quickly learn to spend our earnings on candy and video games.",
+     "Hard workers always do their best when a reward is waiting, and nothing rewards a kid like cold, hard cash.",
+     "Of course, some parents argue that helping around the house is simply part of being in a family.",
+     "That may sound lovely on a greeting card, but a family is really a tiny business, and every business pays its workers.",
+     "A small weekly allowance would transform grumpy chore-doers into eager helpers almost overnight.",
+     "For the good of the entire household, parents should start handing out paychecks today."
+    ],
+    "hint": "The very first word tells you who this is written for.",
+    "questions": [
+     {
+      "kind": "blank",
+      "sentence": 2,
+      "ask": "Which sentence is the author’s claim?",
+      "answer": "Children deserve to be paid for doing their chores.",
+      "options": [
+       "Children deserve to be paid for doing their chores.",
+       "Cleaning a messy bedroom is exhausting work.",
+       "Some parents argue that helping around the house is part of being in a family."
+      ],
+      "video": "arg_full-3"
+     },
+     {
+      "kind": "blank",
+      "sentence": 6,
+      "ask": "Which sentence gives a reason against the author’s claim?",
+      "answer": "Of course, some parents argue that helping around the house is simply part of being in a family.",
+      "options": [
+       "Of course, some parents argue that helping around the house is simply part of being in a family.",
+       "A small weekly allowance would transform grumpy chore-doers into eager helpers.",
+       "Hard workers always do their best when a reward is waiting."
+      ],
+      "video": "arg_full-4"
+     },
+     {
+      "kind": "write",
+      "sentence": 1,
+      "ask": "Who is the intended audience of this passage?",
+      "checks": [
+       {
+        "label": "Names parents",
+        "rule": {
+         "type": "contains",
+         "any": [
+          "parent"
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 4
+        }
+       }
+      ],
+      "model": "The intended audience is parents, because the passage speaks to them directly from the first word.",
+      "video": "arg_full-5"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "A third argument.",
+    "sentences": [
+     "Students should be allowed to take a short nap during the school day.",
+     "Well-rested kids learn better and concentrate longer.",
+     "By lunchtime, many fifth graders are completely exhausted, yawning through math and daydreaming about their cozy pillows at home.",
+     "A quick afternoon nap could recharge their tired brains and help them remember much more of each lesson.",
+     "Some students enjoy collecting trading cards during recess.",
+     "Of course, some teachers worry that a daily nap would waste valuable learning minutes.",
+     "Still, supporters believe that a rested, focused student accomplishes far more in the end."
+    ],
+    "hint": "One sentence in here is about something else entirely.",
+    "questions": [
+     {
+      "kind": "blank",
+      "sentence": 5,
+      "ask": "Which detail does NOT support the author’s claim?",
+      "answer": "Some students enjoy collecting trading cards during recess.",
+      "options": [
+       "Some students enjoy collecting trading cards during recess.",
+       "Well-rested kids learn better and concentrate longer.",
+       "A quick afternoon nap could recharge their tired brains."
+      ],
+      "video": "arg_full-6"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "One more.",
+    "sentences": [
+     "Recess should be much longer, because fresh air and free time help students focus better once they return to class.",
+     "Running, climbing, and laughing give kids a chance to burn off extra energy that would otherwise turn into wiggling and whispering.",
+     "Longer recess could improve health, lift students’ moods, and even strengthen friendships across different grades.",
+     "Studies suggest that active bodies lead to sharper minds, so a longer break might actually raise test scores.",
+     "For all of these reasons, many students believe a longer recess would make the entire school day better."
+    ],
+    "hint": "Claim, audience, and one piece of evidence.",
+    "questions": [
+     {
+      "kind": "write",
+      "sentence": 1,
+      "ask": "Finish the sentence: the author’s claim is…",
+      "checks": [
+       {
+        "label": "Names recess",
+        "rule": {
+         "type": "contains",
+         "any": [
+          "recess"
+         ]
+        }
+       },
+       {
+        "label": "Says it should be longer",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "longer"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "more time"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "extend"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 5
+        }
+       }
+      ],
+      "model": "that recess should be much longer, because it helps students focus when they return to class.",
+      "video": "arg_full-7"
+     },
+     {
+      "kind": "write",
+      "sentence": 5,
+      "ask": "Finish the sentence: the intended audience is…",
+      "checks": [
+       {
+        "label": "Names the audience",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "student"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "school"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "teacher"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "administrat"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 3
+        }
+       }
+      ],
+      "model": "students, and the school leaders who decide how long recess lasts.",
+      "video": "arg_full-8"
+     },
+     {
+      "kind": "write",
+      "sentence": 4,
+      "ask": "How does this sentence support the author’s claim? “Studies suggest that active bodies lead to sharper minds, so a longer break might actually raise test scores.”",
+      "checks": [
+       {
+        "label": "Names the evidence",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "stud"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "research"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "evidence"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "fact"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Says what it shows",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "test score"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "sharper"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "focus"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "learn"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "mind"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 8
+        }
+       }
+      ],
+      "model": "It gives evidence from studies that being active sharpens the mind, which suggests a longer recess could raise test scores.",
+      "video": "arg_full-9"
+     }
+    ]
+   }
+  ]
+ }
+}

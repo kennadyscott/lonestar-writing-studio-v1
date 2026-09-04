@@ -1,0 +1,1840 @@
+{
+ "id": "topic_adages_puns",
+ "title": "Adages & Puns",
+ "short": "Adages & Puns",
+ "state": "TX",
+ "grade": 5,
+ "domain": "Foundational Language",
+ "standards": [
+  "5.3D"
+ ],
+ "blurb": "Two skills — sayings that teach a lesson, and words doing two jobs at once — then one full-topic proof.",
+ "icon": "🐱",
+ "core": [
+  {
+   "id": "ap_adages",
+   "title": "Adages",
+   "standards": [
+    "5.3D"
+   ],
+   "skill": "What an adage means, and how the story around it tells you",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions. The sentences are numbered.",
+     "sentences": [
+      "Mina spent three weeks building a volcano for the science fair.",
+      "She painted it gray and added fake lava with glue and glitter gel.",
+      "The night before the competition, she proudly placed it on the kitchen table.",
+      "Her little brother Ben accidentally bumped the table while running through the room.",
+      "The volcano crashed, and pieces scattered everywhere.",
+      "Mina groaned, “My project is ruined!”",
+      "Her dad handed her tape and said, “You can’t cry over spilled milk.”",
+      "Mina realized she needed to stop worrying about the accident and focus on fixing the problem.",
+      "She repaired the volcano as best she could.",
+      "It wasn’t perfect, but it still erupted bright orange foam during judging."
+     ],
+     "hint": "The sentence right after the adage usually tells you what it did.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 7,
+       "ask": "What does “You can’t cry over spilled milk” mean in the passage?",
+       "checks": [
+        {
+         "label": "Says the thing has already happened",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "already happened"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "cannot change"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "can’t change"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "can't change"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "in the past"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "done"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says being upset does not help",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "no point"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "no use"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "does not help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "upset"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "worry"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "crying"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "It means there is no point being upset about something that has already happened, because you cannot change it."
+      },
+      {
+       "kind": "blank",
+       "sentence": 8,
+       "ask": "Which sentence BEST helps a reader understand what the adage means?",
+       "answer": "Mina realized she needed to stop worrying about the accident and focus on fixing the problem.",
+       "options": [
+        "The volcano crashed, and pieces scattered everywhere.",
+        "Mina realized she needed to stop worrying about the accident and focus on fixing the problem.",
+        "She repaired the volcano as best she could.",
+        "Mina groaned, “My project is ruined!”"
+       ]
+      },
+      {
+       "kind": "write",
+       "sentence": 7,
+       "ask": "Finish the sentence: Mina’s dad most likely used the adage to…",
+       "checks": [
+        {
+         "label": "Says what he wanted her to do",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "focus"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fix"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "move on"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "keep going"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the feeling he was answering",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "upset"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "worry"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "sad"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "feeling"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "disappoint"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "encourage Mina to focus on fixing the problem instead of feeling upset"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage. Same job.",
+     "sentences": [
+      "During lunch, Jordan noticed a container labeled DO NOT OPEN sitting alone on the cafeteria table.",
+      "Curious about what was inside, he slowly lifted the lid.",
+      "Inside was a tuna sandwich and a banana covered in peanut butter.",
+      "At that moment, the owner walked over and frowned.",
+      "Mia laughed and said, “Curiosity killed the cat.”",
+      "Jordan quickly closed the container and decided some mysteries should stay mysteries."
+     ],
+     "hint": "What happened to Jordan right after he got curious?",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 5,
+       "ask": "What does the adage “Curiosity killed the cat” mean in this passage?",
+       "checks": [
+        {
+         "label": "Mentions being curious",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "curious"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "curiosity"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "nosy"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says where it leads",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "trouble"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "problem"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "should not"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "shouldn’t"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "shouldn't"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "mind your own"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "It means being too curious about something that is not yours can get you into trouble."
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "select",
+     "brief": "Each cat agent explains an adage. Say whether the explanation is right.",
+     "bank": [],
+     "hint": "Read the explanation on its own. Does it actually say what the adage says?",
+     "items": [
+      {
+       "given": "“Actions speak louder than words.” — People’s behavior shows more than what they say.  →  ____",
+       "answer": "right",
+       "options": [
+        "right",
+        "wrong"
+       ]
+      },
+      {
+       "given": "“Don’t judge a book by its cover.” — Books with nice covers are usually interesting.  →  ____",
+       "answer": "wrong",
+       "options": [
+        "right",
+        "wrong"
+       ]
+      },
+      {
+       "given": "“The early bird catches the worm.” — People who prepare early often have an advantage.  →  ____",
+       "answer": "right",
+       "options": [
+        "right",
+        "wrong"
+       ]
+      },
+      {
+       "given": "“Practice makes perfect.” — Only talented people become successful.  →  ____",
+       "answer": "wrong",
+       "options": [
+        "right",
+        "wrong"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "select",
+     "brief": "Each correct cat agent carries a clue word. The suspect has all of them.",
+     "bank": [],
+     "hint": "Only the agents who explained their adage correctly count.",
+     "items": [
+      {
+       "given": "Actions speak louder than words → Backpack.  Don’t judge a book by its cover → Camera.  The early bird catches the worm → Watch.  Practice makes perfect → Sandals.  What is the suspect carrying?  ____",
+       "answer": "a backpack and a watch",
+       "options": [
+        "a camera and sandals",
+        "a backpack and a watch",
+        "a camera and a watch",
+        "a backpack and sandals"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more passage.",
+     "sentences": [
+      "Kayla had practiced for weeks before the school spelling bee and expected to reach the championship round easily.",
+      "However, during the final round, she misspelled a simple word she had reviewed many times before the competition.",
+      "Frustrated by her mistake, Kayla told her coach that entering the contest had been a waste of time.",
+      "Her coach simply replied, “Every cloud has a silver lining.”",
+      "Several days later, Kayla received an email inviting her to join the district vocabulary team based on her earlier performance scores.",
+      "Although she still remembered the disappointment of the spelling bee, she began to view the experience differently."
+     ],
+     "hint": "Find the saying first, then work out what it did for Kayla.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "Which words in sentence 4 are the adage?",
+       "answer": "Every cloud has a silver lining",
+       "options": [
+        "Her coach simply replied",
+        "Every cloud has a silver lining",
+        "a waste of time",
+        "the championship round"
+       ]
+      },
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "What is the meaning of the adage in this paragraph?",
+       "answer": "Disappointing situations can still lead to something positive.",
+       "options": [
+        "Practicing for competitions always leads to success.",
+        "Disappointing situations can still lead to something positive.",
+        "Vocabulary teams are harder than spelling bees.",
+        "Coaches should encourage students after contests."
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "ap_puns",
+   "title": "Puns",
+   "standards": [
+    "5.3D"
+   ],
+   "skill": "Spotting a word doing two jobs at once, and saying what both are",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions. The sentences are numbered.",
+     "sentences": [
+      "Last Saturday, Andrea helped her Uncle Mateo at his bakery during the town food festival.",
+      "Business was slow at first, so her uncle tried using silly jokes to attract customers.",
+      "As people walked by, he held up a loaf of bread and shouted, “I loaf making customers smile!”",
+      "Then he pointed to a tray of pastries and said, “We always rise to the occasion!”",
+      "A few people laughed and stopped at the booth.",
+      "Later, when someone asked why the bakery stayed open so late, he replied, “That’s just how we roll.”",
+      "Soon, customers crowded around the booth laughing at the jokes while buying cookies, muffins, and warm cinnamon rolls."
+     ],
+     "hint": "A pun is one word doing two jobs. Say both jobs out loud.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which pun means the baker enjoys making people happy?",
+       "answer": "I loaf making customers smile!",
+       "options": [
+        "I loaf making customers smile!",
+        "We always rise to the occasion!",
+        "That’s just how we roll."
+       ]
+      },
+      {
+       "kind": "pick",
+       "sentence": 4,
+       "ask": "Click the word in sentence 4 that creates the pun, then write the other thing it means.",
+       "target": "rise",
+       "answer": "dough rising"
+      },
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "Why is that pun funny?",
+       "checks": [
+        {
+         "label": "Mentions the bread meaning",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "dough"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bread"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bake"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "rising"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the other meaning",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "occasion"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "challenge"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "do well"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "succeed"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "meet"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "It is funny because bread dough really does rise, and rising to the occasion also means doing well when something is asked of you."
+      },
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "Why is “That’s just how we roll” a pun?",
+       "checks": [
+        {
+         "label": "Mentions rolls the food",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "roll"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bread"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bun"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "dough"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the saying",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "how we do"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "the way we"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "saying"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "act"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "behave"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "A bakery sells rolls, and “how we roll” is also a saying that means the way we do things."
+      },
+      {
+       "kind": "blank",
+       "sentence": 7,
+       "ask": "Which line could the author use in an advertisement for the bakery?",
+       "answer": "“Our bakers knead your support!”",
+       "options": [
+        "“Our bakers knead your support!”",
+        "“The bakery opens every morning at six.”",
+        "“Fresh bread is sold daily at the festival.”",
+        "“Customers lined up near the front door.”"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A cave, a dragon, and some very bad jokes.",
+     "sentences": [
+      "Liora wandered cautiously through the glowing forest until she discovered a hidden cave behind tangled vines.",
+      "Glittering crystals reflected shimmering patterns of light across the rocky floor as she ventured deeper inside.",
+      "Soon, she noticed unusual wooden signs hanging beside the tunnels.",
+      "One sign pointed toward a rocky passage and read, “This cave is ore-some!”",
+      "Another sign beside a pile of gems declared, “You really rock!”",
+      "Liora chuckled at the clever signs, but her smile quickly faded when a deep growl echoed through the cavern.",
+      "A dragon stepped from the shadows and narrowed its glowing eyes.",
+      "“I hope you didn’t take my jokes for granite,” the dragon warned as smoke curled from its nose."
+     ],
+     "hint": "Read the dragon’s line out loud and listen for the word underneath it.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "What is the meaning of the pun “This cave is ore-some!”?",
+       "answer": "The cave is exciting and impressive.",
+       "options": [
+        "The cave is exciting and impressive.",
+        "The cave is filled with loud noises.",
+        "The cave is dangerous to enter.",
+        "The cave is difficult to explore."
+       ]
+      },
+      {
+       "kind": "pick",
+       "sentence": 8,
+       "ask": "Click the pun in the dragon’s warning, then write the word it is playing on.",
+       "target": "granite",
+       "answer": "granted"
+      },
+      {
+       "kind": "write",
+       "sentence": 8,
+       "ask": "Explain the dragon’s pun.",
+       "checks": [
+        {
+         "label": "Names the rock",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "granite"
+          ]
+         }
+        },
+        {
+         "label": "Names the word underneath",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "granted"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "for grant"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "Granite is a rock found in a cave, and it sounds like granted, so the dragon is asking them not to take its jokes for granted."
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more. Read it, then answer.",
+     "sentences": [
+      "Jordan volunteered at the town garden center during the spring festival.",
+      "As he carried pots of colorful flowers to the display tables, the manager smiled and said, “I’m rooting for you today!”",
+      "Jordan laughed at the joke and continued helping customers choose plants.",
+      "Bright rows of tulips and roses filled the air with a fresh scent.",
+      "Later, a customer accidentally knocked over a watering can, spilling water across the floor.",
+      "The manager handed her a towel and said, “No need to wet your plants over it!”",
+      "The customers chuckled while Jordan realized the manager enjoyed using puns to make people smile."
+     ],
+     "hint": "Roots grow in soil. What else does rooting mean?",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Mikey thinks sentence 2 contains a pun. Do you agree?",
+       "answer": "Agree",
+       "options": [
+        "Agree",
+        "Disagree"
+       ]
+      },
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Explain your reasoning.",
+       "checks": [
+        {
+         "label": "Mentions the plant meaning",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "root"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "plant"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "garden"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "soil"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions cheering someone on",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "cheer"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "support"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "encourag"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "hoping"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "want"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "It is a pun because rooting means cheering someone on, and roots are also part of the plants they sell at the garden centre."
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "skillBuilders": {
+  "ap_adages": {
+   "id": "ap_sb_adages",
+   "title": "SB: Adages",
+   "standards": [
+    "5.3D"
+   ],
+   "skill": "Matching a saying to what it actually means",
+   "activities": [
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Read each short story. Choose the meaning of the adage it uses.",
+     "hint": "Ask what the character did wrong, or did right.",
+     "items": [
+      {
+       "given": "Mateo carried six heavy boxes at once instead of making two trips, and dropped them all. The coach said, “Slow and steady wins the race.”  →  ____",
+       "answer": "Careful, steady effort works best.",
+       "options": [
+        "Careful, steady effort works best.",
+        "Rushing can cause mistakes.",
+        "Do not assume success before it happens.",
+        "Taking a risk can lead to a reward."
+       ]
+      },
+      {
+       "given": "Ava rushed through her science project the night before it was due, and parts fell apart in class. Her brother said, “Haste makes waste.”  →  ____",
+       "answer": "Rushing can cause mistakes.",
+       "options": [
+        "Careful, steady effort works best.",
+        "Rushing can cause mistakes.",
+        "Do not assume success before it happens.",
+        "Taking a risk can lead to a reward."
+       ]
+      },
+      {
+       "given": "Jordan bragged he would win first place at the talent show. His teacher warned, “Don’t count your chickens before they hatch.”  →  ____",
+       "answer": "Do not assume success before it happens.",
+       "options": [
+        "Careful, steady effort works best.",
+        "Rushing can cause mistakes.",
+        "Do not assume success before it happens.",
+        "Taking a risk can lead to a reward."
+       ]
+      },
+      {
+       "given": "Leila felt nervous about joining robotics club, went anyway, and made new friends. Her grandmother said, “Nothing ventured, nothing gained.”  →  ____",
+       "answer": "Taking a risk can lead to a reward.",
+       "options": [
+        "Careful, steady effort works best.",
+        "Rushing can cause mistakes.",
+        "Do not assume success before it happens.",
+        "Taking a risk can lead to a reward."
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer.",
+     "sentences": [
+      "Carter had waited all season for the championship basketball game.",
+      "On the morning of the tournament, he packed his water bottle, shoes, and lucky wristband before heading to school.",
+      "However, when his team arrived at the gym, Carter realized he had forgotten his basketball jersey at home.",
+      "“I can’t believe this happened,” Carter groaned as he searched through his backpack again.",
+      "His coach handed him a practice jersey and reminded him, “Look before you leap.”",
+      "Coach Daniels explained that Carter had rushed out the door without checking his equipment carefully.",
+      "Embarrassed, Carter quickly joined warm-ups and promised himself he would prepare more carefully next time."
+     ],
+     "hint": "The sentence after the adage usually explains it.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Which words in sentence 5 are the adage?",
+       "answer": "Look before you leap",
+       "options": [
+        "His coach handed him a practice jersey",
+        "Look before you leap",
+        "reminded him"
+       ]
+      },
+      {
+       "kind": "blank",
+       "sentence": 6,
+       "ask": "What does that adage mean?",
+       "answer": "People should think carefully before acting too quickly.",
+       "options": [
+        "Basketball players should always arrive early for games.",
+        "People should think carefully before acting too quickly.",
+        "Championship games are difficult to prepare for."
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more passage.",
+     "sentences": [
+      "Fiona hurried through the crowded school hallway carrying posters for the student council fundraiser.",
+      "Earlier that morning, her teacher had reminded the class, “Better safe than sorry,” but Fiona ignored the advice and stacked too many supplies in her arms at once.",
+      "As she rushed toward the cafeteria, several posters slipped onto the floor and scattered everywhere.",
+      "Her friend Malik helped gather the papers and reminded her, “Pride comes before a fall.”",
+      "Embarrassed, Fiona nodded and carried the remaining supplies more carefully the rest of the afternoon."
+     ],
+     "hint": "Two sayings, two different lessons.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which detail best shows why “Better safe than sorry” applied to Fiona?",
+       "answer": "She stacked too many supplies in her arms at once.",
+       "options": [
+        "She stacked too many supplies in her arms at once.",
+        "She was carrying posters for the fundraiser.",
+        "Malik helped gather the papers."
+       ]
+      },
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "What does the adage “Pride comes before a fall” mean?",
+       "checks": [
+        {
+         "label": "Mentions being overconfident",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "proud"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "pride"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "confiden"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "boast"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "show off"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "sure of"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions what follows",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "mistake"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fail"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fall"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "wrong"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "trouble"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "embarrass"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 7
+         }
+        }
+       ],
+       "model": "It means being too proud or too sure of yourself often comes right before you make a mistake."
+      }
+     ]
+    }
+   ]
+  },
+  "ap_puns": {
+   "id": "ap_sb_puns",
+   "title": "SB: Puns",
+   "standards": [
+    "5.3D"
+   ],
+   "skill": "Telling a pun from an ordinary sentence, one at a time",
+   "activities": [
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Does the sentence contain a pun?",
+     "hint": "A pun has a word doing two jobs. An ordinary sentence does not.",
+     "items": [
+      {
+       "given": "A baker opens a shop that is rolling in dough.  →  ____",
+       "answer": "pun",
+       "options": [
+        "pun",
+        "not a pun"
+       ]
+      },
+      {
+       "given": "A gardener watered the flowers early every morning.  →  ____",
+       "answer": "not a pun",
+       "options": [
+        "pun",
+        "not a pun"
+       ]
+      },
+      {
+       "given": "A fisherman opens a seafood restaurant and says the business is off the hook.  →  ____",
+       "answer": "pun",
+       "options": [
+        "pun",
+        "not a pun"
+       ]
+      },
+      {
+       "given": "A cat becomes famous for its purr-fect singing voice.  →  ____",
+       "answer": "pun",
+       "options": [
+        "pun",
+        "not a pun"
+       ]
+      },
+      {
+       "given": "A scientist completed an experiment in the chemistry lab.  →  ____",
+       "answer": "not a pun",
+       "options": [
+        "pun",
+        "not a pun"
+       ]
+      },
+      {
+       "given": "The sunburned banana said, “I’m peeling terrible today!”  →  ____",
+       "answer": "pun",
+       "options": [
+        "pun",
+        "not a pun"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer the questions.",
+     "sentences": [
+      "Sean helped his dad at the town bakery during the weekend festival.",
+      "As customers lined up for fresh bread, his dad smiled and said, “Business is really rolling today!”",
+      "Sean laughed because the word rolling referred to both bread dough and the busy crowd.",
+      "Later, a customer asked whether the bakery stayed busy every weekend.",
+      "His dad grinned and replied, “We always rise to the occasion.”",
+      "Soon, more families gathered around the booth to buy pastries and listen to the bakery jokes.",
+      "Sean carried trays of cupcakes to the front table while customers crowded around the bakery booth.",
+      "A customer asked if the bakery stayed busy every weekend, and Sean’s dad smiled and said, “Business is really crumby today!”",
+      "Sean laughed as more families stopped by to buy desserts and hear the bakery jokes."
+     ],
+     "hint": "Sentence 3 tells you how a pun works. Use the same idea on the others.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Explain what “Business is really rolling today!” means.",
+       "checks": [
+        {
+         "label": "Mentions the bakery meaning",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "roll"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "dough"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bread"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bake"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions business going well",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "busy"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "going well"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "lots of customers"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "crowd"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "good"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "A bakery rolls dough, and business rolling along also means it is busy and going well."
+      },
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "What is the meaning of the pun in sentence 5?",
+       "answer": "The phrase refers to bread dough rising and succeeding during challenges.",
+       "options": [
+        "The bakery opens early each morning for customers.",
+        "The phrase refers to bread dough rising and succeeding during challenges.",
+        "The bakery sells fresh bread during weekend festivals."
+       ]
+      },
+      {
+       "kind": "pick",
+       "sentence": 8,
+       "ask": "Click the word in sentence 8 that creates the pun, then write the word it sounds like.",
+       "target": "crumby",
+       "answer": "crummy"
+      },
+      {
+       "kind": "write",
+       "sentence": 8,
+       "ask": "Explain the pun in sentence 8.",
+       "checks": [
+        {
+         "label": "Mentions crumbs",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "crumb"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "cake"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bread"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bakery"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the other meaning",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "crummy"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bad"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "terrible"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "poor"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "Baked goods leave crumbs, and crumby sounds like crummy, which means bad — so it is a joke about business being both."
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "full": {
+  "id": "ap_full",
+  "title": "Full Topic: Adages & Puns",
+  "standards": [
+   "5.3D"
+  ],
+  "skill": "Both skills, in one piece of writing",
+  "activities": [
+   {
+    "kind": "passage",
+    "brief": "Read the passage, then answer the questions.",
+    "sentences": [
+     "Heavy snow covered the sidewalks and roads across Maple Lane.",
+     "Mila and her younger brother Theo bundled into thick coats and hurried outside to help shovel the driveway.",
+     "As Theo slipped into a snowbank, he laughed, “I guess I really broke the ice today!”",
+     "Mila groaned at the joke but helped him back up.",
+     "After several minutes of shoveling, Mila complained that clearing the snow would take forever.",
+     "Their grandfather smiled and reminded them, “Many hands make light work.”",
+     "Soon, several neighbors joined together, passing shovels back and forth while laughing and talking."
+    ],
+    "hint": "One of these is a joke about words. One is a lesson about life.",
+    "questions": [
+     {
+      "kind": "blank",
+      "sentence": 3,
+      "ask": "Which line in the passage is the pun?",
+      "answer": "I guess I really broke the ice today!",
+      "options": [
+       "I guess I really broke the ice today!",
+       "Many hands make light work.",
+       "clearing the snow would take forever"
+      ]
+     },
+     {
+      "kind": "blank",
+      "sentence": 6,
+      "ask": "Which line in the passage is the adage?",
+      "answer": "Many hands make light work.",
+      "options": [
+       "I guess I really broke the ice today!",
+       "Many hands make light work.",
+       "passing shovels back and forth"
+      ]
+     },
+     {
+      "kind": "write",
+      "sentence": 3,
+      "ask": "What is the meaning of the pun?",
+      "checks": [
+       {
+        "label": "Mentions the literal ice",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "ice"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "snow"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "slipped"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "fell"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions the saying",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "break the ice"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "broke the ice"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "awkward"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "start"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "joke"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "friendly"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 8
+        }
+       }
+      ],
+      "model": "Theo really did fall into the ice and snow, and breaking the ice also means starting things off in a friendly way."
+     },
+     {
+      "kind": "write",
+      "sentence": 6,
+      "ask": "What is the meaning of the adage?",
+      "checks": [
+       {
+        "label": "Mentions more people",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "people"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "everyone"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "help"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "together"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "hands"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions the work being easier",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "easier"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "faster"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "quicker"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "less work"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "lighter"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 7
+        }
+       }
+      ],
+      "model": "It means a job gets easier and faster when more people help with it."
+     },
+     {
+      "kind": "pick",
+      "sentence": 3,
+      "ask": "Theo says another joke: “Ice to meet this snowstorm!” Click the word in sentence 3 that his new joke plays on, then write the word it sounds like.",
+      "target": "ice",
+      "answer": "nice"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "A second passage. Same two skills.",
+    "sentences": [
+     "Dark clouds rolled across Cedar Street as rain poured onto the sidewalks and driveways.",
+     "Jada and her cousin Marcus hurried outside to help bring in groceries before the storm became worse.",
+     "As Marcus slipped while carrying a bag of apples, he laughed and shouted, “Orange you glad I didn’t drop these?”",
+     "Jada groaned at the joke but grabbed the bag before it rolled into a puddle.",
+     "A few minutes later, the power suddenly went out across the neighborhood.",
+     "Jada worried that dinner would be ruined, but her grandmother calmly lit several candles and said, “When life gives you lemons, make lemonade.”",
+     "Soon, the family gathered around the kitchen table telling stories and playing card games while rain tapped against the windows."
+    ],
+    "hint": "Say the fruit out loud and listen for the ordinary word inside it.",
+    "questions": [
+     {
+      "kind": "pick",
+      "sentence": 3,
+      "ask": "Click the word that makes Marcus’s joke a pun, then write the word it sounds like.",
+      "target": "Orange",
+      "answer": "aren’t"
+     },
+     {
+      "kind": "blank",
+      "sentence": 3,
+      "ask": "What is the meaning of that pun?",
+      "answer": "Marcus uses the word orange to sound like aren’t while joking about the apples.",
+      "options": [
+       "Marcus uses the word orange to sound like aren’t while joking about the apples.",
+       "Marcus believes oranges are better than apples.",
+       "Marcus wants Jada to buy more fruit from the store.",
+       "Marcus thinks the groceries are too heavy to carry."
+      ]
+     },
+     {
+      "kind": "write",
+      "sentence": 6,
+      "ask": "Explain the meaning of “When life gives you lemons, make lemonade.”",
+      "checks": [
+       {
+        "label": "Mentions something going wrong",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "bad"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "wrong"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "problem"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "difficult"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "hard"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "lemons"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions making it good",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "best"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "good"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "positive"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "better"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "lemonade"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "opportunit"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 8
+        }
+       }
+      ],
+      "model": "It means that when something bad happens you should make the best of it and find something good in it."
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "A last passage.",
+    "sentences": [
+     "Caleb helped his aunt prepare decorations for the school fundraiser after classes ended.",
+     "While they hung colorful banners across the cafeteria, his aunt reminded him, “Don’t put all your eggs in one basket.”",
+     "Caleb nodded and continued organizing supplies for different games and activities.",
+     "Soon, students arrived with baked goods, raffle prizes, and posters for the event.",
+     "Later, one table collapsed, sending markers and papers sliding across the floor.",
+     "Caleb quickly helped clean the mess while his aunt smiled proudly at how calmly he handled the problem.",
+     "By evening, the fundraiser looked organized and ready to begin."
+    ],
+    "hint": "Is it a saying with a lesson in it, or just an instruction?",
+    "questions": [
+     {
+      "kind": "blank",
+      "sentence": 2,
+      "ask": "Lyla thinks sentence 2 contains an adage. Do you agree?",
+      "answer": "Agree",
+      "options": [
+       "Agree",
+       "Disagree"
+      ]
+     },
+     {
+      "kind": "write",
+      "sentence": 2,
+      "ask": "Explain your reasoning.",
+      "checks": [
+       {
+        "label": "Says it is an adage or a saying",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "adage"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "saying"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "adages"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Says what it means",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "one place"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "spread"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "everything on"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "risk"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "all your"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "depend"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 8
+        }
+       }
+      ],
+      "model": "It is an adage because it is a well-known saying that teaches a lesson: do not risk everything on one plan."
+     }
+    ]
+   }
+  ]
+ }
+}

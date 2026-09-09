@@ -1,0 +1,2685 @@
+{
+ "id": "topic_authors_purpose",
+ "title": "Author’s Purpose",
+ "short": "Author’s Purpose",
+ "state": "TX",
+ "grade": 5,
+ "domain": "Author's Purpose",
+ "standards": [
+  "5.10A",
+  "5.10B",
+  "5.10C"
+ ],
+ "blurb": "Why the author wrote it, how it is organised, and what the features are for — then one full-topic proof.",
+ "icon": "🔍",
+ "core": [
+  {
+   "id": "apx_apm",
+   "title": "Author’s Purpose and Message",
+   "standards": [
+    "5.10A"
+   ],
+   "skill": "Why the author wrote it, and what they want you to take away",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the article, then complete the statements.",
+     "sentences": [
+      "Aarav Patel, 10, enjoys knitting scarves and hats.",
+      "He learned the hobby from his grandmother and practiced every day after school.",
+      "Soon, Aarav was creating blankets and small stuffed animals for his family.",
+      "He shared pictures of his projects online, and many people liked his designs.",
+      "Aarav says knitting helps him stay calm and focused.",
+      "As Aarav improved, he joined a local craft club and taught younger kids how to knit simple projects.",
+      "He also helped collect handmade scarves for families during the winter.",
+      "Aarav says knitting taught him patience and confidence.",
+      "In the future, he hopes to become an engineer because he enjoys designing and building things."
+     ],
+     "hint": "Purpose is WHY the author wrote it. Message is what they want you to believe afterwards.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 6,
+       "ask": "Finish the statement: The author included details about Aarav teaching younger kids to knit to…",
+       "checks": [
+        {
+         "label": "Says what it shows about Aarav",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "teach"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "share"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "kind"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "generous"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "show that Aarav enjoys helping others learn new skills.",
+       "video": "apx_apm-1"
+      },
+      {
+       "kind": "write",
+       "sentence": 8,
+       "ask": "Finish the statement: The author most likely wrote the passage to…",
+       "checks": [
+        {
+         "label": "Names a hobby or knitting",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "hobb"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "knit"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says what it does for young people",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "grow"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "learn"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "confiden"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "patien"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "show that hobbies can help young people grow and help others.",
+       "video": "apx_apm-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer.",
+     "sentences": [
+      "Jalen tightened his helmet and watched the judges announce the winners of the skateboarding competition.",
+      "He had hoped to earn first place, but another skater received the top score.",
+      "For a moment, Jalen stared quietly at his board.",
+      "Then his best friend pointed out that Jalen had finally landed the difficult spin trick he had practiced for weeks.",
+      "As the crowd applauded, Jalen picked up his skateboard and headed back toward the practice ramps with a grin on his face."
+     ],
+     "hint": "The message is about how Jalen handles losing. Which sentence shows him handling it?",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Which sentence best supports the author’s message about staying positive after disappointment?",
+       "answer": "As the crowd applauded, Jalen picked up his skateboard and headed back toward the practice ramps with a grin on his face.",
+       "options": [
+        "As the crowd applauded, Jalen picked up his skateboard and headed back toward the practice ramps with a grin on his face.",
+        "He had hoped to earn first place, but another skater received the top score.",
+        "For a moment, Jalen stared quietly at his board."
+       ],
+       "video": "apx_apm-3"
+      },
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "Finish the statement: The author included details about Jalen practicing the spin trick for weeks to…",
+       "checks": [
+        {
+         "label": "Mentions the practice or hard work",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "practi"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "hard work"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "effort"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "weeks"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says what it shows",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "pay"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "paid"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "worth"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "proud"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "success"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "accomplish"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "progress"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "improv"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "show that his hard work paid off even though he did not win first place.",
+       "flag": "The video for question 4 leaves the answer blank — every other answer in this topic is written in. The model here is mine.",
+       "video": "apx_apm-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A poem. Read it, then answer.",
+     "sentences": [
+      "The Great Cafeteria Disaster",
+      "I carried my lunch tray proud and tall, certain I would not trip at all.",
+      "The pizza slid, the pudding flew, and chocolate milk splashed on my shoe.",
+      "My best friend laughed so hard she cried, while french fries scattered far and wide.",
+      "The lunch lady handed me a mop and said, “At least the spill did stop!”",
+      "I bowed to cheers from every table, pretending I had planned the fable.",
+      "By the end of lunch, I had to admit the whole embarrassing moment was worth a bit."
+     ],
+     "hint": "Look at how the speaker feels by the last line.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 3,
+       "ask": "Finish the statement: The author’s purpose for including the details about the flying pizza and spilled milk is to…",
+       "checks": [
+        {
+         "label": "Names the embarrassing moment",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "embarrass"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "disaster"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "mess"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "accident"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "mistake"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says it turns funny",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "funny"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "laugh"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "humor"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "humour"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "joke"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "show how embarrassing moments can become funny later.",
+       "video": "apx_apm-5"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more passage.",
+     "sentences": [
+      "Community gardens are becoming more common in cities across the country.",
+      "These gardens are often built in empty lots or near schools, and they provide fresh fruits and vegetables for local families.",
+      "In addition, gardens help the environment by cleaning the air and attracting bees and butterflies.",
+      "Some teachers use gardens to help students learn about science and healthy eating.",
+      "However, growing a garden takes hard work because plants need water, sunlight, and care each day.",
+      "Even with these challenges, many communities continue building gardens because they believe the benefits are important.",
+      "Community gardens show that people can improve their neighborhoods by working together."
+     ],
+     "hint": "The last sentence usually says the message out loud.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "What is the most likely reason the author included the information about teachers and students?",
+       "answer": "to describe one benefit of community gardens",
+       "options": [
+        "to explain why science classes are difficult",
+        "to describe one benefit of community gardens",
+        "to show how students become gardeners",
+        "to explain why schools need larger playgrounds"
+       ],
+       "video": "apx_apm-6"
+      },
+      {
+       "kind": "write",
+       "sentence": 7,
+       "ask": "Finish the statement: The author’s message in the passage is…",
+       "checks": [
+        {
+         "label": "Mentions working together or community",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "together"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "communit"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "neighbo"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Says people can improve things",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "improve"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "better"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "help"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "change"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "people can improve their communities by working together to create gardens.",
+       "video": "apx_apm-7"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "apx_ts",
+   "title": "Text Structure",
+   "standards": [
+    "5.10B"
+   ],
+   "skill": "How a text is organised, and why the author chose that shape",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the three paragraphs. Each question names the paragraph it is about.",
+     "sentences": [
+      "(1) When the city announced plans to replace the old skate park with a parking lot, many students were disappointed. The ramps were cracked and damaged, so city leaders believed repairs would cost too much money. However, several students decided to work together to save the park.",
+      "(2) First, the students created posters explaining why the skate park mattered to the community. Next, they organized a weekend event where skaters performed tricks while volunteers collected donations for repairs. Soon, local businesses offered supplies and paint to help improve the park.",
+      "(3) The city eventually decided to repair the skate park instead of tearing it down. Workers fixed the broken ramps, added brighter lights, and painted colorful designs across the walls. When the repairs were finished, families and students gathered for a community celebration at the grand reopening. By the end of the summer, the skate park had once again become one of the busiest places in the neighborhood."
+     ],
+     "hint": "Problem and solution, then the steps in order, then what happened because of them.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 1,
+       "ask": "What is the author’s purpose for presenting paragraph 1 as a problem-and-solution structure?",
+       "checks": [
+        {
+         "label": "Mentions the problem or how students responded",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "problem"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "respond"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "react"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "solve"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "save"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions readers understanding",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "understand"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "readers"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "show"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "explain"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "To help readers understand how students responded to a community problem.",
+       "video": "apx_ts-1"
+      },
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Finish the sentence: The author organized paragraph 2 in chronological order to…",
+       "checks": [
+        {
+         "label": "Mentions steps or sequence",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "step"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "order"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "sequence"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "first"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions saving the park",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "save"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "skate park"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "park"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "explain the steps students took to help save the skate park.",
+       "video": "apx_ts-2"
+      },
+      {
+       "kind": "write",
+       "sentence": 3,
+       "ask": "Finish the sentence: The author uses a cause-and-effect structure for paragraph 3 most likely to…",
+       "checks": [
+        {
+         "label": "Mentions results or effects",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "result"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "effect"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "outcome"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "happened"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "led to"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the teamwork or students",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "teamwork"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "student"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "work"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "show the positive results of the students’ teamwork.",
+       "video": "apx_ts-3"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Which sentence from paragraph 3 best shows the EFFECT of the students’ teamwork?",
+       "answer": "By the end of the summer, the skate park had once again become one of the busiest places in the neighborhood.",
+       "options": [
+        "By the end of the summer, the skate park had once again become one of the busiest places in the neighborhood.",
+        "The city eventually decided to repair the skate park instead of tearing it down.",
+        "Workers fixed the broken ramps, added brighter lights, and painted colorful designs across the walls."
+       ],
+       "video": "apx_ts-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Two more passages.",
+     "sentences": [
+      "Escape rooms are popular attractions where players solve puzzles and search for clues before time runs out. Many rooms have exciting themes such as haunted mansions, secret laboratories, or space stations. Players examine hidden objects, decode messages, and unlock doors while working together as a team. The mysterious setting and fast pace make escape rooms exciting for many people.",
+      "Because escape rooms require teamwork, many teachers and youth programs now use them as learning activities. Students practicing communication and problem-solving skills often become more confident while completing challenges together. As a result, some schools create classroom escape rooms to review science, math, or history lessons in a more interactive way.",
+      "The Rise of Food Trucks. Food trucks have become more popular in many cities across the country. Years ago, most food trucks sold simple meals like hot dogs and sandwiches at parks or construction sites. Over time, chefs began offering many different foods, including tacos, barbecue, and desserts. Because food trucks can travel to busy events and neighborhoods, many owners found new ways to reach customers. Some cities even hold food truck festivals where families can try meals from several trucks in one place. Today, food trucks are an important part of food culture in many communities because they provide creative meals at affordable prices."
+     ],
+     "hint": "“Years ago… Over time… Today” is a clue to the structure.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "What is the most likely reason the author uses a descriptive text structure in the first paragraph?",
+       "answer": "To help readers imagine what escape rooms are like",
+       "options": [
+        "To help readers imagine what escape rooms are like",
+        "To explain the steps needed to build an escape room",
+        "To compare escape rooms with video games",
+        "To show how escape rooms became popular over time"
+       ],
+       "video": "apx_ts-5"
+      },
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Finish the sentence: The author uses a cause-and-effect structure for the second paragraph most likely to…",
+       "checks": [
+        {
+         "label": "Mentions teamwork or skills",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "teamwork"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "skill"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "problem-solving"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "communicat"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions students or learning",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "student"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "learn"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "school"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "explain how escape rooms help students build teamwork and problem-solving skills.",
+       "video": "apx_ts-6"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "A student says the author used a problem-and-solution structure to explain food trucks. Is the student correct?",
+       "answer": "FALSE",
+       "options": [
+        "TRUE",
+        "FALSE"
+       ],
+       "video": "apx_ts-7"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "The author presents the food truck information in which text structure?",
+       "answer": "chronological",
+       "options": [
+        "chronological",
+        "problem and solution",
+        "compare and contrast",
+        "descriptive"
+       ],
+       "video": "apx_ts-8"
+      },
+      {
+       "kind": "write",
+       "sentence": 3,
+       "ask": "…to do what? Finish the sentence: the author uses that structure to…",
+       "checks": [
+        {
+         "label": "Mentions change over time",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "over time"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "changed"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "became"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "grew"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "history"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions food trucks",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "food truck"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "explain how food trucks changed and became more popular over time.",
+       "video": "apx_ts-8"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "apx_pgf",
+   "title": "Print and Graphic Features",
+   "standards": [
+    "5.10C"
+   ],
+   "skill": "Headings, captions, photos and charts — and what each one is for",
+   "flag": "The paper shows a real photograph, chart or timeline here. The deck text cannot carry an image, so each feature is described in words inside the passage. Check that the questions still make sense against the description.",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage. The features on the paper are described in brackets.",
+     "sentences": [
+      "Libraries Help Communities",
+      "Public libraries are places where people can read, learn, and explore new ideas for free. Today, libraries offer books, computers, digital books, and educational programs for children and adults. Many libraries also provide free internet access and quiet spaces for studying.",
+      "[Subheading] The First Free Libraries",
+      "Long ago, books were expensive, and many families could not afford to own them. In 1833, Peterborough, New Hampshire, opened one of the first free public libraries in the United States. Citizens could borrow books without paying fees. Soon, other towns began creating libraries because they believed education was important for everyone.",
+      "[Photograph] A small old wooden house with a peaked roof. Caption: One of the first free public libraries in Peterborough, NH.",
+      "During the late 1800s, libraries became more common across the country. Andrew Carnegie donated money to help build more than 1,600 libraries. These libraries gave communities access to books and learning opportunities.",
+      "Today, libraries continue to change. Visitors can borrow electronic books, use computers, and attend free programs.",
+      "[Did You Know? box] Many libraries host free summer reading programs for children."
+     ],
+     "hint": "Each feature does a job. Ask what the reader gets from it that the plain text does not give.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 5,
+       "ask": "Why did the author include the photograph?",
+       "checks": [
+        {
+         "label": "Mentions seeing or picturing",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "see"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "look"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "picture"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "visual"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "imagine"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "show"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the library",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "librar"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "To help readers better understand what one of the first public libraries looked like.",
+       "video": "apx_pgf-1"
+      },
+      {
+       "kind": "write",
+       "sentence": 8,
+       "ask": "Why did the author include the “Did You Know?” box at the bottom?",
+       "checks": [
+        {
+         "label": "Mentions an extra fact",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "fact"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "extra"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "additional"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "more information"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "interesting"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 5
+         }
+        }
+       ],
+       "model": "To give readers an additional fact about libraries.",
+       "video": "apx_pgf-2"
+      },
+      {
+       "kind": "write",
+       "sentence": 3,
+       "ask": "What was the author’s purpose for using subheadings?",
+       "checks": [
+        {
+         "label": "Mentions organising or topics",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "organi"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "topic"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "section"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "main idea"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "find"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 5
+         }
+        }
+       ],
+       "model": "To organize information and help readers identify main topics.",
+       "video": "apx_pgf-3"
+      },
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "True or false: the caption explains that the first free public library in Peterborough, New Hampshire burned down.",
+       "answer": "FALSE",
+       "options": [
+        "TRUE",
+        "FALSE"
+       ],
+       "video": "apx_pgf-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage, with its features described.",
+     "sentences": [
+      "Should Schools Keep Printed Textbooks?",
+      "[Subheading] Benefits of Printed Textbooks",
+      "Many schools use laptops and tablets, but printed textbooks are still important. Paper books help students focus and avoid distractions from games or websites. Many students also remember information better when reading from a physical page.",
+      "[Photograph] A student at a desk with a highlighter and an open book. Caption: A student highlights important information.",
+      "[Subheading] Technology and Learning",
+      "Digital books give students quick access to information and activities. However, too much screen time can cause distractions and eyestrain. Using both textbooks and technology can support learning.",
+      "[Chart] Student Learning Preferences — a bar chart with two bars, Printed Textbooks and Digital Books, showing how many students prefer each.",
+      "[Subheading] Finding the Right Balance",
+      "Schools do not have to choose only one learning tool. Many teachers use both printed textbooks and digital books to support student learning and give students different ways to practice skills."
+     ],
+     "hint": "A photograph shows; a caption tells you what you are seeing; a chart compares.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "What information does the photograph provide the reader with?",
+       "checks": [
+        {
+         "label": "Mentions the textbook or reading",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "textbook"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "book"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "read"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "highlight"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions learning or use",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "learn"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "use"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "study"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "how"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "It helps readers understand how printed textbooks are used for learning.",
+       "video": "apx_pgf-5"
+      },
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "How does the caption help the reader?",
+       "checks": [
+        {
+         "label": "Mentions what the student is doing",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "highlight"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "important"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "doing"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "using"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions explaining or telling",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "explain"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "tell"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "describe"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "understand"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "know"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "It explains that the student is using a printed textbook to highlight important information.",
+       "video": "apx_pgf-6"
+      },
+      {
+       "kind": "blank",
+       "sentence": 7,
+       "ask": "What is the most likely reason the author includes the chart?",
+       "answer": "to show why students prefer different learning tools",
+       "options": [
+        "to explain how digital books are made",
+        "to entertain readers with a chart",
+        "to show events in time order",
+        "to show why students prefer different learning tools"
+       ],
+       "video": "apx_pgf-7"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "skillBuilders": {
+  "apx_apm": {
+   "id": "apx_sb_apm",
+   "title": "SB: Author’s Purpose and Message",
+   "standards": [
+    "5.10A"
+   ],
+   "skill": "Purpose and message, one story at a time",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer.",
+     "sentences": [
+      "Ethan wanted to save money, so he decided to cut his own hair before school picture day. After watching two short videos online, he felt completely confident. At first, everything seemed fine, but then the clippers made a loud buzzing sound and removed a large patch of hair above his ear. Ethan tried to fix the mistake by trimming the other side, but that only made his hair shorter and more uneven.",
+      "When he walked into school the next morning, his friends stared for a second before bursting into laughter. Even his teacher had trouble hiding a smile during attendance. By lunchtime, several students were calling Ethan “The Lawn Mower” because of the strange lines shaved into his hair. Instead of getting upset, Ethan joked about the disaster and claimed he was “starting a new fashion trend.”"
+     ],
+     "hint": "Inform, entertain, teach or persuade — which one is this?",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Why did the author include details about students calling Ethan “The Lawn Mower”?",
+       "answer": "To show how students reacted to Ethan’s haircut",
+       "options": [
+        "To explain why Ethan became upset with his classmates",
+        "To show how students reacted to Ethan’s haircut",
+        "To describe how students create funny nicknames"
+       ],
+       "video": "apx_sb_apm-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "What is the most likely purpose the author wrote this passage?",
+       "answer": "To entertain readers with a school story",
+       "options": [
+        "To inform readers about recycling",
+        "To entertain readers with a school story",
+        "To teach readers about a science experiment",
+        "To persuade readers that the school needs more bike racks"
+       ],
+       "video": "apx_sb_apm-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage.",
+     "sentences": [
+      "Benji could not wait for the school’s “Inventor Day” competition. He spent three weeks building a machine that was supposed to feed his dog automatically. On the morning of the contest, Benji proudly placed the invention on the table and pressed the power button. Instead of dropping dog food into the bowl, the machine launched pieces of kibble across the cafeteria like popcorn. One piece even landed in the principal’s coffee cup.",
+      "Students burst into laughter while Benji scrambled to unplug the machine. At first, he wanted to hide under the table, but then he started laughing too. By the end of the contest, several students asked Benji to demonstrate the “flying dog food machine” again because they thought it was the funniest invention at the event."
+     ],
+     "hint": "The message is in how Benji chooses to react.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "What is the author’s message?",
+       "answer": "Mistakes can become enjoyable when people choose a positive attitude",
+       "options": [
+        "Competitions should have stricter rules for inventions",
+        "Mistakes can become enjoyable when people choose a positive attitude",
+        "Inventing machines requires advanced scientific knowledge"
+       ],
+       "video": "apx_sb_apm-3"
+      },
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which sentence best supports that message?",
+       "answer": "At first, he wanted to hide under the table, but then he started laughing too.",
+       "options": [
+        "At first, he wanted to hide under the table, but then he started laughing too.",
+        "He spent three weeks building a machine that was supposed to feed his dog automatically.",
+        "One piece even landed in the principal’s coffee cup."
+       ],
+       "video": "apx_sb_apm-4"
+      },
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Explain your reasoning.",
+       "checks": [
+        {
+         "label": "Mentions laughing or attitude",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "laugh"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "attitude"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "positive"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "chose"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "decided"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Connects to the message",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "mistake"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "enjoy"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "instead"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "rather than"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "hide"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "It shows Benji choosing to laugh instead of hiding, which is exactly what the message says — a mistake became enjoyable because of his attitude.",
+       "video": "apx_sb_apm-4"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "One more, with numbered sentences.",
+     "sentences": [
+      "Ronnie wanted to win the school marble tournament more than anything.",
+      "During the first round, another player dropped a shiny blue marble under the table.",
+      "Ronnie picked it up and thought about keeping it because it was smoother than his own marbles.",
+      "Then he imagined how upset he would feel if someone kept one of his favorites.",
+      "Ronnie handed the marble back, and the other player smiled and thanked him."
+     ],
+     "hint": "Honesty is an action. Which sentence is the action?",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 5,
+       "ask": "Which sentence best supports the author’s message about honesty?",
+       "answer": "Ronnie handed the marble back, and the other player smiled and thanked him.",
+       "options": [
+        "Then he imagined how upset he would feel if someone kept one of his favorites.",
+        "Ronnie wanted to win the school marble tournament more than anything.",
+        "Ronnie handed the marble back, and the other player smiled and thanked him."
+       ],
+       "video": "apx_sb_apm-5"
+      }
+     ]
+    }
+   ]
+  },
+  "apx_ts": {
+   "id": "apx_sb_ts",
+   "title": "SB: Text Structures",
+   "standards": [
+    "5.10B"
+   ],
+   "skill": "Chronological, cause and effect, compare and contrast — and why each was chosen",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage, then answer.",
+     "sentences": [
+      "(1) Many students struggle to keep their backpacks organized during the school week. Because papers become crumpled and homework often disappears, some students arrive to class feeling unprepared and stressed. Teachers also lose valuable class time while students search for missing assignments and supplies. As a result, one middle school created “Backpack Check Fridays” to help students stay organized.",
+      "(2) First, students sort papers into folders for each subject. Next, they sharpen pencils and check planners for missing assignments. Finally, teachers inspect backpacks to make sure students are prepared for the following week. As a result, many students forget fewer assignments and arrive more prepared for class."
+     ],
+     "hint": "Chronological order shows events in order or the steps in a process.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 1,
+       "ask": "Finish the sentence: The author uses a problem-and-solution structure in the first paragraph to explain…",
+       "checks": [
+        {
+         "label": "Names the problem",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "disorgani"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "backpack"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "problem"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "messy"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Names the solution",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "solution"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "solve"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "backpack check"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "created"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "how problems caused by disorganized backpacks led the school to create a solution.",
+       "video": "apx_sb_ts-1"
+      },
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Why does the author organize the second paragraph in chronological order?",
+       "checks": [
+        {
+         "label": "Mentions steps or sequence",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "step"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "sequence"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "order"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "first"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions Backpack Check Fridays or students",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "backpack"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "student"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "friday"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "To help readers understand the sequence of steps students follow during Backpack Check Fridays.",
+       "video": "apx_sb_ts-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A poem, then a passage.",
+     "sentences": [
+      "First, Marco carried pizzas down the hall with pride, balancing three giant boxes stacked high at his side. Next, he pushed the gym door open with his shoe, but the slippery floor sent the pizzas flying too.",
+      "Because the pizzas landed upside down on the floor, students burst into laughter louder than before. As a result, Marco bowed like a chef on TV, and the principal tossed him napkins with a grin.",
+      "Both skateboarding and roller skating are popular activities for students who enjoy fast-paced sports. Skateboarding requires riders to balance on a narrow board, while roller skating uses boots with wheels attached. Unlike roller skates, skateboards can perform tricks more easily at skate parks. However, roller skates often provide more stability for beginners learning balance and coordination."
+     ],
+     "hint": "“Because… As a result…” is cause and effect. “Both… while… Unlike…” is compare and contrast.",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "Why does the poet organize the first stanza in chronological order?",
+       "answer": "to explain the sequence of events that led to the pizza accident",
+       "options": [
+        "to explain the sequence of events that led to the pizza accident",
+        "to describe what the pizzas looked like before they fell",
+        "to compare Marco’s actions with the principal’s actions"
+       ],
+       "video": "apx_sb_ts-3"
+      },
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Why does the author organize the second stanza using a cause-and-effect structure?",
+       "checks": [
+        {
+         "label": "Mentions the accident or fall",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "accident"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fell"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fall"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "dropped"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "pizzas"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions the reactions",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "react"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "laugh"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "caused"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "result"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 7
+         }
+        }
+       ],
+       "model": "To explain how Marco’s accident caused the students’ reactions.",
+       "video": "apx_sb_ts-4"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "Three students explain the skating passage. Art: “compare-and-contrast, to explain how skateboarding and roller skating are alike and different.” Manny: “problem and solution, to explain how they are good for the skater.” Will: “chronological, to explain the order of learning new skating skills.” Who is correct?",
+       "answer": "Art",
+       "options": [
+        "Art",
+        "Manny",
+        "Will"
+       ],
+       "video": "apx_sb_ts-5"
+      }
+     ]
+    }
+   ]
+  },
+  "apx_pgf": {
+   "id": "apx_sb_pgf",
+   "title": "SB: Print and Graphic Features",
+   "standards": [
+    "5.10C"
+   ],
+   "skill": "Headings, italics, bold, photographs and timelines — one feature at a time",
+   "flag": "The paper shows a real photograph, chart or timeline here. The deck text cannot carry an image, so each feature is described in words inside the passage. Check that the questions still make sense against the description.",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage. The features are described in brackets.",
+     "sentences": [
+      "The Secret Snack Thief",
+      "[Heading] Missing Snacks",
+      "Every Friday, snacks disappeared from Ms. Lee’s classroom cabinet before recess. Students blamed one another, but nobody could explain why the crackers and granola bars kept vanishing. [In italics:] Someone must be sneaking into the room early, thought Javier as he examined the cabinet carefully.",
+      "[Heading] Looking for Clues",
+      "Javier noticed a trail of tiny crumbs leading toward the reading corner. Near a beanbag chair, he spotted an open backpack stuffed with snack wrappers. Suddenly, Peanut the class hamster darted across the floor carrying a cracker almost as large as his head. Javier laughed when he realized the “snack thief” had whiskers and tiny paws instead of fingerprints.",
+      "[Photograph] A hamster running across a classroom floor with a cracker. Caption: Peanut the hamster races across the classroom with a stolen cracker."
+     ],
+     "hint": "Italics often mark what a character is thinking.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "Why did the author include the heading “Looking for Clues”?",
+       "checks": [
+        {
+         "label": "Mentions what the section is about",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "about"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "section"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "topic"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "main idea"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "happen"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "To help readers identify what the section is mainly about.",
+       "video": "apx_sb_pgf-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 3,
+       "ask": "What is the author’s purpose for using italic print in the first paragraph?",
+       "answer": "To show Javier’s thoughts during the investigation",
+       "options": [
+        "To help readers identify the title of another text",
+        "To show Javier’s thoughts during the investigation",
+        "To describe the sound Peanut made while running away"
+       ],
+       "video": "apx_sb_pgf-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "Two more passages, features described.",
+     "sentences": [
+      "Many students at Lincoln Middle School believe recess should be longer each day. They argue that extra recess would help students exercise, relax, and focus better in class. Some teachers agree because active students are often more [in bold:] productive during lessons. However, other people think a longer recess would take away important learning time. Even so, many students feel the benefits of extra movement and social time make a longer recess a good idea.",
+      "[Photograph] Students playing basketball and relaxing on a sunny playground.",
+      "The Rise of Gaming Tournaments. Video game tournaments have become more popular with kids and teenagers in recent years. Many students now watch gamers compete online in games such as Minecraft and Rocket League. Some schools have even started esports clubs where students practice teamwork and strategy together.",
+      "[Timeline] 2018: Most school gaming clubs meet just for fun. 2020: More students begin watching tournaments online. 2022: Schools start creating official esports teams. 2025: Student gaming tournaments become more common nationwide."
+     ],
+     "hint": "Bold makes one word louder. A timeline shows change in order.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 2,
+       "ask": "Finish the sentence: The author includes the photograph in the passage to help readers…",
+       "checks": [
+        {
+         "label": "Mentions seeing students at recess",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "see"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "picture"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "visual"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "imagine"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "show"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions recess or fun",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "recess"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "relax"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "fun"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "play"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "see students relaxing and having fun during recess.",
+       "video": "apx_sb_pgf-3"
+      },
+      {
+       "kind": "blank",
+       "sentence": 1,
+       "ask": "What is the reason the author included the bolded word “productive”?",
+       "answer": "to emphasize that teachers believe students work better after recess",
+       "options": [
+        "to emphasize that teachers believe students work better after recess",
+        "to explain how recess helps students stay healthy",
+        "to compare students who like recess with students who do not"
+       ],
+       "video": "apx_sb_pgf-4"
+      },
+      {
+       "kind": "write",
+       "sentence": 4,
+       "ask": "What is the most likely reason the author included the timeline?",
+       "checks": [
+        {
+         "label": "Mentions change over time",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "over time"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "popular"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "grew"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "changed"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "order"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "years"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions gaming or tournaments",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "gaming"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "tournament"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "esports"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "To help readers understand how gaming tournaments became more popular over time.",
+       "video": "apx_sb_pgf-5"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "full": {
+  "id": "apx_full",
+  "title": "Full Topic: Author’s Purpose",
+  "standards": [
+   "5.10A",
+   "5.10B",
+   "5.10C"
+  ],
+  "skill": "Purpose, structure and features, in one piece of writing",
+  "flag": "The paper shows a real photograph, chart or timeline here. The deck text cannot carry an image, so each feature is described in words inside the passage. Check that the questions still make sense against the description.",
+  "activities": [
+   {
+    "kind": "passage",
+    "brief": "Read the passage. Its features are described in brackets.",
+    "sentences": [
+     "[Heading] Morning Confusion",
+     "In 2012, visitors at the Tokyo Sea Life Park were shocked when a penguin escaped from its enclosure and disappeared into Tokyo Bay. Workers searched for the penguin for weeks, but the clever bird avoided capture by swimming through the busy harbor.",
+     "[Timeline] March 3: The penguin escapes from the zoo. March 10: People spot the penguin swimming near fishing boats. April 2: News reporters film the penguin diving into the bay. May 24: Zoo workers safely capture the penguin.",
+     "News stations shared updates every day, and people across Japan became curious about where the penguin might appear next.",
+     "[Heading] A Famous Fugitive",
+     "Photographs of the penguin appeared online and on television almost every day. Many people joked that the penguin was enjoying a “vacation” around the city. Although the escape caused problems for zoo workers, the penguin quickly became one of the most famous animals in Japan.",
+     "[Photograph] A penguin swimming in open water with boats behind it. Caption: The escaped penguin swimming through Tokyo Bay."
+    ],
+    "hint": "Three features, three jobs.",
+    "questions": [
+     {
+      "kind": "write",
+      "sentence": 3,
+      "ask": "What does the timeline help readers understand?",
+      "checks": [
+       {
+        "label": "Mentions order or events",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "order"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "event"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "sequence"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "when"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "dates"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions the escape or penguin",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "escape"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "penguin"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 6
+        }
+       }
+      ],
+      "model": "The order of important events during the penguin’s escape.",
+      "video": "apx_full-1"
+     },
+     {
+      "kind": "write",
+      "sentence": 7,
+      "ask": "What is the most likely reason the author includes the photograph?",
+      "checks": [
+       {
+        "label": "Mentions seeing or visualising",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "see"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "visual"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "picture"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "imagine"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "show"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions the penguin swimming",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "penguin"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "swim"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "bay"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 6
+        }
+       }
+      ],
+      "model": "To help readers visualize the escaped penguin swimming in Tokyo Bay.",
+      "video": "apx_full-2"
+     },
+     {
+      "kind": "write",
+      "sentence": 5,
+      "ask": "Why did the author include headings?",
+      "checks": [
+       {
+        "label": "Mentions sections or topics",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "section"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "topic"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "about"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "organi"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "main idea"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 6
+        }
+       }
+      ],
+      "model": "To help readers identify what each section of the passage is mainly about.",
+      "video": "apx_full-3"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "A second passage.",
+    "sentences": [
+     "In 2021, many restaurants across the United States struggled to keep enough ketchup packets in stock. Because more families were ordering takeout meals during that time, restaurants used far more packets than usual. As a result, some restaurants limited how many packets customers could take with each order. News stories and social media posts about the shortage quickly spread online, and many students joked that ketchup packets had become “more valuable than gold.”",
+     "To solve the ketchup shortage, restaurant companies increased shipments and encouraged customers to use ketchup bottles at home instead of extra packets. Although the shortage was short, it showed how quickly small problems can affect many people."
+    ],
+    "hint": "“Because… As a result” in the first paragraph. “To solve…” in the second.",
+    "questions": [
+     {
+      "kind": "write",
+      "sentence": 1,
+      "ask": "Why does the author organize the first paragraph using a cause-and-effect structure?",
+      "checks": [
+       {
+        "label": "Names the cause",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "takeout"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "ordering"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "families"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "demand"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Names the effect",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "shortage"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "ran out"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "caused"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 7
+        }
+       }
+      ],
+      "model": "To explain how increased takeout orders caused the ketchup shortage.",
+      "video": "apx_full-4"
+     },
+     {
+      "kind": "blank",
+      "sentence": 2,
+      "ask": "Which sentence best supports the author’s message that small problems can affect many people?",
+      "answer": "Although the shortage was short, it showed how quickly small problems can affect many people.",
+      "options": [
+       "Although the shortage was short, it showed how quickly small problems can affect many people.",
+       "To solve the ketchup shortage, restaurant companies increased shipments.",
+       "Many students joked that ketchup packets had become “more valuable than gold.”"
+      ],
+      "video": "apx_full-5"
+     },
+     {
+      "kind": "write",
+      "sentence": 2,
+      "ask": "What is the author’s purpose for organizing the second paragraph as a problem-and-solution structure?",
+      "checks": [
+       {
+        "label": "Mentions solving",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "solve"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "solution"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "fix"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "ended"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions the shortage or restaurants",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "shortage"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "restaurant"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "ketchup"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 7
+        }
+       }
+      ],
+      "model": "To explain how restaurants solved the ketchup shortage.",
+      "video": "apx_full-6"
+     }
+    ]
+   },
+   {
+    "kind": "passage",
+    "brief": "One more.",
+    "sentences": [
+     "In 2013, thousands of people gathered in Seattle, Washington, to break the world record for the largest snowball fight. First, volunteers reviewed safety rules and handed out gloves. Next, teams moved into different sections of the park while trucks delivered snow for the competition. Finally, a loud horn signaled the start of the event, and snowballs flew across the park.",
+     "Many participants said the event brought people together through teamwork and laughter. Some even returned the next year with matching costumes and team names. The event showed that simple activities can create memorable experiences."
+    ],
+    "hint": "First, Next, Finally.",
+    "questions": [
+     {
+      "kind": "blank",
+      "sentence": 1,
+      "ask": "Bethany thinks the author used chronological order to explain the steps of the snowball fight event. Is she correct?",
+      "answer": "TRUE",
+      "options": [
+       "TRUE",
+       "FALSE"
+      ],
+      "video": "apx_full-7"
+     },
+     {
+      "kind": "write",
+      "sentence": 2,
+      "ask": "How do the ideas about teamwork and laughter support the message?",
+      "checks": [
+       {
+        "label": "Mentions bringing people together",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "together"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "connect"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "communit"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "bond"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Mentions simple activities or the event",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "simple"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "activit"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "event"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "snowball"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 7
+        }
+       }
+      ],
+      "model": "They show that simple activities can bring people together.",
+      "video": "apx_full-8"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,1685 @@
+{
+ "id": "topic_developing_draft",
+ "title": "Developing a Draft",
+ "short": "Developing a Draft",
+ "state": "TX",
+ "grade": 5,
+ "domain": "Composition",
+ "standards": [
+  "5.11A",
+  "5.11B (i)",
+  "5.11B (ii)"
+ ],
+ "blurb": "Plan it, outline it, write it — the writing process from prompt to paragraph.",
+ "icon": "✏️",
+ "core": [
+  {
+   "id": "dd_plan",
+   "title": "Planning a First Draft",
+   "standards": [
+    "5.11A"
+   ],
+   "skill": "Topic, audience and purpose — worked out before a word is written",
+   "activities": [
+    {
+     "kind": "compose",
+     "brief": "Read the prompt. Work out the topic, the audience and the purpose.",
+     "hint": "Topic is what it is about. Audience is who reads it. Purpose is what it is for.",
+     "items": [
+      {
+       "prompt": "Prompt: Write a letter to the school board explaining why students should have more opportunities for hands-on learning.  What is the TOPIC?",
+       "pieces": [
+        "Write a letter to the school board explaining why students should have more opportunities for hands-on learning."
+       ],
+       "checks": [
+        {
+         "label": "Names hands-on learning",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "hands-on"
+          ]
+         }
+        },
+        {
+         "label": "A phrase, not a whole essay",
+         "rule": {
+          "type": "minWords",
+          "n": 2
+         }
+        }
+       ],
+       "model": "More hands-on learning in elementary school",
+       "video": "dd_plan-1"
+      },
+      {
+       "prompt": "Same prompt. Who is the AUDIENCE?",
+       "pieces": [
+        "…a letter to the school board…"
+       ],
+       "checks": [
+        {
+         "label": "Names the school board",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "school board"
+          ]
+         }
+        },
+        {
+         "label": "Written out",
+         "rule": {
+          "type": "minWords",
+          "n": 2
+         }
+        }
+       ],
+       "model": "School board members",
+       "video": "dd_plan-2"
+      },
+      {
+       "prompt": "Same prompt. What is the PURPOSE?",
+       "pieces": [
+        "…explaining why students should have more opportunities…"
+       ],
+       "checks": [
+        {
+         "label": "Says it is to persuade or convince",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "persuade"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "convince"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "support"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Names what they should support",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "hands-on"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "To persuade school leaders to support more hands-on learning",
+       "video": "dd_plan-3"
+      },
+      {
+       "prompt": "Prompt: Write an essay explaining the benefits of bike lanes near school zones.  What is the TOPIC?",
+       "pieces": [
+        "Write an essay explaining the benefits of bike lanes near school zones."
+       ],
+       "checks": [
+        {
+         "label": "Names bike lanes",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "bike lane"
+          ]
+         }
+        },
+        {
+         "label": "A phrase, not a whole essay",
+         "rule": {
+          "type": "minWords",
+          "n": 3
+         }
+        }
+       ],
+       "model": "Benefits of bike lanes near school zones",
+       "video": "dd_plan-4"
+      },
+      {
+       "prompt": "Same prompt. Who is the AUDIENCE? (Think about who decides where bike lanes go.)",
+       "pieces": [
+        "…bike lanes near school zones…"
+       ],
+       "checks": [
+        {
+         "label": "Names people who decide",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "planner"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "official"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "city"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "council"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "transportation"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written out",
+         "rule": {
+          "type": "minWords",
+          "n": 2
+         }
+        }
+       ],
+       "model": "City planners and transportation officials",
+       "video": "dd_plan-5"
+      },
+      {
+       "prompt": "Same prompt. What is the PURPOSE?",
+       "pieces": [
+        "…an essay explaining the benefits…"
+       ],
+       "checks": [
+        {
+         "label": "Says it is to explain or inform",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "explain"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "inform"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "describe"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Names bike lanes",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "bike lane"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 5
+         }
+        }
+       ],
+       "model": "To explain the benefits of bike lanes near school zones",
+       "video": "dd_plan-6"
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Which audience would each word suit — a letter to a friend, or a letter to the school board?",
+     "hint": "Casual words for a friend. Careful, formal words for the board.",
+     "items": [
+      {
+       "given": "awesome  →  ____",
+       "answer": "a friend",
+       "options": [
+        "a friend",
+        "the school board"
+       ],
+       "video": "dd_plan-7"
+      },
+      {
+       "given": "cool  →  ____",
+       "answer": "a friend",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "support  →  ____",
+       "answer": "the school board",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "amazing  →  ____",
+       "answer": "a friend",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "address  →  ____",
+       "answer": "the school board",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "numerous  →  ____",
+       "answer": "the school board",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "fun  →  ____",
+       "answer": "a friend",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "beneficial  →  ____",
+       "answer": "the school board",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "instead  →  ____",
+       "answer": "the school board",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "students  →  ____",
+       "answer": "the school board",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "lots  →  ____",
+       "answer": "a friend",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      },
+      {
+       "given": "policies  →  ____",
+       "answer": "the school board",
+       "options": [
+        "a friend",
+        "the school board"
+       ]
+      }
+     ]
+    },
+    {
+     "kind": "compose",
+     "brief": "One of topic, audience or purpose is missing. Fill it in.",
+     "hint": "Read the two you are given and ask what the third has to be.",
+     "items": [
+      {
+       "prompt": "Topic: Students should be able to use artificial intelligence tools for homework.  Audience: Teachers.  PURPOSE?",
+       "pieces": [
+        "Topic: Students should be able to use AI tools for homework",
+        "Audience: Teachers"
+       ],
+       "checks": [
+        {
+         "label": "Says it is to persuade",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "persuade"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "convince"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Names teachers",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "teacher"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "To persuade teachers to allow students to use artificial intelligence tools for homework.",
+       "video": "dd_plan-8"
+      },
+      {
+       "prompt": "Audience: School board members and community leaders.  Purpose: Persuade readers to support the creation of a school garden.  TOPIC?",
+       "pieces": [
+        "Audience: School board members and community leaders",
+        "Purpose: Persuade readers to support the creation of a school garden"
+       ],
+       "checks": [
+        {
+         "label": "Names the garden",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "garden"
+          ]
+         }
+        },
+        {
+         "label": "A phrase",
+         "rule": {
+          "type": "minWords",
+          "n": 2
+         }
+        }
+       ],
+       "model": "Creating a school garden",
+       "video": "dd_plan-9"
+      },
+      {
+       "prompt": "Topic: The local library is adding more digital resources for students.  Purpose: To explain how students can access the new resources.  AUDIENCE?",
+       "pieces": [
+        "Topic: The library is adding digital resources for students",
+        "Purpose: To explain how students can access them"
+       ],
+       "checks": [
+        {
+         "label": "Names students",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "student"
+          ]
+         }
+        },
+        {
+         "label": "Written out",
+         "rule": {
+          "type": "minWords",
+          "n": 1
+         }
+        }
+       ],
+       "model": "Students and families",
+       "video": "dd_plan-10"
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Two more. Pick the best answer.",
+     "hint": "A strong essay topic is specific enough to actually write about.",
+     "items": [
+      {
+       "given": "Which topic would be the strongest for an informational essay?  ____",
+       "answer": "How solar panels convert sunlight into electricity",
+       "options": [
+        "How renewable energy can help communities",
+        "Renewable energy",
+        "Different types of energy sources",
+        "How solar panels convert sunlight into electricity"
+       ],
+       "video": "dd_plan-11"
+      },
+      {
+       "given": "Who would be the ideal audience for an essay asking for larger libraries?  ____",
+       "answer": "the principal and school board members",
+       "options": [
+        "parents at the school",
+        "the principal and school board members",
+        "teachers and staff",
+        "students who read"
+       ],
+       "video": "dd_plan-12"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "dd_ideas",
+   "title": "Engaging Ideas and Details",
+   "standards": [
+    "5.11B (ii)"
+   ],
+   "skill": "A claim worth making, and the facts that actually hold it up",
+   "activities": [
+    {
+     "kind": "passage",
+     "brief": "Read the passage. Writing prompt: Should governments invest money in seed banks?",
+     "sentences": [
+      "Many scientists consider seed banks to be an important resource for protecting plant diversity.",
+      "A seed bank is a facility that stores seeds from thousands of plant species under carefully controlled conditions.",
+      "These collections help preserve plants that may be threatened by habitat loss, climate change, disease, or natural disasters.",
+      "If a plant population declines or disappears in the wild, scientists can use stored seeds to help restore it.",
+      "Seed banks also support agricultural research.",
+      "Farmers and researchers study stored seeds to develop crops that can better withstand drought, pests, and changing environmental conditions.",
+      "Some seed banks contain varieties of plants that are no longer widely grown, making them valuable sources of genetic diversity.",
+      "Maintaining these collections requires specialized equipment, regular testing, and long-term planning.",
+      "Although seed banks can be expensive to operate, many experts believe they play a critical role in protecting ecosystems and securing future food supplies."
+     ],
+     "hint": "A claim takes a side. A fact that supports it has to be about the claim, not just about seeds.",
+     "questions": [
+      {
+       "kind": "write",
+       "sentence": 9,
+       "ask": "Write the claim you would make.",
+       "checks": [
+        {
+         "label": "Takes a side",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "should"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "worth"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "invest"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "important"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Names seed banks",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "seed bank"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 6
+         }
+        }
+       ],
+       "model": "Although expensive to start, seed banks are worth the investment.",
+       "video": "dd_ideas-1"
+      },
+      {
+       "kind": "blank",
+       "sentence": 4,
+       "ask": "Which fact most strongly supports that claim?",
+       "answer": "If a plant population declines or disappears in the wild, scientists can use stored seeds to help restore it.",
+       "options": [
+        "If a plant population declines or disappears in the wild, scientists can use stored seeds to help restore it.",
+        "Maintaining these collections requires specialized equipment, regular testing, and long-term planning.",
+        "A seed bank is a facility that stores seeds from thousands of plant species."
+       ],
+       "flag": "Inferred from the passage — the video for questions 2 and 3 shows the fact-sorting boxes but nothing written in them. The paper asks students to sort facts into Important and Less Important; this asks for the strongest one instead.",
+       "video": "dd_ideas-2"
+      },
+      {
+       "kind": "blank",
+       "sentence": 8,
+       "ask": "Which fact is LESS important to the claim?",
+       "answer": "Maintaining these collections requires specialized equipment, regular testing, and long-term planning.",
+       "options": [
+        "Maintaining these collections requires specialized equipment, regular testing, and long-term planning.",
+        "Farmers and researchers study stored seeds to develop crops that can better withstand drought, pests, and changing environmental conditions.",
+        "These collections help preserve plants that may be threatened by habitat loss, climate change, disease, or natural disasters."
+       ],
+       "video": "dd_ideas-2"
+      }
+     ]
+    },
+    {
+     "kind": "passage",
+     "brief": "A second passage. Read it, then answer.",
+     "sentences": [
+      "Marine biologists study sea turtles to learn more about their behavior and to help protect their populations.",
+      "One challenge researchers face is tracking turtles as they travel across large areas of the ocean.",
+      "To solve this problem, scientists attach small satellite transmitters to some turtles.",
+      "These devices send location data that allows researchers to follow migration routes and identify important feeding and nesting areas.",
+      "The information helps scientists understand where turtles spend their time and what environmental conditions they need to survive.",
+      "Tracking studies have also contributed to conservation efforts.",
+      "By identifying nesting beaches and migration corridors, researchers can recommend areas that need additional protection.",
+      "Data from satellite transmitters has helped scientists recognize threats such as fishing nets, boat traffic, and habitat loss.",
+      "As a result, tracking technology has become an important tool for both studying sea turtle behavior and supporting conservation programs designed to protect these animals."
+     ],
+     "hint": "Different question, different details. What are you trying to write about each time?",
+     "questions": [
+      {
+       "kind": "blank",
+       "sentence": 2,
+       "ask": "Which detail would you use in a paragraph about HOW scientists study sea turtles?",
+       "answer": "One challenge researchers face is tracking turtles as they travel across large areas of the ocean.",
+       "options": [
+        "One challenge researchers face is tracking turtles as they travel across large areas of the ocean.",
+        "Data from satellite transmitters has helped scientists recognize threats such as fishing nets, boat traffic, and habitat loss.",
+        "Marine biologists study sea turtles to learn more about their behavior."
+       ],
+       "video": "dd_ideas-4"
+      },
+      {
+       "kind": "blank",
+       "sentence": 8,
+       "ask": "Which detail could you use to argue “Tracking technology helps protect sea turtles”?",
+       "answer": "Data from satellite transmitters has helped scientists recognize threats such as fishing nets, boat traffic, and habitat loss.",
+       "options": [
+        "Data from satellite transmitters has helped scientists recognize threats such as fishing nets, boat traffic, and habitat loss.",
+        "One challenge researchers face is tracking turtles as they travel across large areas of the ocean.",
+        "To solve this problem, scientists attach small satellite transmitters to some turtles."
+       ],
+       "video": "dd_ideas-4"
+      }
+     ]
+    },
+    {
+     "kind": "compose",
+     "brief": "Make it stronger.",
+     "hint": "\"Nice\" is a wish. An argument gives a reason someone else would care about.",
+     "items": [
+      {
+       "prompt": "“It would be nice if we had less homework.” Write a more engaging argument for the same idea.",
+       "pieces": [
+        "It would be nice if we had less homework."
+       ],
+       "checks": [
+        {
+         "label": "Keeps the topic",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "homework"
+          ]
+         }
+        },
+        {
+         "label": "Gives a reason",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "because"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "so that"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "which"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "would"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "time"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Drops the word nice",
+         "rule": {
+          "type": "notContains",
+          "any": [
+           "nice"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 10
+         }
+        }
+       ],
+       "model": "Students with less homework have more time to read, play and rest, which helps them concentrate and learn more in class the next day.",
+       "video": "dd_ideas-4"
+      },
+      {
+       "prompt": "Rewrite this to SHOW the action instead of TELLING it: “Raelyn didn’t want to wake up this morning.”",
+       "pieces": [
+        "Raelyn didn’t want to wake up this morning."
+       ],
+       "checks": [
+        {
+         "label": "Keeps Raelyn",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "raelyn"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "she"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Shows an action",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "groan"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "pull"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "roll"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "bur"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "snooze"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "blanket"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "pillow"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "alarm"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "eyes"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Stops telling us",
+         "rule": {
+          "type": "notContains",
+          "any": [
+           "didn’t want",
+           "didn't want",
+           "did not want"
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 8
+         }
+        }
+       ],
+       "model": "Raelyn groaned, pulled the blanket over her head, and hit snooze for the third time.",
+       "video": "dd_ideas-9"
+      }
+     ]
+    },
+    {
+     "kind": "fix",
+     "mode": "select",
+     "bank": [],
+     "brief": "Two more. Pick the best answer.",
+     "hint": "Argumentative writing talks to people who disagree with you.",
+     "items": [
+      {
+       "given": "Which tone should you use in an argumentative writing assignment?  ____",
+       "answer": "formal",
+       "options": [
+        "casual",
+        "presidential",
+        "formal",
+        "conversational"
+       ],
+       "video": "dd_ideas-7"
+      },
+      {
+       "given": "What detail would you include in a writing assignment about shelter pets?  ____",
+       "answer": "Shelter pets often cost less to adopt than pets from breeders.",
+       "options": [
+        "Shelter pets often cost less to adopt than pets from breeders.",
+        "Shelter pets are the cutest animals.",
+        "Visiting an animal shelter is exciting.",
+        "Many people enjoy looking at puppies and kittens."
+       ],
+       "video": "dd_ideas-8"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "dd_struct",
+   "title": "Purposeful Structure",
+   "standards": [
+    "5.11B (i)"
+   ],
+   "skill": "An outline before a paragraph: thesis, main ideas, details, conclusion",
+   "flag": "This worksheet is free writing. The paper is a graphic organizer a student fills in and then a paragraph they draft. Structural checks only — they confirm the pieces are there, not that the writing is good. A person reads this before it counts.",
+   "activities": [
+    {
+     "kind": "compose",
+     "brief": "Prompt: Should schools require every student to participate in at least one club each year? Build the outline.",
+     "hint": "The example on the paper: thesis at the top, main ideas on the left, details on the right, conclusion restates the thesis.",
+     "items": [
+      {
+       "prompt": "THESIS — the focus of your writing, in one sentence.",
+       "pieces": [
+        "Should schools require every student to participate in at least one club each year?"
+       ],
+       "checks": [
+        {
+         "label": "Takes a side",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "should"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "every student"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "require"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions clubs",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "club"
+          ]
+         }
+        },
+        {
+         "label": "One sentence",
+         "rule": {
+          "type": "minSentences",
+          "n": 1
+         }
+        }
+       ],
+       "model": "Schools should require every student to join at least one club, because clubs build skills and friendships that classes alone cannot.",
+       "video": "dd_struct-org1"
+      },
+      {
+       "prompt": "MAIN IDEA 1 is given: “Clubs help students build life skills.” Write a DETAIL that supports it.",
+       "pieces": [
+        "Main idea: Clubs help students build life skills."
+       ],
+       "checks": [
+        {
+         "label": "Names a skill",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "teamwork"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "leader"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "responsib"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "time"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "communicat"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "confiden"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "skill"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Written as a sentence",
+         "rule": {
+          "type": "minWords",
+          "n": 7
+         }
+        }
+       ],
+       "model": "Students who run a club meeting practise leadership and learn to manage their time.",
+       "video": "dd_struct-org1"
+      },
+      {
+       "prompt": "The DETAILS are given: “Students often make new friends with similar interests. Being involved helps students feel like they belong.” Write MAIN IDEA 2.",
+       "pieces": [
+        "Details: Students often make new friends with similar interests. Being involved helps students feel like they belong."
+       ],
+       "checks": [
+        {
+         "label": "About friends or belonging",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "friend"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "belong"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "connect"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "communit"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Mentions clubs",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "club"
+          ]
+         }
+        },
+        {
+         "label": "One sentence",
+         "rule": {
+          "type": "minSentences",
+          "n": 1
+         }
+        }
+       ],
+       "model": "Clubs help students make friends and feel that they belong at school.",
+       "video": "dd_struct-org1"
+      },
+      {
+       "prompt": "MAIN IDEA 3 and one DETAIL — your own.",
+       "checks": [
+        {
+         "label": "Mentions clubs",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "club"
+          ]
+         }
+        },
+        {
+         "label": "At least two sentences",
+         "rule": {
+          "type": "minSentences",
+          "n": 2
+         }
+        },
+        {
+         "label": "Long enough to be an idea and a detail",
+         "rule": {
+          "type": "minWords",
+          "n": 14
+         }
+        }
+       ],
+       "model": "Clubs let students try things they cannot try in class. A student who joins the robotics club may discover a career before they are twelve.",
+       "video": "dd_struct-org1"
+      },
+      {
+       "prompt": "CONCLUSION — restate the thesis.",
+       "checks": [
+        {
+         "label": "Mentions clubs",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "club"
+          ]
+         }
+        },
+        {
+         "label": "Sounds like an ending",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "as you can see"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "in conclusion"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "overall"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "for these reasons"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "that is why"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "clearly"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "One sentence",
+         "rule": {
+          "type": "minSentences",
+          "n": 1
+         }
+        }
+       ],
+       "model": "As you can see, requiring every student to join a club would give them skills, friends and a place to belong.",
+       "video": "dd_struct-org1"
+      }
+     ]
+    },
+    {
+     "kind": "compose",
+     "brief": "Now the whole thing. Should students have school on Fridays? Outline it, then draft the paragraph.",
+     "hint": "Thesis. Three main ideas with details. Conclusion. Then turn the outline into sentences.",
+     "items": [
+      {
+       "prompt": "Your OUTLINE: thesis, three main ideas, conclusion.",
+       "pieces": [
+        "Should students have school on Fridays?"
+       ],
+       "checks": [
+        {
+         "label": "Mentions Friday",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "friday"
+          ]
+         }
+        },
+        {
+         "label": "Takes a side",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "should"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "should not"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "shouldn't"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Has several parts",
+         "rule": {
+          "type": "minSentences",
+          "n": 4
+         }
+        },
+        {
+         "label": "Long enough for an outline",
+         "rule": {
+          "type": "minWords",
+          "n": 40
+         }
+        }
+       ],
+       "model": "Thesis: Students should not have school on Fridays. Main idea 1: A four-day week gives students a day to rest and catch up. Main idea 2: Families would have more time together. Main idea 3: Schools would save money on buses and buildings. Conclusion: For these reasons, a four-day school week would help students and schools alike.",
+       "video": "dd_struct-org2"
+      },
+      {
+       "prompt": "Your DRAFT — the paragraph, written from your outline.",
+       "checks": [
+        {
+         "label": "Mentions Friday",
+         "rule": {
+          "type": "contains",
+          "any": [
+           "friday"
+          ]
+         }
+        },
+        {
+         "label": "Opens with a position",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "should"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "should not"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "shouldn't"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Gives reasons",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "because"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "first"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "also"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "another"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "Ends with a conclusion",
+         "rule": {
+          "type": "any",
+          "of": [
+           {
+            "type": "contains",
+            "any": [
+             "in conclusion"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "overall"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "for these reasons"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "that is why"
+            ]
+           },
+           {
+            "type": "contains",
+            "any": [
+             "as you can see"
+            ]
+           }
+          ]
+         }
+        },
+        {
+         "label": "A real paragraph",
+         "rule": {
+          "type": "minWords",
+          "n": 60
+         }
+        }
+       ],
+       "model": "Students should not have school on Fridays. First, a four-day week would give students a day to rest and catch up on work, so they arrive on Monday ready to learn. Families would also have more time together, which matters as much as any lesson. Finally, schools would save money on buses and buildings that could go towards teachers and books instead. For these reasons, a four-day school week would help students and schools alike.",
+       "video": "dd_struct-org2"
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "skillBuilders": {},
+ "full": {
+  "id": "dd_full",
+  "title": "Full Topic: Develop a Draft",
+  "standards": [
+   "5.11A",
+   "5.11B (i)",
+   "5.11B (ii)"
+  ],
+  "skill": "Plan it, outline it, write it",
+  "flag": "The deck for this capstone says GRADE 4 where every other worksheet in the topic says Grade 5. The paper needs checking. The draft itself is free writing. Structural checks only — they confirm the pieces are there, not that the writing is good. A person reads this before it counts.",
+  "activities": [
+   {
+    "kind": "compose",
+    "brief": "Prompt: Write a paragraph to students about whether they should play a sport after school. Topic, audience, purpose.",
+    "hint": "Three short answers.",
+    "items": [
+     {
+      "prompt": "TOPIC?",
+      "pieces": [
+       "Write a paragraph to students about whether they should play a sport after school."
+      ],
+      "checks": [
+       {
+        "label": "Names sport",
+        "rule": {
+         "type": "contains",
+         "any": [
+          "sport"
+         ]
+        }
+       },
+       {
+        "label": "A phrase",
+        "rule": {
+         "type": "minWords",
+         "n": 2
+        }
+       }
+      ],
+      "model": "Sports after school",
+      "video": "dd_full-org1"
+     },
+     {
+      "prompt": "AUDIENCE?",
+      "pieces": [
+       "…a paragraph to students…"
+      ],
+      "checks": [
+       {
+        "label": "Names students",
+        "rule": {
+         "type": "contains",
+         "any": [
+          "student"
+         ]
+        }
+       }
+      ],
+      "model": "Students",
+      "video": "dd_full-org1"
+     },
+     {
+      "prompt": "PURPOSE?",
+      "pieces": [
+       "…about whether they should play a sport…"
+      ],
+      "checks": [
+       {
+        "label": "Says persuade or explain",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "persuade"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "convince"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "explain"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "help"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Names sport",
+        "rule": {
+         "type": "contains",
+         "any": [
+          "sport"
+         ]
+        }
+       },
+       {
+        "label": "Written as a sentence",
+        "rule": {
+         "type": "minWords",
+         "n": 5
+        }
+       }
+      ],
+      "model": "To persuade students to play a sport after school.",
+      "flag": "The video for this page fills in topic and audience and leaves purpose blank. The model answer is mine.",
+      "video": "dd_full-org1"
+     }
+    ]
+   },
+   {
+    "kind": "compose",
+    "brief": "Should students play a sport after school? Outline it.",
+    "hint": "Thesis, three main ideas with details, conclusion.",
+    "items": [
+     {
+      "prompt": "Your OUTLINE.",
+      "checks": [
+       {
+        "label": "Mentions sport",
+        "rule": {
+         "type": "contains",
+         "any": [
+          "sport"
+         ]
+        }
+       },
+       {
+        "label": "Takes a side",
+        "rule": {
+         "type": "contains",
+         "any": [
+          "should"
+         ]
+        }
+       },
+       {
+        "label": "Has several parts",
+        "rule": {
+         "type": "minSentences",
+         "n": 4
+        }
+       },
+       {
+        "label": "Long enough for an outline",
+        "rule": {
+         "type": "minWords",
+         "n": 40
+        }
+       }
+      ],
+      "model": "Thesis: Students should play a sport after school. Main idea 1: Sport keeps students healthy and active. Main idea 2: Being on a team teaches students to work with others. Main idea 3: Sport gives students a break from screens and homework. Conclusion: For these reasons, every student should try a sport after school.",
+      "video": "dd_full-org1"
+     }
+    ]
+   },
+   {
+    "kind": "compose",
+    "brief": "Now write it. Your response should have a clear central idea, descriptive details with specific examples, proper language, and a conclusion that supports the central idea.",
+    "hint": "That list is the rubric. Check your draft against each line.",
+    "items": [
+     {
+      "prompt": "Your RESPONSE.",
+      "checks": [
+       {
+        "label": "A clear central idea",
+        "rule": {
+         "type": "all",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "sport"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "should"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Specific examples",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "for example"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "such as"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "like"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "soccer"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "basketball"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "swim"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "run"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "team"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Proper language",
+        "rule": {
+         "type": "notContains",
+         "any": [
+          "gonna",
+          "wanna",
+          "kinda",
+          " u ",
+          "lol"
+         ]
+        }
+       },
+       {
+        "label": "A conclusion",
+        "rule": {
+         "type": "any",
+         "of": [
+          {
+           "type": "contains",
+           "any": [
+            "in conclusion"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "overall"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "for these reasons"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "that is why"
+           ]
+          },
+          {
+           "type": "contains",
+           "any": [
+            "as you can see"
+           ]
+          }
+         ]
+        }
+       },
+       {
+        "label": "Long enough to be a response",
+        "rule": {
+         "type": "minWords",
+         "n": 80
+        }
+       }
+      ],
+      "model": "Students should play a sport after school. Sport keeps students healthy and active: an hour of soccer or basketball burns off the energy that builds up during a day at a desk. Being on a team also teaches students to work with others, because a team only wins when everyone passes the ball. Finally, a sport gives students a real break from screens and homework, and most come home calmer and ready to focus. For these reasons, every student should try at least one sport after school.",
+      "video": "dd_full-org2"
+     }
+    ]
+   }
+  ]
+ }
+}

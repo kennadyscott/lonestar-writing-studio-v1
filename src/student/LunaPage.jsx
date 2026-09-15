@@ -10,7 +10,7 @@ import ModuleBadge from '../components/ModuleBadge.jsx'
  */
 
 // How much to calm the background art (0 = full intensity, 1 = solid navy).
-const SKY_DIM = 0.42
+const SKY_DIM = 0.58
 
 const SKY = (import.meta.env.BASE_URL || '/') + 'luna-sky.webp'
 const NAVY = '#0d2f55'

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 
@@ -9,13 +9,32 @@ import ModuleBadge from '../components/ModuleBadge.jsx'
  * 3-column path with dotted connectors, and the "My Writer Profile" sidebar.
  */
 
-// How much to calm the background art (0 = full intensity, 1 = solid navy).
-const SKY_DIM = 0.58
+// Page wash: the sky strip sits under a pale wash (like the homepage) so the
+// cards and the navy band carry the page. PAGE_WASH is how much white goes on.
+const PAGE_WASH = 0.62
+const WASH_RGB = '236,244,251'
+const SKY_CONT = '#9fc6e7' // colour the sky strip fades into below 560px
 
-const SKY = (import.meta.env.BASE_URL || '/') + 'luna-sky.webp'
+const BASE = import.meta.env.BASE_URL || '/'
+const SKY_TOP = BASE + 'luna-sky-top.webp'
+const ISLANDS = BASE + 'luna-islands.webp'
 const NAVY = '#0d2f55'
-const GLASS = 'rgba(9, 32, 68, .62)'
-const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .35)'
+const GLASS = 'rgba(9, 32, 68, .82)'
+const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .22)'
+
+// Where the five islands are in luna-islands.webp, as % of the strip.
+// x = card centre, y = the island's grass line; the card's bottom edge sits
+// a little below that so it reads as standing on the island. Card 6 has no
+// island; it floats over the river.
+const ISLAND_SPOTS = [
+  { x: 13.0, y: 41.7, sink: 3 },
+  { x: 40.0, y: 45.5, sink: 3 },
+  { x: 66.5, y: 46.7, sink: 3 },
+  { x: 11.0, y: 66.9, sink: 13 },
+  { x: 36.0, y: 75.8, sink: 11 },
+  { x: 65.0, y: 76.0, sink: 11 },
+]
+const STRIP_ASPECT = 0.585 // strip height / width (art is 0.565; a hair taller for card room)
 
 const RACE_TILES = [['R', '#e668c9'], ['A', '#6db7f2'], ['C', '#7fd483'], ['E', '#f2b27e']]
 
@@ -68,46 +87,44 @@ function ActivityCard({ a }) {
   const passed = a.status === 'passed'
   const current = a.status === 'in_progress'
   const todo = a.status === 'todo'
+  const tag = (bg, fg, text) => <span style={{ position: 'absolute', top: -9, right: 10, background: bg, color: fg, fontWeight: 800, fontSize: 8.5, letterSpacing: .5, borderRadius: 6, padding: '3px 7px', boxShadow: '0 2px 6px rgba(2,20,50,.25)', zIndex: 2, whiteSpace: 'nowrap' }}>{text}</span>
   return (
-    <div style={{ position: 'relative', background: '#fff', borderRadius: 18, padding: 10, boxShadow: current ? '0 0 0 3px #f5b400, 0 10px 30px rgba(245,180,0,.35)' : CARD_SHADOW, opacity: todo ? .92 : 1 }}>
-      <span style={{ position: 'absolute', top: -13, left: -13, width: 32, height: 32, borderRadius: '50%', background: 'linear-gradient(140deg,#06aade,#0a7dba)', color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 15, boxShadow: '0 2px 8px rgba(2,20,50,.4)', border: '2px solid #fff', zIndex: 2 }}>{a.n}</span>
-      {passed && <span style={{ position: 'absolute', top: -12, right: -12, width: 30, height: 30, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 15, fontWeight: 800, border: '2px solid #fff', boxShadow: '0 2px 8px rgba(2,20,50,.35)', zIndex: 2 }}>✓</span>}
-      {current && (
-        <span style={{ position: 'absolute', top: -12, right: 14, background: '#f5b400', color: NAVY, fontWeight: 800, fontSize: 10.5, letterSpacing: .6, borderRadius: 8, padding: '4px 10px', boxShadow: '0 2px 8px rgba(2,20,50,.35)', zIndex: 2 }}>CURRENT ACTIVITY</span>
-      )}
-      {todo && <span style={{ position: 'absolute', top: -12, right: 14, background: '#dfe8ef', color: '#4a6f8c', fontWeight: 800, fontSize: 10.5, letterSpacing: .6, borderRadius: 8, padding: '4px 10px', zIndex: 2 }}>UP NEXT</span>}
+    <div style={{ position: 'relative', background: '#fff', borderRadius: 14, padding: 7, boxShadow: current ? '0 0 0 2.5px #f5b400, 0 8px 24px rgba(245,180,0,.35)' : CARD_SHADOW, opacity: todo ? .94 : 1 }}>
+      <span style={{ position: 'absolute', top: -10, left: -10, width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(140deg,#06aade,#0a7dba)', color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 12.5, boxShadow: '0 2px 6px rgba(2,20,50,.35)', border: '2px solid #fff', zIndex: 2 }}>{a.n}</span>
+      {passed && <span style={{ position: 'absolute', top: -9, right: -9, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, border: '2px solid #fff', boxShadow: '0 2px 6px rgba(2,20,50,.3)', zIndex: 2 }}>✓</span>}
+      {current && tag('#f5b400', NAVY, 'CURRENT')}
+      {todo && tag('#dfe8ef', '#4a6f8c', 'UP NEXT')}
 
-      <div style={{ position: 'relative', height: 108, borderRadius: 12, overflow: 'hidden', background: 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
-        <span style={{ position: 'absolute', top: 8, left: 12, color: 'rgba(255,255,255,.55)', fontSize: 10 }}>✦</span>
-        <span style={{ position: 'absolute', bottom: 10, right: 14, color: '#f5b400', fontSize: 11 }}>✦</span>
-        <span style={{ position: 'absolute', top: 14, right: 26, color: 'rgba(255,255,255,.35)', fontSize: 8 }}>✦</span>
-        <div style={{ position: 'absolute', bottom: -18, left: 0, right: 0, height: 34, background: 'radial-gradient(ellipse at 50% 100%, #3f7a3a 0%, #2c5a3a 45%, transparent 72%)' }} />
-        <img src={BRAND.luna} alt="" style={{ height: 66, position: 'relative' }} />
+      <div style={{ position: 'relative', height: 66, borderRadius: 10, overflow: 'hidden', background: 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <span style={{ position: 'absolute', top: 5, left: 8, color: 'rgba(255,255,255,.55)', fontSize: 8 }}>✦</span>
+        <span style={{ position: 'absolute', bottom: 6, right: 9, color: '#f5b400', fontSize: 9 }}>✦</span>
+        <div style={{ position: 'absolute', bottom: -14, left: 0, right: 0, height: 26, background: 'radial-gradient(ellipse at 50% 100%, #3f7a3a 0%, #2c5a3a 45%, transparent 72%)' }} />
+        <img src={BRAND.luna} alt="" style={{ height: 42, position: 'relative' }} />
         {a.art === 'RACE' ? (
-          <span style={{ display: 'inline-flex', gap: 3, position: 'relative' }}>
+          <span style={{ display: 'inline-flex', gap: 2, position: 'relative' }}>
             {RACE_TILES.map(([l, c]) => (
-              <span key={l} style={{ width: 24, height: 24, borderRadius: 6, background: c, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 14, transform: `rotate(${(l.charCodeAt(0) % 3 - 1) * 8}deg)`, boxShadow: '0 2px 4px rgba(0,0,0,.3)' }}>{l}</span>
+              <span key={l} style={{ width: 15, height: 15, borderRadius: 4, background: c, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 9.5, transform: `rotate(${(l.charCodeAt(0) % 3 - 1) * 8}deg)`, boxShadow: '0 1px 3px rgba(0,0,0,.3)' }}>{l}</span>
             ))}
           </span>
         ) : (
-          <span style={{ fontSize: 36, position: 'relative', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.45))' }}>{a.art}</span>
+          <span style={{ fontSize: 24, position: 'relative', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.45))' }}>{a.art}</span>
         )}
       </div>
 
-      <div style={{ padding: '10px 6px 6px' }}>
-        <div style={{ fontWeight: 800, fontSize: 14, lineHeight: 1.25, minHeight: 36, color: NAVY }}>{a.title}</div>
-        <div style={{ margin: '4px 0 10px' }}><Stars n={a.stars} /></div>
+      <div style={{ padding: '7px 3px 2px' }}>
+        <div style={{ fontWeight: 800, fontSize: 11.5, lineHeight: 1.2, minHeight: 28, color: NAVY }}>{a.title}</div>
+        <div style={{ margin: '2px 0 6px' }}><Stars n={a.stars} size={12} /></div>
         {current ? (
-          <button title="Activity opens in the full product" style={{ width: '100%', padding: '11px 0', borderRadius: 11, fontWeight: 800, fontSize: 14, color: NAVY, background: 'linear-gradient(180deg,#ffd44d,#f5b400)', boxShadow: '0 3px 0 #c98f00' }}>
-            Continue Activity →
+          <button title="Activity opens in the full product" style={{ width: '100%', padding: '7px 0', borderRadius: 8, fontWeight: 800, fontSize: 11.5, color: NAVY, background: 'linear-gradient(180deg,#ffd44d,#f5b400)', boxShadow: '0 2px 0 #c98f00' }}>
+            Continue →
           </button>
         ) : passed ? (
-          <button title="Activity opens in the full product" style={{ width: '100%', padding: '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 13, color: '#fff', background: 'linear-gradient(120deg,#41b9e3,#0a7dba)' }}>
-            📊 View Summary
+          <button title="Activity opens in the full product" style={{ width: '100%', padding: '6px 0', borderRadius: 8, fontWeight: 800, fontSize: 11, color: '#fff', background: 'linear-gradient(120deg,#41b9e3,#0a7dba)' }}>
+            📊 Summary
           </button>
         ) : (
-          <button disabled style={{ width: '100%', padding: '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 13, color: '#7d93a6', background: '#eef3f6', cursor: 'default' }}>
-            🔒 Coming Soon
+          <button disabled style={{ width: '100%', padding: '6px 0', borderRadius: 8, fontWeight: 800, fontSize: 11, color: '#7d93a6', background: '#eef3f6', cursor: 'default' }}>
+            🔒 Coming soon
           </button>
         )}
       </div>
@@ -117,13 +134,22 @@ function ActivityCard({ a }) {
 
 /* ---------------- journey band ---------------- */
 
-function Journey({ modules, currentId }) {
+const BAND = { background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid #bcd9ec', borderRadius: 16, boxShadow: CARD_SHADOW }
+
+function BandHead({ modules, right }) {
   return (
-    <Glass style={{ padding: '14px 22px 16px', marginBottom: 22 }}>
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 12 }}>
-        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1.2, color: '#ffd44d' }}>✦ YOUR WRITING JOURNEY</div>
-        <div style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,.75)' }}>{modules.length} Modules · A Brighter You <span style={{ color: '#ffd44d' }}>✦</span></div>
-      </div>
+    <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 8 }}>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.1, color: '#0a7dba' }}>✦ YOUR WRITING JOURNEY</div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#5c7285' }}>{right || <>{modules.length} Modules · A Brighter You <span style={{ color: '#f5b400' }}>✦</span></>}</div>
+    </div>
+  )
+}
+
+// A — every module in one slim row.
+function JourneyAll({ modules, currentId }) {
+  return (
+    <div style={{ ...BAND, padding: '9px 18px 10px', marginBottom: 18 }}>
+      <BandHead modules={modules} />
       <div style={{ display: 'flex', alignItems: 'flex-start' }}>
         {modules.map((m, i) => {
           const locked = m.status === 'not_started'
@@ -131,25 +157,84 @@ function Journey({ modules, currentId }) {
           const done = m.status === 'completed'
           return (
             <React.Fragment key={m.id}>
-              {i > 0 && <div style={{ flex: '0 0 auto', width: 28, borderTop: '2px dashed rgba(255,255,255,.35)', marginTop: 26 }} />}
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, textAlign: 'center',
-                background: cur ? 'rgba(255,255,255,.12)' : 'transparent', borderRadius: 14, padding: '8px 6px' }}>
-                <div style={{ position: 'relative', width: 54, height: 54, borderRadius: '50%', display: 'grid', placeItems: 'center',
-                  background: cur ? 'radial-gradient(circle, rgba(255,212,77,.35), transparent 70%)' : 'rgba(255,255,255,.08)',
-                  boxShadow: cur ? '0 0 0 3px #f5b400, 0 0 24px rgba(245,180,0,.6)' : 'none' }}>
-                  <ModuleBadge id={m.id} size={cur ? 44 : 36} dim={locked} />
-                  {done && <span style={{ position: 'absolute', top: -2, right: -4, width: 17, height: 17, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 800 }}>✓</span>}
-                  {locked && <span style={{ position: 'absolute', top: -4, right: -6, fontSize: 12 }}>🔒</span>}
+              {i > 0 && <div style={{ flex: '0 0 auto', width: 22, borderTop: '2px dashed #8fcbe8', marginTop: 17 }} />}
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', background: cur ? '#eaf6fd' : 'transparent', borderRadius: 10, padding: '4px 6px' }}>
+                <div style={{ position: 'relative', width: 36, height: 36, borderRadius: '50%', display: 'grid', placeItems: 'center', boxShadow: cur ? '0 0 0 2.5px #f5b400, 0 0 16px rgba(245,180,0,.5)' : 'none', background: cur ? '#fff' : 'transparent' }}>
+                  <ModuleBadge id={m.id} size={cur ? 30 : 26} dim={locked} />
+                  {done && <span style={{ position: 'absolute', top: -3, right: -4, width: 14, height: 14, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 8.5, fontWeight: 800 }}>✓</span>}
+                  {locked && <span style={{ position: 'absolute', top: -5, right: -5, fontSize: 10 }}>🔒</span>}
                 </div>
-                <div style={{ fontSize: 11.5, fontWeight: 800, lineHeight: 1.25, color: cur ? '#fff' : locked ? 'rgba(255,255,255,.6)' : 'rgba(255,255,255,.9)' }}>
-                  Module {i + 1}:<br />{m.label}
+                <div style={{ fontSize: 10.5, fontWeight: 800, lineHeight: 1.2, color: cur ? NAVY : locked ? '#8aa0b2' : '#2f5573' }}>
+                  <span style={{ color: cur ? '#0a7dba' : 'inherit' }}>M{i + 1}</span> · {m.label}
                 </div>
               </div>
             </React.Fragment>
           )
         })}
       </div>
-    </Glass>
+    </div>
+  )
+}
+
+// B — one module at a time, with arrows and dots.
+function JourneyCarousel({ modules, currentId }) {
+  const curIdx = Math.max(0, modules.findIndex((m) => m.id === currentId))
+  const [i, setI] = useState(curIdx)
+  const m = modules[i]
+  const locked = m.status === 'not_started'
+  const done = m.status === 'completed'
+  const cur = m.id === currentId
+  const status = done ? 'Completed' : cur ? 'In progress' : locked ? `Locked · finish Module ${i} first` : 'Ready'
+  const arrow = (dir) => {
+    const ok = dir < 0 ? i > 0 : i < modules.length - 1
+    return (
+      <button onClick={() => ok && setI(i + dir)} disabled={!ok} aria-label={dir < 0 ? 'Previous module' : 'Next module'}
+        style={{ width: 34, height: 34, borderRadius: '50%', background: ok ? '#fff' : '#f2f6f9', border: '1.5px solid #bcd9ec', color: ok ? '#0a7dba' : '#b4c0cb', fontSize: 18, fontWeight: 800, display: 'grid', placeItems: 'center', flexShrink: 0, cursor: ok ? 'pointer' : 'default' }}>
+        {dir < 0 ? '‹' : '›'}
+      </button>
+    )
+  }
+  return (
+    <div style={{ ...BAND, padding: '9px 18px 10px', marginBottom: 18 }}>
+      <BandHead modules={modules} right={<>Module {i + 1} of {modules.length}</>} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        {arrow(-1)}
+        <div style={{ position: 'relative', width: 50, height: 50, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#fff', boxShadow: cur ? '0 0 0 2.5px #f5b400, 0 0 18px rgba(245,180,0,.5)' : '0 0 0 1.5px #dde8ee', flexShrink: 0 }}>
+          <ModuleBadge id={m.id} size={40} dim={locked} />
+          {done && <span style={{ position: 'absolute', top: -2, right: -3, width: 16, height: 16, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 9.5, fontWeight: 800 }}>✓</span>}
+          {locked && <span style={{ position: 'absolute', top: -5, right: -5, fontSize: 12 }}>🔒</span>}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 800, color: locked ? '#7d93a6' : NAVY, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Module {i + 1}: {m.label}</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
+            <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: '2px 8px', borderRadius: 999, background: done ? '#e4f5ec' : cur ? '#fdf1dc' : '#eef3f6', color: done ? '#2e9e6b' : cur ? '#b97e10' : '#7d93a6' }}>{status.toUpperCase()}</span>
+            {!locked && <div style={{ flex: 1, maxWidth: 220, height: 7, background: '#e6eef3', borderRadius: 4, overflow: 'hidden' }}><div style={{ height: '100%', width: `${(m.progress || 0) * 100}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)' }} /></div>}
+            {!locked && <span style={{ fontSize: 11, fontWeight: 700, color: '#5c7285' }}>{Math.round((m.progress || 0) * 100)}%</span>}
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }} aria-label="Modules">
+          {modules.map((x, k) => {
+            const on = k === i
+            const c = x.status === 'completed' ? '#2e9e6b' : x.id === currentId ? '#f5b400' : '#c9d6e0'
+            return <button key={x.id} onClick={() => setI(k)} aria-label={`Module ${k + 1}`} style={{ width: on ? 18 : 8, height: 8, borderRadius: 4, background: c, opacity: on ? 1 : .8, transition: 'width .15s', padding: 0 }} />
+          })}
+        </div>
+        {arrow(1)}
+      </div>
+    </div>
+  )
+}
+
+function JourneySwitch({ value, onChange }) {
+  const opt = (v, label) => (
+    <button onClick={() => onChange(v)} style={{ padding: '5px 10px', borderRadius: 8, fontWeight: 800, fontSize: 11.5, background: value === v ? NAVY : 'transparent', color: value === v ? '#fff' : '#4a6f8c' }}>{label}</button>
+  )
+  return (
+    <div title="Prototype only: two ways to show the journey band" style={{ display: 'inline-flex', gap: 2, padding: 2, background: 'rgba(255,255,255,.9)', border: '1.5px solid #bcd9ec', borderRadius: 10, boxShadow: CARD_SHADOW }}>
+      <span style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: '#7d93a6', padding: '0 6px 0 8px' }}>JOURNEY</span>
+      {opt('all', 'A · All six')}
+      {opt('one', 'B · One at a time')}
+    </div>
   )
 }
 
@@ -178,6 +263,115 @@ function ProgressRing({ pct }) {
   )
 }
 
+
+/* ---------------- string lights ---------------- */
+
+// Quadratic curve between two card centres with a gentle sag, then bulbs
+// spaced along it. Everything in container pixels, measured after layout.
+function stringPath(a, b, sag = 34) {
+  const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2 + sag
+  const pts = []
+  for (let i = 0; i <= 48; i++) {
+    const t = i / 48, u = 1 - t
+    pts.push({ x: u * u * a.x + 2 * u * t * cx + t * t * b.x, y: u * u * a.y + 2 * u * t * cy + t * t * b.y })
+  }
+  const bulbs = []
+  let acc = 0, next = 22
+  for (let i = 1; i < pts.length; i++) {
+    acc += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
+    if (acc >= next) { bulbs.push(pts[i]); next += 26 }
+  }
+  return { d: `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`, bulbs }
+}
+
+function StringLights({ centres, w, h }) {
+  if (centres.length < 2 || !w) return null
+  const segs = []
+  for (let i = 1; i < centres.length; i++) segs.push(stringPath(centres[i - 1], centres[i]))
+  return (
+    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} aria-hidden>
+      <defs>
+        <filter id="bulbGlow" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="2.2" />
+        </filter>
+      </defs>
+      {segs.map((s, i) => (
+        <g key={i}>
+          <path d={s.d} fill="none" stroke="rgba(13,47,85,.55)" strokeWidth="2" strokeLinecap="round" />
+          {s.bulbs.map((b, j) => {
+            const gold = j % 5 === 2
+            return (
+              <g key={j}>
+                <circle cx={b.x} cy={b.y} r="7.5" fill={gold ? 'rgba(255,196,40,.55)' : 'rgba(0,170,255,.5)'} filter="url(#bulbGlow)" />
+                <circle cx={b.x} cy={b.y} r="3.6" fill={gold ? '#ffc933' : '#1fb6ff'} stroke="#fff" strokeWidth="1.2" />
+                <circle cx={b.x - 1} cy={b.y - 1.1} r="1.1" fill="#fff" />
+              </g>
+            )
+          })}
+        </g>
+      ))}
+    </svg>
+  )
+}
+
+/* ---------------- the island path ---------------- */
+
+function IslandPath({ acts }) {
+  const box = useRef(null)
+  const cardRefs = useRef([])
+  const [size, setSize] = useState({ w: 0, h: 0 })
+  const [centres, setCentres] = useState([])
+
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el) return
+    const measure = () => {
+      const r = el.getBoundingClientRect()
+      setSize({ w: r.width, h: r.height })
+      setCentres(cardRefs.current.filter(Boolean).map((c) => {
+        const q = c.getBoundingClientRect()
+        return { x: q.left - r.left + q.width / 2, y: q.top - r.top + q.height / 2 }
+      }))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [acts.length])
+
+  const narrow = size.w > 0 && size.w < 820
+
+  if (narrow) {
+    return (
+      <div ref={box} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 40, padding: '10px 14px 0' }}>
+        {acts.map((a) => <ActivityCard key={a.n} a={a} />)}
+      </div>
+    )
+  }
+
+  return (
+    <div ref={box} style={{ position: 'relative', width: '100%', paddingTop: `${STRIP_ASPECT * 100}%`, margin: '-10px 0 0' }}>
+      {/* the islands, washed a little and feathered at the edges */}
+      <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 24,
+        backgroundImage: `linear-gradient(rgba(${WASH_RGB},.22), rgba(${WASH_RGB},.22)), url(${ISLANDS})`,
+        backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
+        WebkitMaskImage: 'linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)',
+        maskImage: 'linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)',
+        WebkitMaskComposite: 'source-in', maskComposite: 'intersect' }} />
+      <StringLights centres={centres} w={size.w} h={size.h} />
+      {acts.map((a, i) => {
+        const spot = ISLAND_SPOTS[i] || ISLAND_SPOTS[ISLAND_SPOTS.length - 1]
+        return (
+          <div key={a.n} ref={(el) => { cardRefs.current[i] = el }}
+            style={{ position: 'absolute', left: `${spot.x}%`, top: `${spot.y + spot.sink}%`, transform: 'translate(-50%, -100%)', width: 'clamp(142px, 15.5%, 168px)', zIndex: 2 }}>
+            <ActivityCard a={a} />
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 /* ---------------- page ---------------- */
 
 export default function LunaPage({ state, me, onBack }) {
@@ -195,32 +389,39 @@ export default function LunaPage({ state, me, onBack }) {
   const level = Math.floor(coins / 300) + 1
   const levelPct = (coins % 300) / 300
   const earned = ['m1', 'm5', 'm4']
+  const [journey, setJourney] = useState(() => { try { return localStorage.getItem('luna.journey') || 'all' } catch { return 'all' } })
+  const pickJourney = (v) => { setJourney(v); try { localStorage.setItem('luna.journey', v) } catch {} }
 
   return (
-    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '28px 0 70px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: '#fff',
-      backgroundColor: NAVY,
-      backgroundImage: `linear-gradient(180deg, rgba(8,28,64,${SKY_DIM + .1}) 0%, rgba(8,28,64,${SKY_DIM}) 30%, rgba(8,28,64,${SKY_DIM}) 70%, rgba(8,28,64,${SKY_DIM + .15}) 100%), url(${SKY})`,
-      backgroundSize: 'cover, cover', backgroundPosition: 'center top, center top', backgroundAttachment: 'scroll, fixed' }}>
+    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '28px 0 70px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
+      backgroundColor: SKY_CONT,
+      backgroundImage: `linear-gradient(to bottom, rgba(${WASH_RGB},${PAGE_WASH}) 0, rgba(${WASH_RGB},${PAGE_WASH}) 380px, ${SKY_CONT} 560px, ${SKY_CONT} 100%), url(${SKY_TOP})`,
+      backgroundSize: '100% 100%, 100% auto', backgroundPosition: 'top, center top', backgroundRepeat: 'no-repeat, no-repeat' }}>
 
       <div style={{ position: 'relative', maxWidth: 1780, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
         {/* header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 22, marginBottom: 22 }}>
-          <img src={BRAND.luna} alt="Luna" style={{ height: 118, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.5))' }} />
+          <img src={BRAND.luna} alt="Luna" style={{ height: 118, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
           <div>
-            <h1 style={{ margin: 0, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 800, lineHeight: 1.05, letterSpacing: '-.01em', textShadow: '0 3px 14px rgba(2,20,50,.6)' }}>
-              Luna's <span style={{ color: '#7fe3ff' }}>Writing Nook</span>
+            <h1 style={{ margin: 0, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 800, lineHeight: 1.05, letterSpacing: '-.01em', color: NAVY }}>
+              Luna's <span style={{ color: '#06aade' }}>Writing Nook</span>
             </h1>
-            <div style={{ fontSize: 17, fontWeight: 700, marginTop: 6, color: 'rgba(255,255,255,.92)', textShadow: '0 2px 8px rgba(2,20,50,.6)' }}>Think it. Write it. Shine! <span style={{ color: '#ffd44d' }}>✦</span></div>
+            <div style={{ fontSize: 17, fontWeight: 700, marginTop: 6, color: '#4a6f8c' }}>Think it. Write it. Shine! <span style={{ color: '#f5b400' }}>✦</span></div>
           </div>
           <div style={{ flex: 1 }} />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8 }}>
           {onBack && (
-            <button onClick={onBack} style={{ alignSelf: 'flex-start', background: 'rgba(255,255,255,.96)', borderRadius: 12, padding: '11px 20px', fontWeight: 800, fontSize: 14, color: NAVY, boxShadow: CARD_SHADOW }}>
+            <button onClick={onBack} style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 12, padding: '11px 20px', fontWeight: 800, fontSize: 14, color: NAVY, boxShadow: CARD_SHADOW }}>
               ← Back to Previous Page
             </button>
           )}
+          <JourneySwitch value={journey} onChange={pickJourney} />
+          </div>
         </div>
 
-        <Journey modules={modules} currentId={current.id} />
+        {journey === 'one'
+          ? <JourneyCarousel key={current.id} modules={modules} currentId={current.id} />
+          : <JourneyAll modules={modules} currentId={current.id} />}
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 22, alignItems: 'start' }}>
           {/* ===== main column ===== */}
@@ -248,20 +449,8 @@ export default function LunaPage({ state, me, onBack }) {
               </div>
             </White>
 
-            {/* activity path */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: '48px 44px', padding: '6px 14px 0' }}>
-              {acts.map((a, i) => (
-                <div key={a.n} style={{ position: 'relative' }}>
-                  {i % 3 !== 2 && i < acts.length - 1 && (
-                    <div aria-hidden style={{ position: 'absolute', top: 58, right: -44, width: 44, borderTop: '3px dotted rgba(255,255,255,.7)', zIndex: 1 }} />
-                  )}
-                  {i === 2 && acts.length > 3 && (
-                    <div aria-hidden style={{ position: 'absolute', left: '50%', bottom: -48, height: 48, borderLeft: '3px dotted rgba(255,255,255,.7)', zIndex: 1 }} />
-                  )}
-                  <ActivityCard a={a} />
-                </div>
-              ))}
-            </div>
+            {/* activity path, on the islands */}
+            <IslandPath acts={acts} />
           </div>
 
           {/* ===== writer profile ===== */}
@@ -339,8 +528,8 @@ export default function LunaPage({ state, me, onBack }) {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 34, fontSize: 14, fontStyle: 'italic', color: 'rgba(255,255,255,.8)', textShadow: '0 2px 8px rgba(2,20,50,.6)' }}>
-          "Every great writer starts with a single idea." <span style={{ color: '#ffd44d' }}>✦</span>
+        <div style={{ textAlign: 'center', marginTop: 34, fontSize: 14, fontStyle: 'italic', color: NAVY, fontWeight: 600 }}>
+          "Every great writer starts with a single idea." <span style={{ color: '#f5b400' }}>✦</span>
         </div>
       </div>
     </div>

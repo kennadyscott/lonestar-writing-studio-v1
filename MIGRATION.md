@@ -82,3 +82,13 @@ question has a video, a wrong answer plays it.
   that converted it, not fixed.
 - Art uploaded through the browser importer cannot be stored on a serverless
   host. Art I attached by hand is in the repo and fine.
+
+## Fluency Sets (added 2026-09-15)
+
+Fluency Practice is not content-as-data yet. Six games are hardcoded
+(`src/student/FluencyGame.jsx` banks and `server/typingBank.mjs` tiers) and the
+game list lives in `server/seed.mjs` → `fluencyGames`. The CMS should add a
+`fluency_set` content type with the same stage pipeline and proof gate as
+learning paths, import the existing banks as `imported` (never approved), and
+serve them through `/api/library/live`. Full brief with item shapes and proof
+rules: `~/Documents/fluency-sets-brief.md`.

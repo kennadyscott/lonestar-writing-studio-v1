@@ -22,19 +22,19 @@ const NAVY = '#0d2f55'
 const GLASS = 'rgba(9, 32, 68, .82)'
 const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .22)'
 
-// Where the five islands are in luna-islands.webp, as % of the strip.
+// Where the six islands are in luna-islands.webp (composed 3 x 2 from the art), as % of the strip.
 // x = card centre, y = the island's grass line; the card's bottom edge sits
 // a little below that so it reads as standing on the island. Card 6 has no
 // island; it floats over the river.
 const ISLAND_SPOTS = [
-  { x: 13.0, y: 41.7, sink: 3 },
-  { x: 40.0, y: 45.5, sink: 3 },
-  { x: 66.5, y: 46.7, sink: 3 },
-  { x: 11.0, y: 66.9, sink: 13 },
-  { x: 36.0, y: 75.8, sink: 11 },
-  { x: 65.0, y: 76.0, sink: 11 },
+  { x: 17, y: 30, sink: 5 },
+  { x: 50, y: 30, sink: 5 },
+  { x: 83, y: 30, sink: 5 },
+  { x: 17, y: 72, sink: 5 },
+  { x: 50, y: 72, sink: 5 },
+  { x: 83, y: 72, sink: 5 },
 ]
-const STRIP_ASPECT = 0.585 // strip height / width (art is 0.565; a hair taller for card room)
+const STRIP_ASPECT = 0.565 // strip height / width, the art's own ratio
 
 const RACE_TILES = [['R', '#e668c9'], ['A', '#6db7f2'], ['C', '#7fd483'], ['E', '#f2b27e']]
 
@@ -176,63 +176,14 @@ function JourneyAll({ modules, currentId }) {
   )
 }
 
-// B — one module at a time, with arrows and dots.
-function JourneyCarousel({ modules, currentId }) {
-  const curIdx = Math.max(0, modules.findIndex((m) => m.id === currentId))
-  const [i, setI] = useState(curIdx)
-  const m = modules[i]
-  const locked = m.status === 'not_started'
-  const done = m.status === 'completed'
-  const cur = m.id === currentId
-  const status = done ? 'Completed' : cur ? 'In progress' : locked ? `Locked · finish Module ${i} first` : 'Ready'
-  const arrow = (dir) => {
-    const ok = dir < 0 ? i > 0 : i < modules.length - 1
-    return (
-      <button onClick={() => ok && setI(i + dir)} disabled={!ok} aria-label={dir < 0 ? 'Previous module' : 'Next module'}
-        style={{ width: 34, height: 34, borderRadius: '50%', background: ok ? '#fff' : '#f2f6f9', border: '1.5px solid #bcd9ec', color: ok ? '#0a7dba' : '#b4c0cb', fontSize: 18, fontWeight: 800, display: 'grid', placeItems: 'center', flexShrink: 0, cursor: ok ? 'pointer' : 'default' }}>
-        {dir < 0 ? '‹' : '›'}
-      </button>
-    )
-  }
-  return (
-    <div style={{ ...BAND, padding: '9px 18px 10px', marginBottom: 18 }}>
-      <BandHead modules={modules} right={<>Module {i + 1} of {modules.length}</>} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-        {arrow(-1)}
-        <div style={{ position: 'relative', width: 50, height: 50, borderRadius: '50%', display: 'grid', placeItems: 'center', background: '#fff', boxShadow: cur ? '0 0 0 2.5px #f5b400, 0 0 18px rgba(245,180,0,.5)' : '0 0 0 1.5px #dde8ee', flexShrink: 0 }}>
-          <ModuleBadge id={m.id} size={40} dim={locked} />
-          {done && <span style={{ position: 'absolute', top: -2, right: -3, width: 16, height: 16, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 9.5, fontWeight: 800 }}>✓</span>}
-          {locked && <span style={{ position: 'absolute', top: -5, right: -5, fontSize: 12 }}>🔒</span>}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 15, fontWeight: 800, color: locked ? '#7d93a6' : NAVY, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Module {i + 1}: {m.label}</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 4 }}>
-            <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .4, padding: '2px 8px', borderRadius: 999, background: done ? '#e4f5ec' : cur ? '#fdf1dc' : '#eef3f6', color: done ? '#2e9e6b' : cur ? '#b97e10' : '#7d93a6' }}>{status.toUpperCase()}</span>
-            {!locked && <div style={{ flex: 1, maxWidth: 220, height: 7, background: '#e6eef3', borderRadius: 4, overflow: 'hidden' }}><div style={{ height: '100%', width: `${(m.progress || 0) * 100}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)' }} /></div>}
-            {!locked && <span style={{ fontSize: 11, fontWeight: 700, color: '#5c7285' }}>{Math.round((m.progress || 0) * 100)}%</span>}
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexShrink: 0 }} aria-label="Modules">
-          {modules.map((x, k) => {
-            const on = k === i
-            const c = x.status === 'completed' ? '#2e9e6b' : x.id === currentId ? '#f5b400' : '#c9d6e0'
-            return <button key={x.id} onClick={() => setI(k)} aria-label={`Module ${k + 1}`} style={{ width: on ? 18 : 8, height: 8, borderRadius: 4, background: c, opacity: on ? 1 : .8, transition: 'width .15s', padding: 0 }} />
-          })}
-        </div>
-        {arrow(1)}
-      </div>
-    </div>
-  )
-}
-
-function JourneySwitch({ value, onChange }) {
+function LessonSwitch({ value, onChange }) {
   const opt = (v, label) => (
     <button onClick={() => onChange(v)} style={{ padding: '5px 10px', borderRadius: 8, fontWeight: 800, fontSize: 11.5, background: value === v ? NAVY : 'transparent', color: value === v ? '#fff' : '#4a6f8c' }}>{label}</button>
   )
   return (
-    <div title="Prototype only: two ways to show the journey band" style={{ display: 'inline-flex', gap: 2, padding: 2, background: 'rgba(255,255,255,.9)', border: '1.5px solid #bcd9ec', borderRadius: 10, boxShadow: CARD_SHADOW }}>
-      <span style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: '#7d93a6', padding: '0 6px 0 8px' }}>JOURNEY</span>
-      {opt('all', 'A · All six')}
+    <div title="Prototype only: two ways to show the lessons" style={{ display: 'inline-flex', gap: 2, padding: 2, background: 'rgba(255,255,255,.9)', border: '1.5px solid #bcd9ec', borderRadius: 10, boxShadow: CARD_SHADOW }}>
+      <span style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: '#7d93a6', padding: '0 6px 0 8px' }}>LESSONS</span>
+      {opt('all', 'A · All on the map')}
       {opt('one', 'B · One at a time')}
     </div>
   )
@@ -284,10 +235,10 @@ function stringPath(a, b, sag = 34) {
   return { d: `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`, bulbs }
 }
 
-function StringLights({ centres, w, h }) {
+function StringLights({ centres, w, h, sag }) {
   if (centres.length < 2 || !w) return null
   const segs = []
-  for (let i = 1; i < centres.length; i++) segs.push(stringPath(centres[i - 1], centres[i]))
+  for (let i = 1; i < centres.length; i++) segs.push(stringPath(centres[i - 1], centres[i], sag))
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} aria-hidden>
       <defs>
@@ -372,6 +323,61 @@ function IslandPath({ acts }) {
   )
 }
 
+
+/* ---------------- one lesson at a time ---------------- */
+
+const ISLAND_ONE = BASE + 'luna-island.webp'
+
+function LessonCarousel({ acts }) {
+  const start = Math.max(0, acts.findIndex((a) => a.status === 'in_progress'))
+  const [i, setI] = useState(start)
+  const box = useRef(null)
+  const cardRef = useRef(null)
+  const [geo, setGeo] = useState({ w: 0, h: 0, c: null })
+  useLayoutEffect(() => {
+    const el = box.current
+    if (!el) return
+    const measure = () => {
+      const r = el.getBoundingClientRect(); const q = cardRef.current?.getBoundingClientRect()
+      setGeo({ w: r.width, h: r.height, c: q ? { x: q.left - r.left + q.width / 2, y: q.top - r.top + q.height / 2 } : null })
+    }
+    measure(); const ro = new ResizeObserver(measure); ro.observe(el); return () => ro.disconnect()
+  }, [])
+  const a = acts[i]
+  const go = (d) => setI((k) => Math.min(acts.length - 1, Math.max(0, k + d)))
+  const arrow = (d) => {
+    const ok = d < 0 ? i > 0 : i < acts.length - 1
+    return (
+      <button onClick={() => go(d)} disabled={!ok} aria-label={d < 0 ? 'Previous lesson' : 'Next lesson'}
+        style={{ width: 44, height: 44, borderRadius: '50%', background: ok ? '#fff' : 'rgba(255,255,255,.6)', border: '1.5px solid #bcd9ec', color: ok ? '#0a7dba' : '#b4c0cb', fontSize: 24, fontWeight: 800, display: 'grid', placeItems: 'center', boxShadow: CARD_SHADOW, cursor: ok ? 'pointer' : 'default', zIndex: 3 }}>
+        {d < 0 ? '‹' : '›'}
+      </button>
+    )
+  }
+  const lights = geo.c ? [{ x: geo.w * 0.06, y: geo.c.y - 40 }, geo.c, { x: geo.w * 0.94, y: geo.c.y - 40 }] : []
+  return (
+    <div ref={box} style={{ position: 'relative', minHeight: 440, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 28, padding: '64px 12px 60px' }}>
+      <StringLights centres={lights} w={geo.w} h={geo.h} sag={56} />
+      {arrow(-1)}
+      <div style={{ position: 'relative', width: 'clamp(230px, 28%, 290px)', paddingBottom: 96, zIndex: 2 }}>
+        <img src={ISLAND_ONE} alt="" style={{ position: 'absolute', left: '50%', bottom: 0, width: '172%', transform: 'translateX(-50%)', filter: 'drop-shadow(0 14px 18px rgba(2,20,50,.3))', pointerEvents: 'none' }} />
+        <div ref={cardRef} style={{ position: 'relative', zIndex: 2, transform: 'scale(1.26)', transformOrigin: 'bottom center', marginBottom: 14 }}>
+          <ActivityCard a={a} />
+        </div>
+      </div>
+      {arrow(1)}
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 14, display: 'flex', justifyContent: 'center', gap: 8, zIndex: 3 }} aria-label="Lessons">
+        {acts.map((x, k) => {
+          const on = k === i
+          const c = x.status === 'passed' ? '#2e9e6b' : x.status === 'in_progress' ? '#f5b400' : '#c9d6e0'
+          return <button key={x.n} onClick={() => setI(k)} aria-label={`Lesson ${k + 1}`} style={{ width: on ? 22 : 9, height: 9, borderRadius: 5, background: c, boxShadow: '0 0 0 2px rgba(255,255,255,.9)', transition: 'width .15s', padding: 0 }} />
+        })}
+      </div>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 34, textAlign: 'center', fontSize: 12, fontWeight: 800, color: NAVY, letterSpacing: .4, zIndex: 3 }}>Lesson {i + 1} of {acts.length}</div>
+    </div>
+  )
+}
+
 /* ---------------- page ---------------- */
 
 export default function LunaPage({ state, me, onBack }) {
@@ -389,8 +395,8 @@ export default function LunaPage({ state, me, onBack }) {
   const level = Math.floor(coins / 300) + 1
   const levelPct = (coins % 300) / 300
   const earned = ['m1', 'm5', 'm4']
-  const [journey, setJourney] = useState(() => { try { return localStorage.getItem('luna.journey') || 'all' } catch { return 'all' } })
-  const pickJourney = (v) => { setJourney(v); try { localStorage.setItem('luna.journey', v) } catch {} }
+  const [lessons, setLessons] = useState(() => { try { return localStorage.getItem('luna.lessons') || 'all' } catch { return 'all' } })
+  const pickLessons = (v) => { setLessons(v); try { localStorage.setItem('luna.lessons', v) } catch {} }
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '28px 0 70px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
@@ -404,7 +410,7 @@ export default function LunaPage({ state, me, onBack }) {
           <img src={BRAND.luna} alt="Luna" style={{ height: 118, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
           <div>
             <h1 style={{ margin: 0, fontSize: 'clamp(30px, 3.2vw, 46px)', fontWeight: 800, lineHeight: 1.05, letterSpacing: '-.01em', color: NAVY }}>
-              Luna's <span style={{ color: '#06aade' }}>Writing Nook</span>
+              Luna's <span style={{ color: '#035c78' }}>Writing Nook</span>
             </h1>
             <div style={{ fontSize: 17, fontWeight: 700, marginTop: 6, color: '#4a6f8c' }}>Think it. Write it. Shine! <span style={{ color: '#f5b400' }}>✦</span></div>
           </div>
@@ -415,13 +421,11 @@ export default function LunaPage({ state, me, onBack }) {
               ← Back to Previous Page
             </button>
           )}
-          <JourneySwitch value={journey} onChange={pickJourney} />
+          <LessonSwitch value={lessons} onChange={pickLessons} />
           </div>
         </div>
 
-        {journey === 'one'
-          ? <JourneyCarousel key={current.id} modules={modules} currentId={current.id} />
-          : <JourneyAll modules={modules} currentId={current.id} />}
+        <JourneyAll modules={modules} currentId={current.id} />
 
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 22, alignItems: 'start' }}>
           {/* ===== main column ===== */}
@@ -450,7 +454,7 @@ export default function LunaPage({ state, me, onBack }) {
             </White>
 
             {/* activity path, on the islands */}
-            <IslandPath acts={acts} />
+            {lessons === 'one' ? <LessonCarousel acts={acts} /> : <IslandPath acts={acts} />}
           </div>
 
           {/* ===== writer profile ===== */}

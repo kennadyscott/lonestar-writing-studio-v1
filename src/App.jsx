@@ -54,7 +54,7 @@ export default function App() {
   } else if (view === 'home') {
     body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
   } else if (view === 'luna') {
-    body = <LunaPage state={state} onBack={goHome} onChange={refresh} />
+    body = <LunaPage state={state} me={me} onBack={goHome} />
   } else if (view === 'quickwrite') {
     body = <QuickWritePage state={state} onBack={goHome} onChange={refresh} />
   } else if (view === 'wall') {

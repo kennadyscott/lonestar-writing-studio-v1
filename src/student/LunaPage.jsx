@@ -64,7 +64,7 @@ function White({ children, style }) {
 
 /* ---------------- activity cards ---------------- */
 
-function ActivityCard({ a, onOpen }) {
+function ActivityCard({ a, onOpen, wide = false }) {
   const passed = a.status === 'passed'
   const current = a.status === 'in_progress'
   const locked = a.status === 'todo'
@@ -74,14 +74,15 @@ function ActivityCard({ a, onOpen }) {
     <div role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
       onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      style={{ position: 'relative', background: '#fff', borderRadius: 14, padding: 7, cursor: clickable ? 'pointer' : 'default',
+      style={{ position: 'relative', background: '#fff', borderRadius: 14, padding: wide ? 10 : 7, cursor: clickable ? 'pointer' : 'default',
+        display: wide ? 'flex' : 'block', gap: wide ? 14 : 0, alignItems: 'stretch',
         border: '1px solid var(--gold-line)',
         boxShadow: current ? '0 0 0 2.5px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)',
         opacity: locked && !a.final ? .7 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
-      <div style={{ position: 'relative', height: 66, borderRadius: 10, overflow: 'hidden', background: a.final ? 'linear-gradient(135deg,#1c4f86 0%,#0d2f55 100%)' : 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+      <div style={{ position: 'relative', height: wide ? 'auto' : 66, minHeight: wide ? 118 : undefined, width: wide ? '42%' : 'auto', flexShrink: 0, borderRadius: 10, overflow: 'hidden', background: a.final ? 'linear-gradient(135deg,#1c4f86 0%,#0d2f55 100%)' : 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
         <div style={{ position: 'absolute', bottom: -14, left: 0, right: 0, height: 26, background: 'radial-gradient(ellipse at 50% 100%, #3f7a3a 0%, #2c5a3a 45%, transparent 72%)' }} />
-        <img src={BRAND.luna} alt="" style={{ height: 42, position: 'relative', filter: locked ? 'grayscale(.4) brightness(.85)' : 'none' }} />
+        <img src={BRAND.luna} alt="" style={{ height: wide ? 64 : 42, position: 'relative', filter: locked ? 'grayscale(.4) brightness(.85)' : 'none' }} />
         {a.art === 'RACE' ? (
           <span style={{ display: 'inline-flex', gap: 2, position: 'relative' }}>
             {RACE_TILES.map(([l, c]) => (
@@ -89,22 +90,22 @@ function ActivityCard({ a, onOpen }) {
             ))}
           </span>
         ) : (
-          <span style={{ fontSize: 24, position: 'relative', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.45))' }}>{a.final ? '🏆' : a.art}</span>
+          <span style={{ fontSize: wide ? 32 : 24, position: 'relative', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.45))' }}>{a.final ? '🏆' : a.art}</span>
         )}
         {locked && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 12, opacity: .9 }}>🔒</span>}
       </div>
 
-      <div style={{ padding: '8px 3px 3px', textAlign: 'center' }}>
-        <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .9, color: a.final ? '#b97e10' : current ? 'var(--link)' : '#7d93a6', marginBottom: 3 }}>{a.final ? 'FINAL CHALLENGE' : `LESSON ${a.n}`}</div>
-        <div style={{ fontWeight: 800, fontSize: a.final ? 12.5 : 11.5, lineHeight: 1.2, color: NAVY, minHeight: a.sub ? 0 : 28 }}>{a.title}</div>
-        {a.sub && <div style={{ fontSize: 10.5, color: '#5c7285', marginTop: 1 }}>{a.sub}</div>}
-        <div style={{ margin: '4px 0 2px' }}><Stars n={a.stars} size={12} /></div>
+      <div style={{ padding: wide ? '4px 2px 2px' : '8px 3px 3px', textAlign: wide ? 'left' : 'center', flex: 1, minWidth: 0, display: wide ? 'flex' : 'block', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ fontSize: wide ? 10.5 : 9.5, fontWeight: 800, letterSpacing: .9, color: a.final ? '#b97e10' : current ? 'var(--link)' : '#7d93a6', marginBottom: 3 }}>{a.final ? 'FINAL CHALLENGE' : `LESSON ${a.n}`}</div>
+        <div style={{ fontWeight: 800, fontSize: wide ? 15 : a.final ? 12.5 : 11.5, lineHeight: 1.2, color: NAVY, minHeight: wide || a.sub ? 0 : 28 }}>{a.title}</div>
+        {a.sub && <div style={{ fontSize: wide ? 12 : 10.5, color: '#5c7285', marginTop: 1 }}>{a.sub}</div>}
+        <div style={{ margin: '4px 0 2px' }}><Stars n={a.stars} size={wide ? 14 : 12} /></div>
         {current ? (
-          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: '100%', marginTop: 4, padding: '7px 0', borderRadius: 8, fontWeight: 800, fontSize: 11.5, color: NAVY, background: 'linear-gradient(180deg,#ffd44d,#f5b400)', boxShadow: '0 2px 0 #c98f00' }}>
+          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: wide ? 'auto' : '100%', alignSelf: 'flex-start', marginTop: 4, padding: wide ? '8px 18px' : '7px 0', borderRadius: 8, fontWeight: 800, fontSize: wide ? 13 : 11.5, color: NAVY, background: 'linear-gradient(180deg,#ffd44d,#f5b400)', boxShadow: '0 2px 0 #c98f00' }}>
             Continue →
           </button>
         ) : (
-          <div style={{ height: 18, fontSize: 10.5, fontWeight: 700, color: passed ? (hover ? '#0a7dba' : '#7d93a6') : '#9fb3c4', lineHeight: '18px' }}>
+          <div style={{ height: 18, fontSize: wide ? 12 : 10.5, fontWeight: 700, color: passed ? (hover ? '#0a7dba' : '#7d93a6') : '#9fb3c4', lineHeight: '18px' }}>
             {passed ? (hover ? 'View summary →' : 'Passed') : a.final ? 'Unlocks after lesson 5' : 'Up next'}
           </div>
         )}
@@ -236,15 +237,13 @@ function IslandPath({ acts, onOpen }) {
 
 /* ---------------- one lesson at a time (filmstrip) ---------------- */
 
-// Five slots spread across the row: the focused lesson big in the middle,
-// its neighbours a step smaller, the outer two smaller still. `zoom` scales
-// layout too, so the slots never overlap.
+// Three landscape slots across the row: the focused lesson in the middle,
+// its neighbours a step smaller and dimmed. `zoom` scales layout too, so
+// the slots never overlap.
 const SLOTS = [
-  { w: 'clamp(110px, 12.5%, 138px)', zoom: .88, op: .55 },
-  { w: 'clamp(130px, 15%, 160px)', zoom: 1, op: .8 },
-  { w: 'clamp(160px, 18%, 196px)', zoom: 1.18, op: 1 },
-  { w: 'clamp(130px, 15%, 160px)', zoom: 1, op: .8 },
-  { w: 'clamp(110px, 12.5%, 138px)', zoom: .88, op: .55 },
+  { w: '24%', zoom: .92, op: .6 },
+  { w: '37%', zoom: 1, op: 1 },
+  { w: '24%', zoom: .92, op: .6 },
 ]
 
 function LessonCarousel({ acts, onOpen }) {
@@ -263,16 +262,16 @@ function LessonCarousel({ acts, onOpen }) {
   }
   return (
     <div tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '12px 0 44px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'clamp(8px, 1.5%, 20px)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(8px, 1.5%, 20px)' }}>
         {arrow(-1)}
         {SLOTS.map((slot, sIdx) => {
-          const k = i + (sIdx - 2)
+          const k = i + (sIdx - 1)
           const a = acts[k]
-          const focus = sIdx === 2
+          const focus = sIdx === 1
           return (
             <div key={sIdx} onClick={() => a && !focus && setI(k)}
               style={{ width: slot.w, flexShrink: 0, zoom: slot.zoom, opacity: a ? slot.op : 0, transition: 'opacity .18s', cursor: a && !focus ? 'pointer' : 'default', filter: focus ? 'none' : 'saturate(.8)', pointerEvents: a ? 'auto' : 'none', position: 'relative', zIndex: focus ? 3 : 2 }}>
-              {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none' }}><ActivityCard a={a} onOpen={onOpen} /></div> : <div style={{ height: 1 }} />}
+              {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none' }}><ActivityCard a={a} onOpen={onOpen} wide /></div> : <div style={{ height: 1 }} />}
             </div>
           )
         })}

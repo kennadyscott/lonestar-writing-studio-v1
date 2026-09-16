@@ -12,24 +12,10 @@ import ModuleBadge from '../components/ModuleBadge.jsx'
 // Backdrop is the dashboard's: canvas colour + bg-stars.jpg at 22%.
 
 const BASE = import.meta.env.BASE_URL || '/'
-const ISLANDS = BASE + 'luna-islands.webp'
 const NAVY = '#0d2f55'
 const GLASS = 'rgba(9, 32, 68, .82)'
 const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .22)'
 
-// Where the six islands are in luna-islands.webp (composed as one row from the art), as % of the strip.
-// x = card centre, y = the island's grass line; the card's bottom edge sits
-// a little below that so it reads as standing on the island. Card 6 has no
-// island; it floats over the river.
-const ISLAND_SPOTS = [
-  { x: 8.5, y: 60, sink: 8 },
-  { x: 24.5, y: 60, sink: 8 },
-  { x: 40.5, y: 60, sink: 8 },
-  { x: 56.5, y: 60, sink: 8 },
-  { x: 72.5, y: 60, sink: 8 },
-  { x: 89.5, y: 60, sink: 10 },
-]
-const STRIP_ASPECT = 0.3424 // strip height / width, the art's own ratio (one row)
 
 const RACE_TILES = [['R', '#e668c9'], ['A', '#6db7f2'], ['C', '#7fd483'], ['E', '#f2b27e']]
 
@@ -271,7 +257,7 @@ function StringLights({ centres, w, h, sag }) {
   )
 }
 
-/* ---------------- the island path ---------------- */
+/* ---------------- all lessons in a row ---------------- */
 
 function IslandPath({ acts, onOpen }) {
   const box = useRef(null)
@@ -287,7 +273,7 @@ function IslandPath({ acts, onOpen }) {
       setSize({ w: r.width, h: r.height })
       setCentres(cardRefs.current.filter(Boolean).map((c) => {
         const q = c.getBoundingClientRect()
-        return { x: q.left - r.left + q.width / 2, y: q.top - r.top + q.height / 2 }
+        return { x: q.left - r.left + q.width / 2, y: q.top - r.top + q.height * .42 }
       }))
     }
     measure()
@@ -296,39 +282,18 @@ function IslandPath({ acts, onOpen }) {
     return () => ro.disconnect()
   }, [acts.length])
 
-  const narrow = size.w > 0 && size.w < 820
-
-  if (narrow) {
-    return (
-      <div ref={box} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 40, padding: '10px 14px 0' }}>
-        {acts.map((a) => <ActivityCard key={a.n} a={a} onOpen={onOpen} />)}
-      </div>
-    )
-  }
-
   return (
-    <div ref={box} style={{ position: 'relative', width: '100%', paddingTop: `${STRIP_ASPECT * 100}%`, margin: '18px 0 0' }}>
-      {/* the islands, washed a little and feathered at the edges */}
-      <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 24,
-        backgroundImage: `linear-gradient(rgba(236,244,251,.3), rgba(236,244,251,.3)), url(${ISLANDS})`,
-        backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
-        WebkitMaskImage: 'linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)',
-        maskImage: 'linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)',
-        WebkitMaskComposite: 'source-in', maskComposite: 'intersect' }} />
-      <StringLights centres={centres} w={size.w} h={size.h} />
-      {acts.map((a, i) => {
-        const spot = ISLAND_SPOTS[i] || ISLAND_SPOTS[ISLAND_SPOTS.length - 1]
-        return (
-          <div key={a.n} ref={(el) => { cardRefs.current[i] = el }}
-            style={{ position: 'absolute', left: `${spot.x}%`, top: `${spot.y + spot.sink}%`, transform: 'translate(-50%, -100%)', width: a.final ? 'clamp(150px, 17%, 186px)' : 'clamp(120px, 13.6%, 150px)', zIndex: 2 }}>
-            <ActivityCard a={a} onOpen={onOpen} />
-          </div>
-        )
-      })}
+    <div ref={box} style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'clamp(10px, 1.6%, 22px)', padding: '30px 6px 8px', marginTop: 12 }}>
+      <StringLights centres={centres} w={size.w} h={size.h} sag={18} />
+      {acts.map((a, i) => (
+        <div key={a.n} ref={(el) => { cardRefs.current[i] = el }}
+          style={{ width: a.final ? 'clamp(150px, 17%, 186px)' : 'clamp(120px, 14.5%, 156px)', flexShrink: 0, position: 'relative', zIndex: 2 }}>
+          <ActivityCard a={a} onOpen={onOpen} />
+        </div>
+      ))}
     </div>
   )
 }
-
 
 /* ---------------- one lesson at a time (filmstrip) ---------------- */
 

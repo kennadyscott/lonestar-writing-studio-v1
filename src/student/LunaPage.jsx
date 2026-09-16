@@ -17,17 +17,19 @@ const GLASS = 'rgba(9, 32, 68, .82)'
 const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .22)'
 
 
-const RACE_TILES = [['R', '#e668c9'], ['A', '#6db7f2'], ['C', '#7fd483'], ['E', '#f2b27e']]
 
 // Module 1 activity path (prototype data — mirrors the live product's lessons).
+// Art panels are cropped from the Luna V2 lesson-card renders (public/lessons/).
 const M1_ACTIVITIES = [
-  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: '💬' },
-  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: '💡' },
-  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: '🔍' },
-  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: '🧠' },
-  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'RACE' },
-  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: '💻', final: true },
+  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: 'l1' },
+  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: 'l2' },
+  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: 'l3' },
+  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: 'l4' },
+  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'l5' },
+  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'l6', final: true },
 ]
+const LESSON_ART = (key) => `${BASE}lessons/${key}.webp`
+const GOLD_FRAME = '#e9b93a'
 
 const MISSION_BLURB = {
   m1: 'Build a strong foundation for clear, thoughtful answers.',
@@ -70,44 +72,39 @@ function ActivityCard({ a, onOpen, wide = false }) {
   const locked = a.status === 'todo'
   const [hover, setHover] = useState(false)
   const clickable = passed || current
+  const frame = current ? `0 0 0 3px ${GOLD_FRAME}, 0 0 26px rgba(245,180,0,.55), 0 10px 26px rgba(2,20,50,.18)` : `0 0 0 2px ${GOLD_FRAME}, var(--shadow)`
   return (
     <div role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
       onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      style={{ position: 'relative', background: '#fff', borderRadius: 14, padding: wide ? 10 : 7, cursor: clickable ? 'pointer' : 'default',
-        display: wide ? 'flex' : 'block', gap: wide ? 14 : 0, alignItems: 'stretch',
-        border: '1px solid var(--gold-line)',
-        boxShadow: current ? '0 0 0 2.5px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)',
-        opacity: locked && !a.final ? .7 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
+      style={{ position: 'relative', background: '#fff', borderRadius: 18, overflow: 'hidden', cursor: clickable ? 'pointer' : 'default',
+        display: wide ? 'flex' : 'block', alignItems: 'stretch',
+        boxShadow: frame, opacity: locked && !a.final ? .72 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
-      <div style={{ position: 'relative', height: wide ? 'auto' : 66, minHeight: wide ? 118 : undefined, width: wide ? '42%' : 'auto', flexShrink: 0, borderRadius: 10, overflow: 'hidden', background: a.final ? 'linear-gradient(135deg,#1c4f86 0%,#0d2f55 100%)' : 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-        <div style={{ position: 'absolute', bottom: -14, left: 0, right: 0, height: 26, background: 'radial-gradient(ellipse at 50% 100%, #3f7a3a 0%, #2c5a3a 45%, transparent 72%)' }} />
-        <img src={BRAND.luna} alt="" style={{ height: wide ? 64 : 42, position: 'relative', filter: locked ? 'grayscale(.4) brightness(.85)' : 'none' }} />
-        {a.art === 'RACE' ? (
-          <span style={{ display: 'inline-flex', gap: 2, position: 'relative' }}>
-            {RACE_TILES.map(([l, c]) => (
-              <span key={l} style={{ width: 15, height: 15, borderRadius: 4, background: c, color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 9.5, transform: `rotate(${(l.charCodeAt(0) % 3 - 1) * 8}deg)`, boxShadow: '0 1px 3px rgba(0,0,0,.3)' }}>{l}</span>
-            ))}
-          </span>
-        ) : (
-          <span style={{ fontSize: wide ? 32 : 24, position: 'relative', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.45))' }}>{a.final ? '🏆' : a.art}</span>
-        )}
-        {locked && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 12, opacity: .9 }}>🔒</span>}
+      {/* art panel */}
+      <div style={{ position: 'relative', width: wide ? '46%' : '100%', flexShrink: 0, aspectRatio: wide ? 'auto' : '720 / 246', minHeight: wide ? 132 : undefined, background: '#0d2f55' }}>
+        <img src={LESSON_ART(a.art)} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: locked ? 'saturate(.7) brightness(.85)' : 'none' }} />
+        {locked && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,.85)', display: 'grid', placeItems: 'center', fontSize: 12 }}>🔒</span>}
+        {!wide && <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, background: GOLD_FRAME, opacity: .9 }} />}
       </div>
 
-      <div style={{ padding: wide ? '4px 2px 2px' : '8px 3px 3px', textAlign: wide ? 'left' : 'center', flex: 1, minWidth: 0, display: wide ? 'flex' : 'block', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ fontSize: wide ? 10.5 : 9.5, fontWeight: 800, letterSpacing: .9, color: a.final ? '#b97e10' : current ? 'var(--link)' : '#7d93a6', marginBottom: 3 }}>{a.final ? 'FINAL CHALLENGE' : `LESSON ${a.n}`}</div>
-        <div style={{ fontWeight: 800, fontSize: wide ? 15 : a.final ? 12.5 : 11.5, lineHeight: 1.2, color: NAVY, minHeight: wide || a.sub ? 0 : 28 }}>{a.title}</div>
-        {a.sub && <div style={{ fontSize: wide ? 12 : 10.5, color: '#5c7285', marginTop: 1 }}>{a.sub}</div>}
-        <div style={{ margin: '4px 0 2px' }}><Stars n={a.stars} size={wide ? 14 : 12} /></div>
+      {/* white panel */}
+      <div style={{ padding: wide ? '12px 16px' : '10px 10px 12px', textAlign: wide ? 'left' : 'center', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: wide ? 'flex-start' : 'center', gap: 3 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.6, color: a.final ? '#c98f00' : 'var(--link)' }}>{a.final ? 'FINAL CHALLENGE' : `LESSON ${a.n}`}</div>
+        <div style={{ fontWeight: 800, fontSize: wide ? 17 : 15.5, lineHeight: 1.15, color: NAVY, letterSpacing: '-.01em' }}>{a.title}</div>
+        {a.sub && <div style={{ fontSize: 12, color: '#4a6f8c', fontWeight: 600 }}>{a.sub}</div>}
+        <div style={{ margin: '2px 0 0' }}><Stars n={a.stars} size={wide ? 22 : 20} dimColor="#d3dbe3" /></div>
         {current ? (
-          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: wide ? 'auto' : '100%', alignSelf: 'flex-start', marginTop: 4, padding: wide ? '8px 18px' : '7px 0', borderRadius: 8, fontWeight: 800, fontSize: wide ? 13 : 11.5, color: NAVY, background: 'linear-gradient(180deg,#ffd44d,#f5b400)', boxShadow: '0 2px 0 #c98f00' }}>
-            Continue →
+          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: wide ? 'auto' : '100%', marginTop: 6, padding: wide ? '9px 22px' : '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 14, color: NAVY, background: 'linear-gradient(180deg,#ffd44d 0%,#f5b400 100%)', boxShadow: '0 3px 0 #c98f00, 0 0 18px rgba(245,180,0,.45)' }}>
+            ✦ Continue →
           </button>
-        ) : (
-          <div style={{ height: 18, fontSize: wide ? 12 : 10.5, fontWeight: 700, color: passed ? (hover ? '#0a7dba' : '#7d93a6') : '#9fb3c4', lineHeight: '18px' }}>
-            {passed ? (hover ? 'View summary →' : 'Passed') : a.final ? 'Unlocks after lesson 5' : 'Up next'}
+        ) : passed ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 4, fontSize: 13.5, fontWeight: 700, color: hover ? 'var(--link)' : '#4a6f8c' }}>
+            <span aria-hidden style={{ width: 20, height: 20, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>
+            {hover ? 'View summary →' : 'Passed'}
           </div>
+        ) : (
+          <div style={{ marginTop: 4, fontSize: 12.5, fontWeight: 600, color: '#7d93a6' }}>{a.final ? 'Unlocks after lesson 5' : 'Up next'}</div>
         )}
       </div>
     </div>
@@ -218,11 +215,11 @@ function IslandPath({ acts, onOpen }) {
       {rows.map((row, r) => (
         <React.Fragment key={r}>
           {r > 0 && <Connector style={{ margin: '2px 6px' }} />}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, padding: '4px 4px' }}>
             {row.map((a, i) => (
               <React.Fragment key={a.n}>
                 {i > 0 && <Connector style={{ width: 34, flexShrink: 0, alignSelf: 'center', margin: '0 2px' }} />}
-                <div style={{ flex: 1, minWidth: 0, zoom: 1.15 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <ActivityCard a={a} onOpen={onOpen} />
                 </div>
               </React.Fragment>
@@ -271,7 +268,7 @@ function LessonCarousel({ acts, onOpen }) {
           return (
             <div key={sIdx} onClick={() => a && !focus && setI(k)}
               style={{ width: slot.w, flexShrink: 0, zoom: slot.zoom, opacity: a ? slot.op : 0, transition: 'opacity .18s', cursor: a && !focus ? 'pointer' : 'default', filter: focus ? 'none' : 'saturate(.8)', pointerEvents: a ? 'auto' : 'none', position: 'relative', zIndex: focus ? 3 : 2 }}>
-              {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none' }}><ActivityCard a={a} onOpen={onOpen} wide /></div> : <div style={{ height: 1 }} />}
+              {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none', padding: 4 }}><ActivityCard a={a} onOpen={onOpen} wide /></div> : <div style={{ height: 1 }} />}
             </div>
           )
         })}

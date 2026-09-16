@@ -7,6 +7,7 @@ import WritingStudio from './student/WritingStudio.jsx'
 import RevisionStudio from './student/RevisionStudio.jsx'
 import ArcadePage from './student/ArcadePage.jsx'
 import LunaPage from './student/LunaPage.jsx'
+import LessonPage from './student/LessonPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
 import FeedbackReview from './student/FeedbackReview.jsx'
@@ -18,6 +19,7 @@ export default function App() {
   const [state, setState] = useState(null)
   const [health, setHealth] = useState({ hasKey: false })
   const [view, setView] = useState('home')
+  const [lesson, setLesson] = useState(null)
   const [openSub, setOpenSub] = useState(null) // submission id for the studio
   const [reviewSub, setReviewSub] = useState(null) // completed submission being reviewed
   const [publisher, setPublisher] = useState(false)
@@ -54,7 +56,9 @@ export default function App() {
   } else if (view === 'home') {
     body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
   } else if (view === 'luna') {
-    body = <LunaPage state={state} me={me} onBack={goHome} />
+    body = <LunaPage state={state} me={me} onBack={goHome} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />
+  } else if (view === 'lesson' && lesson) {
+    body = <LessonPage lesson={lesson.a} moduleLabel={lesson.moduleLabel} onBack={() => setView('luna')} />
   } else if (view === 'quickwrite') {
     body = <QuickWritePage state={state} onBack={goHome} onChange={refresh} />
   } else if (view === 'wall') {

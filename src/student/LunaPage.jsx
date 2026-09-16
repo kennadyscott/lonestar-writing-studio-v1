@@ -67,21 +67,20 @@ function White({ children, style }) {
 function ActivityCard({ a, onOpen }) {
   const passed = a.status === 'passed'
   const current = a.status === 'in_progress'
-  const todo = a.status === 'todo'
-  const tag = (bg, fg, text) => <span style={{ position: 'absolute', top: -9, right: 10, background: bg, color: fg, fontWeight: 800, fontSize: 8.5, letterSpacing: .5, borderRadius: 6, padding: '3px 7px', boxShadow: '0 2px 6px rgba(2,20,50,.25)', zIndex: 2, whiteSpace: 'nowrap' }}>{text}</span>
+  const locked = a.status === 'todo'
+  const [hover, setHover] = useState(false)
+  const clickable = passed || current
   return (
-    <div style={{ position: 'relative', background: '#fff', borderRadius: 14, padding: 7, boxShadow: current ? '0 0 0 2.5px #f5b400, 0 8px 24px rgba(245,180,0,.35)' : a.final ? '0 0 0 2px #ffd44d, 0 8px 26px rgba(245,180,0,.3)' : CARD_SHADOW, opacity: todo && !a.final ? .94 : 1 }}>
-      <span style={{ position: 'absolute', top: -10, left: -10, width: 26, height: 26, borderRadius: '50%', background: 'linear-gradient(140deg,#06aade,#0a7dba)', color: '#fff', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 12.5, boxShadow: '0 2px 6px rgba(2,20,50,.35)', border: '2px solid #fff', zIndex: 2 }}>{a.n}</span>
-      {passed && <span style={{ position: 'absolute', top: -9, right: -9, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800, border: '2px solid #fff', boxShadow: '0 2px 6px rgba(2,20,50,.3)', zIndex: 2 }}>✓</span>}
-      {current && tag('#f5b400', NAVY, 'CURRENT')}
-      {todo && !a.final && tag('#dfe8ef', '#4a6f8c', 'UP NEXT')}
-      {a.final && <span style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%) rotate(-3deg)', background: 'linear-gradient(180deg,#ffd44d,#f5b400)', color: NAVY, fontWeight: 800, fontSize: 9.5, letterSpacing: .7, borderRadius: 8, padding: '4px 12px', boxShadow: '0 2px 8px rgba(2,20,50,.3)', zIndex: 2, whiteSpace: 'nowrap' }}>FINAL CHALLENGE</span>}
+    <div role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
+      onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
+      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
+      style={{ position: 'relative', background: '#fff', borderRadius: 14, padding: 7, cursor: clickable ? 'pointer' : 'default',
+        boxShadow: current ? '0 0 0 2.5px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : a.final ? '0 0 0 1.5px #ffd44d, ' + CARD_SHADOW : CARD_SHADOW,
+        opacity: locked && !a.final ? .7 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
-      <div style={{ position: 'relative', height: 66, borderRadius: 10, overflow: 'hidden', background: 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-        <span style={{ position: 'absolute', top: 5, left: 8, color: 'rgba(255,255,255,.55)', fontSize: 8 }}>✦</span>
-        <span style={{ position: 'absolute', bottom: 6, right: 9, color: '#f5b400', fontSize: 9 }}>✦</span>
+      <div style={{ position: 'relative', height: 66, borderRadius: 10, overflow: 'hidden', background: a.final ? 'linear-gradient(135deg,#1c4f86 0%,#0d2f55 100%)' : 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
         <div style={{ position: 'absolute', bottom: -14, left: 0, right: 0, height: 26, background: 'radial-gradient(ellipse at 50% 100%, #3f7a3a 0%, #2c5a3a 45%, transparent 72%)' }} />
-        <img src={BRAND.luna} alt="" style={{ height: 42, position: 'relative' }} />
+        <img src={BRAND.luna} alt="" style={{ height: 42, position: 'relative', filter: locked ? 'grayscale(.4) brightness(.85)' : 'none' }} />
         {a.art === 'RACE' ? (
           <span style={{ display: 'inline-flex', gap: 2, position: 'relative' }}>
             {RACE_TILES.map(([l, c]) => (
@@ -89,35 +88,23 @@ function ActivityCard({ a, onOpen }) {
             ))}
           </span>
         ) : (
-          <span style={{ fontSize: 24, position: 'relative', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.45))' }}>{a.art}</span>
+          <span style={{ fontSize: 24, position: 'relative', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,.45))' }}>{a.final ? '🏆' : a.art}</span>
         )}
+        {locked && <span style={{ position: 'absolute', top: 6, right: 8, fontSize: 12, opacity: .9 }}>🔒</span>}
       </div>
 
-      <div style={{ padding: '7px 3px 2px' }}>
-        <div style={{ fontWeight: 800, fontSize: a.final ? 13 : 11.5, lineHeight: 1.2, minHeight: a.sub ? 0 : 28, color: NAVY, textAlign: a.final ? 'center' : 'left' }}>{a.title}</div>
-        {a.sub && <div style={{ fontSize: 10.5, color: '#5c7285', textAlign: 'center', marginTop: 1 }}>{a.sub}</div>}
-        <div style={{ margin: '2px 0 6px', display: 'flex', alignItems: 'center', justifyContent: a.final ? 'center' : 'space-between', gap: 6 }}>
-          <Stars n={a.stars} size={12} />
-          {passed && <span style={{ fontSize: 8.5, fontWeight: 800, letterSpacing: .4, background: '#2e9e6b', color: '#fff', borderRadius: 999, padding: '2px 7px' }}>✓ PASSED</span>}
-        </div>
+      <div style={{ padding: '8px 3px 3px', textAlign: 'center' }}>
+        <div style={{ fontWeight: 800, fontSize: a.final ? 12.5 : 11.5, lineHeight: 1.2, color: NAVY, minHeight: a.sub ? 0 : 28 }}>{a.title}</div>
+        {a.sub && <div style={{ fontSize: 10.5, color: '#5c7285', marginTop: 1 }}>{a.sub}</div>}
+        <div style={{ margin: '4px 0 2px' }}><Stars n={a.stars} size={12} /></div>
         {current ? (
-          <button onClick={() => onOpen?.(a)} style={{ width: '100%', padding: '7px 0', borderRadius: 8, fontWeight: 800, fontSize: 11.5, color: NAVY, background: 'linear-gradient(180deg,#ffd44d,#f5b400)', boxShadow: '0 2px 0 #c98f00' }}>
+          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: '100%', marginTop: 4, padding: '7px 0', borderRadius: 8, fontWeight: 800, fontSize: 11.5, color: NAVY, background: 'linear-gradient(180deg,#ffd44d,#f5b400)', boxShadow: '0 2px 0 #c98f00' }}>
             Continue →
           </button>
-        ) : passed ? (
-          <button onClick={() => onOpen?.(a)} style={{ width: '100%', padding: '6px 0', borderRadius: 8, fontWeight: 800, fontSize: 11, color: '#fff', background: 'linear-gradient(120deg,#41b9e3,#0a7dba)' }}>
-            📊 Summary
-          </button>
         ) : (
-          a.final ? (
-          <button disabled style={{ width: '100%', padding: '7px 0', borderRadius: 8, fontWeight: 800, fontSize: 11.5, color: '#9a7a1c', background: 'linear-gradient(180deg,#fff1bf,#ffe08a)', cursor: 'default' }}>
-            🔒 Start Challenge →
-          </button>
-          ) : (
-          <button disabled style={{ width: '100%', padding: '6px 0', borderRadius: 8, fontWeight: 800, fontSize: 11, color: '#7d93a6', background: '#eef3f6', cursor: 'default' }}>
-            🔒 Coming soon
-          </button>
-          )
+          <div style={{ height: 18, fontSize: 10.5, fontWeight: 700, color: passed ? (hover ? '#0a7dba' : '#7d93a6') : '#9fb3c4', lineHeight: '18px' }}>
+            {passed ? (hover ? 'View summary →' : 'Passed') : a.final ? 'Unlocks after lesson 5' : 'Up next'}
+          </div>
         )}
       </div>
     </div>
@@ -338,17 +325,12 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                 <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}>{MISSION_BLURB[current.id]}</div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ minWidth: 190 }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0a7dba', marginBottom: 4 }}>{done} of {acts.length} activities completed</div>
+                <div style={{ minWidth: 220 }}>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0a7dba', marginBottom: 4 }}>{done} of {acts.length} lessons · {left === 0 ? 'mission complete!' : `${left} to go`}</div>
                   <div style={{ position: 'relative', height: 12, background: '#e6eef3', borderRadius: 8, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct * 100}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 8 }} />
                     <span style={{ position: 'absolute', right: 6, top: 0, fontSize: 10, fontWeight: 800, lineHeight: '12px', color: '#4a6f8c' }}>{Math.round(pct * 100)}%</span>
                   </div>
-                </div>
-                <img src={BRAND.luna} alt="" style={{ height: 48 }} />
-                <div style={{ position: 'relative', background: '#fff', border: '2px solid #bcd9ec', borderRadius: 14, padding: '6px 10px', fontSize: 12, fontWeight: 800, color: '#0a7dba', whiteSpace: 'nowrap' }}>
-                  {left === 0 ? 'Mission complete!' : `${left === 1 ? 'One activity' : `${['', '', 'Two', 'Three', 'Four', 'Five', 'Six'][left] || left} activities`} left!`}
-                  <span style={{ position: 'absolute', left: -9, top: '50%', width: 12, height: 12, background: '#fff', borderLeft: '2px solid #bcd9ec', borderBottom: '2px solid #bcd9ec', transform: 'translateY(-50%) rotate(45deg)' }} />
                 </div>
               </div>
             </White>

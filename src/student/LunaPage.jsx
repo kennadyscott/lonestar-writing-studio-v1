@@ -3,10 +3,11 @@ import { BRAND } from '../lib/brand.js'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 
 /*
- * Luna's Writing Nook — night-sky mockup (2026-09-15).
- * Full-bleed illustrated sky (public/luna-sky.webp) muted by SKY_DIM, a dark
- * glass "Your Writing Journey" band, a Mission card, activity cards on a
- * 3-column path with dotted connectors, and the "My Writer Profile" sidebar.
+ * Luna's Writing Nook — the student's module page.
+ * Dashboard backdrop, wordmark header, slim Writing Journey band, then one
+ * white panel: mission header + the six lessons as a 3 x 2 grid of Luna V2
+ * cards joined by gold constellation rules. Profile sidebar on the right.
+ * Lesson data is prototype content until the decks are converted.
  */
 
 // Backdrop is the dashboard's: canvas colour + bg-stars.jpg at 22%.
@@ -66,7 +67,7 @@ function White({ children, style }) {
 
 /* ---------------- activity cards ---------------- */
 
-function ActivityCard({ a, onOpen, wide = false }) {
+function ActivityCard({ a, onOpen }) {
   const passed = a.status === 'passed'
   const current = a.status === 'in_progress'
   const locked = a.status === 'todo'
@@ -78,24 +79,23 @@ function ActivityCard({ a, onOpen, wide = false }) {
       onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{ position: 'relative', background: '#fff', borderRadius: 18, overflow: 'hidden', cursor: clickable ? 'pointer' : 'default',
-        display: wide ? 'flex' : 'block', alignItems: 'stretch',
         boxShadow: frame, opacity: locked && !a.final ? .72 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
       {/* art panel */}
-      <div style={{ position: 'relative', width: wide ? '46%' : '100%', flexShrink: 0, aspectRatio: wide ? 'auto' : '720 / 246', minHeight: wide ? 132 : undefined, background: '#0d2f55' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '720 / 246', background: '#0d2f55' }}>
         <img src={LESSON_ART(a.art)} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: locked ? 'saturate(.7) brightness(.85)' : 'none' }} />
         {locked && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,.85)', display: 'grid', placeItems: 'center', fontSize: 12 }}>🔒</span>}
-        {!wide && <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, background: GOLD_FRAME, opacity: .9 }} />}
+        <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, background: GOLD_FRAME, opacity: .9 }} />
       </div>
 
       {/* white panel */}
-      <div style={{ padding: wide ? '12px 16px' : '10px 10px 12px', textAlign: wide ? 'left' : 'center', flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: wide ? 'flex-start' : 'center', gap: 3 }}>
+      <div style={{ padding: '10px 10px 12px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
         <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.6, color: a.final ? '#c98f00' : 'var(--link)' }}>{a.final ? 'FINAL CHALLENGE' : `LESSON ${a.n}`}</div>
-        <div style={{ fontWeight: 800, fontSize: wide ? 17 : 15.5, lineHeight: 1.15, color: NAVY, letterSpacing: '-.01em' }}>{a.title}</div>
+        <div style={{ fontWeight: 800, fontSize: 15.5, lineHeight: 1.15, color: NAVY, letterSpacing: '-.01em' }}>{a.title}</div>
         {a.sub && <div style={{ fontSize: 12, color: '#4a6f8c', fontWeight: 600 }}>{a.sub}</div>}
-        <div style={{ margin: '2px 0 0' }}><Stars n={a.stars} size={wide ? 22 : 20} dimColor="#d3dbe3" /></div>
+        <div style={{ margin: '2px 0 0' }}><Stars n={a.stars} size={20} dimColor="#d3dbe3" /></div>
         {current ? (
-          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: wide ? 'auto' : '100%', marginTop: 6, padding: wide ? '9px 22px' : '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 14, color: NAVY, background: 'linear-gradient(180deg,#ffd44d 0%,#f5b400 100%)', boxShadow: '0 3px 0 #c98f00, 0 0 18px rgba(245,180,0,.45)' }}>
+          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: '100%', marginTop: 6, padding: '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 14, color: NAVY, background: 'linear-gradient(180deg,#ffd44d 0%,#f5b400 100%)', boxShadow: '0 3px 0 #c98f00, 0 0 18px rgba(245,180,0,.45)' }}>
             ✦ Continue →
           </button>
         ) : passed ? (
@@ -155,19 +155,6 @@ function JourneyAll({ modules, currentId }) {
   )
 }
 
-function LessonSwitch({ value, onChange }) {
-  const opt = (v, label) => (
-    <button onClick={() => onChange(v)} style={{ padding: '5px 10px', borderRadius: 8, fontWeight: 800, fontSize: 11.5, background: value === v ? NAVY : 'transparent', color: value === v ? '#fff' : '#4a6f8c' }}>{label}</button>
-  )
-  return (
-    <div title="Prototype only: two ways to show the lessons" style={{ display: 'inline-flex', gap: 2, padding: 2, background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 10, boxShadow: 'var(--shadow)' }}>
-      <span style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: '#7d93a6', padding: '0 6px 0 8px' }}>LESSONS</span>
-      {opt('all', 'A · All on the map')}
-      {opt('one', 'B · One at a time')}
-    </div>
-  )
-}
-
 /* ---------------- sidebar bits ---------------- */
 
 function Stat({ icon, label, children, last }) {
@@ -207,7 +194,7 @@ function Connector({ style }) {
   )
 }
 
-function IslandPath({ acts, onOpen }) {
+function LessonGrid({ acts, onOpen }) {
   const rows = []
   for (let i = 0; i < acts.length; i += 3) rows.push(acts.slice(i, i + 3))
   return (
@@ -232,60 +219,6 @@ function IslandPath({ acts, onOpen }) {
   )
 }
 
-/* ---------------- one lesson at a time (filmstrip) ---------------- */
-
-// Three landscape slots across the row: the focused lesson in the middle,
-// its neighbours a step smaller and dimmed. `zoom` scales layout too, so
-// the slots never overlap.
-const SLOTS = [
-  { w: '24%', zoom: .92, op: .6 },
-  { w: '37%', zoom: 1, op: 1 },
-  { w: '24%', zoom: .92, op: .6 },
-]
-
-function LessonCarousel({ acts, onOpen }) {
-  const start = Math.max(0, acts.findIndex((a) => a.status === 'in_progress'))
-  const [i, setI] = useState(start)
-  const go = (d) => setI((k) => Math.min(acts.length - 1, Math.max(0, k + d)))
-  const onKey = (e) => { if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1) }
-  const arrow = (d) => {
-    const ok = d < 0 ? i > 0 : i < acts.length - 1
-    return (
-      <button onClick={() => go(d)} disabled={!ok} aria-label={d < 0 ? 'Previous lesson' : 'Next lesson'}
-        style={{ width: 44, height: 44, borderRadius: '50%', background: ok ? NAVY : 'rgba(255,255,255,.7)', border: ok ? 'none' : '1.5px solid #bcd9ec', color: ok ? '#fff' : '#b4c0cb', fontSize: 24, fontWeight: 800, display: 'grid', placeItems: 'center', boxShadow: CARD_SHADOW, cursor: ok ? 'pointer' : 'default', flexShrink: 0, alignSelf: 'center' }}>
-        {d < 0 ? '‹' : '›'}
-      </button>
-    )
-  }
-  return (
-    <div tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '12px 0 44px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'clamp(8px, 1.5%, 20px)' }}>
-        {arrow(-1)}
-        {SLOTS.map((slot, sIdx) => {
-          const k = i + (sIdx - 1)
-          const a = acts[k]
-          const focus = sIdx === 1
-          return (
-            <div key={sIdx} onClick={() => a && !focus && setI(k)}
-              style={{ width: slot.w, flexShrink: 0, zoom: slot.zoom, opacity: a ? slot.op : 0, transition: 'opacity .18s', cursor: a && !focus ? 'pointer' : 'default', filter: focus ? 'none' : 'saturate(.8)', pointerEvents: a ? 'auto' : 'none', position: 'relative', zIndex: focus ? 3 : 2 }}>
-              {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none', padding: 4 }}><ActivityCard a={a} onOpen={onOpen} wide /></div> : <div style={{ height: 1 }} />}
-            </div>
-          )
-        })}
-        {arrow(1)}
-      </div>
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 18, textAlign: 'center', fontSize: 12.5, fontWeight: 800, color: NAVY, letterSpacing: .4 }}>Lesson {i + 1} of {acts.length} · {acts[i].title}</div>
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', gap: 8 }} aria-label="Lessons">
-        {acts.map((x, k) => {
-          const on = k === i
-          const c = x.status === 'passed' ? '#2e9e6b' : x.status === 'in_progress' ? '#f5b400' : '#c9d6e0'
-          return <button key={x.n} onClick={() => setI(k)} aria-label={`Lesson ${k + 1}`} style={{ width: on ? 22 : 9, height: 9, borderRadius: 5, background: c, boxShadow: '0 0 0 2px rgba(255,255,255,.9)', transition: 'width .15s', padding: 0 }} />
-        })}
-      </div>
-    </div>
-  )
-}
-
 /* ---------------- page ---------------- */
 
 export default function LunaPage({ state, me, onBack, onOpenLesson }) {
@@ -304,8 +237,6 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   const levelPct = (coins % 300) / 300
   const earned = ['m1', 'm5', 'm4']
   const open = (a) => onOpenLesson?.(a, `Module ${currentIdx + 1}: ${current.label}`)
-  const [lessons, setLessons] = useState(() => { try { return localStorage.getItem('luna.lessons') || 'all' } catch { return 'all' } })
-  const pickLessons = (v) => { setLessons(v); try { localStorage.setItem('luna.lessons', v) } catch {} }
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
@@ -319,14 +250,11 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
           <img src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
           <img src={BRAND.lunaWordmark} alt="Luna's Writing Nook" style={{ height: 'clamp(54px, 5vw, 74px)', width: 'auto', display: 'block', marginTop: 2 }} />
           <div style={{ flex: 1 }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {onBack && (
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)' }}>
               ← Back to Previous Page
             </button>
           )}
-          <LessonSwitch value={lessons} onChange={pickLessons} />
-          </div>
         </div>
 
         <JourneyAll modules={modules} currentId={current.id} />
@@ -350,7 +278,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                   </div>
                 </div>
               </div>
-              {lessons === 'one' ? <LessonCarousel acts={acts} onOpen={open} /> : <IslandPath acts={acts} onOpen={open} />}
+              <LessonGrid acts={acts} onOpen={open} />
             </White>
           </div>
 

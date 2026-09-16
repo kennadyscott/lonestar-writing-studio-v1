@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 
@@ -207,87 +207,13 @@ function ProgressRing({ pct }) {
 }
 
 
-/* ---------------- string lights ---------------- */
-
-// Quadratic curve between two card centres with a gentle sag, then bulbs
-// spaced along it. Everything in container pixels, measured after layout.
-function stringPath(a, b, sag = 34) {
-  const cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2 + sag
-  const pts = []
-  for (let i = 0; i <= 48; i++) {
-    const t = i / 48, u = 1 - t
-    pts.push({ x: u * u * a.x + 2 * u * t * cx + t * t * b.x, y: u * u * a.y + 2 * u * t * cy + t * t * b.y })
-  }
-  const bulbs = []
-  let acc = 0, next = 22
-  for (let i = 1; i < pts.length; i++) {
-    acc += Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y)
-    if (acc >= next) { bulbs.push(pts[i]); next += 26 }
-  }
-  return { d: `M${a.x} ${a.y} Q${cx} ${cy} ${b.x} ${b.y}`, bulbs }
-}
-
-function StringLights({ centres, w, h, sag }) {
-  if (centres.length < 2 || !w) return null
-  const segs = []
-  for (let i = 1; i < centres.length; i++) segs.push(stringPath(centres[i - 1], centres[i], sag))
-  return (
-    <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} style={{ position: 'absolute', inset: 0, zIndex: 1, pointerEvents: 'none' }} aria-hidden>
-      <defs>
-        <filter id="bulbGlow" x="-100%" y="-100%" width="300%" height="300%">
-          <feGaussianBlur stdDeviation="2.2" />
-        </filter>
-      </defs>
-      {segs.map((s, i) => (
-        <g key={i}>
-          <path d={s.d} fill="none" stroke="rgba(13,47,85,.55)" strokeWidth="2" strokeLinecap="round" />
-          {s.bulbs.map((b, j) => {
-            const gold = j % 5 === 2
-            return (
-              <g key={j}>
-                <circle cx={b.x} cy={b.y} r="7.5" fill={gold ? 'rgba(255,196,40,.55)' : 'rgba(0,170,255,.5)'} filter="url(#bulbGlow)" />
-                <circle cx={b.x} cy={b.y} r="3.6" fill={gold ? '#ffc933' : '#1fb6ff'} stroke="#fff" strokeWidth="1.2" />
-                <circle cx={b.x - 1} cy={b.y - 1.1} r="1.1" fill="#fff" />
-              </g>
-            )
-          })}
-        </g>
-      ))}
-    </svg>
-  )
-}
-
 /* ---------------- all lessons in a row ---------------- */
 
 function IslandPath({ acts, onOpen }) {
-  const box = useRef(null)
-  const cardRefs = useRef([])
-  const [size, setSize] = useState({ w: 0, h: 0 })
-  const [centres, setCentres] = useState([])
-
-  useLayoutEffect(() => {
-    const el = box.current
-    if (!el) return
-    const measure = () => {
-      const r = el.getBoundingClientRect()
-      setSize({ w: r.width, h: r.height })
-      setCentres(cardRefs.current.filter(Boolean).map((c) => {
-        const q = c.getBoundingClientRect()
-        return { x: q.left - r.left + q.width / 2, y: q.top - r.top + q.height * .42 }
-      }))
-    }
-    measure()
-    const ro = new ResizeObserver(measure)
-    ro.observe(el)
-    return () => ro.disconnect()
-  }, [acts.length])
-
   return (
-    <div ref={box} style={{ position: 'relative', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'clamp(10px, 1.6%, 22px)', padding: '30px 6px 8px', marginTop: 12 }}>
-      <StringLights centres={centres} w={size.w} h={size.h} sag={18} />
-      {acts.map((a, i) => (
-        <div key={a.n} ref={(el) => { cardRefs.current[i] = el }}
-          style={{ width: a.final ? 'clamp(150px, 17%, 186px)' : 'clamp(120px, 14.5%, 156px)', flexShrink: 0, position: 'relative', zIndex: 2 }}>
+    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'clamp(10px, 1.6%, 22px)', padding: '22px 6px 8px', marginTop: 12 }}>
+      {acts.map((a) => (
+        <div key={a.n} style={{ width: a.final ? 'clamp(150px, 17%, 186px)' : 'clamp(120px, 14.5%, 156px)', flexShrink: 0 }}>
           <ActivityCard a={a} onOpen={onOpen} />
         </div>
       ))}
@@ -297,65 +223,50 @@ function IslandPath({ acts, onOpen }) {
 
 /* ---------------- one lesson at a time (filmstrip) ---------------- */
 
-// Five slots: the focused lesson big in the middle, its neighbours a step
-// smaller, the outer two smaller still. `zoom` scales layout too, so nothing
-// overlaps; widths are set so the five fill the row.
+// Five slots spread across the row: the focused lesson big in the middle,
+// its neighbours a step smaller, the outer two smaller still. `zoom` scales
+// layout too, so the slots never overlap.
 const SLOTS = [
-  { w: 'clamp(96px, 11%, 118px)', zoom: .85, op: .55 },
-  { w: 'clamp(118px, 14%, 140px)', zoom: 1, op: .8 },
-  { w: 'clamp(150px, 17%, 172px)', zoom: 1.2, op: 1 },
-  { w: 'clamp(118px, 14%, 140px)', zoom: 1, op: .8 },
-  { w: 'clamp(96px, 11%, 118px)', zoom: .85, op: .55 },
+  { w: 'clamp(110px, 12.5%, 138px)', zoom: .88, op: .55 },
+  { w: 'clamp(130px, 15%, 160px)', zoom: 1, op: .8 },
+  { w: 'clamp(160px, 18%, 196px)', zoom: 1.18, op: 1 },
+  { w: 'clamp(130px, 15%, 160px)', zoom: 1, op: .8 },
+  { w: 'clamp(110px, 12.5%, 138px)', zoom: .88, op: .55 },
 ]
 
 function LessonCarousel({ acts, onOpen }) {
   const start = Math.max(0, acts.findIndex((a) => a.status === 'in_progress'))
   const [i, setI] = useState(start)
-  const box = useRef(null)
-  const slotRefs = useRef([])
-  const [geo, setGeo] = useState({ w: 0, h: 0, pts: [] })
-  useLayoutEffect(() => {
-    const el = box.current
-    if (!el) return
-    const measure = () => {
-      const r = el.getBoundingClientRect()
-      const pts = slotRefs.current.filter(Boolean).map((c) => { const q = c.getBoundingClientRect(); return { x: q.left - r.left + q.width / 2, y: q.top - r.top + 4 } })
-      setGeo({ w: r.width, h: r.height, pts: [{ x: 0, y: 30 }, ...pts, { x: r.width, y: 30 }] })
-    }
-    measure(); const ro = new ResizeObserver(measure); ro.observe(el); return () => ro.disconnect()
-  }, [i])
   const go = (d) => setI((k) => Math.min(acts.length - 1, Math.max(0, k + d)))
   const onKey = (e) => { if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1) }
   const arrow = (d) => {
     const ok = d < 0 ? i > 0 : i < acts.length - 1
     return (
       <button onClick={() => go(d)} disabled={!ok} aria-label={d < 0 ? 'Previous lesson' : 'Next lesson'}
-        style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', [d < 0 ? 'left' : 'right']: 0, width: 44, height: 44, borderRadius: '50%', background: ok ? NAVY : 'rgba(255,255,255,.7)', border: ok ? 'none' : '1.5px solid #bcd9ec', color: ok ? '#fff' : '#b4c0cb', fontSize: 24, fontWeight: 800, display: 'grid', placeItems: 'center', boxShadow: CARD_SHADOW, cursor: ok ? 'pointer' : 'default', zIndex: 4 }}>
+        style={{ width: 44, height: 44, borderRadius: '50%', background: ok ? NAVY : 'rgba(255,255,255,.7)', border: ok ? 'none' : '1.5px solid #bcd9ec', color: ok ? '#fff' : '#b4c0cb', fontSize: 24, fontWeight: 800, display: 'grid', placeItems: 'center', boxShadow: CARD_SHADOW, cursor: ok ? 'pointer' : 'default', flexShrink: 0, alignSelf: 'center' }}>
         {d < 0 ? '‹' : '›'}
       </button>
     )
   }
-  slotRefs.current = []
   return (
-    <div ref={box} tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '44px 56px 50px', marginTop: 10 }}>
-      <StringLights centres={geo.pts} w={geo.w} h={geo.h} sag={22} />
-      {arrow(-1)}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 'clamp(12px, 2.4%, 30px)' }}>
+    <div tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '18px 0 40px', marginTop: 6 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'clamp(8px, 1.5%, 20px)' }}>
+        {arrow(-1)}
         {SLOTS.map((slot, sIdx) => {
           const k = i + (sIdx - 2)
           const a = acts[k]
           const focus = sIdx === 2
           return (
-            <div key={sIdx} ref={(el) => { if (a) slotRefs.current.push(el) }} onClick={() => a && !focus && setI(k)}
+            <div key={sIdx} onClick={() => a && !focus && setI(k)}
               style={{ width: slot.w, flexShrink: 0, zoom: slot.zoom, opacity: a ? slot.op : 0, transition: 'opacity .18s', cursor: a && !focus ? 'pointer' : 'default', filter: focus ? 'none' : 'saturate(.8)', pointerEvents: a ? 'auto' : 'none', position: 'relative', zIndex: focus ? 3 : 2 }}>
               {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none' }}><ActivityCard a={a} onOpen={onOpen} /></div> : <div style={{ height: 1 }} />}
             </div>
           )
         })}
+        {arrow(1)}
       </div>
-      {arrow(1)}
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 26, textAlign: 'center', fontSize: 12.5, fontWeight: 800, color: NAVY, letterSpacing: .4, zIndex: 3 }}>Lesson {i + 1} of {acts.length} · {acts[i].title}</div>
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 8, display: 'flex', justifyContent: 'center', gap: 8, zIndex: 3 }} aria-label="Lessons">
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 18, textAlign: 'center', fontSize: 12.5, fontWeight: 800, color: NAVY, letterSpacing: .4 }}>Lesson {i + 1} of {acts.length} · {acts[i].title}</div>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, display: 'flex', justifyContent: 'center', gap: 8 }} aria-label="Lessons">
         {acts.map((x, k) => {
           const on = k === i
           const c = x.status === 'passed' ? '#2e9e6b' : x.status === 'in_progress' ? '#f5b400' : '#c9d6e0'

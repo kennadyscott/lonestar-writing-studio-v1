@@ -337,6 +337,17 @@ function IslandPath({ acts, onOpen }) {
 
 /* ---------------- one lesson at a time (filmstrip) ---------------- */
 
+// Five slots: the focused lesson big in the middle, its neighbours a step
+// smaller, the outer two smaller still. `zoom` scales layout too, so nothing
+// overlaps; widths are set so the five fill the row.
+const SLOTS = [
+  { w: 13, zoom: .84, op: .55 },
+  { w: 16.5, zoom: 1, op: .8 },
+  { w: 22, zoom: 1.32, op: 1 },
+  { w: 16.5, zoom: 1, op: .8 },
+  { w: 13, zoom: .84, op: .55 },
+]
+
 function LessonCarousel({ acts, onOpen }) {
   const start = Math.max(0, acts.findIndex((a) => a.status === 'in_progress'))
   const [i, setI] = useState(start)
@@ -348,44 +359,43 @@ function LessonCarousel({ acts, onOpen }) {
     if (!el) return
     const measure = () => {
       const r = el.getBoundingClientRect()
-      const pts = slotRefs.current.filter(Boolean).map((c) => { const q = c.getBoundingClientRect(); return { x: q.left - r.left + q.width / 2, y: q.top - r.top + 6 } })
-      setGeo({ w: r.width, h: r.height, pts: [{ x: 0, y: 34 }, ...pts, { x: r.width, y: 34 }] })
+      const pts = slotRefs.current.filter(Boolean).map((c) => { const q = c.getBoundingClientRect(); return { x: q.left - r.left + q.width / 2, y: q.top - r.top + 4 } })
+      setGeo({ w: r.width, h: r.height, pts: [{ x: 0, y: 30 }, ...pts, { x: r.width, y: 30 }] })
     }
     measure(); const ro = new ResizeObserver(measure); ro.observe(el); return () => ro.disconnect()
   }, [i])
   const go = (d) => setI((k) => Math.min(acts.length - 1, Math.max(0, k + d)))
   const onKey = (e) => { if (e.key === 'ArrowLeft') go(-1); if (e.key === 'ArrowRight') go(1) }
-  const slots = [i - 2, i - 1, i, i + 1, i + 2]
   const arrow = (d) => {
     const ok = d < 0 ? i > 0 : i < acts.length - 1
     return (
       <button onClick={() => go(d)} disabled={!ok} aria-label={d < 0 ? 'Previous lesson' : 'Next lesson'}
-        style={{ position: 'absolute', top: '46%', [d < 0 ? 'left' : 'right']: 6, width: 46, height: 46, borderRadius: '50%', background: ok ? '#fff' : 'rgba(255,255,255,.55)', border: '1.5px solid #bcd9ec', color: ok ? '#0a7dba' : '#b4c0cb', fontSize: 26, fontWeight: 800, display: 'grid', placeItems: 'center', boxShadow: CARD_SHADOW, cursor: ok ? 'pointer' : 'default', zIndex: 4 }}>
+        style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', [d < 0 ? 'left' : 'right']: 0, width: 44, height: 44, borderRadius: '50%', background: ok ? NAVY : 'rgba(255,255,255,.7)', border: ok ? 'none' : '1.5px solid #bcd9ec', color: ok ? '#fff' : '#b4c0cb', fontSize: 24, fontWeight: 800, display: 'grid', placeItems: 'center', boxShadow: CARD_SHADOW, cursor: ok ? 'pointer' : 'default', zIndex: 4 }}>
         {d < 0 ? '‹' : '›'}
       </button>
     )
   }
   slotRefs.current = []
   return (
-    <div ref={box} tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '58px 60px 70px' }}>
-      <StringLights centres={geo.pts} w={geo.w} h={geo.h} sag={26} />
+    <div ref={box} tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '52px 56px 54px', marginTop: 14 }}>
+      <StringLights centres={geo.pts} w={geo.w} h={geo.h} sag={22} />
       {arrow(-1)}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'clamp(10px, 2vw, 26px)' }}>
-        {slots.map((k, s) => {
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '2%' }}>
+        {SLOTS.map((slot, sIdx) => {
+          const k = i + (sIdx - 2)
           const a = acts[k]
-          const dist = Math.abs(s - 2)
-          const scale = dist === 0 ? 1.28 : dist === 1 ? .96 : .78
-          const w = dist === 0 ? 'clamp(170px, 19%, 200px)' : dist === 1 ? 'clamp(140px, 15%, 168px)' : 'clamp(110px, 12%, 140px)'
+          const focus = sIdx === 2
           return (
-            <div key={s} ref={(el) => { if (a) slotRefs.current.push(el) }} onClick={() => a && dist > 0 && setI(k)}
-              style={{ width: w, flexShrink: 0, transform: `scale(${scale})`, transformOrigin: 'center', transition: 'transform .18s, opacity .18s', opacity: a ? (dist === 0 ? 1 : dist === 1 ? .78 : .5) : 0, pointerEvents: a && dist > 0 ? 'auto' : dist === 0 ? 'auto' : 'none', cursor: a && dist > 0 ? 'pointer' : 'default', zIndex: 3 - dist, position: 'relative', filter: dist === 0 ? 'none' : 'saturate(.85)' }}>
-              {a ? <div style={{ pointerEvents: dist === 0 ? 'auto' : 'none' }}><ActivityCard a={a} onOpen={onOpen} /></div> : <div style={{ height: 1 }} />}
+            <div key={sIdx} ref={(el) => { if (a) slotRefs.current.push(el) }} onClick={() => a && !focus && setI(k)}
+              style={{ width: `${slot.w}%`, flexShrink: 0, zoom: slot.zoom, opacity: a ? slot.op : 0, transition: 'opacity .18s', cursor: a && !focus ? 'pointer' : 'default', filter: focus ? 'none' : 'saturate(.8)', pointerEvents: a ? 'auto' : 'none', position: 'relative', zIndex: focus ? 3 : 2 }}>
+              {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none' }}><ActivityCard a={a} onOpen={onOpen} /></div> : <div style={{ height: 1 }} />}
             </div>
           )
         })}
       </div>
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 40, textAlign: 'center', fontSize: 12.5, fontWeight: 800, color: NAVY, letterSpacing: .4, zIndex: 3 }}>Lesson {i + 1} of {acts.length} · {acts[i].title}</div>
-      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 18, display: 'flex', justifyContent: 'center', gap: 8, zIndex: 3 }} aria-label="Lessons">
+      {arrow(1)}
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 26, textAlign: 'center', fontSize: 12.5, fontWeight: 800, color: NAVY, letterSpacing: .4, zIndex: 3 }}>Lesson {i + 1} of {acts.length} · {acts[i].title}</div>
+      <div style={{ position: 'absolute', left: 0, right: 0, bottom: 8, display: 'flex', justifyContent: 'center', gap: 8, zIndex: 3 }} aria-label="Lessons">
         {acts.map((x, k) => {
           const on = k === i
           const c = x.status === 'passed' ? '#2e9e6b' : x.status === 'in_progress' ? '#f5b400' : '#c9d6e0'
@@ -418,7 +428,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   const pickLessons = (v) => { setLessons(v); try { localStorage.setItem('luna.lessons', v) } catch {} }
 
   return (
-    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 40px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
+    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
       backgroundColor: SKY_CONT,
       backgroundImage: `linear-gradient(to bottom, rgba(${WASH_RGB},${PAGE_WASH}) 0, rgba(${WASH_RGB},${PAGE_WASH}) 380px, ${SKY_CONT} 560px, ${SKY_CONT} 100%), url(${SKY_TOP})`,
       backgroundSize: '100% 100%, 100% auto', backgroundPosition: 'top, center top', backgroundRepeat: 'no-repeat, no-repeat' }}>
@@ -551,9 +561,6 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
           </div>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 18, fontSize: 13, fontStyle: 'italic', color: NAVY, fontWeight: 600 }}>
-          "Every great writer starts with a single idea." <span style={{ color: '#f5b400' }}>✦</span>
-        </div>
       </div>
     </div>
   )

@@ -67,7 +67,7 @@ function Stepper({ step, done, onJump }) {
 
 function Field({ p, value, onChange }) {
   return (
-    <label style={{ display: 'grid', gridTemplateColumns: '190px 1fr', alignItems: 'center', gap: 14, background: '#fbf7ec', borderRadius: 12, padding: '10px 14px' }}>
+    <label style={{ display: 'grid', gridTemplateColumns: '190px 1fr', alignItems: 'center', gap: 14, background: '#fbf7ec', borderRadius: 12, padding: '7px 14px' }}>
       <span style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <span style={{ fontSize: 22, width: 30, textAlign: 'center' }}>{p.icon}</span>
         <span>
@@ -76,7 +76,7 @@ function Field({ p, value, onChange }) {
         </span>
       </span>
       <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Type your response here…"
-        style={{ font: 'inherit', fontSize: 14, padding: '11px 14px', borderRadius: 9, border: '1.5px solid #cfdde8', background: '#fff', color: 'var(--ink)', outline: 'none' }} />
+        style={{ font: 'inherit', fontSize: 14, padding: '9px 14px', borderRadius: 9, border: '1.5px solid #cfdde8', background: '#fff', color: 'var(--ink)', outline: 'none' }} />
     </label>
   )
 }
@@ -84,12 +84,12 @@ function Field({ p, value, onChange }) {
 function LearnStep({ answers, setAnswers }) {
   return (
     <>
-      <div style={{ background: '#eaf6fd', borderRadius: 14, padding: '22px 20px', textAlign: 'center', margin: '4px 0 14px' }}>
-        <span style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 'clamp(28px, 2.6vw, 40px)', fontWeight: 700, color: NAVY }}>
+      <div style={{ background: '#eaf6fd', borderRadius: 14, padding: '14px 20px', textAlign: 'center', margin: '2px 0 10px' }}>
+        <span style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 'clamp(26px, 2.3vw, 34px)', fontWeight: 700, color: NAVY }}>
           <span style={{ color: '#f5b400', fontSize: '.6em', verticalAlign: 'middle', marginRight: 14 }}>✧</span>{STARBURST.starter}<span style={{ color: '#f5b400', fontSize: '.6em', verticalAlign: 'middle', marginLeft: 14 }}>✧</span>
         </span>
       </div>
-      <div style={{ display: 'grid', gap: 10 }}>
+      <div style={{ display: 'grid', gap: 8 }}>
         {STARBURST.prompts.map((p) => <Field key={p.key} p={p} value={answers[p.key] || ''} onChange={(v) => setAnswers({ ...answers, [p.key]: v })} />)}
       </div>
     </>
@@ -205,40 +205,33 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
       backgroundColor: '#dbe9f4', backgroundImage: `linear-gradient(to bottom, rgba(236,244,251,.66) 0, rgba(236,244,251,.66) 320px, #dbe9f4 560px), url(${SKY_TOP})`, backgroundSize: '100% 100%, 100% auto', backgroundRepeat: 'no-repeat' }}>
 
       {/* left rail */}
-      <aside style={{ background: 'rgba(255,255,255,.72)', borderRight: '1px solid rgba(188,217,236,.7)', padding: '28px 18px 24px 26px', display: 'flex', flexDirection: 'column' }}>
+      <aside style={{ background: 'rgba(255,255,255,.72)', borderRight: '1px solid rgba(188,217,236,.7)', padding: '22px 18px 24px 24px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: 26 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: '#0a7dba' }}>{moduleLabel.split(':')[0].toUpperCase()}</div>
-          <div style={{ fontWeight: 800, fontSize: 15, color: NAVY, lineHeight: 1.25 }}>{lesson.title.replace(/^Module \d+: /, '')}</div>
+          <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: 22, color: NAVY, lineHeight: 1.15 }}>{lesson.title.replace(/^Module \d+: /, '')}</div>
+          <div style={{ fontSize: 12, color: '#4a6f8c', marginTop: 4, lineHeight: 1.35 }}>Use what you know about {lesson.title.replace(/^Module \d+: /, '')} to expand a sentence.</div>
         </div>
         <Stepper step={step} done={done} onJump={setStep} />
         <div style={{ marginTop: 'auto', marginBottom: 110, fontFamily: '"Bradley Hand", "Segoe Script", cursive', fontSize: 22, lineHeight: 1.15, color: NAVY, opacity: .85 }}>Better<br />Writers<br />Brighter<br />Futures <span style={{ color: '#f5b400' }}>✦</span></div>
       </aside>
 
       {/* main */}
-      <section style={{ padding: '26px clamp(22px, 2.6vw, 56px) 96px', position: 'relative', minWidth: 0 }}>
-        <header style={{ display: 'flex', alignItems: 'flex-start', gap: 20, marginBottom: 18 }}>
-          <span style={{ color: '#f5b400', fontSize: 26, marginTop: 6 }}>✦</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: .8, color: '#0a7dba', marginBottom: 4 }}>{moduleLabel.toUpperCase()}</div>
-            <h1 style={{ margin: 0, fontFamily: 'Georgia, "Times New Roman", serif', fontSize: 'clamp(28px, 2.8vw, 40px)', fontWeight: 700, color: NAVY, lineHeight: 1.1 }}>{lesson.title.replace(/^Module \d+: /, '')}</h1>
-            <div style={{ fontSize: 16, color: '#4a6f8c', marginTop: 6 }}>Use what you know about {lesson.title.replace(/^Module \d+: /, '')} to expand a sentence.</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 8 }}>
-            <div style={{ position: 'relative', width: 'clamp(160px, 22vw, 320px)', height: 20, background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 10, overflow: 'hidden' }}>
-              <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 10 }} />
-              <span style={{ position: 'absolute', left: 10, top: 0, lineHeight: '20px', fontSize: 11.5, fontWeight: 800, color: pct > 18 ? '#fff' : NAVY }}>{pct}%</span>
-            </div>
-            <span style={{ fontSize: 14, fontWeight: 700, color: NAVY, whiteSpace: 'nowrap' }}>{step + 1} of {STEPS.length}</span>
-          </div>
-        </header>
+      <section style={{ padding: '18px clamp(22px, 2.6vw, 56px) 0', position: 'relative', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
-        <div style={{ background: 'rgba(255,255,255,.96)', borderRadius: 22, boxShadow: '0 8px 30px rgba(2,20,50,.14)', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 250px', overflow: 'hidden' }}>
-          <div style={{ padding: '22px 24px 24px' }}>
-            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 14 }}>
+        <div style={{ position: 'relative', background: 'rgba(255,255,255,.96)', borderRadius: 22, boxShadow: '0 8px 30px rgba(2,20,50,.14)', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 250px', overflow: 'hidden' }}>
+          <div style={{ padding: '18px 24px 20px' }}>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 12, paddingRight: 0 }}>
+              <div style={{ position: 'absolute', right: 268, top: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ position: 'relative', width: 'clamp(120px, 14vw, 220px)', height: 18, background: '#eef3f6', border: '1.5px solid #cfdde8', borderRadius: 10, overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 10 }} />
+                  <span style={{ position: 'absolute', left: 8, top: 0, lineHeight: '18px', fontSize: 10.5, fontWeight: 800, color: pct > 22 ? '#fff' : NAVY }}>{pct}%</span>
+                </div>
+                <span style={{ fontSize: 12.5, fontWeight: 800, color: NAVY, whiteSpace: 'nowrap' }}>{step + 1} of {STEPS.length}</span>
+              </div>
               <span style={{ width: 52, height: 52, borderRadius: '50%', background: '#fbf7ec', border: '1.5px solid #f0dfae', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{['✎', '☑', '✍', '★'][step]}</span>
               <div>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: 21, fontWeight: 700, color: NAVY }}>{step === 0 ? STARBURST.activity : `${STEPS[step]}: ${STARBURST.activity.split(':')[1].trim()}`}</div>
-                <div style={{ fontSize: 14, color: '#4a6f8c', marginTop: 3, maxWidth: 620 }}>{step === 0 ? STARBURST.directions : step === 1 ? 'Check your eye for detail before you write your own.' : step === 2 ? 'Bring your answers together into one strong sentence.' : 'See how your sentence grew, and where the stars came from.'}</div>
+                <div style={{ fontSize: 13.5, color: '#4a6f8c', marginTop: 3, maxWidth: 560 }}>{step === 0 ? STARBURST.directions : step === 1 ? 'Check your eye for detail before you write your own.' : step === 2 ? 'Bring your answers together into one strong sentence.' : 'See how your sentence grew, and where the stars came from.'}</div>
               </div>
             </div>
             {step === 0 && <LearnStep answers={answers} setAnswers={setAnswers} />}
@@ -265,7 +258,7 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
         </div>
 
         {/* bottom bar */}
-        <div style={{ position: 'sticky', bottom: 0, marginTop: 18, display: 'flex', alignItems: 'center', gap: 12, padding: '14px 0 18px', background: 'linear-gradient(180deg, rgba(219,233,244,0), #dbe9f4 40%)' }}>
+        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, padding: '0 0 18px' }}>
           <button onClick={step === 0 ? onBack : () => setStep(step - 1)} style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 10, padding: '11px 22px', fontWeight: 800, fontSize: 14, color: NAVY }}>← Back</button>
           <span style={{ fontSize: 13, color: '#2e9e6b', fontWeight: 700, minWidth: 90 }}>{saved}</span>
           <div style={{ flex: 1 }} />

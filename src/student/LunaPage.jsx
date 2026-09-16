@@ -194,13 +194,13 @@ function ProgressRing({ pct }) {
 }
 
 
-/* ---------------- all lessons in a row ---------------- */
+/* ---------------- all lessons, as a grid ---------------- */
 
 function IslandPath({ acts, onOpen }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'clamp(10px, 1.6%, 22px)', padding: '22px 6px 8px', marginTop: 12 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 18, alignItems: 'start' }}>
       {acts.map((a) => (
-        <div key={a.n} style={{ width: a.final ? 'clamp(150px, 17%, 186px)' : 'clamp(120px, 14.5%, 156px)', flexShrink: 0 }}>
+        <div key={a.n} style={{ zoom: 1.15 }}>
           <ActivityCard a={a} onOpen={onOpen} />
         </div>
       ))}
@@ -236,7 +236,7 @@ function LessonCarousel({ acts, onOpen }) {
     )
   }
   return (
-    <div tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '18px 0 40px', marginTop: 6 }}>
+    <div tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '12px 0 44px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 'clamp(8px, 1.5%, 20px)' }}>
         {arrow(-1)}
         {SLOTS.map((slot, sIdx) => {
@@ -317,15 +317,15 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 270px', gap: 16, alignItems: 'start' }}>
           {/* ===== main column ===== */}
           <div>
-            {/* mission card */}
-            <White style={{ padding: '10px 18px 12px', marginBottom: 0, color: 'var(--ink)', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: '4px 20px', alignItems: 'center' }}>
-              <div>
-                <span style={{ display: 'inline-block', background: NAVY, color: '#ffd44d', fontWeight: 800, fontSize: 12, letterSpacing: 1.4, padding: '3px 10px', borderRadius: 7, marginBottom: 5, fontSize: 10.5 }}>★ MISSION {String(currentIdx + 1).padStart(2, '0')}</span>
-                <div style={{ fontSize: 'clamp(18px, 1.6vw, 23px)', fontWeight: 800, color: NAVY, lineHeight: 1.15, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Master the {current.label}</div>
-                <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}>{MISSION_BLURB[current.id]}</div>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                <div style={{ minWidth: 220 }}>
+            {/* mission panel: header + lessons together */}
+            <White style={{ padding: '16px 20px 20px', color: 'var(--ink)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 14, marginBottom: 18, borderBottom: '1px solid #e6eef3' }}>
+                <div style={{ flex: 1, minWidth: 260 }}>
+                  <span style={{ display: 'inline-block', background: NAVY, color: '#ffd44d', fontWeight: 800, letterSpacing: 1.4, padding: '3px 10px', borderRadius: 7, marginBottom: 6, fontSize: 10.5 }}>★ MISSION {String(currentIdx + 1).padStart(2, '0')}</span>
+                  <div style={{ fontSize: 'clamp(19px, 1.7vw, 24px)', fontWeight: 800, color: NAVY, lineHeight: 1.15 }}>Master the {current.label}</div>
+                  <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}>{MISSION_BLURB[current.id]}</div>
+                </div>
+                <div style={{ minWidth: 220, maxWidth: 320, flex: '0 1 320px' }}>
                   <div style={{ fontSize: 12, fontWeight: 800, color: '#0a7dba', marginBottom: 4 }}>{done} of {acts.length} lessons · {left === 0 ? 'mission complete!' : `${left} to go`}</div>
                   <div style={{ position: 'relative', height: 12, background: '#e6eef3', borderRadius: 8, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct * 100}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 8 }} />
@@ -333,10 +333,8 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                   </div>
                 </div>
               </div>
+              {lessons === 'one' ? <LessonCarousel acts={acts} onOpen={open} /> : <IslandPath acts={acts} onOpen={open} />}
             </White>
-
-            {/* activity path, on the islands */}
-            {lessons === 'one' ? <LessonCarousel acts={acts} onOpen={open} /> : <IslandPath acts={acts} onOpen={open} />}
           </div>
 
           {/* ===== writer profile ===== */}

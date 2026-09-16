@@ -4,6 +4,7 @@ const BASE = import.meta.env.BASE_URL || '/'
 export const BRAND = {
   logo: BASE + 'lonestar-logo.png',
   luna: BASE + 'luna.png',
+  lunaWordmark: BASE + 'luna-wordmark.png', // "LUNA'S WRITING NOOK" lockup, navy on transparent
   rocket: BASE + 'rocket.png',
   launchBg: BASE + 'launch-bg.jpg',
   trophy: BASE + 'trophy.png',

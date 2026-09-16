@@ -295,12 +295,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
         {/* header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
           <img src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
-          <div>
-            <h1 style={{ margin: 0, fontSize: 'clamp(26px, 2.5vw, 36px)', fontWeight: 800, lineHeight: 1.05, letterSpacing: '-.01em', color: NAVY }}>
-              Luna's <span style={{ color: '#035c78' }}>Writing Nook</span>
-            </h1>
-            <div style={{ fontSize: 14.5, fontWeight: 700, marginTop: 3, color: '#4a6f8c' }}>Think it. Write it. Shine! <span style={{ color: '#f5b400' }}>✦</span></div>
-          </div>
+          <img src={BRAND.lunaWordmark} alt="Luna's Writing Nook" style={{ height: 'clamp(54px, 5vw, 74px)', width: 'auto', display: 'block', marginTop: 2 }} />
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {onBack && (

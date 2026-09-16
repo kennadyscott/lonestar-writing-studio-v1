@@ -9,14 +9,9 @@ import ModuleBadge from '../components/ModuleBadge.jsx'
  * 3-column path with dotted connectors, and the "My Writer Profile" sidebar.
  */
 
-// Page wash: the sky strip sits under a pale wash (like the homepage) so the
-// cards and the navy band carry the page. PAGE_WASH is how much white goes on.
-const PAGE_WASH = 0.62
-const WASH_RGB = '236,244,251'
-const SKY_CONT = '#9fc6e7' // colour the sky strip fades into below 560px
+// Backdrop is the dashboard's: canvas colour + bg-stars.jpg at 22%.
 
 const BASE = import.meta.env.BASE_URL || '/'
-const SKY_TOP = BASE + 'luna-sky-top.webp'
 const ISLANDS = BASE + 'luna-islands.webp'
 const NAVY = '#0d2f55'
 const GLASS = 'rgba(9, 32, 68, .82)'
@@ -315,7 +310,7 @@ function IslandPath({ acts, onOpen }) {
     <div ref={box} style={{ position: 'relative', width: '100%', paddingTop: `${STRIP_ASPECT * 100}%`, margin: '18px 0 0' }}>
       {/* the islands, washed a little and feathered at the edges */}
       <div aria-hidden style={{ position: 'absolute', inset: 0, borderRadius: 24,
-        backgroundImage: `linear-gradient(rgba(${WASH_RGB},.22), rgba(${WASH_RGB},.22)), url(${ISLANDS})`,
+        backgroundImage: `linear-gradient(rgba(236,244,251,.3), rgba(236,244,251,.3)), url(${ISLANDS})`,
         backgroundSize: '100% 100%', backgroundRepeat: 'no-repeat',
         WebkitMaskImage: 'linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)',
         maskImage: 'linear-gradient(to right, transparent, #000 6%, #000 94%, transparent), linear-gradient(to bottom, transparent, #000 8%, #000 92%, transparent)',
@@ -341,11 +336,11 @@ function IslandPath({ acts, onOpen }) {
 // smaller, the outer two smaller still. `zoom` scales layout too, so nothing
 // overlaps; widths are set so the five fill the row.
 const SLOTS = [
-  { w: 13, zoom: .84, op: .55 },
-  { w: 16.5, zoom: 1, op: .8 },
-  { w: 22, zoom: 1.32, op: 1 },
-  { w: 16.5, zoom: 1, op: .8 },
-  { w: 13, zoom: .84, op: .55 },
+  { w: 'clamp(96px, 11%, 118px)', zoom: .85, op: .55 },
+  { w: 'clamp(118px, 14%, 140px)', zoom: 1, op: .8 },
+  { w: 'clamp(150px, 17%, 172px)', zoom: 1.2, op: 1 },
+  { w: 'clamp(118px, 14%, 140px)', zoom: 1, op: .8 },
+  { w: 'clamp(96px, 11%, 118px)', zoom: .85, op: .55 },
 ]
 
 function LessonCarousel({ acts, onOpen }) {
@@ -377,17 +372,17 @@ function LessonCarousel({ acts, onOpen }) {
   }
   slotRefs.current = []
   return (
-    <div ref={box} tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '52px 56px 54px', marginTop: 14 }}>
+    <div ref={box} tabIndex={0} onKeyDown={onKey} style={{ position: 'relative', outline: 'none', padding: '44px 56px 50px', marginTop: 10 }}>
       <StringLights centres={geo.pts} w={geo.w} h={geo.h} sag={22} />
       {arrow(-1)}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: '2%' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'center', gap: 'clamp(12px, 2.4%, 30px)' }}>
         {SLOTS.map((slot, sIdx) => {
           const k = i + (sIdx - 2)
           const a = acts[k]
           const focus = sIdx === 2
           return (
             <div key={sIdx} ref={(el) => { if (a) slotRefs.current.push(el) }} onClick={() => a && !focus && setI(k)}
-              style={{ width: `${slot.w}%`, flexShrink: 0, zoom: slot.zoom, opacity: a ? slot.op : 0, transition: 'opacity .18s', cursor: a && !focus ? 'pointer' : 'default', filter: focus ? 'none' : 'saturate(.8)', pointerEvents: a ? 'auto' : 'none', position: 'relative', zIndex: focus ? 3 : 2 }}>
+              style={{ width: slot.w, flexShrink: 0, zoom: slot.zoom, opacity: a ? slot.op : 0, transition: 'opacity .18s', cursor: a && !focus ? 'pointer' : 'default', filter: focus ? 'none' : 'saturate(.8)', pointerEvents: a ? 'auto' : 'none', position: 'relative', zIndex: focus ? 3 : 2 }}>
               {a ? <div style={{ pointerEvents: focus ? 'auto' : 'none' }}><ActivityCard a={a} onOpen={onOpen} /></div> : <div style={{ height: 1 }} />}
             </div>
           )
@@ -429,11 +424,11 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
-      backgroundColor: SKY_CONT,
-      backgroundImage: `linear-gradient(to bottom, rgba(${WASH_RGB},${PAGE_WASH}) 0, rgba(${WASH_RGB},${PAGE_WASH}) 380px, ${SKY_CONT} 560px, ${SKY_CONT} 100%), url(${SKY_TOP})`,
-      backgroundSize: '100% 100%, 100% auto', backgroundPosition: 'top, center top', backgroundRepeat: 'no-repeat, no-repeat' }}>
+      background: 'var(--canvas)' }}>
+      {/* same backdrop as the dashboard */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
 
-      <div style={{ position: 'relative', maxWidth: 1780, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
+      <div style={{ position: 'relative', maxWidth: 1500, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
         {/* header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
           <img src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />

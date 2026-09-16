@@ -13,7 +13,6 @@ import { BRAND } from '../lib/brand.js'
 
 const NAVY = '#0d2f55'
 const BASE = import.meta.env.BASE_URL || '/'
-const SKY_TOP = BASE + 'luna-sky-top.webp'
 const STEPS = ['Learn', 'Practice', 'Your Turn', 'Review']
 
 const STARBURST = {
@@ -202,10 +201,11 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', minHeight: 'calc(100vh - 64px)', display: 'grid', gridTemplateColumns: '190px minmax(0,1fr)', color: 'var(--ink)',
-      backgroundColor: '#dbe9f4', backgroundImage: `linear-gradient(to bottom, rgba(236,244,251,.66) 0, rgba(236,244,251,.66) 320px, #dbe9f4 560px), url(${SKY_TOP})`, backgroundSize: '100% 100%, 100% auto', backgroundRepeat: 'no-repeat' }}>
+      background: 'var(--canvas)' }}>
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
 
       {/* left rail */}
-      <aside style={{ background: 'rgba(255,255,255,.72)', borderRight: '1px solid rgba(188,217,236,.7)', padding: '22px 18px 24px 24px', display: 'flex', flexDirection: 'column' }}>
+      <aside style={{ position: 'relative', background: 'rgba(255,255,255,.72)', borderRight: '1px solid rgba(188,217,236,.7)', padding: '22px 18px 24px 24px', display: 'flex', flexDirection: 'column' }}>
         <div style={{ marginBottom: 26 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: '#0a7dba' }}>{moduleLabel.split(':')[0].toUpperCase()}</div>
           <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: 22, color: NAVY, lineHeight: 1.15 }}>{lesson.title.replace(/^Module \d+: /, '')}</div>
@@ -216,7 +216,7 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
       </aside>
 
       {/* main */}
-      <section style={{ padding: '18px clamp(22px, 2.6vw, 56px) 0', position: 'relative', minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+      <section style={{ padding: '18px clamp(22px, 2.6vw, 56px) 0', position: 'relative', zIndex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
         <div style={{ position: 'relative', background: 'rgba(255,255,255,.96)', borderRadius: 22, boxShadow: '0 8px 30px rgba(2,20,50,.14)', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 250px', overflow: 'hidden' }}>
           <div style={{ padding: '18px 24px 20px' }}>

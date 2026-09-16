@@ -56,7 +56,7 @@ function Glass({ children, style }) {
 
 function White({ children, style }) {
   return (
-    <div style={{ background: 'rgba(255,255,255,.96)', borderRadius: 18, boxShadow: CARD_SHADOW, ...style }}>
+    <div style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid var(--gold-line)', borderRadius: 18, boxShadow: 'var(--shadow)', ...style }}>
       {children}
     </div>
   )
@@ -75,7 +75,8 @@ function ActivityCard({ a, onOpen }) {
       onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
       style={{ position: 'relative', background: '#fff', borderRadius: 14, padding: 7, cursor: clickable ? 'pointer' : 'default',
-        boxShadow: current ? '0 0 0 2.5px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : a.final ? '0 0 0 1.5px #ffd44d, ' + CARD_SHADOW : CARD_SHADOW,
+        border: '1px solid var(--gold-line)',
+        boxShadow: current ? '0 0 0 2.5px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)',
         opacity: locked && !a.final ? .7 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
       <div style={{ position: 'relative', height: 66, borderRadius: 10, overflow: 'hidden', background: a.final ? 'linear-gradient(135deg,#1c4f86 0%,#0d2f55 100%)' : 'linear-gradient(135deg,#0d2f55 0%,#123a63 60%,#1b2f52 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
@@ -94,6 +95,7 @@ function ActivityCard({ a, onOpen }) {
       </div>
 
       <div style={{ padding: '8px 3px 3px', textAlign: 'center' }}>
+        <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .9, color: a.final ? '#b97e10' : current ? 'var(--link)' : '#7d93a6', marginBottom: 3 }}>{a.final ? 'FINAL CHALLENGE' : `LESSON ${a.n}`}</div>
         <div style={{ fontWeight: 800, fontSize: a.final ? 12.5 : 11.5, lineHeight: 1.2, color: NAVY, minHeight: a.sub ? 0 : 28 }}>{a.title}</div>
         {a.sub && <div style={{ fontSize: 10.5, color: '#5c7285', marginTop: 1 }}>{a.sub}</div>}
         <div style={{ margin: '4px 0 2px' }}><Stars n={a.stars} size={12} /></div>
@@ -113,12 +115,12 @@ function ActivityCard({ a, onOpen }) {
 
 /* ---------------- journey band ---------------- */
 
-const BAND = { background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)', border: '1.5px solid #bcd9ec', borderRadius: 16, boxShadow: CARD_SHADOW }
+const BAND = { background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid var(--gold-line)', borderRadius: 16, boxShadow: 'var(--shadow)' }
 
 function BandHead({ modules, right }) {
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 5 }}>
-      <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.1, color: '#0a7dba' }}>✦ YOUR WRITING JOURNEY</div>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.1, color: 'var(--link)' }}>YOUR WRITING JOURNEY</div>
       <div style={{ fontSize: 11, fontWeight: 700, color: '#5c7285' }}>{right || <>{modules.length} Modules · A Brighter You <span style={{ color: '#f5b400' }}>✦</span></>}</div>
     </div>
   )
@@ -136,7 +138,7 @@ function JourneyAll({ modules, currentId }) {
           const done = m.status === 'completed'
           return (
             <React.Fragment key={m.id}>
-              {i > 0 && <div style={{ flex: '0 0 auto', width: 18, borderTop: '2px dashed #8fcbe8', marginTop: 16 }} />}
+              {i > 0 && <div className="constellation-rule" style={{ flex: '0 0 auto', width: 22, marginTop: 15, display: 'flex', alignItems: 'center', gap: 3 }}><i /><span /></div>}
               <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', background: cur ? '#eaf6fd' : 'transparent', borderRadius: 10, padding: '3px 6px' }}>
                 <div style={{ position: 'relative', width: 32, height: 32, borderRadius: '50%', display: 'grid', placeItems: 'center', boxShadow: cur ? '0 0 0 2.5px #f5b400, 0 0 16px rgba(245,180,0,.5)' : 'none', background: cur ? '#fff' : 'transparent' }}>
                   <ModuleBadge id={m.id} size={cur ? 27 : 23} dim={locked} />
@@ -160,7 +162,7 @@ function LessonSwitch({ value, onChange }) {
     <button onClick={() => onChange(v)} style={{ padding: '5px 10px', borderRadius: 8, fontWeight: 800, fontSize: 11.5, background: value === v ? NAVY : 'transparent', color: value === v ? '#fff' : '#4a6f8c' }}>{label}</button>
   )
   return (
-    <div title="Prototype only: two ways to show the lessons" style={{ display: 'inline-flex', gap: 2, padding: 2, background: 'rgba(255,255,255,.9)', border: '1.5px solid #bcd9ec', borderRadius: 10, boxShadow: CARD_SHADOW }}>
+    <div title="Prototype only: two ways to show the lessons" style={{ display: 'inline-flex', gap: 2, padding: 2, background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 10, boxShadow: 'var(--shadow)' }}>
       <span style={{ alignSelf: 'center', fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: '#7d93a6', padding: '0 6px 0 8px' }}>LESSONS</span>
       {opt('all', 'A · All on the map')}
       {opt('one', 'B · One at a time')}
@@ -194,15 +196,39 @@ function ProgressRing({ pct }) {
 }
 
 
-/* ---------------- all lessons, as a grid ---------------- */
+/* ---------------- all lessons, in order ---------------- */
+
+// Rows of three. Between cards, the homepage's gold constellation rule
+// carries the eye from one lesson to the next; between rows a full-width
+// rule does the same, so the order reads 1 → 2 → 3, then 4 → 5 → 6.
+function Connector({ style }) {
+  return (
+    <div className="constellation-rule" aria-hidden style={{ display: 'flex', alignItems: 'center', gap: 4, ...style }}>
+      <i /><span />
+    </div>
+  )
+}
 
 function IslandPath({ acts, onOpen }) {
+  const rows = []
+  for (let i = 0; i < acts.length; i += 3) rows.push(acts.slice(i, i + 3))
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 18, alignItems: 'start' }}>
-      {acts.map((a) => (
-        <div key={a.n} style={{ zoom: 1.15 }}>
-          <ActivityCard a={a} onOpen={onOpen} />
-        </div>
+    <div style={{ display: 'grid', gap: 12 }}>
+      {rows.map((row, r) => (
+        <React.Fragment key={r}>
+          {r > 0 && <Connector style={{ margin: '2px 6px' }} />}
+          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+            {row.map((a, i) => (
+              <React.Fragment key={a.n}>
+                {i > 0 && <Connector style={{ width: 34, flexShrink: 0, alignSelf: 'center', margin: '0 2px' }} />}
+                <div style={{ flex: 1, minWidth: 0, zoom: 1.15 }}>
+                  <ActivityCard a={a} onOpen={onOpen} />
+                </div>
+              </React.Fragment>
+            ))}
+            {row.length < 3 && Array.from({ length: 3 - row.length }).map((_, k) => <div key={`pad${k}`} style={{ flex: 1, marginLeft: 34 }} />)}
+          </div>
+        </React.Fragment>
       ))}
     </div>
   )
@@ -299,7 +325,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
           <div style={{ flex: 1 }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           {onBack && (
-            <button onClick={onBack} style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: CARD_SHADOW }}>
+            <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)' }}>
               ← Back to Previous Page
             </button>
           )}
@@ -316,12 +342,12 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
             <White style={{ padding: '16px 20px 20px', color: 'var(--ink)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 14, marginBottom: 18, borderBottom: '1px solid #e6eef3' }}>
                 <div style={{ flex: 1, minWidth: 260 }}>
-                  <span style={{ display: 'inline-block', background: NAVY, color: '#ffd44d', fontWeight: 800, letterSpacing: 1.4, padding: '3px 10px', borderRadius: 7, marginBottom: 6, fontSize: 10.5 }}>★ MISSION {String(currentIdx + 1).padStart(2, '0')}</span>
+                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.1, color: 'var(--link)', marginBottom: 4 }}>MISSION {String(currentIdx + 1).padStart(2, '0')}</div>
                   <div style={{ fontSize: 'clamp(19px, 1.7vw, 24px)', fontWeight: 800, color: NAVY, lineHeight: 1.15 }}>Master the {current.label}</div>
                   <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}>{MISSION_BLURB[current.id]}</div>
                 </div>
                 <div style={{ minWidth: 220, maxWidth: 320, flex: '0 1 320px' }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: '#0a7dba', marginBottom: 4 }}>{done} of {acts.length} lessons · {left === 0 ? 'mission complete!' : `${left} to go`}</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--link)', marginBottom: 4 }}>{done} of {acts.length} lessons · {left === 0 ? 'mission complete!' : `${left} to go`}</div>
                   <div style={{ position: 'relative', height: 12, background: '#e6eef3', borderRadius: 8, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct * 100}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 8 }} />
                     <span style={{ position: 'absolute', right: 6, top: 0, fontSize: 10, fontWeight: 800, lineHeight: '12px', color: '#4a6f8c' }}>{Math.round(pct * 100)}%</span>

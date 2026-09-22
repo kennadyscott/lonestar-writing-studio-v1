@@ -3,7 +3,7 @@ import { BRAND } from '../lib/brand.js'
 
 /*
  * Lesson page — opened from a lesson card in Luna's Writing Nook.
- * Four steps down the left (Learn → Practice → Your Turn → Review), the
+ * Five steps down the left (Watch → Learn → Practice → Your Turn → Review), the
  * step's work in the middle, Luna's coaching on the right, Back / Save Draft /
  * Continue along the bottom. Progress = steps completed / 4.
  *
@@ -13,7 +13,11 @@ import { BRAND } from '../lib/brand.js'
 
 const NAVY = '#0d2f55'
 const BASE = import.meta.env.BASE_URL || '/'
-const STEPS = ['Learn', 'Practice', 'Your Turn', 'Review']
+const STEPS = ['Watch', 'Learn', 'Practice', 'Your Turn', 'Review']
+
+// The instruction video that opens the lesson. Prototype: poster frame only,
+// the real clip is attached when the lesson decks are converted.
+const VIDEO = { title: 'Instruction 1.2: Restate the Question', length: '3:42', poster: BASE + 'lessons/video-restate.webp' }
 
 const STARBURST = {
   activity: 'Starburst Prompts: Sentence Expansion',
@@ -34,10 +38,11 @@ const STARBURST = {
     ],
   },
   luna: {
-    0: 'Think about the details! Strong sentences help your writing shine.',
-    1: 'Look for the sentence that answers the most questions without turning into a list.',
-    2: 'Use your four answers. Start with WHEN or WHAT and keep it to one smooth sentence.',
-    3: 'Look at how far your sentence came from two words!',
+    0: 'Watch first. Then we will try it together!',
+    1: 'Think about the details! Strong sentences help your writing shine.',
+    2: 'Look for the sentence that answers the most questions without turning into a list.',
+    3: 'Use your four answers. Start with WHEN or WHAT and keep it to one smooth sentence.',
+    4: 'Look at how far your sentence came from two words!',
   },
 }
 
@@ -49,8 +54,8 @@ function Stepper({ step, done, onJump }) {
       {STEPS.map((label, i) => {
         const cur = i === step, past = i < done
         return (
-          <li key={label} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '0 0 44px' }}>
-            {i < STEPS.length - 1 && <span aria-hidden style={{ position: 'absolute', left: 17, top: 36, width: 2, height: 44, background: past ? '#0a7dba' : '#cbd8e2' }} />}
+          <li key={label} style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14, padding: '0 0 36px' }}>
+            {i < STEPS.length - 1 && <span aria-hidden style={{ position: 'absolute', left: 17, top: 36, width: 2, height: 36, background: past ? '#0a7dba' : '#cbd8e2' }} />}
             <button onClick={() => i <= done && onJump(i)} disabled={i > done} aria-current={cur ? 'step' : undefined}
               style={{ width: 36, height: 36, borderRadius: '50%', display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: 14, flexShrink: 0, cursor: i <= done ? 'pointer' : 'default',
                 background: cur || past ? NAVY : '#fff', color: cur || past ? '#fff' : '#7d93a6', border: cur || past ? 'none' : '2px solid #cbd8e2', boxShadow: cur ? '0 0 0 4px rgba(10,125,186,.18)' : 'none' }}>
@@ -77,6 +82,38 @@ function Field({ p, value, onChange }) {
       <input value={value} onChange={(e) => onChange(e.target.value)} placeholder="Type your response here…"
         style={{ font: 'inherit', fontSize: 14, padding: '9px 14px', borderRadius: 9, border: '1.5px solid #cfdde8', background: '#fff', color: 'var(--ink)', outline: 'none' }} />
     </label>
+  )
+}
+
+function WatchStep({ watched, onWatched }) {
+  const [playing, setPlaying] = useState(false)
+  const play = () => { setPlaying(true); onWatched() }
+  return (
+    <div>
+      <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', background: '#0d2f55', aspectRatio: '16 / 9', boxShadow: '0 8px 26px rgba(2,20,50,.25)' }}>
+        <img src={VIDEO.poster} alt={VIDEO.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        {!playing && (
+          <button onClick={play} aria-label="Play video" style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', background: 'rgba(13,47,85,.18)' }}>
+            <span style={{ width: 84, height: 84, borderRadius: '50%', background: 'rgba(255,255,255,.94)', display: 'grid', placeItems: 'center', boxShadow: '0 8px 28px rgba(2,20,50,.4)', fontSize: 34, color: NAVY, paddingLeft: 6 }}>▶</span>
+          </button>
+        )}
+        {/* player chrome */}
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 0, padding: '28px 16px 12px', background: 'linear-gradient(180deg, rgba(0,0,0,0), rgba(0,0,0,.55))', color: '#fff', display: 'flex', alignItems: 'center', gap: 12, fontSize: 12.5, fontWeight: 700 }}>
+          <button onClick={() => (playing ? setPlaying(false) : play())} aria-label={playing ? 'Pause' : 'Play'} style={{ color: '#fff', fontSize: 16, width: 24 }}>{playing ? '❚❚' : '▶'}</button>
+          <div style={{ flex: 1, height: 5, background: 'rgba(255,255,255,.35)', borderRadius: 3, overflow: 'hidden' }}>
+            <div style={{ height: '100%', width: playing ? '38%' : watched ? '100%' : '0%', background: '#f5b400', borderRadius: 3, transition: 'width 1.2s linear' }} />
+          </div>
+          <span style={{ fontVariantNumeric: 'tabular-nums' }}>{playing ? '1:24' : watched ? VIDEO.length : '0:00'} / {VIDEO.length}</span>
+          <span aria-hidden>🔊</span>
+          <span aria-hidden>⛶</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, fontSize: 13, color: '#4a6f8c', fontWeight: 600 }}>
+        <span style={{ background: '#eaf6fd', color: '#0a7dba', fontWeight: 800, fontSize: 11, letterSpacing: .6, padding: '3px 8px', borderRadius: 6 }}>VIDEO</span>
+        <span>{VIDEO.title} · {VIDEO.length}</span>
+        <span style={{ marginLeft: 'auto', color: watched ? '#2e9e6b' : '#7d93a6' }}>{watched ? '✓ Watched' : 'Press play to begin'}</span>
+      </div>
+    </div>
   )
 }
 
@@ -182,22 +219,23 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
   const [answers, setAnswers] = useState({})
   const [pick, setPick] = useState(null)
   const [sentence, setSentence] = useState('')
+  const [watched, setWatched] = useState(false)
   const [saved, setSaved] = useState('')
 
   useEffect(() => {
     try {
       const d = JSON.parse(localStorage.getItem(draftKey(lesson)) || 'null')
-      if (d) { setAnswers(d.answers || {}); setPick(d.pick ?? null); setSentence(d.sentence || ''); setStep(d.step || 0); setDone(d.done || 0) }
+      if (d) { setAnswers(d.answers || {}); setPick(d.pick ?? null); setSentence(d.sentence || ''); setWatched(!!d.watched); setStep(d.step || 0); setDone(d.done || 0) }
     } catch {}
   }, [lesson.n])
 
   const save = (quiet) => {
-    try { localStorage.setItem(draftKey(lesson), JSON.stringify({ answers, pick, sentence, step, done })) } catch {}
+    try { localStorage.setItem(draftKey(lesson), JSON.stringify({ answers, pick, sentence, watched, step, done })) } catch {}
     if (!quiet) { setSaved('Draft saved'); setTimeout(() => setSaved(''), 1600) }
   }
   const next = () => { const n = Math.min(STEPS.length - 1, step + 1); setStep(n); setDone(Math.max(done, n)); save(true) }
   const pct = Math.round(((step + 1) / STEPS.length) * 100)
-  const canContinue = step === 0 ? STARBURST.prompts.filter((p) => (answers[p.key] || '').trim()).length >= 2 : step === 1 ? pick != null : step === 2 ? sentence.trim().length > 0 : false
+  const canContinue = step === 0 ? watched : step === 1 ? STARBURST.prompts.filter((p) => (answers[p.key] || '').trim()).length >= 2 : step === 2 ? pick != null : step === 3 ? sentence.trim().length > 0 : false
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', minHeight: 'calc(100vh - 64px)', display: 'grid', gridTemplateColumns: '190px minmax(0,1fr)', color: 'var(--ink)',
@@ -228,16 +266,17 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
                 </div>
                 <span style={{ fontSize: 12.5, fontWeight: 800, color: NAVY, whiteSpace: 'nowrap' }}>{step + 1} of {STEPS.length}</span>
               </div>
-              <span style={{ width: 52, height: 52, borderRadius: '50%', background: '#fbf7ec', border: '1.5px solid #f0dfae', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{['✎', '☑', '✍', '★'][step]}</span>
+              <span style={{ width: 52, height: 52, borderRadius: '50%', background: '#fbf7ec', border: '1.5px solid #f0dfae', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{['▶', '✎', '☑', '✍', '★'][step]}</span>
               <div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: 21, fontWeight: 700, color: NAVY }}>{step === 0 ? STARBURST.activity : `${STEPS[step]}: ${STARBURST.activity.split(':')[1].trim()}`}</div>
-                <div style={{ fontSize: 13.5, color: '#4a6f8c', marginTop: 3, maxWidth: 560 }}>{step === 0 ? STARBURST.directions : step === 1 ? 'Check your eye for detail before you write your own.' : step === 2 ? 'Bring your answers together into one strong sentence.' : 'See how your sentence grew, and where the stars came from.'}</div>
+                <div style={{ fontFamily: 'Georgia, serif', fontSize: 21, fontWeight: 700, color: NAVY }}>{step === 0 ? VIDEO.title : step === 1 ? STARBURST.activity : `${STEPS[step]}: ${STARBURST.activity.split(':')[1].trim()}`}</div>
+                <div style={{ fontSize: 13.5, color: '#4a6f8c', marginTop: 3, maxWidth: 560 }}>{step === 0 ? 'Watch Luna walk through the skill, then try it yourself in the next step.' : step === 1 ? STARBURST.directions : step === 2 ? 'Check your eye for detail before you write your own.' : step === 3 ? 'Bring your answers together into one strong sentence.' : 'See how your sentence grew, and where the stars came from.'}</div>
               </div>
             </div>
-            {step === 0 && <LearnStep answers={answers} setAnswers={setAnswers} />}
-            {step === 1 && <PracticeStep pick={pick} setPick={setPick} />}
-            {step === 2 && <YourTurnStep answers={answers} sentence={sentence} setSentence={setSentence} />}
-            {step === 3 && <ReviewStep sentence={sentence} answers={answers} pick={pick} />}
+            {step === 0 && <WatchStep watched={watched} onWatched={() => setWatched(true)} />}
+            {step === 1 && <LearnStep answers={answers} setAnswers={setAnswers} />}
+            {step === 2 && <PracticeStep pick={pick} setPick={setPick} />}
+            {step === 3 && <YourTurnStep answers={answers} sentence={sentence} setSentence={setSentence} />}
+            {step === 4 && <ReviewStep sentence={sentence} answers={answers} pick={pick} />}
           </div>
 
           {/* Luna's side */}

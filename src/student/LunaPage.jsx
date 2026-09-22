@@ -329,7 +329,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                 </div>
               </div>
 
-              <div style={{ padding: '9px 14px', borderBottom: '1px solid #e6eef3' }}>
+              <div style={{ padding: '9px 14px 12px' }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285', marginBottom: 6 }}>Badges Earned</div>
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   {earned.map((id) => <ModuleBadge key={id} id={id} size={36} />)}
@@ -337,14 +337,6 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                 </div>
               </div>
 
-              <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontSize: 24, width: 34, textAlign: 'center' }}>🪙</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285' }}>ClassCade Coins</div>
-                  <div style={{ fontSize: 19, fontWeight: 800, color: NAVY }}>{coins.toLocaleString()}</div>
-                </div>
-                <button title="Shop opens in ClassCade" style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 10, padding: '8px 12px', fontWeight: 800, fontSize: 12.5, color: '#0a7dba' }}>View Shop →</button>
-              </div>
             </White>
 
             <White style={{ padding: '10px 14px', display: 'flex', gap: 12, alignItems: 'center' }}>

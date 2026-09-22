@@ -30,6 +30,8 @@ function CoinToast({ data, onClose }) {
   )
 }
 
+const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
+
 export default function WritingStudio({ state, sub, health, onChange, onBack }) {
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
   const isFree = asg.genre === 'free'
@@ -94,7 +96,9 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   const wc = (content || '').split(/\s+/).filter(Boolean).length
 
   return (
-    <div>
+    <div style={isFree ? { margin: '-26px calc(50% - 50vw) -70px', padding: '26px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box',
+      backgroundImage: `linear-gradient(rgba(233,240,249,.5), rgba(233,240,249,.5)), url(${FW}sky.webp)`, backgroundSize: 'cover', backgroundPosition: 'center top', backgroundAttachment: 'fixed' } : undefined}>
+      <div style={isFree ? { maxWidth: 1180, margin: '0 auto' } : undefined}>
       <CoinToast data={toast} onClose={() => setToast(null)} />
 
       {pub && (
@@ -123,14 +127,21 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
 
       {onBack && <button className="backlink" onClick={onBack}>← Back to My Writing</button>}
 
-      {/* prompt banner */}
-      <div className="card" style={{ padding: '14px 18px', marginBottom: 14, display: 'flex', gap: 14, alignItems: 'center' }}>
-        <div style={{ fontSize: 24 }}>📣</div>
-        <div style={{ flex: 1 }}>
-          <div className="eyebrow">{asg.format ? `${asg.format} · ` : ''}{asg.type || asg.genre} · Grade {asg.gradeLevel}{asg.scopeStage ? ` · ${asg.scopeStage}` : ''}</div>
-          <div style={{ fontSize: 14, marginTop: 2 }}>{asg.prompt}</div>
+      {isFree ? (
+        /* Free Write hero */
+        <div style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', marginBottom: 16, boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>
+          <img src={`${FW}hero.webp`} alt="Free Write — your page, your rules." style={{ display: 'block', width: '100%', height: 'clamp(120px, 14vw, 172px)', objectFit: 'cover', objectPosition: 'center' }} />
         </div>
-      </div>
+      ) : (
+        /* prompt banner */
+        <div className="card" style={{ padding: '14px 18px', marginBottom: 14, display: 'flex', gap: 14, alignItems: 'center' }}>
+          <div style={{ fontSize: 24 }}>📣</div>
+          <div style={{ flex: 1 }}>
+            <div className="eyebrow">{asg.format ? `${asg.format} · ` : ''}{asg.type || asg.genre} · Grade {asg.gradeLevel}{asg.scopeStage ? ` · ${asg.scopeStage}` : ''}</div>
+            <div style={{ fontSize: 14, marginTop: 2 }}>{asg.prompt}</div>
+          </div>
+        </div>
+      )}
 
       {/* version strip */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
@@ -161,7 +172,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>{wc} words</span>
           </div>
           {isCurrent && !published ? (
-            <textarea value={content} onChange={(e) => edit(e.target.value)} placeholder="Start writing your argument here…"
+            <textarea value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? 'Start writing here…\nAnything goes.' : 'Start writing your argument here…'}
               style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           ) : (
             <div style={{ flex: 1, minHeight: 380, padding: 18, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#3a4149' }}>{selected.content}</div>
@@ -203,18 +214,27 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
 
         {/* prompts for a free write, the trait rubric for an assignment */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 480 }}>
-          <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
-            <div style={{ flex: 1, padding: '12px', fontWeight: 700, fontSize: 14, background: '#fff', color: 'var(--navy-1)',
-              borderBottom: '2px solid var(--navy-1)', textAlign: 'center' }}>
-              {asg.genre === 'free' ? '🎲 Prompts' : '🎯 Traits'}
-            </div>
-          </div>
-          <div style={{ flex: 1, minHeight: 0 }}>
-            {asg.genre === 'free'
-              ? <PromptsPanel />
-              : <TraitPanel draft={selected} readOnly={!isCurrent} onChange={onChange} />}
-          </div>
+          {isFree ? (
+            <PromptsPanel streakDays={state.growthSummary?.streakDays ?? 0} />
+          ) : (
+            <>
+              <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
+                <div style={{ flex: 1, padding: '12px', fontWeight: 700, fontSize: 14, background: '#fff', color: 'var(--navy-1)',
+                  borderBottom: '2px solid var(--navy-1)', textAlign: 'center' }}>🎯 Traits</div>
+              </div>
+              <div style={{ flex: 1, minHeight: 0 }}>
+                <TraitPanel draft={selected} readOnly={!isCurrent} onChange={onChange} />
+              </div>
+            </>
+          )}
         </div>
+      </div>
+
+      {isFree && (
+        <div style={{ marginTop: 18, borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>
+          <img src={`${FW}footer.webp`} alt="Writing builds brighter thinkers. Every word you write makes your mind a little stronger." style={{ display: 'block', width: '100%', height: 'auto' }} />
+        </div>
+      )}
       </div>
     </div>
   )

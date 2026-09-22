@@ -78,28 +78,56 @@ const MODES = {
   line: { bank: FIRST_LINES, tag: 'First line', hint: 'Steal this line as your opener — then take the story anywhere.', empty: 'opening lines are ready. Spin one and keep it going!' },
 }
 
-export default function PromptsPanel() {
+const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
+
+// Quick sparks: one tap for a themed prompt, no spin.
+const QUICK = [
+  { key: 'spark', icon: '⭐', label: 'A surprising discovery', pick: (b) => b.findIndex((x) => /found|discover|door|box|map|attic/i.test(x)) },
+  { key: 'spark', icon: '💭', label: 'What if…?', pick: (b) => b.findIndex((x) => /^what if/i.test(x)) },
+  { key: 'line', icon: '❤️', label: "A moment I'll always remember", pick: () => -1 },
+]
+
+export default function PromptsPanel({ streakDays = 0 }) {
   const [mode, setMode] = useState('spark')
   const [idx, setIdx] = useState(null)
   const [spins, setSpins] = useState(0)
   const m = MODES[mode]
 
-  function spin() {
-    let next = Math.floor(Math.random() * m.bank.length)
-    if (next === idx) next = (next + 1) % m.bank.length
+  function spin(bankKey) {
+    const key = bankKey || mode
+    const bank = MODES[key].bank
+    let next = Math.floor(Math.random() * bank.length)
+    if (key === mode && next === idx) next = (next + 1) % bank.length
+    if (key !== mode) setMode(key)
     setIdx(next)
     setSpins((s) => s + 1)
+  }
+  function quick(q) {
+    const bank = MODES[q.key].bank
+    const found = q.pick(bank)
+    const next = found >= 0 ? found : Math.floor(Math.random() * bank.length)
+    setMode(q.key); setIdx(next); setSpins((s) => s + 1)
   }
   function switchMode(k) { setMode(k); setIdx(null) }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 10 }}>
-        <div style={{ fontSize: 22 }}>🎲</div>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>Need an idea?</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Spin for inspiration — then write wherever it takes you.</div>
+      {/* header */}
+      <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ fontSize: 22 }}>💡</div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontWeight: 800, fontSize: 15.5, color: '#0d2f55' }}>Inspiration Hub</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Need an idea? Spin for inspiration — then write wherever it takes you.</div>
         </div>
+        {streakDays > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '5px 12px', flexShrink: 0 }}>
+            <span style={{ fontSize: 15 }}>🔥</span>
+            <div style={{ lineHeight: 1.15 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#0d2f55' }}>{streakDays} day streak</div>
+              <div style={{ fontSize: 10, color: '#8a6d1a', fontWeight: 600 }}>Keep it going!</div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* mode toggle */}
@@ -107,7 +135,7 @@ export default function PromptsPanel() {
         <div style={{ display: 'flex', background: '#eaf1f6', borderRadius: 10, padding: 3 }}>
           {[['spark', '🎲 Story Sparks'], ['line', '✏️ First Lines']].map(([k, label]) => (
             <button key={k} onClick={() => switchMode(k)}
-              style={{ flex: 1, padding: '7px 0', borderRadius: 8, fontSize: 12.5, fontWeight: 800,
+              style={{ flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 12.5, fontWeight: 800,
                 background: mode === k ? '#fff' : 'transparent', color: mode === k ? 'var(--navy)' : 'var(--muted)',
                 boxShadow: mode === k ? 'var(--shadow)' : 'none' }}>
               {label}
@@ -116,14 +144,14 @@ export default function PromptsPanel() {
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: 18, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, textAlign: 'center' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, textAlign: 'center' }}>
         {idx === null ? (
           <>
-            <div style={{ fontSize: 52 }}>{mode === 'spark' ? '🎲' : '✏️'}</div>
-            <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 240, margin: 0 }}>
+            <img src={`${FW}dice.webp`} alt="" style={{ width: 168, height: 168, objectFit: 'contain', marginTop: -6 }} />
+            <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 250, margin: 0, lineHeight: 1.5 }}>
               {m.bank.length} {m.empty}
             </p>
-            <button className="btn" style={{ padding: '11px 26px', fontSize: 15 }} onClick={spin}>
+            <button className="btn" style={{ padding: '12px 28px', fontSize: 15, borderRadius: 12 }} onClick={() => spin()}>
               {mode === 'spark' ? '🎲 Spin a prompt' : '✏️ Give me a first line'}
             </button>
           </>
@@ -137,10 +165,24 @@ export default function PromptsPanel() {
                 {mode === 'line' ? `“${m.bank[idx]}”` : m.bank[idx]}
               </div>
             </div>
-            <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={spin}>🎲 Another one!</button>
-            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 250 }}>{m.hint}</p>
+            <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={() => spin()}>🎲 Another one!</button>
+            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 260 }}>{m.hint}</p>
           </>
         )}
+      </div>
+
+      {/* quick sparks */}
+      <div style={{ padding: '14px 16px 16px', borderTop: '1px solid var(--line)', marginTop: 14 }}>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600, marginBottom: 8 }}>Or try a quick spark…</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
+          {QUICK.map((q) => (
+            <button key={q.label} onClick={() => quick(q)}
+              style={{ background: '#fff', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, boxShadow: 'var(--shadow)' }}>
+              <span style={{ fontSize: 18 }}>{q.icon}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#0d2f55', lineHeight: 1.25, textAlign: 'center' }}>{q.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   )

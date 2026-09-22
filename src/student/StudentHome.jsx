@@ -423,7 +423,7 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
   )
 }
 
-/* ---- Fluency Arcade: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
+/* ---- Fluency Zone: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
 const ARCADE_THEME = {
   sentences: { from: '#1f8f5a', to: '#0f5a3a', glow: '#5fe3a1', btn: '#7ee8b1' },
   flow: { from: '#6a3fd8', to: '#3b1f8f', glow: '#b39cff', btn: '#c9b6ff' },
@@ -464,7 +464,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div>
               <div style={{ ...arcadeFont, fontSize: 'clamp(30px, 3.6vw, 46px)', lineHeight: 1, letterSpacing: '.02em', textShadow: '0 3px 0 #1a2a6a, 0 6px 18px rgba(0,0,0,.45)' }}>
-                <span style={{ color: '#ffd44d' }}>✦ </span><span style={{ color: '#7fd6ff' }}>FLUENCY</span> <span style={{ color: '#ffd44d' }}>ARCADE</span><span style={{ color: '#ffd44d' }}> ✦</span>
+                <span style={{ color: '#ffd44d' }}>✦ </span><span style={{ color: '#7fd6ff' }}>FLUENCY</span> <span style={{ color: '#ffd44d' }}>ZONE</span><span style={{ color: '#ffd44d' }}> ✦</span>
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, marginTop: 10, background: 'rgba(8,10,40,.65)', border: '1.5px solid rgba(127,214,255,.6)', borderRadius: 999, padding: '7px 16px', fontSize: 13, fontWeight: 800 }}>
                 <span style={{ letterSpacing: .5 }}>ROUND {grid?.round || 1}</span>
@@ -785,7 +785,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <BigTask compact icon="🧾" title="The Proof Room" sub="Find what's broken. Make it right." grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
             <BigTask compact icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask compact icon="🎮" title="Fluency Arcade" sub="Small games, big progress · double coins" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask compact icon="🎮" title="Fluency Zone" sub="Small games, big progress · double coins" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
             <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
           </div>
         </div>

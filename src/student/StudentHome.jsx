@@ -431,10 +431,10 @@ const ARCADE_THEME = {
   flow: { body: '#2e1a6a', glow: '#b39cff', btn: '#c9b6ff' },
   wordswap: { body: '#0e2c60', glow: '#7fd6ff', btn: '#9fe0ff' },
   typing: { body: '#5e2216', glow: '#ffd27a', btn: '#ffd44d' },
-  context: { body: '#203359', glow: '#7fd6ff', btn: '#9fe0ff' },
-  thisvsthat: { body: '#1f2f45', glow: '#7fd6ff', btn: '#9fe0ff' },
-  wordwork: { body: '#243a57', glow: '#7fd6ff', btn: '#9fe0ff' },
-  spelling: { body: '#213c68', glow: '#ffe08a', btn: '#ffe9a3' },
+  context: { body: '#012c80', glow: '#7fd6ff', btn: '#9fe0ff' },
+  thisvsthat: { body: '#03317d', glow: '#ffa0d8', btn: '#ffb8e2' },
+  wordwork: { body: '#04337d', glow: '#b39cff', btn: '#c9b6ff' },
+  spelling: { body: '#083aa5', glow: '#ffe08a', btn: '#ffe9a3' },
 }
 // How much navy goes over the Fluency Zone backdrop (0 = full art, 1 = solid).
 const ZONE_WASH = 0.5

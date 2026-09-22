@@ -152,8 +152,8 @@ export function seedState() {
     },
     // Fluency game registry — mirrors a games.json manifest in the games repo,
     // so new games published by grade level appear here automatically.
-    // Fluency Practice roster. kind 'builtin' plays in the dashboard; 'soon' is
-    // announced but not built yet (no content behind it).
+    // Fluency Zone roster. kind 'builtin' plays in the dashboard; 'soon' would be
+    // announced but not built. All ten are built (the last four as demo banks).
     fluencyGames: [
       { id: 'fg_combine', title: 'Combine It!', icon: '🔗', skill: 'Sentence Combining', grades: '3–8', kind: 'builtin', game: 'combine' },
       { id: 'fg_fragments', title: 'Fragment Fixer', icon: '🧩', skill: 'Complete Sentences', grades: '2–6', kind: 'builtin', game: 'fragments' },
@@ -161,10 +161,10 @@ export function seedState() {
       { id: 'fg_transitions', title: 'Transition Bridge', icon: '🌉', skill: 'Transitions', grades: '3–8', kind: 'builtin', game: 'transitions' },
       { id: 'fg_typing', title: 'Type Right', icon: '⌨️', skill: 'Typing & Conventions', grades: '2–8', kind: 'builtin', game: 'typing' },
       { id: 'fg_wordswap', title: 'Word Upgrade', icon: '💎', skill: 'Word Choice', grades: '3–8', kind: 'builtin', game: 'wordswap' },
-      { id: 'fg_thisvsthat', title: 'This vs. That', icon: '⚖️', skill: 'Commonly Confused Words', grades: '3–8', kind: 'soon', game: 'thisvsthat' },
-      { id: 'fg_context', title: 'Context Clues', icon: '🔍', skill: 'Vocabulary', grades: '3–8', kind: 'soon', game: 'context' },
-      { id: 'fg_wordwork', title: 'Word Work', icon: '🔤', skill: 'Word Parts', grades: '2–8', kind: 'soon', game: 'wordwork' },
-      { id: 'fg_spelling', title: 'Spelling', icon: '🐝', skill: 'Spelling', grades: '2–8', kind: 'soon', game: 'spelling' },
+      { id: 'fg_thisvsthat', title: 'This vs. That', icon: '⚖️', skill: 'Commonly Confused Words', grades: '3–8', kind: 'builtin', game: 'thisvsthat' },
+      { id: 'fg_context', title: 'Context Clues', icon: '🔍', skill: 'Vocabulary', grades: '3–8', kind: 'builtin', game: 'context' },
+      { id: 'fg_wordwork', title: 'Word Work', icon: '🔤', skill: 'Word Parts', grades: '2–8', kind: 'builtin', game: 'wordwork' },
+      { id: 'fg_spelling', title: 'Spelling', icon: '🐝', skill: 'Spelling', grades: '2–8', kind: 'builtin', game: 'spelling' },
     ],
     // The Fluency grid: one tile per category. A tile picks a game from its
     // list at random; clearing every playable tile pays a bonus.

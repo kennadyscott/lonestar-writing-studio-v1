@@ -170,7 +170,7 @@ export function seedState() {
     // list at random; clearing every playable tile pays a bonus.
     fluencyCategories: [
       { id: 'sentences', title: 'Sentence Builders', icon: '🧱', blurb: 'Stretch, combine and fix sentences.', games: ['stretch', 'combine', 'fragments'] },
-      { id: 'flow', title: 'Smooth Transitions', icon: '🌉', blurb: 'Bridge ideas so writing flows.', games: ['transitions'] },
+      { id: 'flow', title: 'Smooth Transitions', icon: '🛣️', blurb: 'Bridge ideas so writing flows.', games: ['transitions'] },
       { id: 'wordswap', title: 'Word Upgrade', icon: '💎', blurb: 'Swap plain words for stronger ones.', games: ['wordswap'] },
       { id: 'context', title: 'Context Clues', icon: '🔍', blurb: 'Work out a word from the words around it.', games: ['context'] },
       { id: 'thisvsthat', title: 'This vs. That', icon: '⚖️', blurb: 'Their or there? Pick the right one.', games: ['thisvsthat'] },

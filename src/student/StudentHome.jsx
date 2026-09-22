@@ -423,7 +423,20 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
   )
 }
 
-/* ---- Fluency grid: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
+/* ---- Fluency Arcade: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
+const ARCADE_THEME = {
+  sentences: { from: '#1f8f5a', to: '#0f5a3a', glow: '#5fe3a1', btn: '#7ee8b1' },
+  flow: { from: '#6a3fd8', to: '#3b1f8f', glow: '#b39cff', btn: '#c9b6ff' },
+  wordswap: { from: '#0a7dba', to: '#063f6e', glow: '#7fd6ff', btn: '#9fe0ff' },
+  context: { from: '#0d5f66', to: '#083840', glow: '#7fe3d8', btn: '#9ff0e6' },
+  thisvsthat: { from: '#b4478a', to: '#6a2450', glow: '#ffa0d8', btn: '#ffb8e2' },
+  wordwork: { from: '#8a5a12', to: '#4d3008', glow: '#ffd27a', btn: '#ffdc9a' },
+  spelling: { from: '#c78a00', to: '#7a5200', glow: '#ffe08a', btn: '#ffe9a3' },
+  typing: { from: '#d98a12', to: '#8a4a05', glow: '#ffd27a', btn: '#ffd44d' },
+}
+const MAX_COINS = { stretch: 16, typing: 20 }
+const maxCoinsFor = (opts) => Math.max(0, ...opts.map((g) => MAX_COINS[g.game] ?? 24))
+
 function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal }) {
   const byKey = Object.fromEntries(games.map((g) => [g.game, g]))
   const playable = (c) => c.games.map((k) => byKey[k]).filter((g) => g && g.kind === 'builtin')
@@ -433,73 +446,97 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
   const doneCount = inPlay.filter((t) => t.done).length
   const allClear = inPlay.length > 0 && doneCount === inPlay.length
   const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + (grid?.bonusPaid ? 50 : 0)
+  const BASE = import.meta.env.BASE_URL || '/'
+  const arcadeFont = { fontFamily: '"Lilita One", "Baloo 2", Manrope, sans-serif' }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
-      <div className="card" style={{ width: 960, maxWidth: '96vw', padding: '22px 24px 20px', border: '1px solid var(--gold-line)' }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
-          <span style={{ fontSize: 26 }}>🎮</span>
-          <div>
-            <b style={{ fontSize: 18 }}>Fluency Practice</b>
-            <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: .8, color: 'var(--link)' }}>ROUND {grid?.round || 1} · {doneCount} OF {inPlay.length} CLEARED</div>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,10,30,.62)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: 980, maxWidth: '96vw', borderRadius: 24, overflow: 'hidden', color: '#fff', position: 'relative',
+        background: 'radial-gradient(ellipse at 20% 0%, #2b2a7a 0%, #141650 38%, #0b0d33 100%)', boxShadow: '0 0 0 3px #3b8bd6, 0 0 0 5px rgba(120,190,255,.35), 0 30px 80px rgba(0,0,0,.55)' }}>
+        {/* stars */}
+        {[[6, 22, 10], [30, 8, 7], [58, 15, 9], [80, 6, 6], [93, 30, 8], [14, 60, 6], [70, 72, 7], [96, 88, 6]].map(([x, y, sz], i) => (
+          <span key={i} aria-hidden style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, fontSize: sz, color: i % 3 ? 'rgba(255,255,255,.55)' : '#ffd44d', pointerEvents: 'none' }}>✦</span>
+        ))}
+
+        {/* header on the space banner */}
+        <div style={{ position: 'relative', minHeight: 150, backgroundImage: `linear-gradient(90deg, rgba(20,22,80,.92) 0%, rgba(20,22,80,.6) 45%, rgba(20,22,80,.15) 100%), url(${BASE}hero-robot.png)`, backgroundSize: 'cover', backgroundPosition: 'right 35%', padding: '18px 22px 12px' }}>
+          <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 12, right: 14, width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,.14)', border: '1.5px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 18, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ ...arcadeFont, fontSize: 'clamp(30px, 3.6vw, 46px)', lineHeight: 1, letterSpacing: '.02em', textShadow: '0 3px 0 #1a2a6a, 0 6px 18px rgba(0,0,0,.45)' }}>
+                <span style={{ color: '#ffd44d' }}>✦ </span><span style={{ color: '#7fd6ff' }}>FLUENCY</span> <span style={{ color: '#ffd44d' }}>ARCADE</span><span style={{ color: '#ffd44d' }}> ✦</span>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, marginTop: 10, background: 'rgba(8,10,40,.65)', border: '1.5px solid rgba(127,214,255,.6)', borderRadius: 999, padding: '7px 16px', fontSize: 13, fontWeight: 800 }}>
+                <span style={{ letterSpacing: .5 }}>ROUND {grid?.round || 1}</span>
+                <span style={{ display: 'inline-flex', gap: 6 }} aria-label={`${doneCount} of ${inPlay.length} cleared`}>
+                  {inPlay.map((t) => <span key={t.id} style={{ width: 11, height: 11, borderRadius: '50%', background: t.done ? '#7fd6ff' : 'rgba(255,255,255,.22)', boxShadow: t.done ? '0 0 8px #7fd6ff' : 'none' }} />)}
+                </span>
+                <span style={{ color: 'rgba(255,255,255,.4)' }}>|</span>
+                <span>🏆 Clear all {inPlay.length} for <span style={{ color: '#ffd44d' }}>+50 bonus coins!</span></span>
+              </div>
+            </div>
+            <div style={{ marginLeft: 'auto', marginRight: 52, background: 'rgba(8,10,40,.7)', border: '1.5px solid rgba(255,212,77,.7)', borderRadius: 999, padding: '8px 18px 8px 12px', display: 'flex', alignItems: 'center', gap: 10, ...arcadeFont, fontSize: 22 }}>
+              <span style={{ fontSize: 22 }}>🪙</span>{earned}
+            </div>
           </div>
-          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-            <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--muted)' }}>This round</div>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>🪙 {earned}</div>
-          </div>
-          <button onClick={onClose} style={{ fontSize: 22, color: 'var(--muted)', marginLeft: 6 }}>×</button>
+          <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,.85)' }}>Pick a tile and we pick the game. Finish it to reveal your coins. Grade {grade}.</div>
         </div>
-        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '4px 0 14px' }}>
-          Pick a tile and we pick the game. Finish it to reveal your coins. Clear every tile for a <b>+50 bonus</b>. Grade {grade}.
-        </p>
 
         {allClear && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(120deg,#fff6d6,#ffe9a3)', border: '1px solid var(--gold-line)', borderRadius: 14, padding: '12px 16px', marginBottom: 14 }}>
-            <span style={{ fontSize: 30 }}>🏆</span>
+          <div style={{ margin: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(120deg,#ffe9a3,#ffd44d)', color: '#1a2a6a', borderRadius: 14, padding: '10px 16px' }}>
+            <span style={{ fontSize: 28 }}>🏆</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 15 }}>Grid cleared! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
-              <div style={{ fontSize: 12.5, color: '#7a5a00', fontWeight: 600 }}>Reset the grid to play a fresh round of surprise games.</div>
+              <div style={{ ...arcadeFont, fontSize: 18 }}>GRID CLEARED! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
+              <div style={{ fontSize: 12.5, fontWeight: 700 }}>Reset for a fresh round of surprise games.</div>
             </div>
-            <button className="btn" disabled={busy} onClick={onReset} style={{ background: 'var(--navy)' }}>↺ Reset & play again</button>
+            <button disabled={busy} onClick={onReset} style={{ background: '#1a2a6a', color: '#fff', fontWeight: 800, borderRadius: 999, padding: '9px 18px', fontSize: 13 }}>↺ Reset & play again</button>
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>
+        {/* tiles */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 14, padding: '16px 22px 8px' }}>
           {tiles.map((t) => {
             const soon = t.options.length === 0
             const done = !!t.done
             const justNow = lastReveal === t.id
+            const th = ARCADE_THEME[t.id] || ARCADE_THEME.wordswap
             const played = done ? byKey[t.done.game] : null
             return (
-              <div key={t.id} style={{ position: 'relative', borderRadius: 16, border: `1px solid ${done ? 'var(--gold-line)' : 'var(--line)'}`, background: done ? 'linear-gradient(160deg,#fffdf4,#fff4cc)' : soon ? '#f6f9fb' : '#fff', padding: '14px 14px 12px', minHeight: 150, display: 'flex', flexDirection: 'column', gap: 6, opacity: soon ? .7 : 1, boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.35)' : 'none', transition: 'box-shadow .3s' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ width: 40, height: 40, borderRadius: 12, background: done ? '#fff' : '#e8f5fb', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{t.icon}</span>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, fontSize: 14.5, lineHeight: 1.15 }}>{t.title}</div>
-                    <div style={{ fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.3 }}>{t.blurb}</div>
-                  </div>
-                </div>
+              <div key={t.id} style={{ position: 'relative', borderRadius: 18, padding: '16px 12px 14px', minHeight: 196, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 4,
+                background: soon ? 'linear-gradient(180deg,#2a2c5c,#1a1c44)' : `linear-gradient(180deg, ${th.from} 0%, ${th.to} 100%)`,
+                border: `2px solid ${done ? '#5fe3a1' : soon ? 'rgba(255,255,255,.14)' : th.glow}`,
+                boxShadow: justNow ? `0 0 0 3px #ffd44d, 0 0 28px ${th.glow}` : done ? '0 0 18px rgba(95,227,161,.45)' : soon ? 'none' : `0 0 16px ${th.glow}55`,
+                opacity: soon ? .75 : 1, transition: 'box-shadow .3s' }}>
+                {done && <span aria-hidden style={{ position: 'absolute', top: 10, right: 10, width: 26, height: 26, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 800 }}>✓</span>}
+                {soon && <span aria-hidden style={{ position: 'absolute', top: 10, right: 12, fontSize: 15, opacity: .8 }}>🔒</span>}
+                <div style={{ fontSize: 54, lineHeight: 1, margin: '4px 0 8px', filter: soon ? 'grayscale(.7) opacity(.7)' : `drop-shadow(0 0 12px ${th.glow})` }}>{t.icon}</div>
+                <div style={{ ...arcadeFont, fontSize: 17, letterSpacing: '.01em', textShadow: '0 2px 0 rgba(0,0,0,.35)' }}>{t.title}</div>
+                <div style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.8)', minHeight: 15 }}>{t.blurb}</div>
                 <div style={{ flex: 1 }} />
                 {done ? (
-                  <div>
-                    <div style={{ fontSize: 11.5, fontWeight: 700, color: '#7a5a00' }}>✓ {played?.title || t.done.game}</div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.1 }}>🪙 +{t.done.coins}</div>
-                  </div>
+                  <>
+                    <div style={{ fontSize: 13, fontWeight: 800 }}>🪙 <span style={{ ...arcadeFont, fontSize: 18 }}>+{t.done.coins}</span> <span style={{ fontSize: 11, color: 'rgba(255,255,255,.75)' }}>· {played?.title}</span></div>
+                    <div style={{ marginTop: 6, background: '#5fe3a1', color: '#0f3d26', fontWeight: 800, fontSize: 13, borderRadius: 999, padding: '7px 14px', width: '100%' }}>✓ Completed!</div>
+                  </>
                 ) : soon ? (
-                  <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--muted)', letterSpacing: .5 }}>COMING SOON</div>
+                  <div style={{ marginTop: 20, border: '1.5px solid rgba(255,255,255,.35)', color: 'rgba(255,255,255,.75)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>COMING SOON</div>
                 ) : (
-                  <button className="btn" disabled={busy} onClick={() => onPlay(t)} style={{ justifyContent: 'center', padding: '8px 0', fontSize: 13 }}>
-                    🎲 Play a surprise game
-                  </button>
+                  <>
+                    <div style={{ fontSize: 12.5, fontWeight: 800 }}>🪙 up to <span style={{ ...arcadeFont, fontSize: 18 }}>+{maxCoinsFor(t.options)}</span></div>
+                    <button disabled={busy} onClick={() => onPlay(t)} style={{ marginTop: 6, background: th.btn, color: '#14163f', fontWeight: 800, fontSize: 14, borderRadius: 999, padding: '8px 14px', width: '100%', boxShadow: '0 3px 0 rgba(0,0,0,.35)' }}>
+                      Play →
+                    </button>
+                    <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.7)', marginTop: 4 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
+                  </>
                 )}
-                {!done && !soon && <div style={{ fontSize: 10.5, color: 'var(--muted)', textAlign: 'center' }}>{t.options.length === 1 ? t.options[0].title : `${t.options.length} games in the mix`}</div>}
               </div>
             )
           })}
         </div>
-        <p style={{ fontSize: 11.5, color: 'var(--muted)', margin: '12px 0 0', textAlign: 'center' }}>
-          Every round pays <b>double coins</b> in ClassCade. Games play right here on this screen.
-        </p>
+
+        <div style={{ margin: '10px 0 0', padding: '12px 22px 14px', background: 'rgba(8,10,40,.6)', borderTop: '1px solid rgba(127,214,255,.25)', textAlign: 'center', fontSize: 13, fontWeight: 700 }}>
+          🪙 Every round pays <span style={{ color: '#ffd44d' }}>double coins</span> in ClassCade! <span style={{ color: '#ffd44d' }}>✦</span>
+        </div>
       </div>
     </div>
   )
@@ -748,7 +785,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <BigTask compact icon="🧾" title="The Proof Room" sub="Find what's broken. Make it right." grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
             <BigTask compact icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask compact icon="🎮" title="Fluency Practice" sub="Earn double coins in ClassCade" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask compact icon="🎮" title="Fluency Arcade" sub="Small games, big progress · double coins" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
             <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
           </div>
         </div>

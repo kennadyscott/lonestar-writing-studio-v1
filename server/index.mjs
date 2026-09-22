@@ -37,7 +37,7 @@ function load() {
 { const fresh = seedState(); let filled = false
   for (const k of ['fluencyGames', 'fluencyCategories', 'fluencyGrid']) if (state[k] == null) { state[k] = fresh[k]; filled = true }
   // The roster and its categories are product config, not student data: keep them current.
-  const same = (a, b) => JSON.stringify((a || []).map((x) => x.id)) === JSON.stringify(b.map((x) => x.id))
+  const same = (a, b) => JSON.stringify(a || []) === JSON.stringify(b)
   if (!same(state.fluencyGames, fresh.fluencyGames)) { state.fluencyGames = fresh.fluencyGames; filled = true }
   if (!same(state.fluencyCategories, fresh.fluencyCategories)) {
     state.fluencyCategories = fresh.fluencyCategories

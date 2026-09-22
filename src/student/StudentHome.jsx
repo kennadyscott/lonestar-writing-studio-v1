@@ -491,9 +491,9 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
               <div key={t.id} className={`zone-tile${!done && !soon ? ' playable' : ''}`} role={!done && !soon ? 'button' : undefined} tabIndex={!done && !soon ? 0 : -1}
                 onClick={() => !done && !soon && !busy && onPlay(t)} onKeyDown={(e) => !done && !soon && !busy && (e.key === 'Enter' || e.key === ' ') && onPlay(t)}
                 style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-                background: done ? '#f3fbf6' : '#fff', border: `1px solid ${done ? '#2e9e6b' : 'var(--gold-line)'}`,
+                background: done ? '#f4f6f8' : '#fff', border: `1px solid ${done ? '#cbd8e2' : 'var(--gold-line)'}`,
                 boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
-                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 400', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: soon ? 'saturate(.5)' : 'none', borderBottom: '1px solid var(--gold-line)' }} />
+                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 400', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: done ? 'saturate(.25) brightness(.85)' : soon ? 'saturate(.5)' : 'none', borderBottom: '1px solid var(--gold-line)' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
                 <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, width: '100%', flex: 1 }}>
@@ -664,11 +664,19 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
   const [lastReveal, setLastReveal] = useState(null)
   const [gridBusy, setGridBusy] = useState(false)
+  const [gameFinished, setGameFinished] = useState(false)
+  const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
 
   // A grid game finished: record the clear, reveal the coins, refresh state.
+  // Closing a zone game before it is finished forfeits the round: ask first.
+  function closeGame() {
+    if (game?.category && !gameFinished) { setLeaveConfirm(true); return }
+    setGame(null); setGameFinished(false)
+  }
   async function finishGridGame(result) {
+    setGameFinished(true)
     if (!game?.category) return
     const payload = { category: game.category, game: game.key, score: result?.score ?? null, total: result?.total ?? null, paid: result?.paid ?? 0 }
     setGridBusy(true)
@@ -728,12 +736,25 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       {game?.key === 'typing'
-        ? <TypingGame grade={me.gradeLevel ?? 6} onClose={() => setGame(null)} onChange={onChange} onFinished={(r) => finishGridGame(r)} />
-        : game && <FluencyGame gameKey={game.key} onClose={() => setGame(null)} onFinished={(r) => finishGridGame(r)} />}
+        ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} />
+        : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}
+      {leaveConfirm && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 95 }} onClick={() => setLeaveConfirm(false)}>
+          <div className="card" style={{ width: 400, maxWidth: '92vw', padding: '22px 24px', border: '1px solid var(--gold-line)', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ fontSize: 34 }}>⚠️</div>
+            <div style={{ fontWeight: 800, fontSize: 17, margin: '6px 0 4px' }}>Leave this game?</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.45 }}>This round won't count. To clear the tile you'll need to start the game over and finish it.</div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16 }}>
+              <button className="btn" onClick={() => setLeaveConfirm(false)} style={{ background: 'var(--good)' }}>Keep playing</button>
+              <button onClick={() => { setLeaveConfirm(false); setGame(null); setGameFinished(false) }} style={{ background: '#fff', border: '1.5px solid var(--line)', borderRadius: 10, padding: '9px 16px', fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>Leave anyway</button>
+            </div>
+          </div>
+        </div>
+      )}
       {proofRoom && <ProofRoom grade={me.gradeLevel ?? 5} onClose={() => setProofRoom(false)} onChange={onChange} />}
       {gamePicker && (
         <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal}
-          onPlay={(t) => { const pick = t.options[Math.floor(Math.random() * t.options.length)]; setLastReveal(null); setGame({ key: pick.game, category: t.id }) }}
+          onPlay={(t) => { const pick = t.options[Math.floor(Math.random() * t.options.length)]; setLastReveal(null); setGameFinished(false); setGame({ key: pick.game, category: t.id }) }}
           onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null) } }}
           onClose={() => setGamePicker(false)} />
       )}

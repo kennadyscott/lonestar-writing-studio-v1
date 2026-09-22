@@ -448,23 +448,23 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
         {/* header: the same dark strip as Luna's Writing Nook on the home page, her backdrop faint behind it */}
         <div style={{ position: 'relative', padding: '16px 22px 14px', color: '#fff', backgroundImage: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 50%, rgba(13,36,64,.7) 100%), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 30%', borderBottom: '1px solid var(--gold-line)' }}>
           <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 12, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 17, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
-            <div style={{ flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+            <div style={{ flexShrink: 0, marginRight: 'auto' }}>
               <div style={{ ...arcadeFont, fontSize: 'clamp(24px, 2.6vw, 32px)', lineHeight: 1, letterSpacing: '.02em' }}>
                 <span style={{ color: '#fff' }}>FLUENCY</span> <span style={{ color: '#f5b400' }}>ZONE</span>
               </div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>Pick a tile and we pick the game. Finish it to reveal your coins. Grade {grade}.</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>Tap a tile and we pick the game. Finish it to reveal your coins. Grade {grade}.</div>
             </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', marginLeft: 'auto' }}>
+            <div style={{ flexShrink: 0, marginRight: 40, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 16px 6px 12px', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
+              <span>🪙</span>{earned}
+            </div>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', order: 3, marginLeft: 'auto' }}>
               <span style={{ letterSpacing: .6 }}>ROUND {grid?.round || 1}</span>
               <span style={{ display: 'inline-flex', gap: 5 }} aria-label={`${doneCount} of ${inPlay.length} cleared`}>
                 {inPlay.map((t) => <span key={t.id} style={{ width: 9, height: 9, borderRadius: '50%', background: t.done ? '#f5b400' : 'rgba(255,255,255,.28)', boxShadow: t.done ? '0 0 6px #f5b400' : 'none' }} />)}
               </span>
               <span style={{ color: 'rgba(255,255,255,.35)' }}>|</span>
               <span>🏆 Clear the board for <span style={{ color: '#f5b400' }}>+50 bonus coins</span></span>
-            </div>
-            <div style={{ marginRight: 40, flexShrink: 0, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 16px 6px 12px', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
-              <span>🪙</span>{earned}
             </div>
           </div>
         </div>
@@ -488,9 +488,11 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
             const justNow = lastReveal === t.id
             const played = done ? byKey[t.done.game] : null
             return (
-              <div key={t.id} style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+              <div key={t.id} className={`zone-tile${!done && !soon ? ' playable' : ''}`} role={!done && !soon ? 'button' : undefined} tabIndex={!done && !soon ? 0 : -1}
+                onClick={() => !done && !soon && !busy && onPlay(t)} onKeyDown={(e) => !done && !soon && !busy && (e.key === 'Enter' || e.key === ' ') && onPlay(t)}
+                style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
                 background: done ? '#f3fbf6' : '#fff', border: `1px solid ${done ? '#2e9e6b' : 'var(--gold-line)'}`,
-                boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, transition: 'box-shadow .3s' }}>
+                boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
                 <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 400', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: soon ? 'saturate(.5)' : 'none', borderBottom: '1px solid var(--gold-line)' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
@@ -507,9 +509,8 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                     <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>COMING SOON</div>
                   ) : (
                     <>
-                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>🪙 up to <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(t.options)}</b></div>
-                      <button className="btn" disabled={busy} onClick={() => onPlay(t)} style={{ marginTop: 6, width: '100%', justifyContent: 'center', padding: '8px 0', fontSize: 13.5, borderRadius: 999 }}>Play →</button>
-                      <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 4 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>🪙 up to <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(t.options)}</b></div>
+                      <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
                     </>
                   )}
                 </div>

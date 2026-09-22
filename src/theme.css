@@ -169,3 +169,7 @@ a { color: var(--link); }
   .nova-banner { gap: 16px !important; padding: 20px 22px !important; }
 }
 @media (max-width: 780px) { .nova-robot { display: none; } }
+
+/* Fluency Zone tiles: the whole card is the button */
+.zone-tile { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
+.zone-tile.playable:hover, .zone-tile.playable:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(2,56,77,.18), 0 0 0 2px var(--gold); outline: none; }

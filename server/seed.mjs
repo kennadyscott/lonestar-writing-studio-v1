@@ -171,8 +171,10 @@ export function seedState() {
     fluencyCategories: [
       { id: 'sentences', title: 'Sentence Builders', icon: '🧱', blurb: 'Stretch, combine and fix sentences.', games: ['stretch', 'combine', 'fragments'] },
       { id: 'flow', title: 'Smooth Transitions', icon: '🌉', blurb: 'Bridge ideas so writing flows.', games: ['transitions'] },
-      { id: 'wordpower', title: 'Word Power', icon: '💎', blurb: 'Stronger, more exact words.', games: ['wordswap', 'context'] },
-      { id: 'wordwork', title: 'Word Work', icon: '🔤', blurb: 'Tricky pairs and word parts.', games: ['thisvsthat', 'wordwork'] },
+      { id: 'wordswap', title: 'Word Upgrade', icon: '💎', blurb: 'Swap plain words for stronger ones.', games: ['wordswap'] },
+      { id: 'context', title: 'Context Clues', icon: '🔍', blurb: 'Work out a word from the words around it.', games: ['context'] },
+      { id: 'thisvsthat', title: 'This vs. That', icon: '⚖️', blurb: 'Their or there? Pick the right one.', games: ['thisvsthat'] },
+      { id: 'wordwork', title: 'Word Work', icon: '🔤', blurb: 'Prefixes, suffixes and roots.', games: ['wordwork'] },
       { id: 'spelling', title: 'Spelling', icon: '🐝', blurb: 'Spell it right the first time.', games: ['spelling'] },
       { id: 'typing', title: 'Type Right', icon: '⌨️', blurb: 'Fast, accurate and correct.', games: ['typing'] },
     ],

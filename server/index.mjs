@@ -36,7 +36,15 @@ function load() {
 // Saved data from before a feature shipped lacks its keys; fill them from the seed.
 { const fresh = seedState(); let filled = false
   for (const k of ['fluencyGames', 'fluencyCategories', 'fluencyGrid']) if (state[k] == null) { state[k] = fresh[k]; filled = true }
-  if (state.fluencyCategories && !state.fluencyGames.some((g) => g.game === 'spelling')) { state.fluencyGames = fresh.fluencyGames; filled = true }
+  // The roster and its categories are product config, not student data: keep them current.
+  const same = (a, b) => JSON.stringify((a || []).map((x) => x.id)) === JSON.stringify(b.map((x) => x.id))
+  if (!same(state.fluencyGames, fresh.fluencyGames)) { state.fluencyGames = fresh.fluencyGames; filled = true }
+  if (!same(state.fluencyCategories, fresh.fluencyCategories)) {
+    state.fluencyCategories = fresh.fluencyCategories
+    const ids = new Set(fresh.fluencyCategories.map((c) => c.id))
+    for (const k of Object.keys(state.fluencyGrid?.cleared || {})) if (!ids.has(k)) delete state.fluencyGrid.cleared[k]
+    filled = true
+  }
   if (filled) save() }
 }
 function save() { fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2)) }

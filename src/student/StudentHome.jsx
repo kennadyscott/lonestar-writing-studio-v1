@@ -436,7 +436,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
-      <div className="card" style={{ width: 760, maxWidth: '96vw', padding: '22px 24px 20px', border: '1px solid var(--gold-line)' }} onClick={(e) => e.stopPropagation()}>
+      <div className="card" style={{ width: 960, maxWidth: '96vw', padding: '22px 24px 20px', border: '1px solid var(--gold-line)' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
           <span style={{ fontSize: 26 }}>🎮</span>
           <div>
@@ -464,7 +464,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
           </div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 12 }}>
           {tiles.map((t) => {
             const soon = t.options.length === 0
             const done = !!t.done
@@ -486,7 +486,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                     <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.1 }}>🪙 +{t.done.coins}</div>
                   </div>
                 ) : soon ? (
-                  <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--muted)', letterSpacing: .5 }}>COMING SOON · {t.games.map((k) => byKey[k]?.title).filter(Boolean).join(', ')}</div>
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--muted)', letterSpacing: .5 }}>COMING SOON</div>
                 ) : (
                   <button className="btn" disabled={busy} onClick={() => onPlay(t)} style={{ justifyContent: 'center', padding: '8px 0', fontSize: 13 }}>
                     🎲 Play a surprise game

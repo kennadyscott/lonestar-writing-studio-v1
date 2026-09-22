@@ -152,15 +152,31 @@ export function seedState() {
     },
     // Fluency game registry — mirrors a games.json manifest in the games repo,
     // so new games published by grade level appear here automatically.
+    // Fluency Practice roster. kind 'builtin' plays in the dashboard; 'soon' is
+    // announced but not built yet (no content behind it).
     fluencyGames: [
-      { id: 'fg_stretch', title: 'Sentence Stretch', icon: '✨', skill: 'Sentence Fluency', grades: '2–8', kind: 'builtin', game: 'stretch' },
       { id: 'fg_combine', title: 'Combine It!', icon: '🔗', skill: 'Sentence Combining', grades: '3–8', kind: 'builtin', game: 'combine' },
-      { id: 'fg_transitions', title: 'Transition Bridge', icon: '🌉', skill: 'Transitions', grades: '3–8', kind: 'builtin', game: 'transitions' },
       { id: 'fg_fragments', title: 'Fragment Fixer', icon: '🧩', skill: 'Complete Sentences', grades: '2–6', kind: 'builtin', game: 'fragments' },
-      { id: 'fg_wordswap', title: 'Word Upgrade', icon: '💎', skill: 'Word Choice', grades: '3–8', kind: 'builtin', game: 'wordswap' },
+      { id: 'fg_stretch', title: 'Sentence Stretch', icon: '✨', skill: 'Sentence Fluency', grades: '2–8', kind: 'builtin', game: 'stretch' },
+      { id: 'fg_transitions', title: 'Transition Bridge', icon: '🌉', skill: 'Transitions', grades: '3–8', kind: 'builtin', game: 'transitions' },
       { id: 'fg_typing', title: 'Type Right', icon: '⌨️', skill: 'Typing & Conventions', grades: '2–8', kind: 'builtin', game: 'typing' },
-      { id: 'fg_punct', title: 'Punctuation Quest', icon: '🐉', skill: 'Conventions', grades: '3–5', kind: 'external', url: 'https://kennadyscott.github.io/punctuation-quest/' },
+      { id: 'fg_wordswap', title: 'Word Upgrade', icon: '💎', skill: 'Word Choice', grades: '3–8', kind: 'builtin', game: 'wordswap' },
+      { id: 'fg_thisvsthat', title: 'This vs. That', icon: '⚖️', skill: 'Commonly Confused Words', grades: '3–8', kind: 'soon', game: 'thisvsthat' },
+      { id: 'fg_context', title: 'Context Clues', icon: '🔍', skill: 'Vocabulary', grades: '3–8', kind: 'soon', game: 'context' },
+      { id: 'fg_wordwork', title: 'Word Work', icon: '🔤', skill: 'Word Parts', grades: '2–8', kind: 'soon', game: 'wordwork' },
+      { id: 'fg_spelling', title: 'Spelling', icon: '🐝', skill: 'Spelling', grades: '2–8', kind: 'soon', game: 'spelling' },
     ],
+    // The Fluency grid: one tile per category. A tile picks a game from its
+    // list at random; clearing every playable tile pays a bonus.
+    fluencyCategories: [
+      { id: 'sentences', title: 'Sentence Builders', icon: '🧱', blurb: 'Stretch, combine and fix sentences.', games: ['stretch', 'combine', 'fragments'] },
+      { id: 'flow', title: 'Smooth Transitions', icon: '🌉', blurb: 'Bridge ideas so writing flows.', games: ['transitions'] },
+      { id: 'wordpower', title: 'Word Power', icon: '💎', blurb: 'Stronger, more exact words.', games: ['wordswap', 'context'] },
+      { id: 'wordwork', title: 'Word Work', icon: '🔤', blurb: 'Tricky pairs and word parts.', games: ['thisvsthat', 'wordwork'] },
+      { id: 'spelling', title: 'Spelling', icon: '🐝', blurb: 'Spell it right the first time.', games: ['spelling'] },
+      { id: 'typing', title: 'Type Right', icon: '⌨️', blurb: 'Fast, accurate and correct.', games: ['typing'] },
+    ],
+    fluencyGrid: { round: 1, cleared: {}, bonusPaid: false },
     // Teacher-configured settings (from the teacher's system).
     settings: { quickWriteSeconds: 180, quickWriteSetBy: 'Mr. Nowitski' },
     // Quick Write — static prompt bank (title + prompt, like the live product).

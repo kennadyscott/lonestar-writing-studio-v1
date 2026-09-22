@@ -423,69 +423,82 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
   )
 }
 
-/* ---- Fluency game picker: the growing games library, by grade level ---- */
-function GamePickerModal({ games, grade, onPlayBuiltin, onClose }) {
-  const [playing, setPlaying] = useState(null)
-
-  /* in-dashboard game window — the dashboard is one click away */
-  if (playing) {
-    return (
-      <div style={{ position: 'fixed', inset: 0, zIndex: 80, display: 'flex', flexDirection: 'column', background: '#0e0b33' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 18px', background: '#131048', color: '#fff', borderBottom: '2px solid rgba(255,255,255,.12)', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 22 }}>{playing.icon}</span>
-          <b style={{ fontSize: 15.5 }}>{playing.title}</b>
-          <span style={{ fontSize: 12, color: '#b9aef2', fontWeight: 700 }}>{playing.skill}</span>
-          <span style={{ flex: 1 }} />
-          <button onClick={() => setPlaying(null)}
-            style={{ background: 'var(--good)', color: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 999, padding: '8px 18px', cursor: 'pointer' }}>
-            ✓ Done playing
-          </button>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,.14)', color: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 999, padding: '8px 18px', cursor: 'pointer' }}>
-            ✕ Back to Dashboard
-          </button>
-        </div>
-        <iframe src={playing.url} title={playing.title} style={{ flex: 1, border: 'none', background: '#fff' }} />
-      </div>
-    )
-  }
+/* ---- Fluency grid: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
+function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal }) {
+  const byKey = Object.fromEntries(games.map((g) => [g.game, g]))
+  const playable = (c) => c.games.map((k) => byKey[k]).filter((g) => g && g.kind === 'builtin')
+  const cleared = grid?.cleared || {}
+  const tiles = categories.map((c) => ({ ...c, options: playable(c), done: cleared[c.id] || null }))
+  const inPlay = tiles.filter((t) => t.options.length > 0)
+  const doneCount = inPlay.filter((t) => t.done).length
+  const allClear = inPlay.length > 0 && doneCount === inPlay.length
+  const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + (grid?.bonusPaid ? 50 : 0)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
-      <div className="card" style={{ width: 520, maxWidth: '94vw', padding: 24 }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
+      <div className="card" style={{ width: 760, maxWidth: '96vw', padding: '22px 24px 20px', border: '1px solid var(--gold-line)' }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
           <span style={{ fontSize: 26 }}>🎮</span>
-          <b style={{ fontSize: 18 }}>Fluency Practice</b>
-          <button onClick={onClose} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
+          <div>
+            <b style={{ fontSize: 18 }}>Fluency Practice</b>
+            <div style={{ fontSize: 11.5, fontWeight: 800, letterSpacing: .8, color: 'var(--link)' }}>ROUND {grid?.round || 1} · {doneCount} OF {inPlay.length} CLEARED</div>
+          </div>
+          <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--muted)' }}>This round</div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>🪙 {earned}</div>
+          </div>
+          <button onClick={onClose} style={{ fontSize: 22, color: 'var(--muted)', marginLeft: 6 }}>×</button>
         </div>
-        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>
-          Quick games that build writing muscles — every round pays <b>double coins</b> in ClassCade. New games are added by grade level; you're in <b>Grade {grade}</b>.
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '4px 0 14px' }}>
+          Pick a tile and we pick the game. Finish it to reveal your coins. Clear every tile for a <b>+50 bonus</b>. Grade {grade}.
         </p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 420, overflowY: 'auto', paddingRight: 4 }}>
-          {games.map((g) => {
-            const soon = g.kind === 'soon'
+
+        {allClear && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(120deg,#fff6d6,#ffe9a3)', border: '1px solid var(--gold-line)', borderRadius: 14, padding: '12px 16px', marginBottom: 14 }}>
+            <span style={{ fontSize: 30 }}>🏆</span>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontWeight: 800, fontSize: 15 }}>Grid cleared! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
+              <div style={{ fontSize: 12.5, color: '#7a5a00', fontWeight: 600 }}>Reset the grid to play a fresh round of surprise games.</div>
+            </div>
+            <button className="btn" disabled={busy} onClick={onReset} style={{ background: 'var(--navy)' }}>↺ Reset & play again</button>
+          </div>
+        )}
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12 }}>
+          {tiles.map((t) => {
+            const soon = t.options.length === 0
+            const done = !!t.done
+            const justNow = lastReveal === t.id
+            const played = done ? byKey[t.done.game] : null
             return (
-              <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12, border: '1px solid var(--line)', borderRadius: 12, padding: '11px 14px', opacity: soon ? .6 : 1 }}>
-                <span style={{ width: 42, height: 42, borderRadius: 12, background: '#e8f5fb', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{g.icon}</span>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14.5 }}>{g.title}</div>
-                  <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginTop: 3 }}>
-                    <span className="pill" style={{ fontSize: 10.5, padding: '2px 8px', background: '#e2f2f3', color: 'var(--scr)' }}>{g.skill}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: 'var(--muted)' }}>Grades {g.grades}</span>
+              <div key={t.id} style={{ position: 'relative', borderRadius: 16, border: `1px solid ${done ? 'var(--gold-line)' : 'var(--line)'}`, background: done ? 'linear-gradient(160deg,#fffdf4,#fff4cc)' : soon ? '#f6f9fb' : '#fff', padding: '14px 14px 12px', minHeight: 150, display: 'flex', flexDirection: 'column', gap: 6, opacity: soon ? .7 : 1, boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.35)' : 'none', transition: 'box-shadow .3s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ width: 40, height: 40, borderRadius: 12, background: done ? '#fff' : '#e8f5fb', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{t.icon}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontWeight: 800, fontSize: 14.5, lineHeight: 1.15 }}>{t.title}</div>
+                    <div style={{ fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.3 }}>{t.blurb}</div>
                   </div>
                 </div>
-                {soon ? (
-                  <span style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--muted)' }}>COMING SOON</span>
-                ) : g.kind === 'external' ? (
-                  <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={() => setPlaying(g)}>Play ▶</button>
+                <div style={{ flex: 1 }} />
+                {done ? (
+                  <div>
+                    <div style={{ fontSize: 11.5, fontWeight: 700, color: '#7a5a00' }}>✓ {played?.title || t.done.game}</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.1 }}>🪙 +{t.done.coins}</div>
+                  </div>
+                ) : soon ? (
+                  <div style={{ fontSize: 11.5, fontWeight: 800, color: 'var(--muted)', letterSpacing: .5 }}>COMING SOON · {t.games.map((k) => byKey[k]?.title).filter(Boolean).join(', ')}</div>
                 ) : (
-                  <button className="btn" style={{ padding: '7px 16px', fontSize: 13 }} onClick={() => onPlayBuiltin(g)}>Play ▶</button>
+                  <button className="btn" disabled={busy} onClick={() => onPlay(t)} style={{ justifyContent: 'center', padding: '8px 0', fontSize: 13 }}>
+                    🎲 Play a surprise game
+                  </button>
                 )}
+                {!done && !soon && <div style={{ fontSize: 10.5, color: 'var(--muted)', textAlign: 'center' }}>{t.options.length === 1 ? t.options[0].title : `${t.options.length} games in the mix`}</div>}
               </div>
             )
           })}
         </div>
         <p style={{ fontSize: 11.5, color: 'var(--muted)', margin: '12px 0 0', textAlign: 'center' }}>
-          🎮 Quick rounds, instant feedback — every game plays right here on this screen.
+          Every round pays <b>double coins</b> in ClassCade. Games play right here on this screen.
         </p>
       </div>
     </div>
@@ -626,9 +639,19 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
 export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onChange }) {
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
-  const [game, setGame] = useState(null) // built-in game key, e.g. 'combine'
+  const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
+  const [lastReveal, setLastReveal] = useState(null)
+  const [gridBusy, setGridBusy] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
+
+  // A grid game finished: record the clear, reveal the coins, refresh state.
+  async function finishGridGame(result) {
+    if (!game?.category) return
+    const payload = { category: game.category, game: game.key, score: result?.score ?? null, total: result?.total ?? null, paid: result?.paid ?? 0 }
+    setGridBusy(true)
+    try { await api.fluencyFinish(payload); setLastReveal(game.category); await onChange?.() } catch {} finally { setGridBusy(false) }
+  }
   const [proofRoom, setProofRoom] = useState(false)
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -682,13 +705,14 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     <div>
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
-      {game === 'typing'
-        ? <TypingGame grade={me.gradeLevel ?? 6} onClose={() => setGame(null)} onChange={onChange} />
-        : game && <FluencyGame gameKey={game} onClose={() => setGame(null)} />}
+      {game?.key === 'typing'
+        ? <TypingGame grade={me.gradeLevel ?? 6} onClose={() => setGame(null)} onChange={onChange} onFinished={(r) => finishGridGame(r)} />
+        : game && <FluencyGame gameKey={game.key} onClose={() => setGame(null)} onFinished={(r) => finishGridGame(r)} />}
       {proofRoom && <ProofRoom grade={me.gradeLevel ?? 5} onClose={() => setProofRoom(false)} onChange={onChange} />}
       {gamePicker && (
-        <GamePickerModal games={state.fluencyGames || []} grade={me.gradeLevel ?? 6}
-          onPlayBuiltin={(g) => { setGamePicker(false); setGame((g && g.game) || 'stretch') }}
+        <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal}
+          onPlay={(t) => { const pick = t.options[Math.floor(Math.random() * t.options.length)]; setLastReveal(null); setGame({ key: pick.game, category: t.id }) }}
+          onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null) } }}
           onClose={() => setGamePicker(false)} />
       )}
       {fwChooser && (

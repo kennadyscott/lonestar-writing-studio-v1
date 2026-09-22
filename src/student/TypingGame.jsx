@@ -42,7 +42,7 @@ function Target({ typed, target }) {
   )
 }
 
-export default function TypingGame({ grade = 6, onClose, onChange }) {
+export default function TypingGame({ grade = 6, onClose, onChange, onFinished }) {
   const [level, setLevel] = useState(Math.max(2, Math.min(8, grade)))
   const [mode, setMode] = useState(null)
   const [items, setItems] = useState([])
@@ -122,6 +122,7 @@ export default function TypingGame({ grade = 6, onClose, onChange }) {
     try { awarded = await api.typingFinish(payload) } catch { awarded = null }
     setResult({ ...payload, seconds: Math.round(seconds), ...(awarded || {}) })
     onChange && onChange()
+    onFinished && onFinished({ paid: awarded?.coins || 0, accuracy })
   }
 
   const exactOk = locked && typed === item?.target

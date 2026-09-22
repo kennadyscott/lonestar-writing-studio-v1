@@ -9,6 +9,21 @@ import { rawTopics } from '../../server/proofRoom.mjs'
 const ME = 'stu_kscott'
 const COIN_CAP = 150
 const TYPING_DAILY_ROUNDS = 5 // paid typing rounds per day
+
+// Fluency grid coin rules. Type Right pays through its own round, so the tile
+// just records what that round paid; every other game pays here, doubled.
+const FLUENCY_BONUS = 50
+function fluencyRoundCoins(game, score, total, paid) {
+  if (game === 'typing') return Math.max(0, Number(paid) || 0)
+  if (game === 'stretch') return 16
+  const s = Math.max(0, Math.min(Number(score) || 0, Number(total) || 0))
+  return (4 + s) * 2
+}
+function fluencyPlayable(categories, games) {
+  const builtin = new Set(games.filter((g) => g.kind === 'builtin').map((g) => g.game))
+  return categories.filter((c) => c.games.some((g) => builtin.has(g))).map((c) => c.id)
+}
+
 let state = seedState()
 
 const clone = (x) => JSON.parse(JSON.stringify(x))
@@ -252,6 +267,28 @@ export const localApi = {
     state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'proof_job', coins, ts: now() })
     const stu = findStu(ME); if (stu) stu.coins += coins
     return { coins, passed: true, jobsLeft: 5 - paidToday - 1 }
+  },
+  fluencyFinish: async (body) => {
+    const grid = state.fluencyGrid || (state.fluencyGrid = { round: 1, cleared: {}, bonusPaid: false })
+    const cat = (state.fluencyCategories || []).find((c) => c.id === body.category)
+    if (!cat) return { error: 'unknown category' }
+    if (grid.cleared[cat.id]) return { coins: grid.cleared[cat.id].coins, bonus: 0, already: true, grid: clone(grid) }
+    const coins = fluencyRoundCoins(body.game, body.score, body.total, body.paid)
+    const stu = findStu(ME)
+    if (body.game !== 'typing' && coins > 0) { state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_round', coins, ts: now() }); if (stu) stu.coins += coins }
+    grid.cleared[cat.id] = { game: body.game, coins, ts: now() }
+    let bonus = 0
+    const playable = fluencyPlayable(state.fluencyCategories || [], state.fluencyGames || [])
+    if (!grid.bonusPaid && playable.every((id) => grid.cleared[id])) {
+      bonus = FLUENCY_BONUS; grid.bonusPaid = true
+      state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_grid', coins: bonus, ts: now() }); if (stu) stu.coins += bonus
+    }
+    return { coins, bonus, grid: clone(grid) }
+  },
+  fluencyReset: async () => {
+    const prev = state.fluencyGrid || { round: 0 }
+    state.fluencyGrid = { round: (prev.round || 0) + 1, cleared: {}, bonusPaid: false }
+    return clone(state.fluencyGrid)
   },
   typingFinish: async (payload) => {
     const accuracy = Number(payload?.accuracy) || 0

@@ -105,7 +105,7 @@ function QuizGame({ bank, onClose, onFinished }) {
   }
   function next() {
     setPicked(null)
-    if (idx + 1 >= items.length) { setIdx(items.length); onFinished && onFinished() }
+    if (idx + 1 >= items.length) { setIdx(items.length); onFinished && onFinished({ score, total: items.length }) }
     else setIdx(idx + 1)
   }
 
@@ -171,7 +171,7 @@ function StretchGame({ onClose, onFinished }) {
     setDone((d) => [...d, { base: r.base, stretched: text.trim(), words: extra }])
     setText('')
     if (round + 1 < STRETCH_ROUNDS.length) setRound(round + 1)
-    else { setRound(-1); onFinished && onFinished() }
+    else { setRound(-1); onFinished && onFinished({ score: null, total: null }) }
   }
 
   if (round === -1) return (

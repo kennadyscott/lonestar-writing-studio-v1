@@ -453,7 +453,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 980, maxWidth: '96vw', borderRadius: 20, overflow: 'hidden', color: 'var(--ink)', background: 'rgba(255,255,255,.97)', border: '1px solid var(--gold-line)', boxShadow: '0 24px 60px rgba(2,20,50,.35)' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: 860, maxWidth: '96vw', borderRadius: 20, overflow: 'hidden', color: 'var(--ink)', background: 'rgba(255,255,255,.97)', border: '1px solid var(--gold-line)', boxShadow: '0 24px 60px rgba(2,20,50,.35)' }}>
 
         {/* header: the same dark strip as Luna's Writing Nook on the home page, her backdrop faint behind it */}
         <div style={{ position: 'relative', padding: '16px 22px 14px', color: '#fff', backgroundImage: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 50%, rgba(13,36,64,.7) 100%), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 30%', borderBottom: '1px solid var(--gold-line)' }}>
@@ -491,7 +491,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
         )}
 
         {/* tiles */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 14, padding: '16px 22px 6px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, padding: '14px 22px 4px' }}>
           {tiles.map((t) => {
             const soon = t.options.length === 0
             const done = !!t.done
@@ -503,10 +503,10 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                 style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
                 background: done ? '#f4f6f8' : '#fff', border: `1px solid ${done ? '#cbd8e2' : 'var(--gold-line)'}`,
                 boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
-                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 400', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: done ? 'saturate(.25) brightness(.85)' : soon ? 'saturate(.5)' : 'none', borderBottom: '1px solid var(--gold-line)' }} />
+                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 250', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: done ? 'saturate(.25) brightness(.85)' : soon ? 'saturate(.5)' : 'none', borderBottom: '1px solid var(--gold-line)' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
-                <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, width: '100%', flex: 1 }}>
+                <div style={{ padding: '8px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY, lineHeight: 1.15 }}>{t.title}</div>
                   <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, minHeight: 15 }}>{t.blurb}</div>
                   <div style={{ flex: 1 }} />

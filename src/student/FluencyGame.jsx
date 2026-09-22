@@ -130,6 +130,22 @@ const BANKS = {
       { q: 'Which is spelled correctly?', o: ['different', 'diffrent', 'differant'], a: 0, why: 'Two Fs and -ent: dif-fer-ent.' },
     ],
   },
+  conventions: {
+    title: 'Conventions', icon: '✒️', skill: 'Punctuation & Capitalization',
+    intro: 'Capitals, commas, apostrophes and end marks. Pick the sentence that gets the rule right.',
+    items: [
+      { q: 'Which sentence is correct?', o: ['My cousin lives in austin, texas.', 'My cousin lives in Austin, Texas.', 'My Cousin lives in Austin, texas.'], a: 1, why: 'City and state names are proper nouns: capital A, capital T. "Cousin" is not a name.' },
+      { q: 'Which sentence is correct?', o: ["The dog's bowl is empty.", "The dogs bowl is empty.", "The dog's bowl is empty"], a: 0, why: 'The bowl belongs to the dog, so dog gets an apostrophe-s, and the sentence needs its period.' },
+      { q: 'Which sentence is correct?', o: ['We packed sandwiches apples and juice.', 'We packed sandwiches, apples, and juice.', 'We packed, sandwiches, apples, and juice.'], a: 1, why: 'Commas separate items in a list. No comma after "packed".' },
+      { q: 'Which sentence is correct?', o: ['Watch out for that car', 'Watch out for that car!', 'watch out for that car!'], a: 1, why: 'A warning gets an exclamation mark, and every sentence starts with a capital.' },
+      { q: 'Which sentence is correct?', o: ["Its time to go, and it's raining.", "It's time to go, and its raining.", "It's time to go, and it's raining."], a: 2, why: 'Both mean "it is", so both are "it\'s" with the apostrophe.' },
+      { q: 'Which sentence is correct?', o: ['On monday we start our project.', 'On Monday we start our Project.', 'On Monday we start our project.'], a: 2, why: 'Days of the week are capitalized. "Project" is an ordinary noun.' },
+      { q: 'Which sentence is correct?', o: ['"Can we leave now?" asked Priya.', '"Can we leave now" asked Priya?', '"Can we leave now?", asked Priya.'], a: 0, why: 'The question mark belongs inside the quotation marks, right after the question.' },
+      { q: 'Which sentence is correct?', o: ['After lunch we went to the library.', 'After lunch, we went to the library.', 'After, lunch we went to the library.'], a: 1, why: 'A comma follows an introductory phrase like "After lunch".' },
+      { q: 'Which sentence is correct?', o: ["The teachers' lounge has two coffee makers.", "The teachers lounge has two coffee makers.", "The teacher's lounge's has two coffee makers."], a: 0, why: 'The lounge belongs to many teachers: plural, then the apostrophe.' },
+      { q: 'Which sentence is correct?', o: ['I wanted to go, but it was too late.', 'I wanted to go but, it was too late.', 'I wanted to go, but, it was too late.'], a: 0, why: 'The comma goes before "but" when it joins two complete sentences.' },
+    ],
+  },
   wordswap: {
     title: 'Word Upgrade', icon: '💎', skill: 'Word Choice',
     intro: 'The bold word is BORING. Pick the upgrade that paints the clearest picture.',

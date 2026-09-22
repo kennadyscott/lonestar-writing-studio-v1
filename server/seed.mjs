@@ -165,6 +165,7 @@ export function seedState() {
       { id: 'fg_context', title: 'Context Clues', icon: '🔍', skill: 'Vocabulary', grades: '3–8', kind: 'builtin', game: 'context' },
       { id: 'fg_wordwork', title: 'Word Work', icon: '🔤', skill: 'Word Parts', grades: '2–8', kind: 'builtin', game: 'wordwork' },
       { id: 'fg_spelling', title: 'Spelling', icon: '🐝', skill: 'Spelling', grades: '2–8', kind: 'builtin', game: 'spelling' },
+      { id: 'fg_conventions', title: 'Conventions', icon: '✒️', skill: 'Punctuation & Capitalization', grades: '2–8', kind: 'builtin', game: 'conventions' },
     ],
     // The Fluency grid: one tile per category. A tile picks a game from its
     // list at random; clearing every playable tile pays a bonus.
@@ -176,6 +177,7 @@ export function seedState() {
       { id: 'thisvsthat', title: 'This vs. That', icon: '⚖️', blurb: 'Their or there? Pick the right one.', games: ['thisvsthat'] },
       { id: 'wordwork', title: 'Word Work', icon: '🔤', blurb: 'Prefixes, suffixes and roots.', games: ['wordwork'] },
       { id: 'spelling', title: 'Spelling', icon: '🐝', blurb: 'Spell it right the first time.', games: ['spelling'] },
+      { id: 'conventions', title: 'Conventions', icon: '✒️', blurb: 'Capitals, commas and end marks.', games: ['conventions'] },
       { id: 'typing', title: 'Type Right', icon: '⌨️', blurb: 'Fast, accurate and correct.', games: ['typing'] },
     ],
     fluencyGrid: { round: 1, cleared: {}, bonusPaid: false },

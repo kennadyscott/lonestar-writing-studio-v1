@@ -348,7 +348,6 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
             </White>
 
             <White style={{ padding: '10px 14px', display: 'flex', gap: 12, alignItems: 'center' }}>
-              <img src={BRAND.luna} alt="Luna" style={{ height: 52 }} />
               <div>
                 <div style={{ fontWeight: 800, fontSize: 15.5, color: NAVY }}>You're doing amazing, writer!</div>
                 <div style={{ fontSize: 12.5, color: '#5c7285', lineHeight: 1.4, fontWeight: 600 }}>Keep up the great work and finish strong! <span style={{ color: '#f5b400' }}>✦</span></div>

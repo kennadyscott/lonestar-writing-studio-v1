@@ -71,15 +71,19 @@ const DRILL_PASS = 75       // clean-copy percentage a Proof Room job must reach
 const DRILL_COINS = 20      // a job is longer than a typing round, so it pays like one
 const DRILL_DAILY_JOBS = 5  // paid jobs per day
 
-// Fluency grid coin rules. Type Right pays through its own round, so the tile
-// just records what that round paid; every other game pays here, doubled.
+// Fluency Zone coin rules: coins follow the score. 90-100% pays 20, 70-89%
+// pays 10, under 70% does not clear the tile (play it again). Sentence
+// Stretch has no right answers, so finishing it counts as a pass at 10.
 const FLUENCY_BONUS = 50
-function fluencyRoundCoins(game, score, total, paid) {
-  if (game === 'typing') return Math.max(0, Number(paid) || 0)
-  if (game === 'stretch') return 16
-  const s = Math.max(0, Math.min(Number(score) || 0, Number(total) || 0))
-  return (4 + s) * 2
+const FLUENCY_PASS = 70
+function fluencyScorePct(game, body) {
+  if (game === 'typing') return Math.max(0, Math.min(100, Number(body.accuracy) || 0))
+  if (game === 'stretch') return 75
+  const total = Number(body.total) || 0
+  if (!total) return 0
+  return Math.round((Math.max(0, Math.min(Number(body.score) || 0, total)) / total) * 100)
 }
+function fluencyRoundCoins(pct) { return pct >= 90 ? 20 : pct >= FLUENCY_PASS ? 10 : 0 }
 function fluencyPlayable(categories, games) {
   const builtin = new Set(games.filter((g) => g.kind === 'builtin').map((g) => g.game))
   return categories.filter((c) => c.games.some((g) => builtin.has(g))).map((c) => c.id)
@@ -510,10 +514,12 @@ const server = http.createServer(async (req, res) => {
       const cat = (state.fluencyCategories || []).find((c) => c.id === body.category)
       if (!cat) return send(res, 400, { error: 'unknown category' })
       if (grid.cleared[cat.id]) return send(res, 200, { coins: grid.cleared[cat.id].coins, bonus: 0, already: true, grid })
-      const coins = fluencyRoundCoins(body.game, body.score, body.total, body.paid)
+      const pct = fluencyScorePct(body.game, body)
+      const coins = fluencyRoundCoins(pct)
+      if (pct < FLUENCY_PASS) return send(res, 200, { coins: 0, passed: false, pct, bonus: 0, grid })
       const stu = findStu(ME)
-      if (body.game !== 'typing' && coins > 0) { state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_round', coins, ts: now() }); if (stu) stu.coins += coins }
-      grid.cleared[cat.id] = { game: body.game, coins, ts: now() }
+      if (coins > 0) { state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_round', coins, ts: now() }); if (stu) stu.coins += coins }
+      grid.cleared[cat.id] = { game: body.game, coins, pct, ts: now() }
       let bonus = 0
       const playable = fluencyPlayable(state.fluencyCategories || [], state.fluencyGames || [])
       if (!grid.bonusPaid && playable.every((id) => grid.cleared[id])) {
@@ -521,7 +527,7 @@ const server = http.createServer(async (req, res) => {
         state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_grid', coins: bonus, ts: now() }); if (stu) stu.coins += bonus
       }
       save()
-      return send(res, 200, { coins, bonus, grid })
+      return send(res, 200, { coins, passed: true, pct, bonus, grid })
     }
     // POST /api/fluency/reset -> new round, empty grid.
     if (req.method === 'POST' && url.pathname === '/api/fluency/reset') {

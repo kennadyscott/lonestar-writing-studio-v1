@@ -42,7 +42,7 @@ function Target({ typed, target }) {
   )
 }
 
-export default function TypingGame({ grade = 6, onClose, onChange, onFinished }) {
+export default function TypingGame({ grade = 6, onClose, onChange, onFinished, payHere = true }) {
   const [level, setLevel] = useState(Math.max(2, Math.min(8, grade)))
   const [mode, setMode] = useState(null)
   const [items, setItems] = useState([])
@@ -119,7 +119,7 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished })
     const wpm = Math.round((typedChars / 5) / (seconds / 60))
     const payload = { accuracy, wpm, mode, grade: level, exact: stats.exact, items: items.length }
     let awarded = null
-    try { awarded = await api.typingFinish(payload) } catch { awarded = null }
+    if (payHere) { try { awarded = await api.typingFinish(payload) } catch { awarded = null } }
     setResult({ ...payload, seconds: Math.round(seconds), ...(awarded || {}) })
     onChange && onChange()
     onFinished && onFinished({ paid: awarded?.coins || 0, accuracy })
@@ -155,7 +155,9 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished })
             ↑ {PASS_MARK}% earns coins
           </div>
 
-          {result.coins > 0 ? (
+          {!payHere ? (
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', margin: '6px 0' }}>{result.accuracy >= 70 ? 'Nice round. Your coins are revealed on the Fluency Zone board.' : 'Under 70% this time. Head back to the board and try the tile again.'}</div>
+          ) : result.coins > 0 ? (
             <div className="pill gold" style={{ justifyContent: 'center', padding: '10px 16px', fontSize: 14, maxWidth: 420, margin: '0 auto' }}>
               🪙 +{result.coins} ClassCade coins{result.doubled ? ' · double for Fluency Practice' : ''}
             </div>

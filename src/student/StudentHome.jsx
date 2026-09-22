@@ -425,10 +425,20 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
 
 /* ---- Fluency Zone: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
 // Tile art is cropped from the Fluency Zone card renders (public/zone/).
-const MAX_COINS = { stretch: 16, typing: 20 }
-const maxCoinsFor = (opts) => Math.max(0, ...opts.map((g) => MAX_COINS[g.game] ?? 24))
+const maxCoinsFor = () => 20
 
-function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal }) {
+// A small gold coin, so we do not depend on the platform's coin emoji.
+function Coin({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" aria-hidden style={{ display: 'inline-block', verticalAlign: '-2px' }}>
+      <circle cx="10" cy="10" r="9" fill="#f5b400" stroke="#c98f00" strokeWidth="1.5" />
+      <circle cx="10" cy="10" r="6" fill="none" stroke="#ffe08a" strokeWidth="1.2" />
+      <text x="10" y="13.4" textAnchor="middle" fontSize="9" fontWeight="800" fill="#7a5200" fontFamily="Manrope, sans-serif">¢</text>
+    </svg>
+  )
+}
+
+function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal, lastMiss }) {
   const byKey = Object.fromEntries(games.map((g) => [g.game, g]))
   const playable = (c) => c.games.map((k) => byKey[k]).filter((g) => g && g.kind === 'builtin')
   const cleared = grid?.cleared || {}
@@ -453,10 +463,10 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
               <div style={{ ...arcadeFont, fontSize: 'clamp(24px, 2.6vw, 32px)', lineHeight: 1, letterSpacing: '.02em' }}>
                 <span style={{ color: '#fff' }}>FLUENCY</span> <span style={{ color: '#f5b400' }}>ZONE</span>
               </div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>Tap a tile and we pick the game. Finish it to reveal your coins. Grade {grade}.</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again. Grade {grade}.</div>
             </div>
             <div style={{ flexShrink: 0, marginRight: 40, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 16px 6px 12px', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
-              <span>🪙</span>{earned}
+              <Coin size={18} />{earned}
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', order: 3, marginLeft: 'auto' }}>
               <span style={{ letterSpacing: .6 }}>ROUND {grid?.round || 1}</span>
@@ -502,14 +512,14 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                   <div style={{ flex: 1 }} />
                   {done ? (
                     <>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>🪙 <b style={{ fontSize: 16, color: NAVY }}>+{t.done.coins}</b> · {played?.title}</div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> <b style={{ fontSize: 16, color: NAVY }}>+{t.done.coins}</b> · {t.done.pct != null ? `${t.done.pct}% · ` : ''}{played?.title}</div>
                       <div style={{ marginTop: 6, background: '#2e9e6b', color: '#fff', fontWeight: 800, fontSize: 12.5, borderRadius: 999, padding: '7px 14px', width: '100%' }}>✓ Completed</div>
                     </>
                   ) : soon ? (
                     <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>COMING SOON</div>
                   ) : (
                     <>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>🪙 up to <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(t.options)}</b></div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: lastMiss === t.id ? '#b23b3b' : 'var(--muted)' }}>{lastMiss === t.id ? <>Under 70% · try again</> : <><Coin /> up to <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(t.options)}</b></>}</div>
                       <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
                     </>
                   )}
@@ -520,7 +530,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
         </div>
 
         <div style={{ padding: '10px 22px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
-          Every round pays <b style={{ color: NAVY }}>double coins</b> in ClassCade <span style={{ color: '#f5b400' }}>✦</span>
+          <Coin /> 20 coins for 90%+, 10 for 70%+. Every round pays <b style={{ color: NAVY }}>double coins</b> in ClassCade <span style={{ color: '#f5b400' }}>✦</span>
         </div>
       </div>
     </div>
@@ -665,6 +675,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [lastReveal, setLastReveal] = useState(null)
   const [gridBusy, setGridBusy] = useState(false)
   const [gameFinished, setGameFinished] = useState(false)
+  const [lastMiss, setLastMiss] = useState(null)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
@@ -678,9 +689,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   async function finishGridGame(result) {
     setGameFinished(true)
     if (!game?.category) return
-    const payload = { category: game.category, game: game.key, score: result?.score ?? null, total: result?.total ?? null, paid: result?.paid ?? 0 }
+    const payload = { category: game.category, game: game.key, score: result?.score ?? null, total: result?.total ?? null, accuracy: result?.accuracy ?? null }
     setGridBusy(true)
-    try { await api.fluencyFinish(payload); setLastReveal(game.category); await onChange?.() } catch {} finally { setGridBusy(false) }
+    try { const r = await api.fluencyFinish(payload); if (r?.passed) { setLastReveal(game.category); setLastMiss(null) } else { setLastMiss(game.category); setLastReveal(null) } await onChange?.() } catch {} finally { setGridBusy(false) }
   }
   const [proofRoom, setProofRoom] = useState(false)
   const rows = useMemo(() => {
@@ -736,7 +747,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
       {game?.key === 'typing'
-        ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} />
+        ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} payHere={!game?.category} />
         : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}
       {leaveConfirm && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 95 }} onClick={() => setLeaveConfirm(false)}>
@@ -753,8 +764,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
       {proofRoom && <ProofRoom grade={me.gradeLevel ?? 5} onClose={() => setProofRoom(false)} onChange={onChange} />}
       {gamePicker && (
-        <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal}
-          onPlay={(t) => { const pick = t.options[Math.floor(Math.random() * t.options.length)]; setLastReveal(null); setGameFinished(false); setGame({ key: pick.game, category: t.id }) }}
+        <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal} lastMiss={lastMiss}
+          onPlay={(t) => { const pick = t.options[Math.floor(Math.random() * t.options.length)]; setLastReveal(null); setLastMiss(null); setGameFinished(false); setGame({ key: pick.game, category: t.id }) }}
           onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null) } }}
           onClose={() => setGamePicker(false)} />
       )}

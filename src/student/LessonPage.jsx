@@ -4,8 +4,8 @@ import { BRAND } from '../lib/brand.js'
 /*
  * Lesson page — opened from a lesson card in Luna's Writing Nook.
  * Five steps down the left (Watch → Learn → Practice → Your Turn → Review), the
- * step's work in the middle, Luna's coaching on the right, Back / Save Draft /
- * Continue along the bottom. Progress = steps completed / 4.
+ * step's work filling the card, Back / Continue along the bottom. Drafts save
+ * on every Continue. Progress = steps completed / 4.
  *
  * Content is prototype data: every Module 1 lesson runs the same Starburst
  * Prompts activity until the real lesson decks are converted.
@@ -89,7 +89,7 @@ function WatchStep({ watched, onWatched }) {
   const [playing, setPlaying] = useState(false)
   const play = () => { setPlaying(true); onWatched() }
   return (
-    <div>
+    <div style={{ maxWidth: 860, margin: '0 auto' }}>
       <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', background: '#0d2f55', aspectRatio: '16 / 9', boxShadow: '0 8px 26px rgba(2,20,50,.25)' }}>
         <img src={VIDEO.poster} alt={VIDEO.title} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         {!playing && (
@@ -220,7 +220,6 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
   const [pick, setPick] = useState(null)
   const [sentence, setSentence] = useState('')
   const [watched, setWatched] = useState(false)
-  const [saved, setSaved] = useState('')
 
   useEffect(() => {
     try {
@@ -229,11 +228,8 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
     } catch {}
   }, [lesson.n])
 
-  const save = (quiet) => {
-    try { localStorage.setItem(draftKey(lesson), JSON.stringify({ answers, pick, sentence, watched, step, done })) } catch {}
-    if (!quiet) { setSaved('Draft saved'); setTimeout(() => setSaved(''), 1600) }
-  }
-  const next = () => { const n = Math.min(STEPS.length - 1, step + 1); setStep(n); setDone(Math.max(done, n)); save(true) }
+  const save = () => { try { localStorage.setItem(draftKey(lesson), JSON.stringify({ answers, pick, sentence, watched, step, done })) } catch {} }
+  const next = () => { const n = Math.min(STEPS.length - 1, step + 1); setStep(n); setDone(Math.max(done, n)); save() }
   const pct = Math.round(((step + 1) / STEPS.length) * 100)
   const canContinue = step === 0 ? watched : step === 1 ? STARBURST.prompts.filter((p) => (answers[p.key] || '').trim()).length >= 2 : step === 2 ? pick != null : step === 3 ? sentence.trim().length > 0 : false
 
@@ -256,10 +252,10 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
       {/* main */}
       <section style={{ padding: '18px clamp(22px, 2.6vw, 56px) 0', position: 'relative', zIndex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
 
-        <div style={{ position: 'relative', background: 'rgba(255,255,255,.96)', borderRadius: 22, boxShadow: '0 8px 30px rgba(2,20,50,.14)', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 250px', overflow: 'hidden' }}>
-          <div style={{ padding: '18px 24px 20px' }}>
-            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 12, paddingRight: 0 }}>
-              <div style={{ position: 'absolute', right: 268, top: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ position: 'relative', background: 'rgba(255,255,255,.96)', borderRadius: 22, boxShadow: '0 8px 30px rgba(2,20,50,.14)', overflow: 'hidden' }}>
+          <div style={{ padding: '18px 26px 22px' }}>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 12, paddingRight: 300 }}>
+              <div style={{ position: 'absolute', right: 24, top: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{ position: 'relative', width: 'clamp(120px, 14vw, 220px)', height: 18, background: '#eef3f6', border: '1.5px solid #cfdde8', borderRadius: 10, overflow: 'hidden' }}>
                   <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 10 }} />
                   <span style={{ position: 'absolute', left: 8, top: 0, lineHeight: '18px', fontSize: 10.5, fontWeight: 800, color: pct > 22 ? '#fff' : NAVY }}>{pct}%</span>
@@ -279,33 +275,16 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
             {step === 4 && <ReviewStep sentence={sentence} answers={answers} pick={pick} />}
           </div>
 
-          {/* Luna's side */}
-          <div style={{ borderLeft: '1px solid #e6eef3', padding: '22px 18px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', background: 'linear-gradient(180deg,#fff 0%,#f3f8fc 100%)' }}>
-            <div style={{ position: 'relative', background: '#fff8e6', border: '1.5px solid #f0dfae', borderRadius: 16, padding: '12px 14px', width: '100%' }}>
-              <div style={{ fontFamily: '"Bradley Hand", "Segoe Script", cursive', fontSize: 19, color: NAVY, marginBottom: 4 }}>Luna says…</div>
-              <div style={{ fontSize: 13, lineHeight: 1.4, color: 'var(--ink)' }}>{STARBURST.luna[step]} <span style={{ color: '#f5b400' }}>✦</span></div>
-              <span aria-hidden style={{ position: 'absolute', left: 28, bottom: -9, width: 16, height: 16, background: '#fff8e6', borderRight: '1.5px solid #f0dfae', borderBottom: '1.5px solid #f0dfae', transform: 'rotate(45deg)' }} />
-            </div>
-            <img src={BRAND.luna} alt="Luna" style={{ height: 120, margin: '26px 0 -6px', filter: 'drop-shadow(0 8px 12px rgba(2,20,50,.25))', position: 'relative', zIndex: 1 }} />
-            <div style={{ width: '100%', display: 'grid', gap: 3, marginTop: 0 }}>
-              {[['Ideas', '#1c4f86', '84%'], ['Revision', '#0d2f55', '92%'], ['Brighter Writing', '#e2a11b', '100%']].map(([t, c, w]) => (
-                <div key={t} style={{ width: w, marginLeft: 'auto', marginRight: 'auto', background: c, color: '#fff', fontWeight: 800, fontSize: 12.5, padding: '9px 12px', borderRadius: 4, boxShadow: '0 2px 0 rgba(0,0,0,.25)' }}>{t}</div>
-              ))}
-            </div>
-            <div style={{ flex: 1 }} />
-          </div>
         </div>
 
         {/* bottom bar */}
         <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, padding: '0 0 18px' }}>
           <button onClick={step === 0 ? onBack : () => setStep(step - 1)} style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 10, padding: '11px 22px', fontWeight: 800, fontSize: 14, color: NAVY }}>← Back</button>
-          <span style={{ fontSize: 13, color: '#2e9e6b', fontWeight: 700, minWidth: 90 }}>{saved}</span>
           <div style={{ flex: 1 }} />
-          <button onClick={() => save(false)} style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 10, padding: '11px 20px', fontWeight: 800, fontSize: 14, color: NAVY }}>💾 Save Draft</button>
           {step < STEPS.length - 1 ? (
             <button onClick={next} disabled={!canContinue} title={canContinue ? '' : 'Finish this step first'} style={{ background: canContinue ? NAVY : '#9fb3c4', color: '#fff', borderRadius: 10, padding: '11px 26px', fontWeight: 800, fontSize: 15, cursor: canContinue ? 'pointer' : 'default' }}>Continue →</button>
           ) : (
-            <button onClick={() => { save(true); onBack() }} style={{ background: '#2e9e6b', color: '#fff', borderRadius: 10, padding: '11px 26px', fontWeight: 800, fontSize: 15 }}>Finish lesson ✓</button>
+            <button onClick={() => { save(); onBack() }} style={{ background: '#2e9e6b', color: '#fff', borderRadius: 10, padding: '11px 26px', fontWeight: 800, fontSize: 15 }}>Finish lesson ✓</button>
           )}
         </div>
       </section>

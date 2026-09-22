@@ -436,6 +436,8 @@ const ARCADE_THEME = {
   wordwork: { body: '#243a57', glow: '#7fd6ff', btn: '#9fe0ff' },
   spelling: { body: '#213c68', glow: '#ffe08a', btn: '#ffe9a3' },
 }
+// How much navy goes over the Fluency Zone backdrop (0 = full art, 1 = solid).
+const ZONE_WASH = 0.5
 const MAX_COINS = { stretch: 16, typing: 20 }
 const maxCoinsFor = (opts) => Math.max(0, ...opts.map((g) => MAX_COINS[g.game] ?? 24))
 
@@ -454,14 +456,11 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,10,30,.62)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: 980, maxWidth: '96vw', borderRadius: 24, overflow: 'hidden', color: '#fff', position: 'relative',
-        background: 'radial-gradient(ellipse at 20% 0%, #2b2a7a 0%, #141650 38%, #0b0d33 100%)', boxShadow: '0 0 0 3px #3b8bd6, 0 0 0 5px rgba(120,190,255,.35), 0 30px 80px rgba(0,0,0,.55)' }}>
-        {/* stars */}
-        {[[6, 22, 10], [30, 8, 7], [58, 15, 9], [80, 6, 6], [93, 30, 8], [14, 60, 6], [70, 72, 7], [96, 88, 6]].map(([x, y, sz], i) => (
-          <span key={i} aria-hidden style={{ position: 'absolute', left: `${x}%`, top: `${y}%`, fontSize: sz, color: i % 3 ? 'rgba(255,255,255,.55)' : '#ffd44d', pointerEvents: 'none' }}>✦</span>
-        ))}
+        backgroundImage: `linear-gradient(rgba(11,13,51,${ZONE_WASH}), rgba(11,13,51,${ZONE_WASH})), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#0b0d33',
+        boxShadow: '0 0 0 3px #3b8bd6, 0 0 0 5px rgba(120,190,255,.35), 0 30px 80px rgba(0,0,0,.55)' }}>
 
         {/* header on the space banner */}
-        <div style={{ position: 'relative', minHeight: 150, backgroundImage: `linear-gradient(90deg, rgba(20,22,80,.92) 0%, rgba(20,22,80,.6) 45%, rgba(20,22,80,.15) 100%), url(${BASE}hero-robot.png)`, backgroundSize: 'cover', backgroundPosition: 'right 35%', padding: '18px 22px 12px' }}>
+        <div style={{ position: 'relative', padding: '18px 22px 12px' }}>
           <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 12, right: 14, width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,.14)', border: '1.5px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 18, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <div>

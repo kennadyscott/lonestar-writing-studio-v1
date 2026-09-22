@@ -456,7 +456,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
       <div onClick={(e) => e.stopPropagation()} style={{ width: 860, maxWidth: '96vw', borderRadius: 20, overflow: 'hidden', color: 'var(--ink)', background: 'rgba(255,255,255,.97)', border: '1px solid var(--gold-line)', boxShadow: '0 24px 60px rgba(2,20,50,.35)' }}>
 
         {/* header: the same dark strip as Luna's Writing Nook on the home page, her backdrop faint behind it */}
-        <div style={{ position: 'relative', padding: '16px 22px 14px', color: '#fff', backgroundImage: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 50%, rgba(13,36,64,.7) 100%), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 30%', borderBottom: '1px solid var(--gold-line)' }}>
+        <div style={{ position: 'relative', padding: '12px 22px 12px', color: '#fff', backgroundImage: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 50%, rgba(13,36,64,.7) 100%), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 30%', borderBottom: '1px solid var(--gold-line)' }}>
           <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 12, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 17, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ flexShrink: 0, marginRight: 'auto' }}>
@@ -503,7 +503,11 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                 style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
                 background: done ? '#f4f6f8' : '#fff', border: `1px solid ${done ? '#cbd8e2' : 'var(--gold-line)'}`,
                 boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
-                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 250', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: done ? 'saturate(.25) brightness(.85)' : soon ? 'saturate(.5)' : 'none', borderBottom: '1px solid var(--gold-line)' }} />
+                {/* art: the whole icon, contained, over a blurred copy of itself so nothing is cut off; toned down a step */}
+                <div aria-hidden style={{ position: 'relative', width: '100%', aspectRatio: '640 / 300', overflow: 'hidden', borderBottom: '1px solid var(--gold-line)', background: '#0e1f4a' }}>
+                  <div style={{ position: 'absolute', inset: -12, backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(14px) brightness(.55) saturate(.8)' }} />
+                  <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', filter: done ? 'saturate(.2) brightness(.8)' : soon ? 'saturate(.5)' : 'saturate(.8) brightness(.9)' }} />
+                </div>
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
                 <div style={{ padding: '8px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', flex: 1 }}>
@@ -529,7 +533,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
           })}
         </div>
 
-        <div style={{ padding: '10px 22px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
+        <div style={{ padding: '8px 22px 12px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
           <Coin /> 20 coins for 90%+, 10 for 70%+. Every round pays <b style={{ color: NAVY }}>double coins</b> in ClassCade <span style={{ color: '#f5b400' }}>✦</span>
         </div>
       </div>

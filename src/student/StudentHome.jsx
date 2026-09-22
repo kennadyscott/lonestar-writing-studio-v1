@@ -424,20 +424,7 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
 }
 
 /* ---- Fluency Zone: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
-// Tile art is cropped from the Fluency Zone card renders (public/zone/); `body`
-// is the colour sampled from each card so the text panel continues the art.
-const ARCADE_THEME = {
-  sentences: { body: '#114554', glow: '#5fe3a1', btn: '#7ee8b1' },
-  flow: { body: '#2e1a6a', glow: '#b39cff', btn: '#c9b6ff' },
-  wordswap: { body: '#0e2c60', glow: '#7fd6ff', btn: '#9fe0ff' },
-  typing: { body: '#5e2216', glow: '#ffd27a', btn: '#ffd44d' },
-  context: { body: '#012c80', glow: '#7fd6ff', btn: '#9fe0ff' },
-  thisvsthat: { body: '#03317d', glow: '#ffa0d8', btn: '#ffb8e2' },
-  wordwork: { body: '#04337d', glow: '#b39cff', btn: '#c9b6ff' },
-  spelling: { body: '#083aa5', glow: '#ffe08a', btn: '#ffe9a3' },
-}
-// How much navy goes over the Fluency Zone backdrop (0 = full art, 1 = solid).
-const ZONE_WASH = 0.5
+// Tile art is cropped from the Fluency Zone card renders (public/zone/).
 const MAX_COINS = { stretch: 16, typing: 20 }
 const maxCoinsFor = (opts) => Math.max(0, ...opts.map((g) => MAX_COINS[g.game] ?? 24))
 
@@ -452,93 +439,87 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
   const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + (grid?.bonusPaid ? 50 : 0)
   const BASE = import.meta.env.BASE_URL || '/'
   const arcadeFont = { fontFamily: '"Lilita One", "Baloo 2", Manrope, sans-serif' }
+  const NAVY = '#0d2f55'
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,10,30,.62)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 980, maxWidth: '96vw', borderRadius: 24, overflow: 'hidden', color: '#fff', position: 'relative',
-        backgroundImage: `linear-gradient(rgba(11,13,51,${ZONE_WASH}), rgba(11,13,51,${ZONE_WASH})), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundColor: '#0b0d33',
-        boxShadow: '0 0 0 3px #3b8bd6, 0 0 0 5px rgba(120,190,255,.35), 0 30px 80px rgba(0,0,0,.55)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: 980, maxWidth: '96vw', borderRadius: 20, overflow: 'hidden', color: 'var(--ink)', background: 'rgba(255,255,255,.97)', border: '1px solid var(--gold-line)', boxShadow: '0 24px 60px rgba(2,20,50,.35)' }}>
 
-        {/* header on the space banner */}
-        <div style={{ position: 'relative', padding: '18px 22px 12px' }}>
-          <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 12, right: 14, width: 34, height: 34, borderRadius: '50%', background: 'rgba(255,255,255,.14)', border: '1.5px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 18, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <div>
-              <div style={{ ...arcadeFont, fontSize: 'clamp(30px, 3.6vw, 46px)', lineHeight: 1, letterSpacing: '.02em', textShadow: '0 3px 0 #1a2a6a, 0 6px 18px rgba(0,0,0,.45)' }}>
-                <span style={{ color: '#ffd44d' }}>✦ </span><span style={{ color: '#7fd6ff' }}>FLUENCY</span> <span style={{ color: '#ffd44d' }}>ZONE</span><span style={{ color: '#ffd44d' }}> ✦</span>
+        {/* header: the same dark strip as Luna's Writing Nook on the home page, her backdrop faint behind it */}
+        <div style={{ position: 'relative', padding: '16px 22px 14px', color: '#fff', backgroundImage: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 50%, rgba(13,36,64,.7) 100%), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 30%', borderBottom: '1px solid var(--gold-line)' }}>
+          <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 12, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 17, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 18 }}>
+            <div style={{ flexShrink: 0 }}>
+              <div style={{ ...arcadeFont, fontSize: 'clamp(24px, 2.6vw, 32px)', lineHeight: 1, letterSpacing: '.02em' }}>
+                <span style={{ color: '#fff' }}>FLUENCY</span> <span style={{ color: '#f5b400' }}>ZONE</span>
               </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 12, marginTop: 10, background: 'rgba(8,10,40,.65)', border: '1.5px solid rgba(127,214,255,.6)', borderRadius: 999, padding: '7px 16px', fontSize: 13, fontWeight: 800 }}>
-                <span style={{ letterSpacing: .5 }}>ROUND {grid?.round || 1}</span>
-                <span style={{ display: 'inline-flex', gap: 6 }} aria-label={`${doneCount} of ${inPlay.length} cleared`}>
-                  {inPlay.map((t) => <span key={t.id} style={{ width: 11, height: 11, borderRadius: '50%', background: t.done ? '#7fd6ff' : 'rgba(255,255,255,.22)', boxShadow: t.done ? '0 0 8px #7fd6ff' : 'none' }} />)}
-                </span>
-                <span style={{ color: 'rgba(255,255,255,.4)' }}>|</span>
-                <span>🏆 Clear the board for <span style={{ color: '#ffd44d' }}>+50 bonus coins!</span></span>
-              </div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>Pick a tile and we pick the game. Finish it to reveal your coins. Grade {grade}.</div>
             </div>
-            <div style={{ marginLeft: 'auto', marginRight: 52, background: 'rgba(8,10,40,.7)', border: '1.5px solid rgba(255,212,77,.7)', borderRadius: 999, padding: '8px 18px 8px 12px', display: 'flex', alignItems: 'center', gap: 10, ...arcadeFont, fontSize: 22 }}>
-              <span style={{ fontSize: 22 }}>🪙</span>{earned}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', marginLeft: 'auto' }}>
+              <span style={{ letterSpacing: .6 }}>ROUND {grid?.round || 1}</span>
+              <span style={{ display: 'inline-flex', gap: 5 }} aria-label={`${doneCount} of ${inPlay.length} cleared`}>
+                {inPlay.map((t) => <span key={t.id} style={{ width: 9, height: 9, borderRadius: '50%', background: t.done ? '#f5b400' : 'rgba(255,255,255,.28)', boxShadow: t.done ? '0 0 6px #f5b400' : 'none' }} />)}
+              </span>
+              <span style={{ color: 'rgba(255,255,255,.35)' }}>|</span>
+              <span>🏆 Clear the board for <span style={{ color: '#f5b400' }}>+50 bonus coins</span></span>
+            </div>
+            <div style={{ marginRight: 40, flexShrink: 0, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 16px 6px 12px', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
+              <span>🪙</span>{earned}
             </div>
           </div>
-          <div style={{ marginTop: 8, fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,.85)' }}>Pick a tile and we pick the game. Finish it to reveal your coins. Grade {grade}.</div>
         </div>
 
         {allClear && (
-          <div style={{ margin: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(120deg,#ffe9a3,#ffd44d)', color: '#1a2a6a', borderRadius: 14, padding: '10px 16px' }}>
-            <span style={{ fontSize: 28 }}>🏆</span>
+          <div style={{ margin: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 14, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 14, padding: '10px 16px' }}>
+            <span style={{ fontSize: 26 }}>🏆</span>
             <div style={{ flex: 1 }}>
-              <div style={{ ...arcadeFont, fontSize: 18 }}>BOARD CLEARED! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
-              <div style={{ fontSize: 12.5, fontWeight: 700 }}>Reset the board for a fresh round of surprise games.</div>
+              <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>Board cleared! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>Reset the board for a fresh round of surprise games.</div>
             </div>
-            <button disabled={busy} onClick={onReset} style={{ background: '#1a2a6a', color: '#fff', fontWeight: 800, borderRadius: 999, padding: '9px 18px', fontSize: 13 }}>↺ Reset & play again</button>
+            <button className="btn" disabled={busy} onClick={onReset}>↺ Reset & play again</button>
           </div>
         )}
 
         {/* tiles */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 14, padding: '16px 22px 8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: 14, padding: '16px 22px 6px' }}>
           {tiles.map((t) => {
             const soon = t.options.length === 0
             const done = !!t.done
             const justNow = lastReveal === t.id
-            const th = ARCADE_THEME[t.id] || { body: '#1a1c44', glow: '#7fd6ff', btn: '#9fe0ff' }
             const played = done ? byKey[t.done.game] : null
             return (
-              <div key={t.id} style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-                background: th.body,
-                border: `2px solid ${done ? '#5fe3a1' : soon ? 'rgba(255,255,255,.18)' : th.glow}`,
-                boxShadow: justNow ? `0 0 0 3px #ffd44d, 0 0 28px ${th.glow}` : done ? '0 0 18px rgba(95,227,161,.45)' : soon ? 'none' : `0 0 16px ${th.glow}55`,
-                opacity: soon ? .8 : 1, transition: 'box-shadow .3s' }}>
-                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 420', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: soon ? 'saturate(.6)' : 'none' }} />
-                {done && <span aria-hidden style={{ position: 'absolute', top: 10, right: 10, width: 26, height: 26, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 800 }}>✓</span>}
-                {soon && <span aria-hidden style={{ position: 'absolute', top: 10, right: 12, fontSize: 15, opacity: .85 }}>🔒</span>}
-                <div style={{ padding: '8px 12px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: '100%', flex: 1 }}>
-                <div style={{ ...arcadeFont, fontSize: 17, letterSpacing: '.01em', textShadow: '0 2px 0 rgba(0,0,0,.35)' }}>{t.title}</div>
-                <div style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.8)', minHeight: 15 }}>{t.blurb}</div>
-                <div style={{ flex: 1 }} />
-                {done ? (
-                  <>
-                    <div style={{ fontSize: 13, fontWeight: 800 }}>🪙 <span style={{ ...arcadeFont, fontSize: 18 }}>+{t.done.coins}</span> <span style={{ fontSize: 11, color: 'rgba(255,255,255,.75)' }}>· {played?.title}</span></div>
-                    <div style={{ marginTop: 6, background: '#5fe3a1', color: '#0f3d26', fontWeight: 800, fontSize: 13, borderRadius: 999, padding: '7px 14px', width: '100%' }}>✓ Completed!</div>
-                  </>
-                ) : soon ? (
-                  <div style={{ marginTop: 20, border: '1.5px solid rgba(255,255,255,.35)', color: 'rgba(255,255,255,.75)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>COMING SOON</div>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 12.5, fontWeight: 800 }}>🪙 up to <span style={{ ...arcadeFont, fontSize: 18 }}>+{maxCoinsFor(t.options)}</span></div>
-                    <button disabled={busy} onClick={() => onPlay(t)} style={{ marginTop: 6, background: th.btn, color: '#14163f', fontWeight: 800, fontSize: 14, borderRadius: 999, padding: '8px 14px', width: '100%', boxShadow: '0 3px 0 rgba(0,0,0,.35)' }}>
-                      Play →
-                    </button>
-                    <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.7)', marginTop: 4 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
-                  </>
-                )}
+              <div key={t.id} style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+                background: done ? '#f3fbf6' : '#fff', border: `1px solid ${done ? '#2e9e6b' : 'var(--gold-line)'}`,
+                boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, transition: 'box-shadow .3s' }}>
+                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 400', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: soon ? 'saturate(.5)' : 'none', borderBottom: '1px solid var(--gold-line)' }} />
+                {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
+                {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
+                <div style={{ padding: '10px 12px 12px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, width: '100%', flex: 1 }}>
+                  <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY, lineHeight: 1.15 }}>{t.title}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, minHeight: 15 }}>{t.blurb}</div>
+                  <div style={{ flex: 1 }} />
+                  {done ? (
+                    <>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>🪙 <b style={{ fontSize: 16, color: NAVY }}>+{t.done.coins}</b> · {played?.title}</div>
+                      <div style={{ marginTop: 6, background: '#2e9e6b', color: '#fff', fontWeight: 800, fontSize: 12.5, borderRadius: 999, padding: '7px 14px', width: '100%' }}>✓ Completed</div>
+                    </>
+                  ) : soon ? (
+                    <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>COMING SOON</div>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>🪙 up to <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(t.options)}</b></div>
+                      <button className="btn" disabled={busy} onClick={() => onPlay(t)} style={{ marginTop: 6, width: '100%', justifyContent: 'center', padding: '8px 0', fontSize: 13.5, borderRadius: 999 }}>Play →</button>
+                      <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 4 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
+                    </>
+                  )}
                 </div>
               </div>
             )
           })}
         </div>
 
-        <div style={{ margin: '10px 0 0', padding: '12px 22px 14px', background: 'rgba(8,10,40,.6)', borderTop: '1px solid rgba(127,214,255,.25)', textAlign: 'center', fontSize: 13, fontWeight: 700 }}>
-          🪙 Every round pays <span style={{ color: '#ffd44d' }}>double coins</span> in ClassCade! <span style={{ color: '#ffd44d' }}>✦</span>
+        <div style={{ padding: '10px 22px 14px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
+          Every round pays <b style={{ color: NAVY }}>double coins</b> in ClassCade <span style={{ color: '#f5b400' }}>✦</span>
         </div>
       </div>
     </div>

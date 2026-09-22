@@ -424,15 +424,17 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
 }
 
 /* ---- Fluency Zone: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
+// Tile art is cropped from the Fluency Zone card renders (public/zone/); `body`
+// is the colour sampled from each card so the text panel continues the art.
 const ARCADE_THEME = {
-  sentences: { from: '#1f8f5a', to: '#0f5a3a', glow: '#5fe3a1', btn: '#7ee8b1' },
-  flow: { from: '#6a3fd8', to: '#3b1f8f', glow: '#b39cff', btn: '#c9b6ff' },
-  wordswap: { from: '#0a7dba', to: '#063f6e', glow: '#7fd6ff', btn: '#9fe0ff' },
-  context: { from: '#0d5f66', to: '#083840', glow: '#7fe3d8', btn: '#9ff0e6' },
-  thisvsthat: { from: '#b4478a', to: '#6a2450', glow: '#ffa0d8', btn: '#ffb8e2' },
-  wordwork: { from: '#8a5a12', to: '#4d3008', glow: '#ffd27a', btn: '#ffdc9a' },
-  spelling: { from: '#c78a00', to: '#7a5200', glow: '#ffe08a', btn: '#ffe9a3' },
-  typing: { from: '#d98a12', to: '#8a4a05', glow: '#ffd27a', btn: '#ffd44d' },
+  sentences: { body: '#114554', glow: '#5fe3a1', btn: '#7ee8b1' },
+  flow: { body: '#2e1a6a', glow: '#b39cff', btn: '#c9b6ff' },
+  wordswap: { body: '#0e2c60', glow: '#7fd6ff', btn: '#9fe0ff' },
+  typing: { body: '#5e2216', glow: '#ffd27a', btn: '#ffd44d' },
+  context: { body: '#203359', glow: '#7fd6ff', btn: '#9fe0ff' },
+  thisvsthat: { body: '#1f2f45', glow: '#7fd6ff', btn: '#9fe0ff' },
+  wordwork: { body: '#243a57', glow: '#7fd6ff', btn: '#9fe0ff' },
+  spelling: { body: '#213c68', glow: '#ffe08a', btn: '#ffe9a3' },
 }
 const MAX_COINS = { stretch: 16, typing: 20 }
 const maxCoinsFor = (opts) => Math.max(0, ...opts.map((g) => MAX_COINS[g.game] ?? 24))
@@ -499,17 +501,18 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
             const soon = t.options.length === 0
             const done = !!t.done
             const justNow = lastReveal === t.id
-            const th = ARCADE_THEME[t.id] || ARCADE_THEME.wordswap
+            const th = ARCADE_THEME[t.id] || { body: '#1a1c44', glow: '#7fd6ff', btn: '#9fe0ff' }
             const played = done ? byKey[t.done.game] : null
             return (
-              <div key={t.id} style={{ position: 'relative', borderRadius: 18, padding: '16px 12px 14px', minHeight: 196, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 4,
-                background: soon ? 'linear-gradient(180deg,#2a2c5c,#1a1c44)' : `linear-gradient(180deg, ${th.from} 0%, ${th.to} 100%)`,
-                border: `2px solid ${done ? '#5fe3a1' : soon ? 'rgba(255,255,255,.14)' : th.glow}`,
+              <div key={t.id} style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+                background: th.body,
+                border: `2px solid ${done ? '#5fe3a1' : soon ? 'rgba(255,255,255,.18)' : th.glow}`,
                 boxShadow: justNow ? `0 0 0 3px #ffd44d, 0 0 28px ${th.glow}` : done ? '0 0 18px rgba(95,227,161,.45)' : soon ? 'none' : `0 0 16px ${th.glow}55`,
-                opacity: soon ? .75 : 1, transition: 'box-shadow .3s' }}>
+                opacity: soon ? .8 : 1, transition: 'box-shadow .3s' }}>
+                <div aria-hidden style={{ width: '100%', aspectRatio: '640 / 420', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: soon ? 'saturate(.6)' : 'none' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 10, right: 10, width: 26, height: 26, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', display: 'grid', placeItems: 'center', fontSize: 13, fontWeight: 800 }}>✓</span>}
-                {soon && <span aria-hidden style={{ position: 'absolute', top: 10, right: 12, fontSize: 15, opacity: .8 }}>🔒</span>}
-                <div style={{ fontSize: 54, lineHeight: 1, margin: '4px 0 8px', filter: soon ? 'grayscale(.7) opacity(.7)' : `drop-shadow(0 0 12px ${th.glow})` }}>{t.icon}</div>
+                {soon && <span aria-hidden style={{ position: 'absolute', top: 10, right: 12, fontSize: 15, opacity: .85 }}>🔒</span>}
+                <div style={{ padding: '8px 12px 14px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, width: '100%', flex: 1 }}>
                 <div style={{ ...arcadeFont, fontSize: 17, letterSpacing: '.01em', textShadow: '0 2px 0 rgba(0,0,0,.35)' }}>{t.title}</div>
                 <div style={{ fontSize: 11.5, fontWeight: 700, color: 'rgba(255,255,255,.8)', minHeight: 15 }}>{t.blurb}</div>
                 <div style={{ flex: 1 }} />
@@ -529,6 +532,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                     <div style={{ fontSize: 10.5, color: 'rgba(255,255,255,.7)', marginTop: 4 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
                   </>
                 )}
+                </div>
               </div>
             )
           })}

@@ -474,7 +474,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                   {inPlay.map((t) => <span key={t.id} style={{ width: 11, height: 11, borderRadius: '50%', background: t.done ? '#7fd6ff' : 'rgba(255,255,255,.22)', boxShadow: t.done ? '0 0 8px #7fd6ff' : 'none' }} />)}
                 </span>
                 <span style={{ color: 'rgba(255,255,255,.4)' }}>|</span>
-                <span>🏆 Clear all {inPlay.length} for <span style={{ color: '#ffd44d' }}>+50 bonus coins!</span></span>
+                <span>🏆 Clear the board for <span style={{ color: '#ffd44d' }}>+50 bonus coins!</span></span>
               </div>
             </div>
             <div style={{ marginLeft: 'auto', marginRight: 52, background: 'rgba(8,10,40,.7)', border: '1.5px solid rgba(255,212,77,.7)', borderRadius: 999, padding: '8px 18px 8px 12px', display: 'flex', alignItems: 'center', gap: 10, ...arcadeFont, fontSize: 22 }}>
@@ -488,8 +488,8 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
           <div style={{ margin: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 14, background: 'linear-gradient(120deg,#ffe9a3,#ffd44d)', color: '#1a2a6a', borderRadius: 14, padding: '10px 16px' }}>
             <span style={{ fontSize: 28 }}>🏆</span>
             <div style={{ flex: 1 }}>
-              <div style={{ ...arcadeFont, fontSize: 18 }}>GRID CLEARED! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
-              <div style={{ fontSize: 12.5, fontWeight: 700 }}>Reset for a fresh round of surprise games.</div>
+              <div style={{ ...arcadeFont, fontSize: 18 }}>BOARD CLEARED! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
+              <div style={{ fontSize: 12.5, fontWeight: 700 }}>Reset the board for a fresh round of surprise games.</div>
             </div>
             <button disabled={busy} onClick={onReset} style={{ background: '#1a2a6a', color: '#fff', fontWeight: 800, borderRadius: 999, padding: '9px 18px', fontSize: 13 }}>↺ Reset & play again</button>
           </div>

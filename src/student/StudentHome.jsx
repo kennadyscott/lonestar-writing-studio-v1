@@ -503,11 +503,8 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                 style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
                 background: done ? '#f4f6f8' : '#fff', border: `1px solid ${done ? '#cbd8e2' : 'var(--gold-line)'}`,
                 boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
-                {/* art: the whole icon, contained, over a blurred copy of itself so nothing is cut off; toned down a step */}
-                <div aria-hidden style={{ position: 'relative', width: '100%', aspectRatio: '640 / 300', overflow: 'hidden', borderBottom: '1px solid var(--gold-line)', background: '#0e1f4a' }}>
-                  <div style={{ position: 'absolute', inset: -12, backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(14px) brightness(.55) saturate(.8)' }} />
-                  <div style={{ position: 'absolute', inset: 0, backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'contain', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', filter: done ? 'saturate(.2) brightness(.8)' : soon ? 'saturate(.5)' : 'saturate(.8) brightness(.9)' }} />
-                </div>
+                {/* art panel cropped from her card render; the crops are ~2.2:1 so cover shows them whole */}
+                <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
                 <div style={{ padding: '8px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', flex: 1 }}>

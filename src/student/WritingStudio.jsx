@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
 import PromptBridge from './PromptBridge.jsx'
+import { ReadAloudText } from './ReadAloud.jsx'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
 import { useT } from '../lib/i18n/index.jsx'
@@ -157,7 +158,10 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           <div style={{ fontSize: 24 }}>📣</div>
           <div style={{ flex: 1 }}>
             <div className="eyebrow">{asg.format ? `${asg.format} · ` : ''}{asg.type || asg.genre} · {t('Grade {n}', { n: asg.gradeLevel })}{asg.scopeStage ? ` · ${asg.scopeStage}` : ''}</div>
-            <div style={{ fontSize: 14, marginTop: 2 }}>{asg.prompt}</div>
+            {/* The prompt is always the grade-level English. Read-aloud only
+                changes whether the student can hear it. */}
+            <ReadAloudText text={asg.prompt} lang="en" level={supportLevel}
+              style={{ fontSize: 14, marginTop: 2 }} />
             {/* The language objective is a publisher field that rides on the
                 assignment. It only shows for students the teacher has placed
                 on the Language Bridge — everyone else sees the prompt alone. */}

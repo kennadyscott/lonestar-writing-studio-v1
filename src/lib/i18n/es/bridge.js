@@ -174,4 +174,11 @@ export const bridge = {
   'What is kindness?': '¿Qué es la amabilidad?',
   'Why does kindness help a class?': '¿Por qué la amabilidad ayuda a una clase?',
   'What is one example?': '¿Cuál es un ejemplo?',
+
+  // ---- read-aloud (support area 3) ----
+  'Listen': 'Escuchar',
+  'Stop': 'Detener',
+  'Read this out loud to me': 'Léemelo en voz alta',
+  'Stop reading': 'Dejar de leer',
+  'Read-aloud needs a browser that can speak. This one cannot.': 'La lectura en voz alta necesita un navegador que pueda hablar. Este no puede.',
 }

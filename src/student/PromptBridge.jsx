@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useT, useLang } from '../lib/i18n/index.jsx'
 import { levelOf, promptSupportFor } from '../lib/languageBridge.js'
+import { canSpeak, rateFor, readsAloud, useSpeech } from '../lib/readAloud.js'
+import { ListenButton } from './ReadAloud.jsx'
 
 /*
  * Prompt support — the first of the spec's nine areas, and the one that makes
@@ -9,6 +11,9 @@ import { levelOf, promptSupportFor } from '../lib/languageBridge.js'
  * The question itself never changes. A Beginning student and an Advanced
  * student are answering the same grade-level prompt; only how much of it
  * arrives at once is different. Advanced renders nothing here on purpose.
+ *
+ * Read-aloud (area 3) rides along: one control reads the whole breakdown in
+ * order, highlighting the line it is on.
  */
 
 function GlossChip({ g, bilingual }) {
@@ -33,18 +38,54 @@ function GlossChip({ g, bilingual }) {
   )
 }
 
+/* Intermediate gets its academic words marked in the prompt itself — the
+ * matrix calls this "key words highlighted". Beginning does not: its text has
+ * already been simplified, so there is nothing academic left to flag. */
+function KeyWords({ text, words }) {
+  if (!words?.length) return text
+  const pattern = words
+    .map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+    .sort((a, b) => b.length - a.length)
+    .join('|')
+  // The (?: ) matters: alternation binds looser than \w*, so `a|b|c\w*`
+  // would let only the LAST alternative take a suffix — "reasons" matched
+  // while "inventions" split into "invention" + "s".
+  const parts = String(text).split(new RegExp(`((?:${pattern})\\w*)`, 'gi'))
+  return parts.map((p, i) => (
+    new RegExp(`^(?:${pattern})\\w*$`, 'i').test(p)
+      ? <b key={i} style={{ color: '#0a7dba', background: '#eaf4fb', borderRadius: 3, padding: '0 2px' }}>{p}</b>
+      : <React.Fragment key={i}>{p}</React.Fragment>
+  ))
+}
+
 export default function PromptBridge({ level, bridge }) {
   const t = useT()
   const { lang } = useLang()
+  const { speak, stop, speaking, index } = useSpeech()
   const lv = levelOf(level)
   const sup = promptSupportFor(level, bridge)
   if (!lv || !sup) return null
 
+  // What the listen control reads, in order. At Beginning the breakdown is
+  // translated, so it is spoken in the interface language; the Intermediate
+  // chunks are the real English prompt and are always spoken in English.
+  const segments = sup.mode === 'steps'
+    ? [sup.simple, ...sup.steps].filter(Boolean).map((s) => ({ text: t(s), lang }))
+    : sup.chunks.map((c) => ({ text: c, lang: 'en' }))
+
+  const hl = (i) => (index === i && speaking
+    ? { background: `${lv.color}2e`, boxShadow: `0 0 0 1px ${lv.color}55` }
+    : null)
+  const keyWords = sup.mode === 'chunks' ? sup.gloss.map((g) => g.word) : []
+
   return (
     <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px dashed var(--line)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 7 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 7, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 13 }}>🌉</span>
         <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: lv.color, textTransform: 'uppercase' }}>{t(sup.title)}</span>
+        <span style={{ flex: 1 }} />
+        <ListenButton segments={segments} level={level} speaking={speaking}
+          onPlay={() => speak(segments, { rate: rateFor(level) })} onStop={stop} compact />
       </div>
 
       {/* Beginning: a plain restatement, then the question in steps. */}
@@ -52,13 +93,14 @@ export default function PromptBridge({ level, bridge }) {
         <>
           {sup.simple && (
             <div style={{ background: `${lv.color}10`, border: `1px solid ${lv.color}33`, borderRadius: 10, padding: '9px 12px',
-              fontSize: 14.5, fontWeight: 700, color: '#0d2f55', lineHeight: 1.45, marginBottom: 9 }}>
+              fontSize: 14.5, fontWeight: 700, color: '#0d2f55', lineHeight: 1.45, marginBottom: 9, ...(hl(0) || {}) }}>
               {t(sup.simple)}
             </div>
           )}
           <ol style={{ margin: '0 0 9px', paddingLeft: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
             {sup.steps.map((step, i) => (
-              <li key={step} style={{ display: 'flex', gap: 9, alignItems: 'center' }}>
+              <li key={step} style={{ display: 'flex', gap: 9, alignItems: 'center', borderRadius: 6, padding: '2px 4px',
+                ...(hl(i + (sup.simple ? 1 : 0)) || {}) }}>
                 <span style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, background: lv.color, color: '#fff',
                   display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800 }}>{i + 1}</span>
                 <span style={{ fontSize: 13.5, color: '#233c50' }}>{t(step)}</span>
@@ -74,10 +116,10 @@ export default function PromptBridge({ level, bridge }) {
           which is why the steps above DO run through t() and these do not. */}
       {sup.mode === 'chunks' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 5, marginBottom: 9 }}>
-          {sup.chunks.map((c) => (
-            <div key={c} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+          {sup.chunks.map((c, i) => (
+            <div key={c} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', borderRadius: 6, padding: '2px 4px', ...(hl(i) || {}) }}>
               <span style={{ width: 3, alignSelf: 'stretch', borderRadius: 2, background: lv.color, flexShrink: 0, minHeight: 18 }} />
-              <span style={{ fontSize: 13.5, color: '#233c50', lineHeight: 1.45 }}>{c}</span>
+              <span style={{ fontSize: 13.5, color: '#233c50', lineHeight: 1.45 }}><KeyWords text={c} words={keyWords} /></span>
             </div>
           ))}
         </div>
@@ -92,6 +134,12 @@ export default function PromptBridge({ level, bridge }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {sup.gloss.map((g) => <GlossChip key={g.word} g={g} bilingual={sup.bilingual || lang === 'es'} />)}
           </div>
+        </div>
+      )}
+
+      {!canSpeak() && readsAloud(level) && (
+        <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>
+          {t('Read-aloud needs a browser that can speak. This one cannot.')}
         </div>
       )}
     </div>

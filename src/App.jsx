@@ -14,6 +14,7 @@ import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
 import FeedbackReview from './student/FeedbackReview.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
+import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
 
 const ME_STUDENT = 'stu_kscott'
 
@@ -51,6 +52,7 @@ export default function App() {
   const goHome = () => { setView('home'); setOpenSub(null); setReviewSub(null) }
 
   async function resetDemo() {
+    clearQuickWriteDrafts()
     await api.reset()
     goHome()
     await refresh()
@@ -74,7 +76,9 @@ export default function App() {
   } else if (view === 'lesson' && lesson) {
     body = <LessonPage lesson={lesson.a} moduleLabel={lesson.moduleLabel} supportLevel={me.supportLevel} onBack={() => setView('luna')} />
   } else if (view === 'quickwrite') {
-    body = <QuickWritePage state={state} me={me} onBack={goHome} onChange={refresh} />
+    body = <QuickWritePage state={state} me={me} onBack={goHome} onChange={refresh}
+      onBank={() => setView('bank')} onWall={() => setView('wall')}
+      onOpen={(id) => { setView('bank'); setOpenSub(id) }} />
   } else if (view === 'wall') {
     body = (
       <div>

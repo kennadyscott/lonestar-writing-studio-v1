@@ -141,6 +141,24 @@ export const localApi = {
     state.assignments.push(asg); state.submissions.push(sub)
     return { submissionId: sub.id, coins, streakDays, streakExtended }
   },
+  undoQuickWrite: async (submissionId, streakExtended) => {
+    const sub = findSub(submissionId)
+    if (!sub) return { ok: true, missing: true }
+    const asg = findAsg(sub.assignmentId)
+    if (!asg || asg.genre !== 'quick') return { error: 'not a quick write' }
+    const coins = state.coinEvents.filter((e) => e.submissionId === sub.id).reduce((a, e) => a + (e.coins || 0), 0)
+    const stu = findStu(sub.studentId)
+    if (stu && coins) stu.coins = Math.max(0, stu.coins - coins)
+    state.coinEvents = state.coinEvents.filter((e) => e.submissionId !== sub.id)
+    if (streakExtended && state.growthSummary) {
+      state.growthSummary.streakDays = Math.max(0, (state.growthSummary.streakDays || 0) - 1)
+      state.growthSummary.lastStreakDate = null
+    }
+    state.submissions = state.submissions.filter((x) => x.id !== sub.id)
+    state.assignments = state.assignments.filter((x) => x.id !== asg.id)
+    state.shareWall = state.shareWall.filter((e) => e.submissionId !== sub.id)
+    return { ok: true }
+  },
   start: async (assignmentId) => {
     const asg = findAsg(assignmentId); if (!asg) return { error: 'no assignment' }
     let sub = state.submissions.find((s) => s.assignmentId === asg.id && s.studentId === ME)

@@ -126,7 +126,6 @@ export const writing = {
   '🌟 Publish it': '🌟 Publicarla',
 
   // ---------- Quick Write (QuickWritePage) ----------
-  'About {n} min': 'Unos {n} min',
   'Writing Topic': 'Tema de escritura',
   'Writing Prompt': 'Idea de escritura',
   'Think about:': 'Piensa en:',
@@ -147,6 +146,8 @@ export const writing = {
   'Title': 'Título',
   '⏰ Time! Finish your thought & submit': '⏰ ¡Se acabó el tiempo! Termina tu idea y envía',
   'keep writing…': 'sigue escribiendo…',
+  'Saved': 'Guardado',
+  'Picked up where you left off.': 'Seguimos donde lo dejaste.',
   'Write your answer here…': 'Escribe tu respuesta aquí…',
   '✓ Submitted': '✓ Enviado',
   'Quick writes are about showing up — words over perfection.': 'La Escritura Rápida se trata de presentarte: palabras antes que perfección.',
@@ -154,6 +155,14 @@ export const writing = {
 
   // completion modal
   'Quick write done!': '¡Escritura Rápida lista!',
+  'Actually, keep writing': 'En realidad, seguir escribiendo',
+  'Your piece': 'Tu escrito',
+  'Read what I wrote': 'Leer lo que escribí',
+  'Open my Writing Bank': 'Abrir mi Banco de Escritura',
+  'See the Writing Wall': 'Ver el Muro de Escritura',
+  'You already finished this Quick Write.': 'Ya terminaste esta Escritura Rápida.',
+  'Write another': 'Escribir otra',
+  'Your first one is saved in your Writing Bank.': 'La primera está guardada en tu Banco de Escritura.',
   'You wrote': 'Escribiste',
   '— showing up is how writers are made.': '— presentarte es lo que te hace escritor.',
   '🏅 Finished a timed Quick Write': '🏅 Terminaste una Escritura Rápida cronometrada',

@@ -428,6 +428,30 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true })
     }
 
+    // POST /api/quickwrite/undo { submissionId, streakExtended }
+    // The success modal can send a student back to the editor. Take back the
+    // piece, the coins, and today's streak bump so a later submit pays once.
+    if (req.method === 'POST' && url.pathname === '/api/quickwrite/undo') {
+      const body = await readBody(req)
+      const sub = findSub(body.submissionId)
+      if (!sub) return send(res, 200, { ok: true, missing: true })
+      const asg = findAsg(sub.assignmentId)
+      if (!asg || asg.genre !== 'quick') return send(res, 400, { error: 'not a quick write' })
+      const coins = state.coinEvents.filter((e) => e.submissionId === sub.id).reduce((a, e) => a + (e.coins || 0), 0)
+      const stu = findStu(sub.studentId)
+      if (stu && coins) stu.coins = Math.max(0, stu.coins - coins)
+      state.coinEvents = state.coinEvents.filter((e) => e.submissionId !== sub.id)
+      if (body.streakExtended && state.growthSummary) {
+        state.growthSummary.streakDays = Math.max(0, (state.growthSummary.streakDays || 0) - 1)
+        state.growthSummary.lastStreakDate = null
+      }
+      state.submissions = state.submissions.filter((x) => x.id !== sub.id)
+      state.assignments = state.assignments.filter((x) => x.id !== asg.id)
+      state.shareWall = state.shareWall.filter((e) => e.submissionId !== sub.id)
+      save()
+      return send(res, 200, { ok: true })
+    }
+
     // POST /api/quickwrite { mode, title?, prompt?, content?, complete? }
     if (req.method === 'POST' && url.pathname === '/api/quickwrite') {
       const body = await readBody(req)

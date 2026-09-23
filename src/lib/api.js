@@ -22,6 +22,7 @@ const networkApi = {
     fetch(u(`/api/submissions/${subId}/conference`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message }) }).then(j),
   saveRevision: (subId) => fetch(u(`/api/submissions/${subId}/save-revision`), { method: 'POST' }).then(j),
   quickWrite: (mode, extra = {}) => fetch(u('/api/quickwrite'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mode, ...extra }) }).then(j),
+  undoQuickWrite: (submissionId, streakExtended) => fetch(u('/api/quickwrite/undo'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ submissionId, streakExtended: !!streakExtended }) }).then(j),
   start: (assignmentId) => fetch(u('/api/submissions/start'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ assignmentId }) }).then(j),
   studentSettings: (payload) => fetch(u('/api/student/settings'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),
   setGoal: (payload) => fetch(u('/api/goal'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),

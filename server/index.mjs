@@ -43,6 +43,7 @@ function load() {
     state.fluencyCategories = fresh.fluencyCategories
     const ids = new Set(fresh.fluencyCategories.map((c) => c.id))
     for (const k of Object.keys(state.fluencyGrid?.cleared || {})) if (!ids.has(k)) delete state.fluencyGrid.cleared[k]
+    for (const k of Object.keys(state.fluencyGrid?.missed || {})) if (!ids.has(k)) delete state.fluencyGrid.missed[k]
     filled = true
   }
   for (const stu of state.students || []) {
@@ -559,9 +560,15 @@ const server = http.createServer(async (req, res) => {
       if (grid.cleared[cat.id]) return send(res, 200, { coins: grid.cleared[cat.id].coins, bonus: 0, already: true, grid })
       const pct = fluencyScorePct(body.game, body)
       const coins = fluencyRoundCoins(pct)
-      if (pct < FLUENCY_PASS) return send(res, 200, { coins: 0, passed: false, pct, bonus: 0, grid })
+      if (pct < FLUENCY_PASS) {
+        grid.missed = grid.missed || {}
+        grid.missed[cat.id] = { game: body.game, pct, ts: now() }
+        save()
+        return send(res, 200, { coins: 0, passed: false, pct, bonus: 0, grid })
+      }
       const stu = findStu(ME)
       if (coins > 0) { state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_round', coins, ts: now() }); if (stu) stu.coins += coins }
+      if (grid.missed) delete grid.missed[cat.id]
       grid.cleared[cat.id] = { game: body.game, coins, pct, ts: now() }
       let bonus = 0
       const playable = fluencyPlayable(state.fluencyCategories || [], state.fluencyGames || [])
@@ -575,7 +582,7 @@ const server = http.createServer(async (req, res) => {
     // POST /api/fluency/reset -> new round, empty grid.
     if (req.method === 'POST' && url.pathname === '/api/fluency/reset') {
       const prev = state.fluencyGrid || { round: 0 }
-      state.fluencyGrid = { round: (prev.round || 0) + 1, cleared: {}, bonusPaid: false }
+      state.fluencyGrid = { round: (prev.round || 0) + 1, cleared: {}, missed: {}, bonusPaid: false }
       save()
       return send(res, 200, state.fluencyGrid)
     }

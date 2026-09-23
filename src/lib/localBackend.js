@@ -307,9 +307,14 @@ export const localApi = {
     if (grid.cleared[cat.id]) return { coins: grid.cleared[cat.id].coins, bonus: 0, already: true, grid: clone(grid) }
     const pct = fluencyScorePct(body.game, body)
     const coins = fluencyRoundCoins(pct)
-    if (pct < FLUENCY_PASS) return { coins: 0, passed: false, pct, bonus: 0, grid: clone(grid) }
+    if (pct < FLUENCY_PASS) {
+      grid.missed = grid.missed || {}
+      grid.missed[cat.id] = { game: body.game, pct, ts: now() }
+      return { coins: 0, passed: false, pct, bonus: 0, grid: clone(grid) }
+    }
     const stu = findStu(ME)
     if (coins > 0) { state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_round', coins, ts: now() }); if (stu) stu.coins += coins }
+    if (grid.missed) delete grid.missed[cat.id]
     grid.cleared[cat.id] = { game: body.game, coins, pct, ts: now() }
     let bonus = 0
     const playable = fluencyPlayable(state.fluencyCategories || [], state.fluencyGames || [])
@@ -321,7 +326,7 @@ export const localApi = {
   },
   fluencyReset: async () => {
     const prev = state.fluencyGrid || { round: 0 }
-    state.fluencyGrid = { round: (prev.round || 0) + 1, cleared: {}, bonusPaid: false }
+    state.fluencyGrid = { round: (prev.round || 0) + 1, cleared: {}, missed: {}, bonusPaid: false }
     return clone(state.fluencyGrid)
   },
   typingFinish: async (payload) => {

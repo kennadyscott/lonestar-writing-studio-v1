@@ -262,7 +262,7 @@ function QuizGame({ bank, onClose, onFinished }) {
           <h3 style={{ margin: '6px 0 4px', fontSize: 22 }}>{t('{score} of {total} correct!', { score, total: items.length })}</h3>
           <CoinAward coins={earned} />
           <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 16px' }}>
-            {best >= 4 ? t('Best streak: {n} in a row 🔥', { n: best }) : score >= items.length / 2 ? t('Solid round — play again to beat it!') : t('Every round makes the next one easier.')}
+            {earned === 0 ? t('Under 70% — try again to clear this tile.') : best >= 4 ? t('Best streak: {n} in a row 🔥', { n: best }) : t('You cleared this tile.')}
           </p>
           <RoundActions onAgain={playAgain} onClose={onClose} againFirst={earned === 0} />
         </div>

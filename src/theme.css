@@ -221,6 +221,7 @@ a { color: var(--link); }
 .zone-sheet-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
 .zone-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 14px 22px 4px; }
 .zone-done { margin-top: 6px; background: #2e9e6b; color: #fff; font-weight: 800; font-size: 12.5px; border-radius: 999px; padding: 7px 10px; width: 100%; }
+.zone-retry { margin-top: 6px; background: #e08a2b; color: #fff; font-weight: 800; font-size: 12.5px; border-radius: 999px; padding: 7px 10px; width: 100%; }
 @media (max-width: 720px) {
   .zone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

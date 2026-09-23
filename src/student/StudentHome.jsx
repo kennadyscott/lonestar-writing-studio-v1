@@ -509,13 +509,14 @@ function Coin({ size = 14 }) {
   )
 }
 
-function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal, lastMiss }) {
+function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal }) {
   const t = useT()
   const say = useSay()
   const byKey = Object.fromEntries(games.map((g) => [g.game, g]))
   const playable = (c) => c.games.map((k) => byKey[k]).filter((g) => g && g.kind === 'builtin')
   const cleared = grid?.cleared || {}
-  const tiles = categories.map((c) => ({ ...c, options: playable(c), done: cleared[c.id] || null }))
+  const missed = grid?.missed || {}
+  const tiles = categories.map((c) => ({ ...c, options: playable(c), done: cleared[c.id] || null, miss: missed[c.id] || null }))
   const inPlay = tiles.filter((tile) => tile.options.length > 0)
   const doneCount = inPlay.filter((tile) => tile.done).length
   const allClear = inPlay.length > 0 && doneCount === inPlay.length
@@ -578,17 +579,19 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
           {tiles.map((tile) => {
             const soon = tile.options.length === 0
             const done = !!tile.done
+            const miss = !done && tile.miss
             const justNow = lastReveal === tile.id
             const played = done ? byKey[tile.done.game] : null
             return (
               <div key={tile.id} className={`zone-tile${!done && !soon ? ' playable' : ''}`} role={!done && !soon ? 'button' : undefined} tabIndex={!done && !soon ? 0 : -1}
                 onClick={() => !done && !soon && !busy && onPlay(tile)} onKeyDown={(e) => !done && !soon && !busy && (e.key === 'Enter' || e.key === ' ') && onPlay(tile)}
                 style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-                background: done ? '#f4f6f8' : '#fff', border: `1px solid ${done ? '#cbd8e2' : 'var(--gold-line)'}`,
+                background: done ? '#f4f6f8' : miss ? '#fff8f6' : '#fff', border: `1px solid ${done ? '#cbd8e2' : miss ? '#e08a2b' : 'var(--gold-line)'}`,
                 boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
                 {/* art panel cropped from her card render; the crops are ~2.2:1 so cover shows them whole */}
                 <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${tile.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
+                {miss && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#e08a2b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 800 }}>!</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
                 <div style={{ padding: '8px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY, lineHeight: 1.15 }}>{tile.title}</div>
@@ -599,11 +602,16 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                       <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> <b style={{ fontSize: 16, color: NAVY }}>+{tile.done.coins}</b> · {tile.done.pct != null ? `${tile.done.pct}% · ` : ''}{played?.title}</div>
                       <div className="zone-done">✓ {t('Completed')}</div>
                     </>
+                  ) : miss ? (
+                    <>
+                      <div style={{ fontSize: 12.5, fontWeight: 800, color: '#b23b3b' }}>{tile.miss.pct != null ? `${tile.miss.pct}% · ` : ''}{t('Under 70% · try again')}</div>
+                      <div className="zone-retry">{t('Try again')}</div>
+                    </>
                   ) : soon ? (
                     <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>{t('COMING SOON')}</div>
                   ) : (
                     <>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: lastMiss === tile.id ? '#b23b3b' : 'var(--muted)' }}>{lastMiss === tile.id ? <>{t('Under 70% · try again')}</> : <><Coin /> {t('up to')} <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(tile.options)}</b></>}</div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> {t('up to')} <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(tile.options)}</b></div>
                       <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>{tile.options.length === 1 ? tile.options[0].title : t('Surprise: {n} games in the mix', { n: tile.options.length })}</div>
                     </>
                   )}
@@ -769,7 +777,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [lastReveal, setLastReveal] = useState(null)
   const [gridBusy, setGridBusy] = useState(false)
   const [gameFinished, setGameFinished] = useState(false)
-  const [lastMiss, setLastMiss] = useState(null)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
@@ -785,7 +792,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     if (!game?.category) return
     const payload = { category: game.category, game: game.key, score: result?.score ?? null, total: result?.total ?? null, accuracy: result?.accuracy ?? null }
     setGridBusy(true)
-    try { const r = await api.fluencyFinish(payload); if (r?.passed) { setLastReveal(game.category); setLastMiss(null) } else { setLastMiss(game.category); setLastReveal(null) } await onChange?.() } catch {} finally { setGridBusy(false) }
+    try { const r = await api.fluencyFinish(payload); setLastReveal(r?.passed ? game.category : null); await onChange?.() } catch {} finally { setGridBusy(false) }
   }
   const [proofRoom, setProofRoom] = useState(false)
   const rows = useMemo(() => {
@@ -860,8 +867,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
       {proofRoom && <ProofRoom grade={me.gradeLevel ?? 5} onClose={() => setProofRoom(false)} onChange={onChange} />}
       {gamePicker && (
-        <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal} lastMiss={lastMiss}
-          onPlay={(tile) => { const pick = tile.options[Math.floor(Math.random() * tile.options.length)]; setLastReveal(null); setLastMiss(null); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
+        <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal}
+          onPlay={(tile) => { const pick = tile.options[Math.floor(Math.random() * tile.options.length)]; setLastReveal(null); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
           onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null) } }}
           onClose={() => setGamePicker(false)} />
       )}

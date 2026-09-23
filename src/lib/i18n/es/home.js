@@ -105,6 +105,7 @@ export const home = {
   'Reset the board for a fresh round of surprise games.': 'Reinicia el tablero para una ronda nueva de juegos sorpresa.',
   'Reset & play again': 'Reiniciar y jugar otra vez',
   'Under 70% · try again': 'Menos de 70% · inténtalo otra vez',
+  'Try again': 'Inténtalo otra vez',
   'up to': 'hasta',
   'Surprise: {n} games in the mix': 'Sorpresa: {n} juegos en la mezcla',
   '20 coins for 90%+, 10 for 70%+. Every round pays': '20 monedas por 90%+, 10 por 70%+. Cada ronda paga',

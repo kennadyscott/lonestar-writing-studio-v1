@@ -209,6 +209,8 @@ export const fluency = {
   "{score} of {total} correct!": "¡{score} de {total} correctas!",
   "Best streak: {n} in a row 🔥": "Mejor racha: {n} seguidas 🔥",
   "Solid round — play again to beat it!": "¡Buena ronda! Juega otra vez para superarla.",
+  "Under 70% — try again to clear this tile.": "Menos de 70% — inténtalo otra vez para completar esta casilla.",
+  "You cleared this tile.": "Completaste esta casilla.",
   "Every round makes the next one easier.": "Cada ronda hace más fácil la siguiente.",
   "Done — back to the dashboard": "Listo — volver al tablero",
   "Play again": "Jugar otra vez",

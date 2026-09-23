@@ -399,7 +399,7 @@ function DailyBanner({ dc, busy, onGo }) {
 
       {/* Nova robot art */}
       <div style={{ position: 'relative', flexShrink: 0 }}>
-        <img className="nova-robot" src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt={t('Nova the Robot')} style={{ width: 148, display: 'block',
+        <img className="nova-robot" src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt="Blip" style={{ width: 148, display: 'block',
           WebkitMaskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)',
           maskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)' }} />
       </div>
@@ -424,7 +424,7 @@ function DailyBanner({ dc, busy, onGo }) {
         </div>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, padding: '8px 20px', fontSize: 13.5, fontWeight: 800, letterSpacing: .6,
           background: 'linear-gradient(120deg,#f5c542,#e89a00)', color: '#3d2c00', border: '1.5px solid rgba(255,225,140,.9)', boxShadow: '0 0 16px rgba(245,180,0,.55)' }}>
-          {t('🪙 EARN 100 COINS!')}
+          {t('🪙 EARN 50 COINS!')}
         </span>
       </div>
 

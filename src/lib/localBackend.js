@@ -10,6 +10,9 @@ const ME = 'stu_kscott'
 const COIN_CAP = 150
 const TYPING_DAILY_ROUNDS = 5 // paid typing rounds per day
 
+// The Daily Revision Challenge pays this once per day.
+const DAILY_CHALLENGE_COINS = 50
+
 // Fluency Zone coin rules: coins follow the score. 90-100% pays 20, 70-89%
 // pays 10, under 70% does not clear the tile (play it again). Sentence
 // Stretch has no right answers, so finishing it counts as a pass at 10.
@@ -281,6 +284,12 @@ export const localApi = {
   submitRevision: async (subId) => {
     const sub = findSub(subId); if (!sub) return { error: 'no submission' }
     const original = sub.drafts[0]
+    // Once a day: today's challenge pays once. A second submit (a double tap,
+    // a second tab) returns the result it already earned and pays nothing.
+    if (sub.completedAt) {
+      const done = { traits: sub.drafts[sub.drafts.length - 1].traits, rubric: sub.rubricResult || null, agreement: sub.agreement || null, newMilestones: [], coinsAwarded: 0, already: true }
+      return done
+    }
     const revision = sub.drafts[sub.drafts.length - 1]
     const traits = fallbackTraits({ draft: revision.content })
     revision.traits = traits
@@ -294,7 +303,7 @@ export const localApi = {
       fixed: after.filter((r, i) => r.met && !before[i]?.met).length,
     }
     sub.rubricResult = rubric
-    const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 100, ts: now() },
+    const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: DAILY_CHALLENGE_COINS, ts: now() },
       ...evaluateMilestones(sub, original, revision)]
     sub.milestones.push(...newMilestones)
     for (const m of newMilestones) {

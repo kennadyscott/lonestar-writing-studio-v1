@@ -75,13 +75,12 @@ export const home = {
 
   // ---- daily challenge banner ----
   'Daily Challenge': 'Reto del Día',
-  'Nova the Robot': 'Nova el Robot',
   'A robot': 'Un robot',
   "Today's challenge is done — nice work! ✓": 'El reto de hoy está listo — ¡buen trabajo! ✓',
   '{author} wrote something rough — can you fix it up?': '{author} escribió algo flojo — ¿puedes mejorarlo?',
   'A brand-new challenge lands tomorrow. You can still look back at your revision.': 'Mañana llega un reto nuevo. Todavía puedes mirar tu revisión.',
   "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!": 'Evalúalo con la rúbrica y luego reescríbelo más fuerte. No es tuyo, ¡así que revisa sin miedo!',
-  '🪙 EARN 100 COINS!': '🪙 ¡GANA 100 MONEDAS!',
+  '🪙 EARN 50 COINS!': '🪙 ¡GANA 50 MONEDAS!',
   'Review →': 'Repasar →',
   'Keep going →': 'Seguir →',
   'Start Revising →': 'Empezar a revisar →',

@@ -76,6 +76,9 @@ const DRILL_PASS = 75       // clean-copy percentage a Proof Room job must reach
 const DRILL_COINS = 20      // a job is longer than a typing round, so it pays like one
 const DRILL_DAILY_JOBS = 5  // paid jobs per day
 
+// The Daily Revision Challenge pays this once per day.
+const DAILY_CHALLENGE_COINS = 50
+
 // Fluency Zone coin rules: coins follow the score. 90-100% pays 20, 70-89%
 // pays 10, under 70% does not clear the tile (play it again). Sentence
 // Stretch has no right answers, so finishing it counts as a pass at 10.
@@ -308,6 +311,12 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'submit-revision') {
       const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
       const original = sub.drafts[0]
+      // Once a day: today's challenge pays once. A second submit (a double tap,
+      // a second tab) returns the result it already earned and pays nothing.
+      if (sub.completedAt) {
+        const done = { traits: sub.drafts[sub.drafts.length - 1].traits, rubric: sub.rubricResult || null, agreement: sub.agreement || null, newMilestones: [], coinsAwarded: 0, already: true }
+        return send(res, 200, done)
+      }
       const revision = sub.drafts[sub.drafts.length - 1]
       const traits = await runTraits(sub, revision)
       revision.traits = traits
@@ -322,7 +331,7 @@ const server = http.createServer(async (req, res) => {
         fixed: after.filter((r, i) => r.met && !before[i]?.met).length,
       }
       sub.rubricResult = rubric
-      const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: 100, ts: now() },
+      const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: DAILY_CHALLENGE_COINS, ts: now() },
         ...evaluateMilestones(sub, original, revision)]
       sub.milestones.push(...newMilestones)
       for (const m of newMilestones) {

@@ -178,6 +178,17 @@ h1.page { font-size: 28px; font-weight: 700; margin: 4px 0 2px; color: var(--ink
 .piece-title { display: block; width: 100%; max-width: 720px; border: none; border-bottom: 1.5px solid transparent; background: transparent; padding: 2px 0 4px; margin: 0; font: inherit; font-size: 28px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); outline: none; }
 .piece-title:focus { border-bottom-color: var(--gold); }
 .piece-title::placeholder { color: #8aa0b3; font-weight: 650; }
+.bank-row-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.bank-row-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.bank-delete { margin-left: 6px; padding: 10px 16px; min-height: 44px; border-radius: 10px; border: 1.5px solid #e7a8ae; background: #fff; color: #b42318; font-weight: 800; font-size: 13px; }
+.bank-delete:hover { background: #fdeeee; }
+.bank-delete:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.bank-delete:disabled { opacity: .55; }
+@media (max-width: 720px) {
+  .bank-row-actions { flex-direction: column; align-items: stretch; width: 100%; }
+  .bank-row-main { width: 100%; }
+  .bank-delete { margin-left: 0; width: 100%; }
+}
 .page-sub { color: var(--muted); font-size: 15px; margin: 0 0 20px; }
 .eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
 a { color: var(--link); }

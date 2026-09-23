@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
@@ -62,6 +62,14 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       const name = (a.title || '').trim() || t('Untitled')
       return { sub, a, name, st: statusOf(sub), wcount: words.length, excerpt: words.slice(0, 14).join(' '), shared: sharedIds.has(sub.id), at: last.updatedAt || last.createdAt || '' }
     })
+
+  const pendingDelete = confirmId ? pieces.find((p) => p.sub.id === confirmId) : null
+  useEffect(() => {
+    if (!confirmId) return
+    const onKey = (e) => { if (e.key === 'Escape') setConfirmId(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [confirmId])
 
   const visible = pieces
     .filter((p) => (filter === 'all' ? true : filter === 'published' ? p.sub.published : (!p.sub.published && !p.sub.completedAt)))
@@ -212,33 +220,43 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-              <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy} onClick={() => onOpen(sub.id)}>
-                {sub.published ? t('Read') : sub.drafts.length > 1 ? t('Revise →') : t('Open →')}
-              </button>
-              {!sub.published && wcount > 0 && (
-                <button className="btn" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy}
-                  onClick={() => setConfirmAction({ kind: 'publish', sub, a })}>{t('🌟 Publish')}</button>
-              )}
-              {sub.published && !shared && (
-                <button className="btn" style={{ padding: '7px 15px', fontSize: 13, background: '#c2571f' }} disabled={busy}
-                  onClick={() => setConfirmAction({ kind: 'share', sub, a })}>{t('💛 Share to Wall')}</button>
-              )}
-              {confirmId === sub.id ? (
-                <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center', background: '#fdeeee', border: '1px solid #f0b9be', borderRadius: 10, padding: '5px 10px' }}>
-                  <span style={{ fontSize: 12, fontWeight: 700, color: '#d84a57' }}>{t("Delete this piece? You can't undo this.")}</span>
-                  <button style={{ fontSize: 12.5, fontWeight: 800, color: '#d84a57' }} disabled={busy}
-                    onClick={() => act(async () => { await api.discard(sub.id); setConfirmId(null) })}>{t('Yes, delete')}</button>
-                  <button style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)' }} onClick={() => setConfirmId(null)}>{t('Keep it')}</button>
-                </span>
-              ) : (
-                <button title={t('Discard this piece')} style={{ fontSize: 16, color: 'var(--muted)', padding: 6 }} disabled={busy}
-                  onClick={() => setConfirmId(sub.id)}>🗑️</button>
-              )}
+            <div className="bank-row-actions">
+              <div className="bank-row-main">
+                <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy} onClick={() => onOpen(sub.id)}>
+                  {sub.published ? t('Read') : sub.drafts.length > 1 ? t('Revise →') : t('Open →')}
+                </button>
+                {!sub.published && wcount > 0 && (
+                  <button className="btn" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy}
+                    onClick={() => setConfirmAction({ kind: 'publish', sub, a })}>{t('🌟 Publish')}</button>
+                )}
+                {sub.published && !shared && (
+                  <button className="btn" style={{ padding: '7px 15px', fontSize: 13, background: '#c2571f' }} disabled={busy}
+                    onClick={() => setConfirmAction({ kind: 'share', sub, a })}>{t('💛 Share to Wall')}</button>
+                )}
+              </div>
+              <button type="button" className="bank-delete" disabled={busy}
+                aria-label={t('Delete {title}', { title: name })}
+                onClick={() => setConfirmId(sub.id)}>{t('Delete')}</button>
             </div>
           </div>
         ))}
       </div>
+
+      {pendingDelete && (
+        <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 70, padding: 16 }} onClick={() => !busy && setConfirmId(null)}>
+          <div className="card" role="dialog" aria-modal="true" aria-labelledby="bank-delete-title" style={{ width: 460, maxWidth: '94vw', padding: '26px 28px' }} onClick={(e) => e.stopPropagation()}>
+            <b id="bank-delete-title" style={{ display: 'block', fontSize: 18, marginBottom: 10 }}>{t('Delete "{title}"?', { title: pendingDelete.name })}</b>
+            <div style={{ background: '#fdeeee', border: '1px solid #f0b9be', borderRadius: 12, padding: '11px 14px', fontSize: 14, lineHeight: 1.5, marginBottom: 18, color: '#8d1d24' }}>
+              <Directions text="This permanently removes it from your Writing Bank. You can't undo this." />
+            </div>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <button className="btn ghost" autoFocus style={{ padding: '12px 20px', minHeight: 44 }} onClick={() => setConfirmId(null)}>{t('Keep it')}</button>
+              <button type="button" className="bank-delete" disabled={busy} style={{ minWidth: 120 }}
+                onClick={() => act(async () => { await api.discard(pendingDelete.sub.id); setConfirmId(null) })}>{t('Yes, delete')}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* guardrail: confirm publish/share with plain-language audience info */}
       {confirmAction && (

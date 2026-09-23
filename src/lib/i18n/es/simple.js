@@ -65,6 +65,7 @@ export const simple = {
   'No Quick Writes yet. Finish one and it will be here.': 'Todavía no hay Escrituras Rápidas. Termina una y estará aquí.',
   'No Free Writes yet. Start one and it will be here.': 'Todavía no hay Escrituras Libres. Empieza una y estará aquí.',
   'Nothing matches.': 'Nada coincide.',
+  'This deletes it forever. You cannot get it back.': 'Esto la borra para siempre. No puedes recuperarla.',
   'Only your class can see it. You can take it down anytime.': 'Solo tu clase puede verlo. Puedes quitarlo cuando quieras.',
 
   // ---- Revision Studio ----

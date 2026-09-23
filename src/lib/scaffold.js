@@ -179,6 +179,8 @@ export const SIMPLE = {
     'No Free Writes yet. Start one and it will be here.',
   'Nothing matches these filters.':
     'Nothing matches.',
+  "This permanently removes it from your Writing Bank. You can't undo this.":
+    'This deletes it forever. You cannot get it back.',
   'It never leaves your classroom, and you or your teacher can take it down anytime.':
     'Only your class can see it. You can take it down anytime.',
 

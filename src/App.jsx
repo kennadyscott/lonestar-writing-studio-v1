@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from 'react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { api } from './lib/api.js'
 import { TopBar, DemoTools } from './components/Shell.jsx'
 import { useLang } from './lib/i18n/index.jsx'
@@ -28,7 +28,15 @@ export default function App() {
   const [publisher, setPublisher] = useState(false)
 
   const { setLang } = useLang()
-  const refresh = useCallback(async () => setState(await api.state()), [])
+  // A slower state fetch must not paint an older streak over one that just landed.
+  const refreshGen = useRef(0)
+  const refresh = useCallback(async () => {
+    const gen = ++refreshGen.current
+    const next = await api.state()
+    if (gen !== refreshGen.current) return null
+    setState(next)
+    return next
+  }, [])
   useEffect(() => { refresh(); api.health().then(setHealth) }, [refresh])
 
   // Interface language is a teacher setting that rides on the student record.

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useT } from '../lib/i18n/index.jsx'
+import { writingStreak } from '../lib/streak.js'
 import { Directions } from './Scaffold.jsx'
 
 /*
@@ -95,8 +96,9 @@ const QUICK = [
   { key: 'line', icon: '❤️', label: "A moment I'll always remember", pick: () => -1 },
 ]
 
-export default function PromptsPanel({ streakDays = 0 }) {
+export default function PromptsPanel({ summary, streakDays = 0 }) {
   const t = useT()
+  const streak = summary ? writingStreak(summary) : { days: streakDays, extendedToday: false }
   const [mode, setMode] = useState('spark')
   const [idx, setIdx] = useState(null)
   const [spins, setSpins] = useState(0)
@@ -130,12 +132,12 @@ export default function PromptsPanel({ streakDays = 0 }) {
             <Directions text="Need an idea? Spin for inspiration — then write wherever it takes you." />
           </div>
         </div>
-        {streakDays > 0 && (
+        {streak.days > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '5px 12px', flexShrink: 0 }}>
-            <span style={{ fontSize: 15 }}>🔥</span>
+            <span style={{ fontSize: 15 }} aria-hidden="true">🔥</span>
             <div style={{ lineHeight: 1.15 }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#0d2f55' }}>{t('{n} day streak', { n: streakDays })}</div>
-              <div style={{ fontSize: 10, color: '#8a6d1a', fontWeight: 600 }}>{t('Keep it going!')}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#0d2f55' }}>{t('{n} days', { n: streak.days })}</div>
+              <div style={{ fontSize: 10, color: '#8a6d1a', fontWeight: 600 }}>{streak.extendedToday ? t('Extended today') : t('Keep it going!')}</div>
             </div>
           </div>
         )}

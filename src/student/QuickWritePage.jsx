@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { api } from '../lib/api.js'
 import { useT } from '../lib/i18n/index.jsx'
+import { writingStreak } from '../lib/streak.js'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
 import { ReadAloudText } from './ReadAloud.jsx'
 import { useSay, Directions, Glossed } from './Scaffold.jsx'
@@ -219,10 +220,17 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
     setBusy(true)
     try {
       const r = await api.quickWrite('quick', { title: pick.title, prompt: pick.prompt, content: text.trim(), complete: true })
-      setResult({ coins: r.coins, words: wc, streakDays: r.streakDays, streakExtended: r.streakExtended, submissionId: r.submissionId })
+      const next = await onChange?.()
+      const fromState = next?.growthSummary ? writingStreak(next.growthSummary) : null
+      setResult({
+        coins: r.coins,
+        words: wc,
+        streakDays: fromState ? fromState.days : r.streakDays,
+        streakExtended: fromState ? fromState.extendedToday : !!r.streakExtended,
+        submissionId: r.submissionId,
+      })
       remember('', 0, 'done')
       setStage('done')
-      onChange && onChange()
     } finally { setBusy(false) }
   }
 
@@ -402,7 +410,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
             )}
             {result.streakDays > 0 && (
               <div className="pill" style={{ justifyContent: 'center', padding: '9px 14px', fontSize: 14, marginTop: 8, background: '#fdeee3', color: '#c2571f', width: '100%' }}>
-                {t('🔥 Writing streak:')} <b>{t('{n} days', { n: result.streakDays })}</b>{result.streakExtended ? t(' — extended today!') : ''}
+                {t('🔥 Writing streak:')} <b>{t('{n} days', { n: result.streakDays })}</b>{result.streakExtended ? ` ${t('Extended today')}` : ''}
               </div>
             )}
             <div className="eyebrow" style={{ textAlign: 'left', margin: '16px 0 8px' }}>{t('Your piece')}</div>

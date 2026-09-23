@@ -5,6 +5,7 @@ export const writing = {
   // ---------- Inspiration Hub (PromptsPanel) ----------
   'Need an idea? Spin for inspiration — then write wherever it takes you.': '¿Necesitas una idea? Gira para inspirarte y escribe a donde te lleve.',
   '{n} day streak': 'racha de {n} días',
+  'Extended today': 'Extendida hoy',
   'Keep it going!': '¡Sigue así!',
   '🎲 Story Sparks': '🎲 Chispas de Historia',
   '✏️ First Lines': '✏️ Primeras Líneas',

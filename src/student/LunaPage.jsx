@@ -252,7 +252,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   const pct = done / acts.length
   const starsEarned = acts.reduce((s, a) => s + a.stars, 0)
   const starsMax = acts.length * 3
-  const streak = state.growthSummary?.streakDays ?? 7
+  const streak = Number(state.growthSummary?.streakDays) || 0
   const coins = me?.coins ?? 0
   const level = Math.floor(coins / 300) + 1
   const levelPct = (coins % 300) / 300

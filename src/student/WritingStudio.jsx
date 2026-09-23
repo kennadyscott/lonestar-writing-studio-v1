@@ -340,7 +340,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           race={!isFree} canStartFrames={!(content || '').trim()} />}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: supportLevel ? 320 : 480 }}>
           {isFree ? (
-            <PromptsPanel streakDays={state.growthSummary?.streakDays ?? 0} />
+            <PromptsPanel summary={state.growthSummary} />
           ) : (
             <>
               <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>

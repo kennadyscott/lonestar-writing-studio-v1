@@ -88,15 +88,14 @@ function LunaNook({ modules, onLuna }) {
         </div>
 
         {/* the six modules, still readable */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 4, flexShrink: 0 }}>
+        <div className="luna-bar-mods">
           {modules.map((m, mi) => {
             const cur = m.status === 'in_progress'
             return (
-              <button key={m.id} onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, width: 62, padding: '5px 2px', borderRadius: 10, cursor: 'pointer',
-                  background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
+              <button key={m.id} className="luna-mod" onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
+                style={{ background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
                 <ModuleBadge id={m.id} size={38} dim={m.status === 'not_started'} />
-                <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .3, color: cur ? '#f5c542' : m.status === 'not_started' ? '#7f9bb4' : '#a8dff5', whiteSpace: 'nowrap' }}>
+                <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#7f9bb4' : '#a8dff5' }}>
                   {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                 </span>
               </button>
@@ -329,44 +328,41 @@ const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
 
 /* ---- the studio dashboard: mockup banner cards with art vignettes ---- */
 function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
-  const t = useT()
   const [c1, c2] = grad
   const BASE = import.meta.env.BASE_URL || '/'
   if (compact) {
     return (
-      <button disabled={busy} onClick={onClick}
-        style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 82, padding: '11px 13px 11px 94px', textAlign: 'left',
+      <button className="big-task" disabled={busy} onClick={onClick}
+        style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 82, padding: '11px 16px 11px 94px', textAlign: 'left',
           display: 'flex', alignItems: 'center', gap: 10, background: `linear-gradient(120deg,${c1},${c2})`,
           border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 8px 20px rgba(20,15,70,.28)', color: '#fff', cursor: 'pointer', width: '100%' }}>
         <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 92,
           background: `linear-gradient(90deg, transparent 45%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
-        <span style={{ position: 'relative', width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 16,
+        <span aria-hidden style={{ position: 'relative', width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 16,
           background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
         <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
           <span style={{ display: 'block', fontSize: 15, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)', whiteSpace: 'nowrap' }}>{title}</span>
           <span style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 2, lineHeight: 1.3 }}>{sub}</span>
         </span>
-        <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 8, padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap' }}>{t('Go')}</span>
       </button>
     )
   }
   return (
-    <button disabled={busy} onClick={onClick}
+    <button className="big-task" disabled={busy} onClick={onClick}
       style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, minHeight: 118, padding: '18px 22px 18px 198px', textAlign: 'left',
         display: 'flex', alignItems: 'center', gap: 16, background: `linear-gradient(120deg,${c1},${c2})`,
         border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 10px 26px rgba(20,15,70,.32)', color: '#fff', cursor: 'pointer' }}>
       <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 195,
         background: `linear-gradient(90deg, transparent 55%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
-      <span style={{ position: 'absolute', top: 12, right: 88, color: 'rgba(255,255,255,.65)', fontSize: 12 }}>✦</span>
-      <span style={{ position: 'absolute', bottom: 13, right: 200, color: 'rgba(255,255,255,.4)', fontSize: 9 }}>✦</span>
-      <span style={{ position: 'absolute', top: 22, right: 268, color: 'rgba(255,255,255,.5)', fontSize: 8 }}>✦</span>
-      <span style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 27,
+      <span aria-hidden style={{ position: 'absolute', top: 12, right: 22, color: 'rgba(255,255,255,.65)', fontSize: 12 }}>✦</span>
+      <span aria-hidden style={{ position: 'absolute', bottom: 13, right: 48, color: 'rgba(255,255,255,.4)', fontSize: 9 }}>✦</span>
+      <span aria-hidden style={{ position: 'absolute', top: 22, right: 80, color: 'rgba(255,255,255,.5)', fontSize: 8 }}>✦</span>
+      <span aria-hidden style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 27,
         background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
       <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
         <span style={{ display: 'block', fontSize: 20, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)' }}>{title}</span>
         <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.9)', fontWeight: 600, marginTop: 3 }}>{sub}</span>
       </span>
-      <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 10, padding: '8px 16px', fontSize: 13.5, whiteSpace: 'nowrap' }}>{t('Go')}</span>
     </button>
   )
 }
@@ -409,7 +405,7 @@ function DailyBanner({ dc, busy, onGo }) {
       </div>
 
       {/* content */}
-      <div style={{ flex: 1, minWidth: 300, position: 'relative' }}>
+      <div style={{ flex: '1 1 220px', minWidth: 0, position: 'relative' }}>
         <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2.2, color: '#e8f1ff', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <span>{t('Daily Challenge')}</span>
           <span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span>
@@ -690,7 +686,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
 
   return (
     <div className="card" style={{ overflow: 'hidden', flex: 1 }}>
-      <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 10px' }}>
+      <div className="assign-head">
         <div className="seg">
           {['active', 'completed'].map((k) => (
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>
@@ -698,9 +694,9 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
             </button>
           ))}
         </div>
-        {headerAction && <><span style={{ flex: 1 }} />{headerAction}</>}
+        {headerAction}
       </div>
-      <div style={{ display: 'flex', gap: 8, padding: '10px 16px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', background: '#f8fbfd', flexWrap: 'wrap' }}>
+      <div className="assign-filters">
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('🔍 Search assignments…')}
           style={{ flex: 1, minWidth: 140, padding: '8px 12px', borderRadius: 10, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 13 }} />
         <select value={formatFilter} onChange={(e) => setFormatFilter(e.target.value)} style={selStyle}>
@@ -723,10 +719,10 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
         {filtered.map((row) => {
           const s = STATUS_CHIP[row.status]
           return (
-            <div key={row.a.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderBottom: '1px solid var(--line)' }}>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 800, fontSize: 15 }}>{row.a.title}</div>
-                <div style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6, flexWrap: 'wrap' }}>
+            <div key={row.a.id} className="assign-row">
+              <div className="assign-main">
+                <div className="assign-title">{row.a.title}</div>
+                <div className="assign-meta">
                   <FormatBadge format={row.a.format} />
                   <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
                   <span style={{ fontSize: 12, color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
@@ -735,11 +731,13 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
                   </span>
                 </div>
               </div>
-              <div style={{ width: 112, textAlign: 'right' }}><DueChip dueDate={row.a.dueDate} status={row.status} /></div>
-              <div style={{ width: 104, textAlign: 'right' }}>
-                <button className={row.status === 'not_started' ? 'btn' : 'btn ghost'} disabled={busy} onClick={() => begin(row)}>
-                  {row.status === 'completed' ? t('Review') : row.status === 'in_progress' ? t('Continue') : t('Begin')}
-                </button>
+              <div className="assign-actions">
+                <div className="assign-due"><DueChip dueDate={row.a.dueDate} status={row.status} /></div>
+                <div className="assign-go">
+                  <button className={row.status === 'not_started' ? 'btn' : 'btn ghost'} disabled={busy} onClick={() => begin(row)}>
+                    {row.status === 'completed' ? t('Review') : row.status === 'in_progress' ? t('Continue') : t('Begin')}
+                  </button>
+                </div>
               </div>
             </div>
           )

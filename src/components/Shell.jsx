@@ -1,22 +1,23 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import { useLang, useT, LANGS } from '../lib/i18n/index.jsx'
 import { LEVELS } from '../lib/languageBridge.js'
 
 export function TopBar({ who, onArcade, onLogo }) {
   const t = useT()
+  const [menu, setMenu] = useState(false)
   return (
     <header className="topbar">
       <button className="logo-chip" onClick={onLogo} title={t('Home')}>
         <img src={BRAND.logo} alt="LoneStar CR" />
       </button>
 
-      <div style={{ flex: 1 }} />
+      <div style={{ flex: 1, minWidth: 0 }} />
 
       <button className="cc-btn" onClick={onArcade} title={t('Switch to ClassCade')}>
         <img src={BRAND.classcade} alt="ClassCade" />
         <span className="split" />
-        <span>
+        <span className="cc-label">
           <small>{t('SWITCH TO')}</small>
           <b>ClassCade</b>
         </span>
@@ -24,11 +25,28 @@ export function TopBar({ who, onArcade, onLogo }) {
 
       <div className="who">
         <div className="av-init">{who.initials}</div>
-        <div>
+        <div className="who-id">
           <div className="nm">{who.name}</div>
           <div className="sub">{who.sub}</div>
         </div>
         <button className="pwr" title={t('Log out (demo)')}>⏻</button>
+      </div>
+
+      {/* Narrow screens: the name and log-out live in a menu so the bar fits. */}
+      <div className="who-menu">
+        <button className="who-avatar" aria-label={who.name} aria-expanded={menu} aria-haspopup="menu" onClick={() => setMenu((v) => !v)}>
+          <span className="av-init">{who.initials}</span>
+        </button>
+        {menu && (
+          <>
+            <button className="who-backdrop" aria-label={t('Close')} onClick={() => setMenu(false)} />
+            <div className="who-panel" role="menu">
+              <div className="nm">{who.name}</div>
+              <div className="sub">{who.sub}</div>
+              <button className="who-logout" role="menuitem" title={t('Log out (demo)')} onClick={() => setMenu(false)}>⏻ {t('Log out (demo)')}</button>
+            </div>
+          </>
+        )}
       </div>
     </header>
   )

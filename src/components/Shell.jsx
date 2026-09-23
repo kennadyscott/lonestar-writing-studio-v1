@@ -43,6 +43,14 @@ export function DemoTools({ onResetDemo, onPublisher, settings, onSettings }) {
   // designation — a student never picks them.
   const pick = (patch) => onSettings && onSettings(patch)
 
+  // The Language Bridge picker is hidden from the demo for now (2026-09-22):
+  // the whole product is built and deployed, but the CEO is about to explore
+  // the site and this is one more thing to explain. Add ?bridge=1 to the URL
+  // to bring the picker back. Nothing else about the feature is touched.
+  const showBridge = (() => {
+    try { return new URLSearchParams(window.location.search).has('bridge') } catch { return false }
+  })()
+
   return (
     <div className="rolepick" style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 210 }}>
       {onSettings && (
@@ -63,7 +71,7 @@ export function DemoTools({ onResetDemo, onPublisher, settings, onSettings }) {
             </div>
           </div>
 
-          <div>
+          {showBridge && <div>
             <div className="demo-sub">Language Bridge</div>
             <div className="level-pick">
               <button onClick={() => pick({ supportLevel: null })}
@@ -76,7 +84,7 @@ export function DemoTools({ onResetDemo, onPublisher, settings, onSettings }) {
                 </button>
               ))}
             </div>
-          </div>
+          </div>}
         </div>
       )}
 

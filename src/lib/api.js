@@ -17,6 +17,8 @@ const networkApi = {
   reset: () => fetch(u('/api/reset'), { method: 'POST' }).then(j),
   saveContent: (draftId, content) =>
     fetch(u(`/api/drafts/${draftId}`), { method: 'PATCH', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ content }) }).then(j),
+  renamePiece: (subId, title) =>
+    fetch(u(`/api/submissions/${subId}/title`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ title }) }).then(j),
   traits: (draftId) => fetch(u(`/api/drafts/${draftId}/traits`), { method: 'POST' }).then(j),
   confer: (subId, message) =>
     fetch(u(`/api/submissions/${subId}/conference`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message }) }).then(j),

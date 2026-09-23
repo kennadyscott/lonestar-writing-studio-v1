@@ -665,7 +665,7 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
               style={{ display: 'flex', alignItems: 'center', gap: 12, textAlign: 'left', border: '1px solid var(--line)', borderRadius: 12, padding: '11px 14px', background: '#fff' }}>
               <span style={{ fontSize: 20 }}>📄</span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>{a.title}</span>
+                <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>{(a.title || '').trim() || t('Untitled')}</span>
                 <span style={{ display: 'block', fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {excerpt || t('Nothing written yet')} · {t('{n} words', { n: wcount })} · {t('Draft {n}', { n: sub.drafts.length })}
                 </span>

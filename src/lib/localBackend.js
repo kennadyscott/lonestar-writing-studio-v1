@@ -142,7 +142,20 @@ export const localApi = {
     return { ...clone(state), dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } }
   },
   reset: async () => { state = seedState(); forgetSaved(); return clone(state) },
-  saveContent: async (draftId, content) => { const h = findDraft(draftId); if (h) h.draft.content = content; return { ok: true } },
+  saveContent: async (draftId, content) => {
+    const h = findDraft(draftId)
+    if (h) { h.draft.content = content; h.draft.updatedAt = now() }
+    return { ok: true }
+  },
+  renamePiece: async (subId, title) => {
+    const sub = findSub(subId); if (!sub) return { error: 'no submission' }
+    const asg = findAsg(sub.assignmentId)
+    if (!asg || asg.genre !== 'free') return { error: 'only a free write can be renamed' }
+    asg.title = String(title || '').trim().replace(/\s+/g, ' ').slice(0, 80)
+    const wall = (state.shareWall || []).find((e) => e.submissionId === sub.id)
+    if (wall) wall.title = asg.title || 'Untitled'
+    return { title: asg.title }
+  },
   traits: async (draftId) => { const h = findDraft(draftId); if (!h) return {}; const t = fallbackTraits({ draft: h.draft.content }); h.draft.traits = t; return t },
   confer: async (subId, message) => {
     const sub = findSub(subId); const draft = sub.drafts[sub.drafts.length - 1]
@@ -170,7 +183,7 @@ export const localApi = {
     const prompt = extra.prompt || (mode === 'free'
       ? 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory. Your coach is here whenever you want to talk it through.'
       : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)])
-    const asg = { id: uid('asg'), title: extra.title || (mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`), genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6, teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'sentence', prompt }
+    const asg = { id: uid('asg'), title: extra.title || (mode === 'free' ? '' : `Quick Write #${n}`), genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6, teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'sentence', prompt }
     const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: extra.complete ? now() : null, drafts: [{ id: uid('drf'), n: 1, content: extra.content || '', createdAt: now(), conference: [], traits: null }], milestones: [] }
     let coins = 0
     let streakDays = state.growthSummary?.streakDays ?? 0
@@ -316,7 +329,7 @@ export const localApi = {
     const sub = findSub(submissionId); if (!sub) return { error: 'no submission' }
     if (state.shareWall.some((e) => e.submissionId === sub.id)) return { already: true }
     const asg = findAsg(sub.assignmentId), stu = findStu(sub.studentId); const draft = sub.drafts[sub.drafts.length - 1]
-    const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar, title: asg.title, genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
+    const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar, title: (asg.title || '').trim() || 'Untitled', genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
     state.shareWall.unshift(entry)
     return entry
   },

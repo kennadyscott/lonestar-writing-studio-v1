@@ -48,15 +48,58 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   const selected = sub.drafts.find((d) => d.id === selectedId) || currentDraft
   const isCurrent = selected.id === currentDraft.id
   const [content, setContent] = useState(selected.content)
+  const [title, setTitle] = useState(asg.title || '')
   const [saving, setSaving] = useState(false)
   const [toast, setToast] = useState(null)
   const [pub, setPub] = useState(null) // publish celebration
   const [sharedNow, setSharedNow] = useState(false)
   const timer = useRef(null)
+  // The bank reads React state, not the saved draft. Autosave has to push
+  // the words (and the title) up, or the card still says nothing was written.
+  const contentRef = useRef(selected.content || '')
+  const dirtyRef = useRef(false)
+  const titleRef = useRef(asg.title || '')
+  const titleDirtyRef = useRef(false)
+  const draftIdRef = useRef(currentDraft.id)
+  const subIdRef = useRef(sub.id)
+  const onChangeRef = useRef(onChange)
+  const flushRef = useRef(async () => {})
+  const leavingRef = useRef(false)
+  draftIdRef.current = currentDraft.id
+  subIdRef.current = sub.id
+  onChangeRef.current = onChange
+
+  flushRef.current = async () => {
+    clearTimeout(timer.current)
+    const jobs = []
+    if (dirtyRef.current) {
+      const text = contentRef.current
+      const id = draftIdRef.current
+      dirtyRef.current = false
+      jobs.push(api.saveContent(id, text))
+    }
+    if (titleDirtyRef.current && isFree) {
+      const next = titleRef.current
+      titleDirtyRef.current = false
+      jobs.push(api.renamePiece(subIdRef.current, next))
+    }
+    if (!jobs.length) return
+    await Promise.all(jobs)
+    await onChangeRef.current?.()
+  }
+
+  function poke() {
+    clearTimeout(timer.current)
+    timer.current = setTimeout(() => { void flushRef.current() }, 500)
+  }
 
   // keep selection on the working draft as new versions appear
   useEffect(() => { setSelectedId(currentDraft.id) }, [currentDraft.id])
-  useEffect(() => { setContent(selected.content) }, [selected.id])
+  useEffect(() => { setContent(selected.content || '') }, [selected.id])
+  useEffect(() => () => {
+    clearTimeout(timer.current)
+    void flushRef.current()
+  }, [])
 
   // Language Bridge inserts a frame/starter where the student is writing.
   function insertSupport(text) {
@@ -72,14 +115,22 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
 
   function edit(v) {
     setContent(v)
-    clearTimeout(timer.current)
-    timer.current = setTimeout(() => api.saveContent(currentDraft.id, v), 500)
+    contentRef.current = v
+    dirtyRef.current = true
+    poke()
+  }
+
+  function editTitle(v) {
+    const next = v.slice(0, 80)
+    setTitle(next)
+    titleRef.current = next
+    titleDirtyRef.current = true
+    poke()
   }
 
   async function saveRevision() {
     setSaving(true)
-    clearTimeout(timer.current)
-    await api.saveContent(currentDraft.id, content)
+    await flushRef.current()
     const res = await api.saveRevision(sub.id)
     setToast(res)
     await onChange()
@@ -89,8 +140,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   // free write: publish the finished piece
   async function publishWork() {
     setSaving(true)
-    clearTimeout(timer.current)
-    await api.saveContent(currentDraft.id, content)
+    await flushRef.current()
     const r = await api.publish(sub.id)
     setPub(r)
     await onChange()
@@ -102,13 +152,12 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
     onChange && onChange()
   }
 
-  // free write: save & close — finish or revise later from the Free Write chooser
-  async function saveAndClose() {
+  // Back, the logo, and Save Writing all leave the saved words in the bank card.
+  async function leave() {
+    if (leavingRef.current) return
+    leavingRef.current = true
     setSaving(true)
-    clearTimeout(timer.current)
-    await api.saveContent(currentDraft.id, content)
-    await onChange()
-    setSaving(false)
+    await flushRef.current()
     onBack && onBack()
   }
 
@@ -125,7 +174,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           <div className="card" style={{ padding: 30, width: 420, textAlign: 'center' }}>
             <div style={{ fontSize: 48 }}>🌟</div>
             <h2 style={{ margin: '4px 0' }}>{t('Published!')}</h2>
-            <p style={{ color: 'var(--muted)', margin: '0 0 12px', fontSize: 14.5 }}>{t('"{title}" is a finished piece — drafted, revised, and done. That\'s real writing.', { title: asg.title })}</p>
+            <p style={{ color: 'var(--muted)', margin: '0 0 12px', fontSize: 14.5 }}>{t('"{title}" is a finished piece — drafted, revised, and done. That\'s real writing.', { title: (asg.title || '').trim() || t('Untitled') })}</p>
             {pub.coins > 0 && (
               <div className="pill gold" style={{ justifyContent: 'center', padding: '9px 14px', fontSize: 14, marginBottom: 12 }}>
                 {t('🏅 Published a finished piece')}&nbsp;&nbsp;<span className="coin"><span className="disc" />+{pub.coins}</span>
@@ -144,13 +193,13 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         </div>
       )}
 
-      {onBack && <button className="backlink" onClick={onBack}>{t('← Back to My Writing')}</button>}
+      {onBack && <button className="backlink" onClick={leave}>{t('← Back to My Writing')}</button>}
 
       {isFree ? (
-        /* Free Write: a plain title, so the page gets straight to the writing */
         <div style={{ marginBottom: 10 }}>
-          <div className="eyebrow">{t('The Writing Studio')}</div>
-          <h1 className="page" style={{ margin: '2px 0 0' }}>{t('Free Write')}</h1>
+          <div className="eyebrow">{t('Free Write')}</div>
+          <input className="piece-title" value={title} onChange={(e) => editTitle(e.target.value)}
+            placeholder={t('Name this piece')} aria-label={t('Title')} maxLength={80} />
         </div>
       ) : (
         /* prompt banner */
@@ -183,7 +232,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           const on = d.id === selectedId
           const isCur = d.id === currentDraft.id
           return (
-            <button key={d.id} onClick={() => setSelectedId(d.id)}
+            <button key={d.id} onClick={() => { void flushRef.current().then(() => setSelectedId(d.id)) }}
               style={{ padding: '6px 12px', borderRadius: 999, fontSize: 13, fontWeight: 600,
                 border: on ? '2px solid var(--navy-1)' : '1px solid var(--line)',
                 background: on ? '#eef4f7' : '#fff', color: 'var(--ink)' }}>
@@ -222,7 +271,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
               </span>
               {isFree ? (
                 <span style={{ display: 'inline-flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button className="btn ghost" disabled={saving} onClick={saveAndClose} title={t('Save and finish later')}>{t('💾 Save Writing')}</button>
+                  <button className="btn ghost" disabled={saving} onClick={leave} title={t('Save and finish later')}>{t('💾 Save Writing')}</button>
                   {currentDraft.n === 1 ? (
                     <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>
                       {saving ? t('Saving…') : t('✅ First Draft Complete')}

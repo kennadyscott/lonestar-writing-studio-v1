@@ -59,7 +59,8 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
     .map(({ sub, a }) => {
       const last = sub.drafts[sub.drafts.length - 1]
       const words = (last.content || '').trim().split(/\s+/).filter(Boolean)
-      return { sub, a, st: statusOf(sub), wcount: words.length, excerpt: words.slice(0, 14).join(' '), shared: sharedIds.has(sub.id), at: last.createdAt || '' }
+      const name = (a.title || '').trim() || t('Untitled')
+      return { sub, a, name, st: statusOf(sub), wcount: words.length, excerpt: words.slice(0, 14).join(' '), shared: sharedIds.has(sub.id), at: last.updatedAt || last.createdAt || '' }
     })
 
   const visible = pieces
@@ -68,7 +69,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
     .filter((p) => {
       const needle = q.trim().toLowerCase()
       if (!needle) return true
-      return (p.a.title || '').toLowerCase().includes(needle) || (p.excerpt || '').toLowerCase().includes(needle)
+      return (p.name || '').toLowerCase().includes(needle) || (p.excerpt || '').toLowerCase().includes(needle)
     })
     .sort((x, y) => (sort === 'longest' ? y.wcount - x.wcount : sort === 'oldest' ? (x.at > y.at ? 1 : -1) : (y.at > x.at ? 1 : -1)))
 
@@ -96,8 +97,9 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
    */
   const ca = confirmAction
   const teacherName = state.teacher?.name || t('your teacher')
-  const shareBody = ca && `"${ca.a.title}${say('" will appear on the class Writing Wall.')} ${t('Who can see it:')} ${say('only the students and teacher in')} ${t("{teacher}'s class", { teacher: teacherName })}. ${say('It never leaves your classroom, and you or your teacher can take it down anytime.')}`
-  const publishBody = ca && `${say('Publishing marks')} "${ca.a.title}" ${say('as finished — it becomes')} ${t('read-only')} ${say('and earns')} ${t('+15 coins')}. ${t('Who can see it:')} ${say('just you and your teacher — publishing does')} ${t('not')} ${say('put it on the Writing Wall. Sharing is a separate choice you make after.')}`
+  const pieceName = (title) => (title || '').trim() || t('Untitled')
+  const shareBody = ca && `"${pieceName(ca.a.title)}${say('" will appear on the class Writing Wall.')} ${t('Who can see it:')} ${say('only the students and teacher in')} ${t("{teacher}'s class", { teacher: teacherName })}. ${say('It never leaves your classroom, and you or your teacher can take it down anytime.')}`
+  const publishBody = ca && `${say('Publishing marks')} "${pieceName(ca.a.title)}" ${say('as finished — it becomes')} ${t('read-only')} ${say('and earns')} ${t('+15 coins')}. ${t('Who can see it:')} ${say('just you and your teacher — publishing does')} ${t('not')} ${say('put it on the Writing Wall. Sharing is a separate choice you make after.')}`
 
   // Start a New Piece: make a fresh free write and open it.
   async function startNew() {
@@ -192,13 +194,13 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {visible.map(({ sub, a, st, wcount, excerpt, shared, at }) => (
+        {visible.map(({ sub, a, name, st, wcount, excerpt, shared, at }) => (
           <div key={sub.id} className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
             <span aria-hidden style={{ width: 104, height: 70, borderRadius: 12, flexShrink: 0, overflow: 'hidden', border: '1px solid var(--gold-line)',
               backgroundImage: `url(${BK}${thumbFor(sub.id)}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
             <div style={{ flex: 1, minWidth: 220 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <b style={{ fontSize: 15.5 }}>{a.title}</b>
+                <b style={{ fontSize: 15.5 }}>{name}</b>
                 <span className="pill" style={{ background: st.bg, color: st.c, fontSize: 11 }}>{t(st.label)}</span>
                 {shared && <span className="pill" style={{ background: '#fdeef4', color: '#c23f74', fontSize: 11 }}>{t('💛 On the Writing Wall')}</span>}
               </div>
@@ -249,7 +251,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                   <b style={{ fontSize: 18 }}><Glossed text={t('Share to the Writing Wall?')} /></b>
                 </div>
                 <p style={{ fontSize: 14, lineHeight: 1.55, margin: '0 0 10px' }}>
-                  "<b>{confirmAction.a.title}</b>
+                  "<b>{pieceName(confirmAction.a.title)}</b>
                   <Glossed text={say('" will appear on the class Writing Wall.')} />
                 </p>
                 <div style={{ background: '#e5f1fb', borderRadius: 12, padding: '11px 14px', fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
@@ -272,7 +274,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                   <b style={{ fontSize: 18 }}><Glossed text={t('Publish this piece?')} /></b>
                 </div>
                 <p style={{ fontSize: 14, lineHeight: 1.55, margin: '0 0 10px' }}>
-                  <Glossed text={say('Publishing marks')} /> "<b>{confirmAction.a.title}</b>" <Glossed text={say('as finished — it becomes')} /> <b>{t('read-only')}</b> <Glossed text={say('and earns')} /> <b>{t('+15 coins')}</b>.
+                  <Glossed text={say('Publishing marks')} /> "<b>{pieceName(confirmAction.a.title)}</b>" <Glossed text={say('as finished — it becomes')} /> <b>{t('read-only')}</b> <Glossed text={say('and earns')} /> <b>{t('+15 coins')}</b>.
                 </p>
                 <div style={{ background: '#e5f1fb', borderRadius: 12, padding: '11px 14px', fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
                   👀 <b>{t('Who can see it:')}</b> <Glossed text={say('just you and your teacher — publishing does')} /> <b>{t('not')}</b> <Glossed text={say('put it on the Writing Wall. Sharing is a separate choice you make after.')} />

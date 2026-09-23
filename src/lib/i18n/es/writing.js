@@ -46,6 +46,8 @@ export const writing = {
   '(working copy)': '(copia de trabajo)',
 
   // editor body + save bar
+  'Name this piece': 'Ponle nombre a esta obra',
+  'Untitled': 'Sin título',
   'Start writing here…\nAnything goes.': 'Empieza a escribir aquí…\nTodo se vale.',
   'Start writing your argument here…': 'Empieza a escribir tu argumento aquí…',
   '🌟 Published — find it anytime in your Writing Bank': '🌟 Publicado: lo encuentras cuando quieras en tu Banco de Escritura',

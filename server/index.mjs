@@ -206,8 +206,25 @@ const server = http.createServer(async (req, res) => {
     // PATCH /api/drafts/:id  { content }
     if (req.method === 'PATCH' && parts[0] === 'api' && parts[1] === 'drafts' && parts[2]) {
       const hit = findDraft(parts[2]); if (!hit) return send(res, 404, { error: 'no draft' })
-      const body = await readBody(req); hit.draft.content = body.content ?? hit.draft.content; save()
+      const body = await readBody(req)
+      hit.draft.content = body.content ?? hit.draft.content
+      hit.draft.updatedAt = now()
+      save()
       return send(res, 200, { ok: true })
+    }
+
+    // POST /api/submissions/:id/title { title } -> name a free write.
+    // Blank stays blank; the bank shows "Untitled" until the student names it.
+    if (req.method === 'POST' && parts[0] === 'api' && parts[1] === 'submissions' && parts[2] && parts[3] === 'title') {
+      const sub = findSub(parts[2]); if (!sub) return send(res, 404, { error: 'no submission' })
+      const asg = findAsg(sub.assignmentId)
+      if (!asg || asg.genre !== 'free') return send(res, 400, { error: 'only a free write can be renamed' })
+      const body = await readBody(req)
+      asg.title = String(body.title || '').trim().replace(/\s+/g, ' ').slice(0, 80)
+      const wall = (state.shareWall || []).find((e) => e.submissionId === sub.id)
+      if (wall) wall.title = asg.title || 'Untitled'
+      save()
+      return send(res, 200, { title: asg.title })
     }
 
     // POST /api/drafts/:id/traits
@@ -325,7 +342,7 @@ const server = http.createServer(async (req, res) => {
       const asg = findAsg(sub.assignmentId), stu = findStu(sub.studentId)
       const draft = sub.drafts[sub.drafts.length - 1]
       const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar,
-        title: asg.title, genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
+        title: (asg.title || '').trim() || 'Untitled', genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
       state.shareWall.unshift(entry); save()
       return send(res, 200, entry)
     }
@@ -462,7 +479,7 @@ const server = http.createServer(async (req, res) => {
         ? 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory. Your coach is here whenever you want to talk it through.'
         : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)])
       const asg = {
-        id: uid('asg'), title: body.title || (mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`),
+        id: uid('asg'), title: body.title || (mode === 'free' ? '' : `Quick Write #${n}`),
         genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6,
         teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null,
         scopeStage: 'sentence', prompt,
@@ -651,7 +668,7 @@ const server = http.createServer(async (req, res) => {
         ? 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory. Your coach is here whenever you want to talk it through.'
         : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)]
       const asg = {
-        id: uid('asg'), title: mode === 'free' ? `Free Write #${n}` : `Quick Write #${n}`,
+        id: uid('asg'), title: mode === 'free' ? '' : `Quick Write #${n}`,
         genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6,
         teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null,
         scopeStage: 'sentence', prompt,

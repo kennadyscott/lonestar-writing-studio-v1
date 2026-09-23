@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useEffect } from 'react'
 import { api, TRAIT_LABELS } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
@@ -523,16 +523,22 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
   const BASE = import.meta.env.BASE_URL || '/'
   const NAVY = '#0d2f55'
 
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: 860, maxWidth: '96vw', borderRadius: 20, overflow: 'hidden', color: 'var(--ink)', background: 'rgba(255,255,255,.97)', border: '1px solid var(--gold-line)', boxShadow: '0 24px 60px rgba(2,20,50,.35)' }}>
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
 
-        {/* header: same type and chips as the rest of the studio, not the arcade wordmark */}
-        <div style={{ padding: '16px 22px 14px', borderBottom: '1px solid var(--line)' }}>
+  return (
+    <div className="zone-backdrop" onClick={onClose}>
+      <div className="zone-sheet" role="dialog" aria-modal="true" aria-labelledby="zone-title" onClick={(e) => e.stopPropagation()}>
+
+        {/* header stays on screen; the tiles scroll underneath it */}
+        <div className="zone-sheet-head" style={{ padding: '16px 22px 14px', borderBottom: '1px solid var(--line)' }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="eyebrow">{t('The Writing Studio')} · {t('Grade {n}', { n: grade })}</div>
-              <h2 className="page" style={{ margin: '2px 0 4px', fontSize: 26 }}>{t('Fluency Zone')} <span style={{ color: 'var(--gold)' }}>✦</span></h2>
+              <h2 id="zone-title" className="page" style={{ margin: '2px 0 4px', fontSize: 26 }}>{t('Fluency Zone')} <span style={{ color: 'var(--gold)' }}>✦</span></h2>
               <p className="page-sub" style={{ margin: 0, fontSize: 13.5 }}>
                 <Directions inline text="Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again." />
               </p>
@@ -555,6 +561,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
           </div>
         </div>
 
+        <div className="zone-sheet-body">
         {allClear && (
           <div style={{ margin: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 14, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 14, padding: '10px 16px' }}>
             <span style={{ fontSize: 26 }}>🏆</span>
@@ -567,7 +574,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
         )}
 
         {/* tiles */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, padding: '14px 22px 4px' }}>
+        <div className="zone-grid">
           {tiles.map((tile) => {
             const soon = tile.options.length === 0
             const done = !!tile.done
@@ -590,7 +597,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                   {done ? (
                     <>
                       <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> <b style={{ fontSize: 16, color: NAVY }}>+{tile.done.coins}</b> · {tile.done.pct != null ? `${tile.done.pct}% · ` : ''}{played?.title}</div>
-                      <div style={{ marginTop: 6, background: '#2e9e6b', color: '#fff', fontWeight: 800, fontSize: 12.5, borderRadius: 999, padding: '7px 14px', width: '100%' }}>✓ {t('Completed')}</div>
+                      <div className="zone-done">✓ {t('Completed')}</div>
                     </>
                   ) : soon ? (
                     <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>{t('COMING SOON')}</div>
@@ -608,6 +615,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
 
         <div style={{ padding: '8px 22px 12px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
           <Coin /> {t('20 coins for 90%+, 10 for 70%+. Every round pays')} <b style={{ color: NAVY }}>{t('double coins')}</b> {t('in ClassCade')} <span style={{ color: '#f5b400' }}>✦</span>
+        </div>
         </div>
       </div>
     </div>

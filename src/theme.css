@@ -214,6 +214,22 @@ a { color: var(--link); }
 /* Studio task cards: the whole card is the button, so keyboard focus has to show on the card. */
 .big-task:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
+/* Fluency Zone: the sheet stays inside the screen. The header does not scroll away. */
+.zone-backdrop { position: fixed; inset: 0; z-index: 55; background: rgba(10,20,30,.5); display: flex; justify-content: center; align-items: safe center; padding: 16px; overflow: auto; }
+.zone-sheet { width: min(860px, 100%); max-height: calc(100dvh - 32px); display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; color: var(--ink); background: rgba(255,255,255,.97); border: 1px solid var(--gold-line); box-shadow: 0 24px 60px rgba(2,20,50,.35); }
+.zone-sheet-head { flex: none; }
+.zone-sheet-body { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.zone-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; padding: 14px 22px 4px; }
+.zone-done { margin-top: 6px; background: #2e9e6b; color: #fff; font-weight: 800; font-size: 12.5px; border-radius: 999px; padding: 7px 10px; width: 100%; }
+@media (max-width: 720px) {
+  .zone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .zone-backdrop { padding: 8px; align-items: stretch; }
+  .zone-sheet { max-height: calc(100dvh - 16px); border-radius: 16px; }
+  .zone-grid { grid-template-columns: 1fr; padding: 12px 12px 4px; }
+}
+
 /* Fluency Zone tiles: the whole card is the button */
 .zone-tile { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .zone-tile.playable:hover, .zone-tile.playable:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(2,56,77,.18), 0 0 0 2px var(--gold); outline: none; }

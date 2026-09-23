@@ -83,6 +83,9 @@ export const writing = {
   'Sort: Oldest': 'Orden: Más antiguas',
   'Sort: Longest': 'Orden: Más largas',
   'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.': 'Todavía no hay nada aquí: empieza una Escritura Libre o una Escritura Rápida y aparecerá en tu banco.',
+  'No Quick Writes yet. Finish one and it shows up here.': 'Todavía no hay Escrituras Rápidas. Termina una y aparecerá aquí.',
+  'No Free Writes yet. Start one and it shows up here.': 'Todavía no hay Escrituras Libres. Empieza una y aparecerá aquí.',
+  'Nothing matches these filters.': 'Nada coincide con estos filtros.',
 
   // piece rows
   '🌟 Published': '🌟 Publicado',

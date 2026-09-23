@@ -28,7 +28,59 @@ function fluencyPlayable(categories, games) {
   return categories.filter((c) => c.games.some((g) => builtin.has(g))).map((c) => c.id)
 }
 
-let state = seedState()
+// GitHub Pages has no server. Student work has to live in the browser or a
+// finished Quick Write vanishes on the next refresh and never reaches the bank.
+const STORE_KEY = 'lscr.studio'
+
+function storage() {
+  try {
+    if (typeof localStorage === 'undefined') return null
+    return localStorage
+  } catch { return null }
+}
+
+function loadState() {
+  const fresh = seedState()
+  const ls = storage()
+  if (!ls) return fresh
+  let saved
+  try {
+    const raw = ls.getItem(STORE_KEY)
+    if (!raw) return fresh
+    saved = JSON.parse(raw)
+  } catch { return fresh }
+  if (!saved || !Array.isArray(saved.submissions) || !Array.isArray(saved.assignments) || !Array.isArray(saved.students)) return fresh
+  for (const key of Object.keys(fresh)) {
+    if (saved[key] === undefined) saved[key] = fresh[key]
+  }
+  saved.students = saved.students.map((s) => {
+    const base = fresh.students.find((x) => x.id === s.id)
+    return base ? { ...base, ...s } : s
+  })
+  for (const s of fresh.students) {
+    if (!saved.students.some((x) => x.id === s.id)) saved.students.push(s)
+  }
+  return saved
+}
+
+let state = loadState()
+// Matches the loaded state so the first read does not freeze a fresh seed into storage.
+let snapshot = JSON.stringify(state)
+
+function persist() {
+  const ls = storage()
+  if (!ls) return
+  let next
+  try { next = JSON.stringify(state) } catch { return }
+  if (next === snapshot) return
+  snapshot = next
+  try { ls.setItem(STORE_KEY, next) } catch { /* private mode: this visit still works */ }
+}
+
+function forgetSaved() {
+  snapshot = JSON.stringify(state)
+  try { storage()?.removeItem(STORE_KEY) } catch {}
+}
 
 const clone = (x) => JSON.parse(JSON.stringify(x))
 const now = () => new Date().toISOString()
@@ -89,7 +141,7 @@ export const localApi = {
     const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === new Date().toISOString().slice(0, 10))
     return { ...clone(state), dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } }
   },
-  reset: async () => { state = seedState(); return clone(state) },
+  reset: async () => { state = seedState(); forgetSaved(); return clone(state) },
   saveContent: async (draftId, content) => { const h = findDraft(draftId); if (h) h.draft.content = content; return { ok: true } },
   traits: async (draftId) => { const h = findDraft(draftId); if (!h) return {}; const t = fallbackTraits({ draft: h.draft.content }); h.draft.traits = t; return t },
   confer: async (subId, message) => {
@@ -352,4 +404,13 @@ export const localApi = {
     return { reactions: e.reactions, myReactions: e.myReactions }
   },
   shoutOut: async (payload) => { const stu = findStu(payload.studentId); if (!stu) return { error: 'no student' }; stu.shoutOut = { from: payload.from || 'Your teacher', initials: payload.initials || 'T', text: (payload.text || '').slice(0, 240), date: now().slice(0, 10) }; return stu.shoutOut },
+}
+
+// Save after any call that changed the studio. Reads compare equal and skip.
+for (const key of Object.keys(localApi)) {
+  const fn = localApi[key]
+  localApi[key] = async (...args) => {
+    try { return await fn(...args) }
+    finally { persist() }
+  }
 }

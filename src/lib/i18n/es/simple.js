@@ -62,6 +62,9 @@ export const simple = {
   // ---- Writing Bank ----
   'All your writing. Change it, finish it, share it, or delete it.': 'Toda tu escritura. Cámbiala, termínala, compártela o bórrala.',
   'Nothing here yet. Write something and it will show up here.': 'Todavía no hay nada. Escribe algo y aparecerá aquí.',
+  'No Quick Writes yet. Finish one and it will be here.': 'Todavía no hay Escrituras Rápidas. Termina una y estará aquí.',
+  'No Free Writes yet. Start one and it will be here.': 'Todavía no hay Escrituras Libres. Empieza una y estará aquí.',
+  'Nothing matches.': 'Nada coincide.',
   'Only your class can see it. You can take it down anytime.': 'Solo tu clase puede verlo. Puedes quitarlo cuando quieras.',
 
   // ---- Revision Studio ----

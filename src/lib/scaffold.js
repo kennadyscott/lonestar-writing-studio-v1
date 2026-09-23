@@ -173,6 +173,12 @@ export const SIMPLE = {
     'All your writing. Change it, finish it, share it, or delete it.',
   'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.':
     'Nothing here yet. Write something and it will show up here.',
+  'No Quick Writes yet. Finish one and it shows up here.':
+    'No Quick Writes yet. Finish one and it will be here.',
+  'No Free Writes yet. Start one and it shows up here.':
+    'No Free Writes yet. Start one and it will be here.',
+  'Nothing matches these filters.':
+    'Nothing matches.',
   'It never leaves your classroom, and you or your teacher can take it down anytime.':
     'Only your class can see it. You can take it down anytime.',
 

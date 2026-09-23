@@ -179,7 +179,15 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       {visible.length === 0 && (
         <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
           <div style={{ fontSize: 40, marginBottom: 8 }}>🗂️</div>
-          <Directions text="Nothing here yet — start a Free Write or Quick Write and it will land in your bank." inline />
+          <Directions text={
+            pieces.length === 0
+              ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
+              : type === 'quick'
+                ? 'No Quick Writes yet. Finish one and it shows up here.'
+                : type === 'free'
+                  ? 'No Free Writes yet. Start one and it shows up here.'
+                  : 'Nothing matches these filters.'
+          } inline />
         </div>
       )}
 

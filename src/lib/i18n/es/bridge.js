@@ -90,4 +90,88 @@ export const bridge = {
   "You didn't explain how your answer connects to the story.": 'No explicaste cómo tu respuesta se conecta con el cuento.',
   'You used evidence from the text to back up your answer.': 'Usaste evidencia del texto para apoyar tu respuesta.',
   'You explained how your evidence connects to your answer.': 'Explicaste cómo tu evidencia se conecta con tu respuesta.',
+
+  // ---- prompt support chrome ----
+  'What this is asking': 'Qué te está pidiendo',
+  'The prompt, one piece at a time': 'La instrucción, parte por parte',
+  'Tap a word you do not know': 'Toca una palabra que no conozcas',
+
+  // ---- the dashboard strip ----
+  '{n} supports are on for you': 'Tienes {n} apoyos activos',
+  'Your teacher set this. The writing you are asked to do is the same as everyone else.': 'Tu maestra lo configuró. La escritura que se te pide es la misma que la de todos.',
+  'See what I get': 'Ver mis apoyos',
+  'Hide': 'Ocultar',
+
+  // ---- the nine support areas ----
+  'Prompt support': 'Apoyo con la instrucción',
+  'Vocabulary': 'Vocabulario',
+  'Comprehensible input': 'Entrada comprensible',
+  'Sentence support': 'Apoyo con las oraciones',
+  'Response structure': 'Estructura de la respuesta',
+  'Evidence': 'Evidencia',
+  'Language production': 'Producción del lenguaje',
+  'Translanguaging': 'Translenguaje',
+  'Feedback': 'Comentarios',
+
+  // ---- the matrix, Beginning ----
+  'Prompt broken into small steps with visuals and simplified language': 'La instrucción dividida en pasos pequeños, con imágenes y lenguaje sencillo',
+  'Picture glossary, bilingual glossary, audio pronunciation': 'Glosario con imágenes, glosario bilingüe y pronunciación en audio',
+  'Read aloud, slowed pacing, sentence-by-sentence highlighting': 'Lectura en voz alta, ritmo más lento y resaltado oración por oración',
+  'Full sentence frames': 'Modelos de oración completos',
+  'Color-coded RACE organizer with frames filled in': 'Organizador RACE por colores con los modelos ya puestos',
+  'Evidence choices highlighted for you': 'Las opciones de evidencia resaltadas para ti',
+  'Say it aloud first, then speech-to-text': 'Dilo en voz alta primero y luego usa voz a texto',
+  'Fully translated directions and home-language brainstorming': 'Instrucciones totalmente traducidas y lluvia de ideas en tu idioma',
+  'One thing at a time, in both languages': 'Una cosa a la vez, en los dos idiomas',
+
+  // ---- the matrix, Intermediate ----
+  'Prompt chunked with academic vocabulary clarified': 'La instrucción en partes, con el vocabulario académico aclarado',
+  'Click a word for its definition': 'Haz clic en una palabra para ver su definición',
+  'Read aloud optional, key words highlighted': 'Lectura en voz alta opcional y palabras clave resaltadas',
+  'RACE structure on the side for reference': 'La estructura RACE a un lado como referencia',
+  'You highlight evidence, we check it matches': 'Tú resaltas la evidencia y nosotros revisamos que coincida',
+  'Speech-to-text on the side': 'Voz a texto a un lado',
+  'Key words and false cognates': 'Palabras clave y cognados falsos',
+  'Language-focused coaching': 'Orientación centrada en el lenguaje',
+
+  // ---- the matrix, Advanced ----
+  'The original prompt, with optional vocabulary support': 'La instrucción original, con apoyo de vocabulario opcional',
+  'Nuance and precision only': 'Solo matiz y precisión',
+  'Optional academic phrase bank': 'Banco de frases académicas opcional',
+  'Elaboration and precision': 'Desarrollo y precisión',
+
+  /* ---- Beginning prompt deconstruction ----
+   * Support area 8 (translanguaging) says Beginning gets fully translated
+   * directions. These are the simplified restatement and the step questions
+   * only. The real prompt and the Intermediate chunks are NEVER translated —
+   * those are the grade-level English the student has to read.
+   */
+  'Should recess be longer? Write to your principal. Tell why.': '¿Debe ser más largo el recreo? Escríbele al director. Di por qué.',
+  'What is recess?': '¿Qué es el recreo?',
+  'Do you want more recess? Yes or no?': '¿Quieres más recreo? ¿Sí o no?',
+  'Why? Give two reasons.': '¿Por qué? Da dos razones.',
+
+  'Is the refrigerator very important? Say yes or no. Tell why.': '¿Es muy importante el refrigerador? Di sí o no. Di por qué.',
+  'What does a refrigerator do?': '¿Qué hace un refrigerador?',
+  'Is it important? Yes or no?': '¿Es importante? ¿Sí o no?',
+
+  'A robot wakes up in a garden. Write what happens next.': 'Un robot despierta en un jardín. Escribe qué pasa después.',
+  'Where is the robot?': '¿Dónde está el robot?',
+  'What does the robot see?': '¿Qué ve el robot?',
+  'What does the robot do?': '¿Qué hace el robot?',
+
+  'A desert is very hot and dry. How do people live there? Tell how.': 'Un desierto es muy caluroso y seco. ¿Cómo vive la gente ahí? Di cómo.',
+  'What is a desert like?': '¿Cómo es un desierto?',
+  'What do people need to live?': '¿Qué necesita la gente para vivir?',
+  'How do people get what they need in a desert?': '¿Cómo consigue la gente lo que necesita en un desierto?',
+
+  'You live long ago, during a war. Write about one brave day.': 'Vives hace mucho tiempo, durante una guerra. Escribe sobre un día valiente.',
+  'Who are you in the story?': '¿Quién eres tú en la historia?',
+  'What brave thing happens?': '¿Qué cosa valiente pasa?',
+  'How do you feel?': '¿Cómo te sientes?',
+
+  'Why is kindness important in class? Tell why. Give examples.': '¿Por qué es importante la amabilidad en clase? Di por qué. Da ejemplos.',
+  'What is kindness?': '¿Qué es la amabilidad?',
+  'Why does kindness help a class?': '¿Por qué la amabilidad ayuda a una clase?',
+  'What is one example?': '¿Cuál es un ejemplo?',
 }

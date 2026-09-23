@@ -210,3 +210,64 @@ export const SIMPLE_NOTES = {
 export const isBilingualFeedback = (level) => level === 'beginning'
 /* Does this level get one item on the first attempt instead of all four? */
 export const isOneThingAtATime = (level, attempt) => !!level && attempt <= 1
+
+/* ---- Vocabulary ---------------------------------------------------------- *
+ * Support area 2. One shared glossary keyed by the word, so an assignment
+ * only has to list which words it needs. `kid` is the definition a sixth
+ * grader reads; `es` is the Spanish gloss a Beginning student also gets.
+ * Advanced gets no glossary — the spec reserves it for nuance they ask for.
+ */
+export const GLOSSARY = {
+  'recess': { kid: 'Free time outside during the school day.', es: 'el recreo' },
+  'argument': { kid: 'Writing that takes a side and gives reasons.', es: 'un argumento' },
+  'principal': { kid: 'The person in charge of the whole school.', es: 'el director / la directora' },
+  'opinion': { kid: 'What you think about something.', es: 'una opinión' },
+  'support': { kid: 'To back up what you said with proof.', es: 'apoyar' },
+  'invention': { kid: 'Something new that a person made.', es: 'un invento' },
+  'take a side': { kid: 'To pick yes or no and stay with it.', es: 'tomar una posición' },
+  'reason': { kid: 'The why behind what you think.', es: 'una razón' },
+  'garden': { kid: 'A place where plants and flowers grow.', es: 'un jardín' },
+  'narrative': { kid: 'A story with events in order.', es: 'una narración' },
+  'desert': { kid: 'A place with very little rain. Hot and dry.', es: 'un desierto' },
+  'adapt': { kid: 'To change so you can live somewhere.', es: 'adaptarse' },
+  'inform': { kid: 'To teach your reader something true.', es: 'informar' },
+  'detail': { kid: 'A small fact that makes your idea clear.', es: 'un detalle' },
+  'imagine': { kid: 'To picture something in your mind.', es: 'imaginar' },
+  'American Revolution': { kid: 'The war where the United States became its own country.', es: 'la Revolución Estadounidense' },
+  'brave': { kid: 'Doing something even when you are scared.', es: 'valiente' },
+  'kindness': { kid: 'Treating people in a way that helps them.', es: 'la amabilidad' },
+  'matter': { kid: 'To be important.', es: 'importar' },
+  'explanation': { kid: 'Telling why something is true.', es: 'una explicación' },
+  'example': { kid: 'One real case that shows your idea.', es: 'un ejemplo' },
+}
+export const glossFor = (words) => (words || []).map((w) => ({ word: w, ...(GLOSSARY[w] || {}) })).filter((g) => g.kid)
+
+/* ---- Prompt support ------------------------------------------------------ *
+ * Support area 1, and the one a student notices first. The QUESTION never
+ * gets easier — all three levels are answering the same grade-level prompt.
+ * What changes is how much of it arrives at once:
+ *   Beginning    — a simplified restatement plus the prompt broken into steps
+ *   Intermediate — the real prompt, chunked, with its academic words flagged
+ *   Advanced     — the prompt exactly as written
+ */
+export function promptSupportFor(level, bridge) {
+  if (!level || !bridge) return null
+  if (level === 'advanced') return null
+  if (level === 'beginning') {
+    return {
+      mode: 'steps',
+      title: 'What this is asking',
+      simple: bridge.simplePrompt || null,
+      steps: bridge.steps || [],
+      gloss: glossFor(bridge.vocab),
+      bilingual: true,
+    }
+  }
+  return {
+    mode: 'chunks',
+    title: 'The prompt, one piece at a time',
+    chunks: bridge.chunks || [],
+    gloss: glossFor(bridge.vocab),
+    bilingual: false,
+  }
+}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
+import PromptBridge from './PromptBridge.jsx'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
 import { useT } from '../lib/i18n/index.jsx'
@@ -166,6 +167,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
                 <div style={{ fontSize: 13, color: '#33607f', marginTop: 1, lineHeight: 1.45 }}>{asg.languageObjective}</div>
               </div>
             )}
+            <PromptBridge level={supportLevel} bridge={asg.bridge} />
           </div>
         </div>
       )}

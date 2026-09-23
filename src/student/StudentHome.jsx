@@ -7,6 +7,7 @@ import ProofRoom from './ProofRoom.jsx'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
+import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const fmt = (d, locale = 'en-US') => d ? new Date(d + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : '—'
@@ -224,6 +225,53 @@ function UpNextCard({ row, busy, begin, onAll }) {
 }
 
 /* ---- Assignments tab: active goal banner ---- */
+/*
+ * The Language Bridge strip. The level is set by the teacher from the
+ * student's LPAC/TELPAS designation, so this is read-only here — it exists so
+ * a student (and anyone demoing) can see what the bridge is turning on for
+ * them without opening a piece of writing first.
+ */
+function BridgeBanner({ level }) {
+  const t = useT()
+  const [open, setOpen] = useState(false)
+  const lv = levelOf(level)
+  if (!lv) return null
+  const rows = SUPPORT_AREAS.map((a) => ({ ...a, got: MATRIX[level]?.[a.id] })).filter((a) => a.got)
+  return (
+    <div className="card" style={{ padding: '12px 18px', marginBottom: 18, border: `1px solid ${lv.color}44`, background: `linear-gradient(120deg,${lv.color}0e,#fff)` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 13, flexWrap: 'wrap' }}>
+        <span style={{ fontSize: 24 }}>🌉</span>
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div className="eyebrow">{t('Language Bridge')}</div>
+          <div style={{ fontSize: 15.5, fontWeight: 800 }}>
+            {t('{n} supports are on for you', { n: rows.length })}
+          </div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+            {t('Your teacher set this. The writing you are asked to do is the same as everyone else.')}
+          </div>
+        </div>
+        <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: .5, color: '#fff', background: lv.color, borderRadius: 999, padding: '5px 13px' }}>
+          {t(lv.label)}
+        </span>
+        <button onClick={() => setOpen((v) => !v)}
+          style={{ fontSize: 12.5, fontWeight: 800, color: lv.color, background: '#fff', border: `1.5px solid ${lv.color}55`, borderRadius: 999, padding: '7px 15px' }}>
+          {open ? t('Hide') : t('See what I get')}
+        </button>
+      </div>
+      {open && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: `1px solid ${lv.color}33`, display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(250px,1fr))', gap: 10 }}>
+          {rows.map((a) => (
+            <div key={a.id} style={{ background: '#fff', border: '1px solid var(--line)', borderRadius: 10, padding: '8px 11px' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .4, color: lv.color, textTransform: 'uppercase' }}>{t(a.label)}</div>
+              <div style={{ fontSize: 12.5, color: '#33566e', marginTop: 2, lineHeight: 1.4 }}>{t(a.got)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function GoalBanner({ me, classFocus }) {
   const t = useT()
   // read-only on Home — the goal is set and managed in a writing conference
@@ -807,6 +855,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {/* ================= HOME ================= */}
       {homeTab === 'home' && (<>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <BridgeBanner level={me.supportLevel} />
         <GoalBanner me={me} classFocus={state.classFocus} />
         <div className="home-main">
           <AssignmentsCard rows={rows} busy={busy} begin={begin}

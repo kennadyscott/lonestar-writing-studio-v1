@@ -80,6 +80,9 @@ export const writing = {
 
   // filters, search, sorts
   'Search your writing pieces…': 'Busca en tus obras…',
+  'Clear search': 'Borrar la búsqueda',
+  'Nothing matches "{query}".': 'Nada coincide con "{query}".',
+  'Your pieces': 'Tus obras',
   'All types': 'Todos los tipos',
   'Sort: Newest': 'Orden: Más recientes',
   'Sort: Oldest': 'Orden: Más antiguas',

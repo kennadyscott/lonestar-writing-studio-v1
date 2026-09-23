@@ -136,29 +136,28 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       </div>
 
       {/* stats + new piece */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: 14, marginBottom: 14, alignItems: 'stretch' }}>
-        <div className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', padding: '14px 4px' }}>
+      <div className="bank-head">
+        <div className="card bank-stats">
           {[
             { icon: '📄', bg: '#e5f1fb', n: total, label: 'pieces', sub: 'Total writing pieces' },
             { icon: '✅', bg: '#e6f6ee', n: publishedCount, label: 'published', sub: 'Shared with the world' },
             { icon: '✏️', bg: '#fdf3df', n: progressCount, label: 'in progress', sub: 'Keep going — great ideas ahead!' },
-          ].map((x, i) => (
-            <div key={x.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', borderLeft: i ? '1px solid var(--line)' : 'none' }}>
-              <span style={{ width: 40, height: 40, borderRadius: 11, background: x.bg, display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>{x.icon}</span>
+          ].map((x) => (
+            <div key={x.label} className="bank-stat">
+              <span className="bank-stat-icon" style={{ background: x.bg }} aria-hidden="true">{x.icon}</span>
               <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                  <b style={{ fontSize: 22, color: '#0d2f55' }}>{x.n}</b>
-                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>{t(x.label)}</span>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
+                  <b>{x.n}</b>
+                  <span className="bank-stat-label">{t(x.label)}</span>
                 </div>
-                <div style={{ fontSize: 11.5, color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{t(x.sub)}</div>
+                <div className="bank-stat-sub">{t(x.sub)}</div>
               </div>
             </div>
           ))}
         </div>
-        <button className="btn" onClick={startNew} disabled={busy}
-          style={{ padding: '0 26px', fontSize: 15.5, borderRadius: 14, background: 'linear-gradient(140deg,#0d2f55,#02384d)', minWidth: 230, justifyContent: 'center', gap: 10 }}>
-          <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 15 }}>+</span>
-          {t('Start a New Piece')} <span style={{ opacity: .7 }}>›</span>
+        <button className="btn bank-new" onClick={startNew} disabled={busy}>
+          <span aria-hidden="true" style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 15 }}>+</span>
+          {t('Start a New Piece')} <span aria-hidden="true" style={{ opacity: .7 }}>›</span>
         </button>
       </div>
 
@@ -173,11 +172,14 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
             </button>
           ))}
         </div>
-        <label style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid var(--line)', borderRadius: 10, padding: '8px 12px' }}>
-          <span style={{ fontSize: 14, color: 'var(--muted)' }}>🔍</span>
+        <div className="bank-search">
+          <span aria-hidden="true" style={{ fontSize: 14, color: 'var(--muted)' }}>🔍</span>
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search your writing pieces…')}
-            style={{ flex: 1, border: 'none', outline: 'none', font: 'inherit', fontSize: 13.5, color: 'var(--ink)', background: 'transparent' }} />
-        </label>
+            aria-label={t('Search your writing pieces…')} />
+          {q.trim() && (
+            <button type="button" className="bank-search-clear" onClick={() => setQ('')}>{t('Clear search')}</button>
+          )}
+        </div>
         {[[type, setType, TYPES], [sort, setSort, SORTS]].map(([val, set, opts], i) => (
           <select key={i} value={val} onChange={(e) => set(e.target.value)}
             style={{ border: '1px solid var(--line)', borderRadius: 10, padding: '9px 12px', font: 'inherit', fontSize: 13, fontWeight: 700, color: 'var(--ink)', background: '#fff' }}>
@@ -187,28 +189,30 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       </div>
 
       {visible.length === 0 && (
-        <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>🗂️</div>
+        <div className="card" role="status" style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
+          <div style={{ fontSize: 40, marginBottom: 8 }} aria-hidden="true">🗂️</div>
           <Directions text={
-            pieces.length === 0
-              ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
-              : type === 'quick'
-                ? 'No Quick Writes yet. Finish one and it shows up here.'
-                : type === 'free'
-                  ? 'No Free Writes yet. Start one and it shows up here.'
-                  : 'Nothing matches these filters.'
-          } inline />
+            q.trim()
+              ? 'Nothing matches "{query}".'
+              : pieces.length === 0
+                ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
+                : type === 'quick'
+                  ? 'No Quick Writes yet. Finish one and it shows up here.'
+                  : type === 'free'
+                    ? 'No Free Writes yet. Start one and it shows up here.'
+                    : 'Nothing matches these filters.'
+          } vars={q.trim() ? { query: q.trim() } : undefined} inline />
         </div>
       )}
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {visible.length > 0 && <ul className="bank-pieces" aria-label={t('Your pieces')}>
         {visible.map(({ sub, a, name, st, wcount, excerpt, shared, at }) => (
-          <div key={sub.id} className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+          <li key={sub.id} className="card bank-piece">
             <span aria-hidden style={{ width: 104, height: 70, borderRadius: 12, flexShrink: 0, overflow: 'hidden', border: '1px solid var(--gold-line)',
               backgroundImage: `url(${BK}${thumbFor(sub.id)}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
-            <div style={{ flex: 1, minWidth: 220 }}>
+            <div className="bank-piece-copy">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <b style={{ fontSize: 15.5 }}>{name}</b>
+                <h2 className="bank-piece-title">{name}</h2>
                 <span className="pill" style={{ background: st.bg, color: st.c, fontSize: 11 }}>{t(st.label)}</span>
                 {shared && <span className="pill" style={{ background: '#fdeef4', color: '#c23f74', fontSize: 11 }}>{t('💛 On the Writing Wall')}</span>}
               </div>
@@ -238,9 +242,9 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                 aria-label={t('Delete {title}', { title: name })}
                 onClick={() => setConfirmId(sub.id)}>{t('Delete')}</button>
             </div>
-          </div>
+          </li>
         ))}
-      </div>
+      </ul>}
 
       {pendingDelete && (
         <div role="presentation" style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 70, padding: 16 }} onClick={() => !busy && setConfirmId(null)}>

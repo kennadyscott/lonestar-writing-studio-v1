@@ -267,7 +267,8 @@ function QuizGame({ bank, onClose, onFinished }) {
           <RoundActions onAgain={playAgain} onClose={onClose} againFirst={earned === 0} />
         </div>
       ) : (
-        <div>
+        <div className="quiz-play">
+          <div className="quiz-play-scroll">
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, fontWeight: 800, color: 'var(--muted)', marginBottom: 10 }}>
             <span>{t('Question {n} of {total}', { n: idx + 1, total: items.length })}</span>
             <span>⭐ {score}{streak >= 2 ? ` · ${t('🔥 {n} streak', { n: streak })}` : ''}</span>
@@ -278,30 +279,30 @@ function QuizGame({ bank, onClose, onFinished }) {
             <span style={{ flex: 1, minWidth: 0 }}><Glossed text={qText} /></span>
             <Speak text={qText} lang={isInstruction ? undefined : 'en'} />
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="quiz-options">
             {it.o.map((opt, i) => {
               const isRight = picked != null && i === it.a
               const isWrongPick = picked === i && i !== it.a
               return (
-                <button key={i} onClick={() => pick(i)} disabled={picked != null}
-                  style={{ textAlign: 'left', padding: '11px 14px', borderRadius: 11, fontSize: 14.5, fontWeight: 600, lineHeight: 1.4, cursor: picked == null ? 'pointer' : 'default',
+                <button key={i} className="quiz-option" onClick={() => pick(i)} disabled={picked != null}
+                  style={{ textAlign: 'left', cursor: picked == null ? 'pointer' : 'default',
                     border: isRight ? '2px solid var(--good)' : isWrongPick ? '2px solid #e06c6c' : '1.5px solid var(--line)',
                     background: isRight ? '#e6f6ee' : isWrongPick ? '#fdecec' : '#fff' }}>
                   {isRight ? '✅ ' : isWrongPick ? '❌ ' : ''}{opt}
                 </button>
               )
             })}
+            {Array.from({ length: Math.max(0, 3 - it.o.length) }, (_, i) => <div key={i} className="quiz-option quiz-option-pad" aria-hidden />)}
           </div>
-          {picked != null && (
-            <div style={{ background: '#e9f5fb', borderRadius: 10, padding: '9px 13px', fontSize: 13, marginTop: 10, lineHeight: 1.45 }}>
-              💡 <Glossed text={t(it.why)} />
-            </div>
-          )}
-          <div style={{ textAlign: 'right', marginTop: 12 }}>
-            <button className="btn" disabled={picked == null} onClick={next}>
-              {idx + 1 >= items.length ? t('See my score →') : t('Next →')}
-            </button>
+          <div className={`quiz-why${picked == null ? '' : ' is-on'}`} style={{ visibility: picked == null ? 'hidden' : 'visible' }}>
+            {picked != null && <>💡 <Glossed text={t(it.why)} /></>}
           </div>
+        </div>
+        <div className="quiz-play-next">
+          <button className="btn" disabled={picked == null} onClick={next}>
+            {idx + 1 >= items.length ? t('See my score →') : t('Next →')}
+          </button>
+        </div>
         </div>
       )}
     </div>
@@ -375,7 +376,7 @@ export default function FluencyGame({ gameKey = 'stretch', onClose, onFinished }
   const skill = bank ? bank.skill : 'Sentence Fluency'
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
-      <div className="card" style={{ width: 560, maxWidth: '92vw', maxHeight: '92vh', overflowY: 'auto', padding: 26 }} onClick={(e) => e.stopPropagation()}>
+      <div className="card fluency-play" onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
           {/* The eyebrow and the title carry the heavy words — Fluency,
               Transitions, Conventions, Fragment — so they are tappable. */}
@@ -383,9 +384,11 @@ export default function FluencyGame({ gameKey = 'stretch', onClose, onFinished }
           <button onClick={onClose} style={{ background: 'none', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
         {bank && <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}><Directions text={bank.intro} /></p>}
+        <div className="fluency-play-main">
         {bank
           ? <QuizGame bank={bank} onClose={onClose} onFinished={onFinished} />
           : <StretchGame onClose={onClose} onFinished={onFinished} />}
+        </div>
       </div>
     </div>
   )

@@ -523,6 +523,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
   const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + (grid?.bonusPaid ? 50 : 0)
   const BASE = import.meta.env.BASE_URL || '/'
   const NAVY = '#0d2f55'
+  const [lockedNote, setLockedNote] = useState(null)
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose?.() }
@@ -575,6 +576,9 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
         )}
 
         {/* tiles */}
+        {lockedNote && (
+          <div className="zone-locked-note" role="status">{t('{name} is already cleared. Reset the board to play it again.', { name: lockedNote })}</div>
+        )}
         <div className="zone-grid">
           {tiles.map((tile) => {
             const soon = tile.options.length === 0
@@ -582,12 +586,21 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
             const miss = !done && tile.miss
             const justNow = lastReveal === tile.id
             const played = done ? byKey[tile.done.game] : null
+            const openable = !done && !soon && !busy
+            function activate() {
+              if (busy || soon) return
+              if (done) { setLockedNote(tile.title); return }
+              setLockedNote(null)
+              onPlay(tile)
+            }
             return (
-              <div key={tile.id} className={`zone-tile${!done && !soon ? ' playable' : ''}`} role={!done && !soon ? 'button' : undefined} tabIndex={!done && !soon ? 0 : -1}
-                onClick={() => !done && !soon && !busy && onPlay(tile)} onKeyDown={(e) => !done && !soon && !busy && (e.key === 'Enter' || e.key === ' ') && onPlay(tile)}
+              <div key={tile.id} className={`zone-tile${openable ? ' playable' : ''}`} role={!soon ? 'button' : undefined} tabIndex={!soon ? 0 : -1}
+                aria-disabled={done || undefined}
+                title={done ? t('{name} is already cleared. Reset the board to play it again.', { name: tile.title }) : undefined}
+                onClick={activate} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), activate())}
                 style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
                 background: done ? '#f4f6f8' : miss ? '#fff8f6' : '#fff', border: `1px solid ${done ? '#cbd8e2' : miss ? '#e08a2b' : 'var(--gold-line)'}`,
-                boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
+                boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: soon ? 'default' : 'pointer' }}>
                 {/* art panel cropped from her card render; the crops are ~2.2:1 so cover shows them whole */}
                 <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${tile.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}

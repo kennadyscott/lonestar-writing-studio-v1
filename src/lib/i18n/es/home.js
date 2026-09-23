@@ -106,6 +106,7 @@ export const home = {
   'Reset & play again': 'Reiniciar y jugar otra vez',
   'Under 70% · try again': 'Menos de 70% · inténtalo otra vez',
   'Try again': 'Inténtalo otra vez',
+  '{name} is already cleared. Reset the board to play it again.': '{name} ya está completada. Reinicia el tablero para jugarla otra vez.',
   'up to': 'hasta',
   'Surprise: {n} games in the mix': 'Sorpresa: {n} juegos en la mezcla',
   '20 coins for 90%+, 10 for 70%+. Every round pays': '20 monedas por 90%+, 10 por 70%+. Cada ronda paga',

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { api } from '../lib/api.js'
 import { useT } from '../lib/i18n/index.jsx'
+import { LanguageBridgePanel } from './LanguageBridge.jsx'
 
 /*
  * Quick Write — the live product's 3-part flow, refreshed in the studio brand:
@@ -28,8 +29,9 @@ function StopwatchArt({ size = 54 }) {
   return <span style={{ fontSize: size * 0.8, filter: 'drop-shadow(0 2px 3px rgba(2,56,77,.3))' }}>⏱️</span>
 }
 
-export default function QuickWritePage({ state, onBack, onChange }) {
+export default function QuickWritePage({ state, me, onBack, onChange }) {
   const t = useT()
+  const supportLevel = me?.supportLevel || null
   // teacher-configured goal time (from their system)
   const GOAL_SECONDS = state.settings?.quickWriteSeconds ?? 180
   const setBy = state.settings?.quickWriteSetBy
@@ -56,6 +58,23 @@ export default function QuickWritePage({ state, onBack, onChange }) {
   const timeUp = secondsLeft <= 0
 
   function cmd(c) { document.execCommand(c, false, null); editorRef.current?.focus() }
+
+  // Drop a starter into the rich-text editor wherever the caret sits.
+  function insertSupport(phrase) {
+    const el = editorRef.current
+    if (!el) return
+    el.focus()
+    const sel = window.getSelection()
+    if (!sel || !sel.rangeCount || !el.contains(sel.anchorNode)) {
+      const r = document.createRange()
+      r.selectNodeContents(el); r.collapse(false)
+      sel?.removeAllRanges(); sel?.addRange(r)
+    }
+    const existing = el.innerText || ''
+    const pad = existing && !/\s$/.test(existing) ? ' ' : ''
+    document.execCommand('insertText', false, pad + phrase + ' ')
+    setText(el.innerText || '')
+  }
 
   async function submit() {
     setBusy(true)
@@ -147,6 +166,12 @@ export default function QuickWritePage({ state, onBack, onChange }) {
                 </div>
               </div>
             </div>
+
+            {supportLevel && stage === 'writing' && (
+              <div style={{ marginTop: 16 }}>
+                <LanguageBridgePanel level={supportLevel} onInsert={insertSupport} race={false} compact />
+              </div>
+            )}
 
             {/* editor */}
             <div style={{ border: '1px solid var(--line)', borderRadius: 12, marginTop: 18, overflow: 'hidden' }}>

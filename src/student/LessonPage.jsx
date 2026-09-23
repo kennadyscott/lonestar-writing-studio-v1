@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import { useT } from '../lib/i18n/index.jsx'
+import { LanguageBridgePanel } from './LanguageBridge.jsx'
 
 /*
  * Lesson page — opened from a lesson card in Luna's Writing Nook.
@@ -167,9 +168,12 @@ function PracticeStep({ pick, setPick }) {
   )
 }
 
-function YourTurnStep({ answers, sentence, setSentence }) {
+function YourTurnStep({ answers, sentence, setSentence, supportLevel }) {
   const t = useT()
   const chips = STARBURST.prompts.map((p) => ({ label: p.label, v: (answers[p.key] || '').trim() })).filter((c) => c.v)
+  // Expanding one sentence is a sentence-level task, so the bridge offers
+  // sentence support only — no RACE organizer, there is no question to cite.
+  const insert = (phrase) => setSentence((v) => (v && !/\s$/.test(v) ? v + ' ' : v) + phrase + ' ')
   return (
     <>
       <div style={{ fontWeight: 800, fontSize: 16, color: NAVY, margin: '6px 0 8px' }}>{t('Now write the expanded sentence.')}</div>
@@ -178,6 +182,11 @@ function YourTurnStep({ answers, sentence, setSentence }) {
       {chips.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
           {chips.map((c) => <span key={c.label} style={{ background: '#fbf7ec', border: '1px solid #f0dfae', borderRadius: 999, padding: '4px 10px', fontSize: 12.5 }}><b style={{ color: '#b97e10' }}>{t(c.label)}</b> {c.v}</span>)}
+        </div>
+      )}
+      {supportLevel && (
+        <div style={{ marginBottom: 12 }}>
+          <LanguageBridgePanel level={supportLevel} onInsert={insert} race={false} compact />
         </div>
       )}
       <textarea value={sentence} onChange={(e) => setSentence(e.target.value)} rows={4} placeholder={t('Type your expanded sentence here…')}
@@ -231,7 +240,7 @@ function ReviewStep({ sentence, answers, pick }) {
   )
 }
 
-export default function LessonPage({ lesson, moduleLabel, onBack }) {
+export default function LessonPage({ lesson, moduleLabel, supportLevel = null, onBack }) {
   const t = useT()
   const [step, setStep] = useState(0)
   const [done, setDone] = useState(0) // furthest step reached
@@ -293,7 +302,7 @@ export default function LessonPage({ lesson, moduleLabel, onBack }) {
             {step === 0 && <WatchStep watched={watched} onWatched={() => setWatched(true)} />}
             {step === 1 && <LearnStep answers={answers} setAnswers={setAnswers} />}
             {step === 2 && <PracticeStep pick={pick} setPick={setPick} />}
-            {step === 3 && <YourTurnStep answers={answers} sentence={sentence} setSentence={setSentence} />}
+            {step === 3 && <YourTurnStep answers={answers} sentence={sentence} setSentence={setSentence} supportLevel={supportLevel} />}
             {step === 4 && <ReviewStep sentence={sentence} answers={answers} pick={pick} />}
           </div>
 

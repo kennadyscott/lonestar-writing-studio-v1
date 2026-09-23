@@ -10,28 +10,31 @@ const T = {
 
 export function seedState() {
   const assignments = [
-    { id: 'asg_recess', title: 'Should recess be longer?', genre: 'argument', type: 'Argument', format: 'ECR', questions: 1, gradeLevel: 6,
+    { id: 'asg_recess', languageObjective: 'Give an opinion and support it out loud and in writing using because, in my opinion, and one reason is.', title: 'Should recess be longer?', genre: 'argument', type: 'Argument', format: 'ECR', questions: 1, gradeLevel: 6,
       teacher: T.dirk, dateAssigned: '2026-06-26', dueDate: '2026-07-04', scopeStage: 'multi-paragraph',
       prompt: 'Some people think the school day should include more recess time. Write an argument telling your principal whether recess should be longer. Support your opinion with clear reasons.' },
-    { id: 'asg_fridge', title: 'How Refrigerators Changed Our Food', genre: 'argument', type: 'Argument', format: 'ECR', questions: 1, gradeLevel: 6,
+    { id: 'asg_fridge', languageObjective: 'Compare two ideas in writing using more important than, however, and this matters because.', title: 'How Refrigerators Changed Our Food', genre: 'argument', type: 'Argument', format: 'ECR', questions: 1, gradeLevel: 6,
       teacher: T.jeremy, dateAssigned: '2026-06-28', dueDate: '2026-07-03', scopeStage: 'multi-paragraph',
       prompt: 'Was the refrigerator one of the most important inventions ever? Write an argument that takes a side and backs it up with reasons.' },
-    { id: 'asg_robot', title: 'The Robot in the Garden', genre: 'narrative', type: 'Narrative', format: 'SCR', questions: 3, gradeLevel: 6,
+    { id: 'asg_robot', languageObjective: 'Tell events in order using first, next, then, and finally.', title: 'The Robot in the Garden', genre: 'narrative', type: 'Narrative', format: 'SCR', questions: 3, gradeLevel: 6,
       teacher: T.jeremy, dateAssigned: '2026-06-29', dueDate: '2026-07-09', scopeStage: 'paragraph',
       prompt: 'A robot wakes up in a garden for the first time. Write a story about what happens next.' },
-    { id: 'asg_desert', title: 'How People Live in the Desert', genre: 'informational', type: 'Informational', format: 'ECR', questions: 1, gradeLevel: 6,
+    { id: 'asg_desert', languageObjective: 'Explain a cause and its effect using so that, in order to, and as a result.', title: 'How People Live in the Desert', genre: 'informational', type: 'Informational', format: 'ECR', questions: 1, gradeLevel: 6,
       teacher: T.dirk, dateAssigned: '2026-06-30', dueDate: '2026-07-14', scopeStage: 'multi-paragraph',
       prompt: 'Explain how people adapt to live in a desert. Use clear reasons and details to inform your reader.' },
-    { id: 'asg_1776', title: 'The Brave Little Girl of 1776', genre: 'narrative', type: 'Narrative', format: 'SCR', questions: 2, gradeLevel: 6,
+    { id: 'asg_1776', languageObjective: 'Describe a character’s feelings using past-tense verbs and sensory words.', title: 'The Brave Little Girl of 1776', genre: 'narrative', type: 'Narrative', format: 'SCR', questions: 2, gradeLevel: 6,
       teacher: T.dak, dateAssigned: '2026-06-27', dueDate: '2026-07-06', scopeStage: 'paragraph',
       prompt: 'Imagine you lived during the American Revolution. Write a story about one brave day.' },
-    { id: 'asg_kindness', title: 'The Power of Kindness', genre: 'informational', type: 'Informational', format: 'SCR', questions: 1, gradeLevel: 6,
+    { id: 'asg_kindness', languageObjective: 'Give an example in writing using for example, such as, and this shows that.', title: 'The Power of Kindness', genre: 'informational', type: 'Informational', format: 'SCR', questions: 1, gradeLevel: 6,
       teacher: T.jeremy, dateAssigned: '2026-06-15', dueDate: '2026-06-25', scopeStage: 'paragraph',
       prompt: 'Explain why kindness matters in a classroom. Support your explanation with examples.' },
   ]
 
   const students = [
+    // lang + supportLevel are set by the TEACHER (LPAC/TELPAS designation), never
+    // chosen by the student. supportLevel null = not an emergent bilingual student.
     { id: 'stu_kscott', name: 'Kayla Scott', initials: 'KS', avatar: '🦊', coins: 1050, gradeLevel: 6,
+      lang: 'en', supportLevel: null,
       goal: { id: 'g_ideas', trait: 'ideas', text: 'Back up my opinion with strong, specific reasons', setOn: '2026-06-20' },
       goalHistory: [
         { trait: 'organization', text: 'Write a real conclusion instead of just stopping', achievedOn: '2026-05-28' },

@@ -1,23 +1,7 @@
 import React from 'react'
 import { BRAND } from '../lib/brand.js'
 import { useLang, useT, LANGS } from '../lib/i18n/index.jsx'
-
-/* Language switch — first control in the bar, so it is findable before anything
-   else on the page has been read. */
-export function LangToggle() {
-  const { lang, setLang, t } = useLang()
-  return (
-    <div className="lang-toggle" role="group" aria-label={t('Language')}>
-      <span className="lang-label">{t('Language')}</span>
-      {LANGS.map((l) => (
-        <button key={l.code} onClick={() => setLang(l.code)} aria-pressed={lang === l.code}
-          title={l.label} className={lang === l.code ? 'on' : ''}>
-          <span aria-hidden>{l.flag}</span> {l.short}
-        </button>
-      ))}
-    </div>
-  )
-}
+import { LEVELS } from '../lib/languageBridge.js'
 
 export function TopBar({ who, onArcade, onLogo }) {
   const t = useT()
@@ -26,8 +10,6 @@ export function TopBar({ who, onArcade, onLogo }) {
       <button className="logo-chip" onClick={onLogo} title={t('Home')}>
         <img src={BRAND.logo} alt="LoneStar CR" />
       </button>
-
-      <LangToggle />
 
       <div style={{ flex: 1 }} />
 
@@ -52,11 +34,52 @@ export function TopBar({ who, onArcade, onLogo }) {
   )
 }
 
-export function DemoTools({ onResetDemo, onPublisher }) {
-  const t = useT()
-  if (!onResetDemo && !onPublisher) return null
+export function DemoTools({ onResetDemo, onPublisher, settings, onSettings }) {
+  const { lang, setLang, t } = useLang()
+  if (!onResetDemo && !onPublisher && !onSettings) return null
+
+  // Everything here is a DEMO affordance. In the product, interface language and
+  // Language Bridge level are set by the teacher from the student's LPAC/TELPAS
+  // designation — a student never picks them.
+  const pick = (patch) => onSettings && onSettings(patch)
+
   return (
-    <div className="rolepick" style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+    <div className="rolepick" style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 210 }}>
+      {onSettings && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          <div style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .7, color: 'var(--muted)', textTransform: 'uppercase' }}>
+            Demo · teacher settings
+          </div>
+
+          <div>
+            <div className="demo-sub">Interface language</div>
+            <div className="lang-toggle">
+              {LANGS.map((l) => (
+                <button key={l.code} onClick={() => { setLang(l.code); pick({ lang: l.code }) }}
+                  aria-pressed={lang === l.code} title={l.label} className={lang === l.code ? 'on' : ''}>
+                  <span aria-hidden>{l.flag}</span> {l.short}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="demo-sub">Language Bridge</div>
+            <div className="level-pick">
+              <button onClick={() => pick({ supportLevel: null })}
+                className={!settings?.supportLevel ? 'on' : ''} title="Not an emergent bilingual student">Off</button>
+              {LEVELS.map((l) => (
+                <button key={l.id} onClick={() => pick({ supportLevel: l.id })}
+                  className={settings?.supportLevel === l.id ? 'on' : ''} title={`${l.label} — ${l.blurb}`}
+                  style={settings?.supportLevel === l.id ? { background: l.color, color: '#fff' } : undefined}>
+                  {l.label[0]}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {onPublisher && (
         <button onClick={onPublisher} style={{ display: 'block', width: '100%', padding: '6px 8px', borderRadius: 8, background: '#eef6f9', color: '#0f97c2', fontSize: 11.5, fontWeight: 800 }}>
           🛠 {t('Publisher console')}

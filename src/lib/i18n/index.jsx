@@ -39,6 +39,11 @@ export function LangProvider({ children }) {
 
 export function useLang() { return useContext(LangContext) }
 
+// Translate into a SPECIFIC language regardless of the current one. Used for
+// the bilingual feedback a Beginning student gets, where the English line and
+// the Spanish line both have to appear at once.
+export function tIn(lang, key, vars) { return translate(DICTS[lang] || null, key, vars) }
+
 // Convenience for components that only need the translator.
 export function useT() { return useContext(LangContext).t }
 

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
+import { LanguageBridgePanel } from './LanguageBridge.jsx'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
 import { useT } from '../lib/i18n/index.jsx'
@@ -35,6 +36,7 @@ function CoinToast({ data, onClose }) {
 const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
 
 export default function WritingStudio({ state, sub, health, onChange, onBack }) {
+  const supportLevel = state.students?.find((x) => x.id === sub.studentId)?.supportLevel || null
   const t = useT()
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
   const isFree = asg.genre === 'free'
@@ -53,6 +55,18 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   // keep selection on the working draft as new versions appear
   useEffect(() => { setSelectedId(currentDraft.id) }, [currentDraft.id])
   useEffect(() => { setContent(selected.content) }, [selected.id])
+
+  // Language Bridge inserts a frame/starter where the student is writing.
+  function insertSupport(text) {
+    const el = document.querySelector('#ws-editor')
+    const cur = content || ''
+    if (!el) { edit((cur ? cur.replace(/\s*$/, '') + ' ' : '') + text); return }
+    const a = el.selectionStart ?? cur.length, b = el.selectionEnd ?? cur.length
+    const pad = a > 0 && !/\s$/.test(cur.slice(0, a)) ? ' ' : ''
+    const next = cur.slice(0, a) + pad + text + cur.slice(b)
+    edit(next)
+    requestAnimationFrame(() => { el.focus(); const p = a + pad.length + text.length; el.setSelectionRange(p, p) })
+  }
 
   function edit(v) {
     setContent(v)
@@ -143,6 +157,15 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           <div style={{ flex: 1 }}>
             <div className="eyebrow">{asg.format ? `${asg.format} · ` : ''}{asg.type || asg.genre} · {t('Grade {n}', { n: asg.gradeLevel })}{asg.scopeStage ? ` · ${asg.scopeStage}` : ''}</div>
             <div style={{ fontSize: 14, marginTop: 2 }}>{asg.prompt}</div>
+            {/* The language objective is a publisher field that rides on the
+                assignment. It only shows for students the teacher has placed
+                on the Language Bridge — everyone else sees the prompt alone. */}
+            {supportLevel && asg.languageObjective && (
+              <div style={{ marginTop: 8, paddingTop: 8, borderTop: '1px dashed var(--line)' }}>
+                <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: 'var(--link)', textTransform: 'uppercase' }}>{t('Language objective')}</span>
+                <div style={{ fontSize: 13, color: '#33607f', marginTop: 1, lineHeight: 1.45 }}>{asg.languageObjective}</div>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -176,7 +199,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('{n} words', { n: wc })}</span>
           </div>
           {isCurrent && !published ? (
-            <textarea value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? t('Start writing here…\nAnything goes.') : t('Start writing your argument here…')}
+            <textarea id="ws-editor" value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? t('Start writing here…\nAnything goes.') : t('Start writing your argument here…')}
               style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           ) : (
             <div style={{ flex: 1, minHeight: 380, padding: 18, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#3a4149' }}>{selected.content}</div>
@@ -216,8 +239,13 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           )}
         </div>
 
-        {/* prompts for a free write, the trait rubric for an assignment */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 480 }}>
+        {/* Language Bridge (teacher-set) sits above whichever panel this is */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {/* RACE is a constructed-response organizer — a free write has no
+            question to restate, so it gets sentence support only. */}
+        {supportLevel && <LanguageBridgePanel level={supportLevel} onInsert={insertSupport}
+          race={!isFree} canStartFrames={!(content || '').trim()} />}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: supportLevel ? 320 : 480 }}>
           {isFree ? (
             <PromptsPanel streakDays={state.growthSummary?.streakDays ?? 0} />
           ) : (
@@ -231,6 +259,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
               </div>
             </>
           )}
+        </div>
         </div>
       </div>
 

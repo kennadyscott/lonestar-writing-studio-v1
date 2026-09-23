@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { api } from './lib/api.js'
 import { TopBar, DemoTools } from './components/Shell.jsx'
+import { useLang } from './lib/i18n/index.jsx'
 import { ShareWallTab } from './student/GrowthPage.jsx'
 import StudentHome from './student/StudentHome.jsx'
 import WritingStudio from './student/WritingStudio.jsx'
@@ -24,8 +25,18 @@ export default function App() {
   const [reviewSub, setReviewSub] = useState(null) // completed submission being reviewed
   const [publisher, setPublisher] = useState(false)
 
+  const { setLang } = useLang()
   const refresh = useCallback(async () => setState(await api.state()), [])
   useEffect(() => { refresh(); api.health().then(setHealth) }, [refresh])
+
+  // Interface language is a teacher setting that rides on the student record.
+  const meLang = state?.students?.find((s) => s.id === ME_STUDENT)?.lang
+  useEffect(() => { if (meLang) setLang(meLang) }, [meLang, setLang])
+
+  const saveSettings = useCallback(async (patch) => {
+    await api.studentSettings(patch)
+    await refresh()
+  }, [refresh])
 
   // Always refresh state before opening a submission — quick/free writes and
   // "Begin" create the submission server-side and it must be in state first.
@@ -60,9 +71,9 @@ export default function App() {
   } else if (view === 'luna') {
     body = <LunaPage state={state} me={me} onBack={goHome} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />
   } else if (view === 'lesson' && lesson) {
-    body = <LessonPage lesson={lesson.a} moduleLabel={lesson.moduleLabel} onBack={() => setView('luna')} />
+    body = <LessonPage lesson={lesson.a} moduleLabel={lesson.moduleLabel} supportLevel={me.supportLevel} onBack={() => setView('luna')} />
   } else if (view === 'quickwrite') {
-    body = <QuickWritePage state={state} onBack={goHome} onChange={refresh} />
+    body = <QuickWritePage state={state} me={me} onBack={goHome} onChange={refresh} />
   } else if (view === 'wall') {
     body = (
       <div>
@@ -84,7 +95,8 @@ export default function App() {
         onLogo={goHome}
       />
       <div className="content">{body}</div>
-      <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)} />
+      <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)}
+        settings={{ lang: me.lang, supportLevel: me.supportLevel }} onSettings={saveSettings} />
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
     </div>
   )

@@ -1,3 +1,5 @@
+import { gradingFor, SIMPLE_NOTES, NEXT_MOVES, NEXT_MOVES_SIMPLE } from './languageBridge.js'
+
 /*
  * Shared scoring for constructed responses. One heuristic judge so the feedback
  * screen and the data card can never disagree about a score.
@@ -26,7 +28,8 @@ const EXPLAIN_CUES = ['because', 'this shows', 'this means', 'which means', 'tha
 
 /* Judge one answer against the strategy anchors. Returns per-anchor hit + the
  * sentence the student reads, written the way the live product words it. */
-export function judge(answer, prompt, strategyKey) {
+export function judge(answer, prompt, strategyKey, level = null) {
+  const g = gradingFor(level)
   const text = (answer || '').trim()
   const lower = text.toLowerCase()
   const w = wordsOf(text)
@@ -35,8 +38,9 @@ export function judge(answer, prompt, strategyKey) {
   const shared = [...new Set(contentWords(first))].filter((x) => promptWords.has(x))
   const firstClause = text.split(/(?<=[.!?])\s/)[0] || text
 
-  const restated = shared.length >= 2
-  const answered = w.length >= 12
+  // Content tests never move. The language bar does — see languageBridge.js.
+  const restated = shared.length >= g.restateShared
+  const answered = w.length >= g.answerMinWords
   const cited = /"[^"]{4,}"/.test(text) || CITE_CUES.some((c) => lower.includes(c))
   const explained = EXPLAIN_CUES.some((c) => lower.includes(c))
 
@@ -64,31 +68,75 @@ export function judge(answer, prompt, strategyKey) {
   }
 
   const hits = { restate: restated, claim: answered, answer: answered, cite: cited, explain: explained }
-  const anchors = STRATEGIES[strategyKey].map((a) => ({ ...a, hit: !!hits[a.key], note: notes[a.key] }))
+  // A Beginning reader gets the note in words they can actually read. The
+  // judgement is identical — only the sentence they see is plainer.
+  const noteFor = (key) => (level === 'beginning' && SIMPLE_NOTES[key])
+    ? SIMPLE_NOTES[key][hits[key] ? 'hit' : 'miss']
+    : notes[key]
+  const anchors = STRATEGIES[strategyKey].map((a) => ({ ...a, hit: !!hits[a.key], note: noteFor(a.key) }))
   return anchors
 }
 
-/* One paragraph of coaching: name what landed, then the single next move. */
-export function feedbackParagraph(anchors) {
+/* The single highest-priority thing to fix, in RACE order. Returned as a key
+ * plus the English sentence, so a caller can translate it for the bilingual
+ * feedback a Beginning student gets. */
+export function nextMoveFor(anchors, level = null) {
+  const missed = anchors.filter((a) => !a.hit)
+  if (!missed.length) return null
+  const key = missed[0].key
+  const table = level === 'beginning' ? NEXT_MOVES_SIMPLE : NEXT_MOVES
+  return { key, label: missed[0].label, text: table[key] || NEXT_MOVES[key] }
+}
+
+/* One paragraph of coaching, returned as a translatable template plus its
+ * variables. The UI calls t(template, vars) so Spanish gets a real sentence
+ * instead of an English one with a translated fragment glued on. */
+export function feedbackParts(anchors, level = null) {
   const missed = anchors.filter((a) => !a.hit)
   const landed = anchors.filter((a) => a.hit)
-  if (!missed.length) return 'You hit every part of the strategy — your answer restates, answers, backs itself up with the text, and explains the connection. Keep writing like this.'
-  const nextMove = {
-    restate: 'Start by turning the question into your first sentence, then answer it.',
-    claim: 'Open with one sentence that says exactly what you think.',
-    answer: 'Say your idea in a full sentence so your reader knows where you stand.',
-    cite: 'Add a detail or a short quote from the text that proves your answer.',
-    explain: 'Add a sentence starting with "This shows…" or "because…" to connect your evidence to your answer.',
-  }[missed[0].key]
-  if (!landed.length) return `Let's build this answer one step at a time. ${nextMove}`
-  const names = landed.map((a) => a.label.toLowerCase()).slice(0, 2)
-  const list = names.length === 2 ? `${names[0]} and ${names[1]}` : names[0]
-  return `Your answer already handles ${list} — that part is working. ${nextMove}`
+  if (!missed.length) {
+    return {
+      template: level === 'beginning'
+        ? 'You did every part. Nice work. Keep writing like this.'
+        : 'You hit every part of the strategy — your answer restates, answers, backs itself up with the text, and explains the connection. Keep writing like this.',
+      vars: {},
+      move: null,
+    }
+  }
+  const move = nextMoveFor(anchors, level)
+  if (level === 'beginning') {
+    return landed.length
+      ? { template: 'Good start. Now do one thing: {move}', vars: { move: move.text }, move }
+      : { template: "Let's do one thing: {move}", vars: { move: move.text }, move }
+  }
+  if (!landed.length) {
+    return { template: "Let's build this answer one step at a time. {move}", vars: { move: move.text }, move }
+  }
+  // Labels travel untranslated; the UI runs each through t() before filling
+  // them in, so a Spanish reader gets Spanish anchor names.
+  const names = landed.map((a) => a.label).slice(0, 2)
+  return {
+    template: names.length === 2
+      ? 'Your answer already handles {a} and {b} — that part is working. {move}'
+      : 'Your answer already handles {a} — that part is working. {move}',
+    vars: { a: names[0], b: names[1] || '', move: move.text },
+    labelVars: ['a', 'b'],
+    moveVar: 'move',
+    move,
+  }
+}
+
+/* Plain-string form, for anything that is not rendering through t(). */
+export function feedbackParagraph(anchors, level = null) {
+  const { template, vars } = feedbackParts(anchors, level)
+  let out = template
+  for (const [k, v] of Object.entries(vars)) out = out.split(`{${k}}`).join(String(v))
+  return out
 }
 
 
 /* Split one submission into per-question answers, judge each, and total it up. */
-export function scoreSubmission(assignment, sub) {
+export function scoreSubmission(assignment, sub, level = null) {
   const draft = sub.drafts[sub.drafts.length - 1]
   const strategyKey = assignment?.strategy || (assignment?.subject === 'science' ? 'CER' : 'RACE')
   const count = Math.max(1, assignment?.questions || 1)
@@ -101,7 +149,7 @@ export function scoreSubmission(assignment, sub) {
 
   const questionText = (i) => (assignment?.questionPrompts?.[i]) || assignment?.prompt || ''
   const questions = chunks.map((answer, i) => {
-    const anchors = judge(answer, questionText(i), strategyKey)
+    const anchors = judge(answer, questionText(i), strategyKey, level)
     const hits = anchors.filter((x) => x.hit).length
     return { answer, prompt: questionText(i), anchors, hits, pct: Math.round((hits / anchors.length) * 100) }
   })

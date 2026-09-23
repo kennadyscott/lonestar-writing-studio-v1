@@ -272,6 +272,16 @@ export const localApi = {
     const stu = findStu(ME); if (stu) stu.coins += coins
     return { coins, passed: true, jobsLeft: 5 - paidToday - 1 }
   },
+  studentSettings: async (body) => {
+    const stu = findStu(ME)
+    if (!stu) return { error: 'no student' }
+    if (body.lang !== undefined) stu.lang = body.lang === 'es' ? 'es' : 'en'
+    if (body.supportLevel !== undefined) {
+      const ok = ['beginning', 'intermediate', 'advanced']
+      stu.supportLevel = ok.includes(body.supportLevel) ? body.supportLevel : null
+    }
+    return { lang: stu.lang, supportLevel: stu.supportLevel }
+  },
   fluencyFinish: async (body) => {
     const grid = state.fluencyGrid || (state.fluencyGrid = { round: 1, cleared: {}, bonusPaid: false })
     const cat = (state.fluencyCategories || []).find((c) => c.id === body.category)

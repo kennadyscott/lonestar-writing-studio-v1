@@ -45,6 +45,10 @@ function load() {
     for (const k of Object.keys(state.fluencyGrid?.cleared || {})) if (!ids.has(k)) delete state.fluencyGrid.cleared[k]
     filled = true
   }
+  for (const stu of state.students || []) {
+    if (stu.lang === undefined) { stu.lang = 'en'; filled = true }
+    if (stu.supportLevel === undefined) { stu.supportLevel = null; filled = true }
+  }
   if (filled) save() }
 }
 function save() { fs.writeFileSync(DATA_FILE, JSON.stringify(state, null, 2)) }
@@ -506,6 +510,21 @@ const server = http.createServer(async (req, res) => {
       return send(res, 200, { ok: true })
     }
 
+
+    // POST /api/student/settings { lang, supportLevel } -> teacher-set ELD settings.
+    // In the real product these come from LPAC/TELPAS, not from the student.
+    if (req.method === 'POST' && url.pathname === '/api/student/settings') {
+      const body = await readBody(req)
+      const stu = findStu(ME)
+      if (!stu) return send(res, 404, { error: 'no student' })
+      if (body.lang !== undefined) stu.lang = body.lang === 'es' ? 'es' : 'en'
+      if (body.supportLevel !== undefined) {
+        const ok = ['beginning', 'intermediate', 'advanced']
+        stu.supportLevel = ok.includes(body.supportLevel) ? body.supportLevel : null
+      }
+      save()
+      return send(res, 200, { lang: stu.lang, supportLevel: stu.supportLevel })
+    }
 
     // POST /api/fluency/finish { category, game, score, total, paid } -> tile cleared, coins revealed.
     if (req.method === 'POST' && url.pathname === '/api/fluency/finish') {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
-import { STRATEGIES, judge, feedbackParagraph, scoreSubmission } from '../lib/writingScore.js'
-import { useT } from '../lib/i18n/index.jsx'
+import { STRATEGIES, judge, feedbackParts, nextMoveFor, scoreSubmission } from '../lib/writingScore.js'
+import { useT, useLang, tIn } from '../lib/i18n/index.jsx'
+import { isBilingualFeedback, isOneThingAtATime, levelOf } from '../lib/languageBridge.js'
 
 /*
  * FeedbackReview — what a student sees when they review a COMPLETED assignment.
@@ -58,9 +59,15 @@ function Reveal({ icon = '👁', label, children }) {
 
 export default function FeedbackReview({ state, sub, onBack }) {
   const t = useT()
+  const { lang } = useLang()
   const [q, setQ] = useState(0)
   const a = state.assignments.find((x) => x.id === sub.assignmentId)
-  const score = scoreSubmission(a, sub)
+  // The teacher's Language Bridge level changes how this screen grades and how
+  // much of it a student is shown at once. No level = the screen as it was.
+  const supportLevel = state.students?.find((x) => x.id === sub.studentId)?.supportLevel || null
+  const lv = levelOf(supportLevel)
+  const attempt = Math.max(1, sub.drafts?.length || 1)
+  const score = scoreSubmission(a, sub, supportLevel)
   const count = score.questions.length
   const current = score.questions[Math.min(q, count - 1)]
   const anchors = current.anchors
@@ -72,6 +79,29 @@ export default function FeedbackReview({ state, sub, onBack }) {
   const strategyName = score.strategyName
   const strategyKey = score.strategyKey
   const questionText = (i) => score.questions[i]?.prompt || ''
+
+  // Attempt 1 with a support level: show what landed, then ONE thing to fix.
+  const oneThing = isOneThingAtATime(supportLevel, attempt)
+  const firstMissed = anchors.find((an) => !an.hit)
+  const shownAnchors = oneThing
+    ? anchors.filter((an) => an.hit || an === firstMissed)
+    : anchors
+  const heldBack = anchors.length - shownAnchors.length
+
+  // Beginning gets the next move in both languages, per the spec.
+  const move = nextMoveFor(anchors, supportLevel)
+  const bilingual = isBilingualFeedback(supportLevel) && move
+  const other = lang === 'es' ? 'en' : 'es'
+
+  // Build the coaching sentence in the reader's language: translate the
+  // template, the anchor names inside it, and the next move separately.
+  const parts = feedbackParts(anchors, supportLevel)
+  const coachVars = Object.fromEntries(Object.entries(parts.vars).map(([k, v]) => {
+    if (!v) return [k, v]
+    if (k === 'move') return [k, t(v)]
+    return [k, t(v).toLocaleLowerCase(lang === 'es' ? 'es-MX' : 'en-US')]
+  }))
+  const coaching = t(parts.template, coachVars)
 
   const rubricRows = strategyKey === 'CER'
     ? [t('Makes a claim that answers the question'), t('Uses evidence from the text'), t('Explains the reasoning that connects them')]
@@ -107,8 +137,23 @@ export default function FeedbackReview({ state, sub, onBack }) {
           <div style={{ position: 'relative', border: '2px solid #2f7fd0', background: '#eaf3fb', borderRadius: 12, padding: '16px 20px', margin: '14px 0 16px' }}>
             <span style={{ position: 'absolute', top: -19, left: 10, fontSize: 28, lineHeight: 1 }}>💡</span>
             <div style={{ textAlign: 'center', fontSize: 17, fontWeight: 800, color: NAVY, letterSpacing: .6, marginBottom: 6 }}>{t('OUR FEEDBACK TO YOU')}</div>
-            <div style={{ textAlign: 'center', fontSize: 14.5, lineHeight: 1.6, color: '#1f4a68' }}>{feedbackParagraph(anchors)}</div>
+            <div style={{ textAlign: 'center', fontSize: 14.5, lineHeight: 1.6, color: '#1f4a68' }}>{coaching}</div>
+            {bilingual && (
+              <div style={{ textAlign: 'center', fontSize: 13.5, lineHeight: 1.55, color: '#33607f', marginTop: 8, paddingTop: 8, borderTop: '1px dashed #b7d3ec' }}>
+                <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .6, color: '#6b8ca6', display: 'block', marginBottom: 2 }}>
+                  {tIn(other, 'Your next step')}
+                </span>
+                {tIn(other, move.text)}
+              </div>
+            )}
           </div>
+          {lv && (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: `${lv.color}14`, border: `1px solid ${lv.color}44`, borderRadius: 999, padding: '5px 13px', fontSize: 11.5, fontWeight: 800, color: '#0d2f55' }}>
+                🌉 {t('Graded for {level} English — the content bar is the same for everyone.', { level: t(lv.label).toLowerCase() })}
+              </span>
+            </div>
+          )}
 
           {/* what they wrote, on demand */}
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: 18 }}>
@@ -126,12 +171,12 @@ export default function FeedbackReview({ state, sub, onBack }) {
           {/* the strategy anchors */}
           <div style={{ textAlign: 'center', fontSize: 14, fontWeight: 800, letterSpacing: 1.4, color: NAVY, marginBottom: 10 }}>{t('WRITING STRATEGY')}</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {anchors.map((an) => (
+            {shownAnchors.map((an) => (
               <div key={an.key} style={{ display: 'flex', alignItems: 'center', gap: 14, background: '#f4f9fc', border: '1.5px solid #dbe8f1', borderRadius: 12, padding: '12px 16px' }}>
                 <span style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 17, fontWeight: 800, color: an.color, background: an.bg }}>{an.letter}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: .8, textTransform: 'uppercase', color: an.color }}>{t(an.label)}</div>
-                  <div style={{ fontSize: 13.5, color: '#33566e', marginTop: 2, lineHeight: 1.45 }}>{an.note}</div>
+                  <div style={{ fontSize: 13.5, color: '#33566e', marginTop: 2, lineHeight: 1.45 }}>{t(an.note)}</div>
                 </div>
                 <span style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 800, color: '#fff', background: an.hit ? 'var(--good)' : '#c0392b' }}>
                   {an.hit ? '✓' : '✕'}
@@ -139,6 +184,12 @@ export default function FeedbackReview({ state, sub, onBack }) {
               </div>
             ))}
           </div>
+
+          {heldBack > 0 && (
+            <div style={{ marginTop: 10, textAlign: 'center', fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>
+              {t('One step at a time. Fix this, then we will look at the rest.')}
+            </div>
+          )}
 
           <div style={{ background: '#f4f8fb', borderRadius: 10, padding: '11px 16px', margin: '16px 0 0', textAlign: 'center', fontSize: 13, color: 'var(--muted)', fontWeight: 700 }}>
             {hitCount === anchors.length

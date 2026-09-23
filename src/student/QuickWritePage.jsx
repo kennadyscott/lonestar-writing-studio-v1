@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import { api } from '../lib/api.js'
 import { useT } from '../lib/i18n/index.jsx'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
+import { ReadAloudText } from './ReadAloud.jsx'
 
 /*
  * Quick Write — the live product's 3-part flow, refreshed in the studio brand:
@@ -157,7 +158,8 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                 <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{t('Title')}</div>
                 <div style={{ fontSize: 19, fontWeight: 800, margin: '1px 0 12px' }}>{pick.title}</div>
                 <div style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{t('Writing Prompt')}</div>
-                <div style={{ fontSize: 15, lineHeight: 1.5 }}>{pick.prompt}</div>
+                <ReadAloudText text={pick.prompt} lang="en" level={supportLevel}
+                  style={{ fontSize: 15, lineHeight: 1.5 }} />
               </div>
               <div style={{ textAlign: 'right' }}>
                 <Digits seconds={secondsLeft} />

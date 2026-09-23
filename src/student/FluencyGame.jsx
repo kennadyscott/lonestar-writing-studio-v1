@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useT } from '../lib/i18n/index.jsx'
 import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
 
@@ -181,16 +181,52 @@ const INSTRUCTION_PROMPTS = new Set([
 
 const shuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
 const ROUND_SIZE = 8
+// Same gate the board uses: 90%+ pays 20, 70–89% pays 10, under 70% pays nothing.
+function coinsFor(score, total) {
+  if (!total) return 0
+  const pct = Math.round((score / total) * 100)
+  return pct >= 90 ? 20 : pct >= 70 ? 10 : 0
+}
+
+function CoinAward({ coins }) {
+  const t = useT()
+  const [shown, setShown] = useState(0)
+  useEffect(() => {
+    if (!coins) return undefined
+    let n = 0
+    const id = setInterval(() => {
+      n += 1
+      setShown(n)
+      if (n >= coins) clearInterval(id)
+    }, coins > 10 ? 35 : 50)
+    return () => clearInterval(id)
+  }, [coins])
+  if (!coins) return null
+  return (
+    <div className="coin-award" role="status" aria-label={t('+{n} coins', { n: coins })}>
+      <span className="coin-award-disc" aria-hidden />
+      <div className="coin-award-num" aria-hidden>+{shown}</div>
+    </div>
+  )
+}
+
+function RoundActions({ onAgain, onClose, againFirst }) {
+  const t = useT()
+  const again = <button key="again" className={againFirst ? 'btn' : 'btn ghost'} style={{ width: '100%', justifyContent: 'center' }} onClick={onAgain}>{t('Play again')}</button>
+  const back = <button key="back" className={againFirst ? 'btn ghost' : 'btn'} style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>{t('Back to the board')}</button>
+  return <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>{againFirst ? <>{again}{back}</> : <>{back}{again}</>}</div>
+}
 
 function QuizGame({ bank, onClose, onFinished }) {
   const t = useT()
-  const [items] = useState(() => shuffle(bank.items).slice(0, ROUND_SIZE))
+  const [items, setItems] = useState(() => shuffle(bank.items).slice(0, ROUND_SIZE))
   const [idx, setIdx] = useState(0)
   const [picked, setPicked] = useState(null) // option index after answering
   const [score, setScore] = useState(0)
   const [streak, setStreak] = useState(0)
   const [best, setBest] = useState(0)
   const finished = idx >= items.length
+  const earned = coinsFor(score, items.length)
   const it = items[idx]
   // The question text, at the level the student reads. A pure instruction
   // prompt is translated; a sentence under study stays in English, so it is
@@ -209,6 +245,14 @@ function QuizGame({ bank, onClose, onFinished }) {
     if (idx + 1 >= items.length) { setIdx(items.length); onFinished && onFinished({ score, total: items.length }) }
     else setIdx(idx + 1)
   }
+  function playAgain() {
+    setItems(shuffle(bank.items).slice(0, ROUND_SIZE))
+    setIdx(0)
+    setPicked(null)
+    setScore(0)
+    setStreak(0)
+    setBest(0)
+  }
 
   return (
     <div>
@@ -216,10 +260,11 @@ function QuizGame({ bank, onClose, onFinished }) {
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 46 }}>{score >= items.length - 1 ? '🏆' : score >= items.length / 2 ? '🌟' : '💪'}</div>
           <h3 style={{ margin: '6px 0 4px', fontSize: 22 }}>{t('{score} of {total} correct!', { score, total: items.length })}</h3>
+          <CoinAward coins={earned} />
           <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 16px' }}>
             {best >= 4 ? t('Best streak: {n} in a row 🔥', { n: best }) : score >= items.length / 2 ? t('Solid round — play again to beat it!') : t('Every round makes the next one easier.')}
           </p>
-          <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>{t('Done — back to the dashboard')}</button>
+          <RoundActions onAgain={playAgain} onClose={onClose} againFirst={earned === 0} />
         </div>
       ) : (
         <div>
@@ -279,18 +324,24 @@ function StretchGame({ onClose, onFinished }) {
     if (round + 1 < STRETCH_ROUNDS.length) setRound(round + 1)
     else { setRound(-1); onFinished && onFinished({ score: null, total: null }) }
   }
+  function playAgain() {
+    setRound(0)
+    setText('')
+    setDone([])
+  }
 
   if (round === -1) return (
-    <div>
+    <div style={{ textAlign: 'center' }}>
       <p style={{ fontSize: 15 }}><Glossed text={say('You stretched {n} sentences — nice fluency workout! 💪', { n: done.length })} /></p>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '12px 0' }}>
+      <CoinAward coins={10} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '12px 0', textAlign: 'left' }}>
         {done.map((d, i) => (
           <div key={i} style={{ background: '#f6f8f9', borderRadius: 10, padding: '8px 12px', fontSize: 14 }}>
             <span style={{ color: 'var(--muted)' }}>{d.base}</span> → <b>{d.stretched || t('(skipped)')}</b>
           </div>
         ))}
       </div>
-      <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>{t('Done — back to the dashboard')}</button>
+      <RoundActions onAgain={playAgain} onClose={onClose} againFirst={false} />
     </div>
   )
   return (

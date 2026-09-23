@@ -230,6 +230,12 @@ a { color: var(--link); }
   .zone-grid { grid-template-columns: 1fr; padding: 12px 12px 4px; }
 }
 
+/* Fluency Zone results: the coin award is the moment, not a silent header tick. */
+@keyframes coinPop { 0% { transform: scale(.35) rotate(-18deg); opacity: 0; } 55% { transform: scale(1.18) rotate(6deg); opacity: 1; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+.coin-award { display: flex; flex-direction: column; align-items: center; gap: 2px; margin: 6px 0 4px; }
+.coin-award-disc { width: 54px; height: 54px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe08a, #f5b400 55%, #c98f00); border: 3px solid #a37400; box-shadow: 0 8px 16px rgba(163,116,0,.35); animation: coinPop .6s ease-out both; }
+.coin-award-num { font-size: 34px; font-weight: 800; color: #a37400; letter-spacing: -.03em; line-height: 1.1; }
+
 /* Fluency Zone tiles: the whole card is the button */
 .zone-tile { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .zone-tile.playable:hover, .zone-tile.playable:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(2,56,77,.18), 0 0 0 2px var(--gold); outline: none; }

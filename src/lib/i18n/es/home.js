@@ -93,7 +93,6 @@ export const home = {
   '{n}w ago': 'hace {n} sem',
 
   // ---- Fluency Zone modal ----
-  // two-tone wordmark: white word then gold word -> "ZONA DE FLUIDEZ"
   'FLUENCY': 'ZONA',
   'ZONE': 'DE FLUIDEZ',
   'Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again.': 'Toca una tarjeta y nosotros elegimos el juego. Saca 90% y ganas 20 monedas, 70% y ganas 10. Menos de 70% y juegas esa tarjeta otra vez.',

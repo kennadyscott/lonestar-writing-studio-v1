@@ -525,36 +525,37 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
   const allClear = inPlay.length > 0 && doneCount === inPlay.length
   const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + (grid?.bonusPaid ? 50 : 0)
   const BASE = import.meta.env.BASE_URL || '/'
-  const arcadeFont = { fontFamily: '"Lilita One", "Baloo 2", Manrope, sans-serif' }
   const NAVY = '#0d2f55'
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} style={{ width: 860, maxWidth: '96vw', borderRadius: 20, overflow: 'hidden', color: 'var(--ink)', background: 'rgba(255,255,255,.97)', border: '1px solid var(--gold-line)', boxShadow: '0 24px 60px rgba(2,20,50,.35)' }}>
 
-        {/* header: the same dark strip as Luna's Writing Nook on the home page, her backdrop faint behind it */}
-        <div style={{ position: 'relative', padding: '12px 22px 12px', color: '#fff', backgroundImage: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 50%, rgba(13,36,64,.7) 100%), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 30%', borderBottom: '1px solid var(--gold-line)' }}>
-          <button onClick={onClose} aria-label={t('Close')} style={{ position: 'absolute', top: 12, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 17, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <div style={{ flexShrink: 0, marginRight: 'auto' }}>
-              <div style={{ ...arcadeFont, fontSize: 'clamp(24px, 2.6vw, 32px)', lineHeight: 1, letterSpacing: '.02em' }}>
-                <span style={{ color: '#fff' }}>{t('FLUENCY')}</span> <span style={{ color: '#f5b400' }}>{t('ZONE')}</span>
-              </div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>
-                <Directions inline text="Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again." /> {t('Grade {n}', { n: grade })}.
-              </div>
+        {/* header: same type and chips as the rest of the studio, not the arcade wordmark */}
+        <div style={{ padding: '16px 22px 14px', borderBottom: '1px solid var(--line)' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="eyebrow">{t('The Writing Studio')} · {t('Grade {n}', { n: grade })}</div>
+              <h2 className="page" style={{ margin: '2px 0 4px', fontSize: 26 }}>{t('Fluency Zone')} <span style={{ color: 'var(--gold)' }}>✦</span></h2>
+              <p className="page-sub" style={{ margin: 0, fontSize: 13.5 }}>
+                <Directions inline text="Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again." />
+              </p>
             </div>
-            <div style={{ flexShrink: 0, marginRight: 40, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 16px 6px 12px', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
-              <Coin size={18} />{earned}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+              <div style={{ background: '#fff', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 14px 6px 10px', display: 'flex', alignItems: 'center', gap: 7, fontWeight: 800, fontSize: 16, color: NAVY }}>
+                <Coin size={16} />{earned}
+              </div>
+              <button onClick={onClose} aria-label={t('Close')} style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--line)', color: 'var(--muted)', fontSize: 18, fontWeight: 700, display: 'grid', placeItems: 'center', background: '#fff' }}>×</button>
             </div>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', order: 3, marginLeft: 'auto' }}>
-              <span style={{ letterSpacing: .6 }}>{t('ROUND')} {grid?.round || 1}</span>
+          </div>
+          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', background: '#f7fafc', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '8px 14px' }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em', color: 'var(--teal)' }}>{t('ROUND')} {grid?.round || 1}</span>
               <span style={{ display: 'inline-flex', gap: 5 }} aria-label={t('{done} of {total} cleared', { done: doneCount, total: inPlay.length })}>
-                {inPlay.map((tile) => <span key={tile.id} style={{ width: 9, height: 9, borderRadius: '50%', background: tile.done ? '#f5b400' : 'rgba(255,255,255,.28)', boxShadow: tile.done ? '0 0 6px #f5b400' : 'none' }} />)}
+                {inPlay.map((tile) => <span key={tile.id} style={{ width: 8, height: 8, borderRadius: '50%', background: tile.done ? 'var(--gold)' : '#d5e0e8' }} />)}
               </span>
-              <span style={{ color: 'rgba(255,255,255,.35)' }}>|</span>
-              <span>🏆 {t('Clear the board for')} <span style={{ color: '#f5b400' }}>{t('+50 bonus coins')}</span></span>
-            </div>
+            </span>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink)' }}>🏆 {t('Clear the board for')} <span style={{ color: '#a37400' }}>{t('+50 bonus coins')}</span></span>
           </div>
         </div>
 

@@ -99,7 +99,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   const wc = (content || '').split(/\s+/).filter(Boolean).length
 
   return (
-    <div style={isFree ? { margin: '-26px calc(50% - 50vw) -70px', padding: '26px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box',
+    <div style={isFree ? { margin: '-26px calc(50% - 50vw) -70px', padding: '18px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box',
       backgroundImage: `linear-gradient(rgba(233,240,249,.5), rgba(233,240,249,.5)), url(${FW}sky.webp)`, backgroundSize: 'cover', backgroundPosition: 'center top', backgroundAttachment: 'fixed' } : undefined}>
       <div style={isFree ? { maxWidth: 1180, margin: '0 auto' } : undefined}>
       <CoinToast data={toast} onClose={() => setToast(null)} />
@@ -131,9 +131,10 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
       {onBack && <button className="backlink" onClick={onBack}>{t('← Back to My Writing')}</button>}
 
       {isFree ? (
-        /* Free Write hero */
-        <div style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', marginBottom: 12, boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>
-          <img src={`${FW}hero.webp`} alt="Free Write — your page, your rules." style={{ display: 'block', width: '100%', height: 'clamp(72px, 8vw, 104px)', objectFit: 'cover', objectPosition: 'center' }} />
+        /* Free Write: a plain title, so the page gets straight to the writing */
+        <div style={{ marginBottom: 10 }}>
+          <div className="eyebrow">{t('The Writing Studio')}</div>
+          <h1 className="page" style={{ margin: '2px 0 0' }}>{t('Free Write')}</h1>
         </div>
       ) : (
         /* prompt banner */

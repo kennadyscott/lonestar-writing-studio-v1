@@ -47,12 +47,14 @@ export default function App() {
   let body
   const sub = openSub ? state.submissions.find((s) => s.id === openSub) : null
   const reviewing = reviewSub ? state.submissions.find((s) => s.id === reviewSub) : null
+  // A piece opened from the Writing Bank keeps view === 'bank', so Back returns there.
+  const backFromStudio = view === 'bank' ? () => setOpenSub(null) : goHome
   if (view === 'home' && reviewing) {
     body = <FeedbackReview state={state} sub={reviewing} onBack={goHome} />
-  } else if (view === 'home' && sub) {
+  } else if ((view === 'home' || view === 'bank') && sub) {
     body = sub.isPeerRevision
-      ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
-      : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={goHome} />
+      ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
+      : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
   } else if (view === 'home') {
     body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
   } else if (view === 'luna') {

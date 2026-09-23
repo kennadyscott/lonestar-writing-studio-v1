@@ -6,6 +6,22 @@ import { api } from '../lib/api.js'
  * place: revise, publish, share to the Writing Wall, or discard.
  */
 
+const BK = (import.meta.env.BASE_URL || '/') + 'bank/'
+const THUMBS = ['feather', 'book', 'door', 'sunset']
+// Stable per piece: same id always draws the same picture.
+const thumbFor = (id) => THUMBS[[...String(id)].reduce((a, c) => a + c.charCodeAt(0), 0) % THUMBS.length]
+
+const TYPES = [
+  ['all', 'All types'],
+  ['free', 'Free Write'],
+  ['quick', 'Quick Write'],
+]
+const SORTS = [
+  ['newest', 'Sort: Newest'],
+  ['oldest', 'Sort: Oldest'],
+  ['longest', 'Sort: Longest'],
+]
+
 const FILTERS = [
   ['all', 'All'],
   ['progress', 'In progress'],
@@ -20,6 +36,9 @@ function statusOf(sub) {
 
 export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onChange }) {
   const [filter, setFilter] = useState('all')
+  const [q, setQ] = useState('')
+  const [type, setType] = useState('all')
+  const [sort, setSort] = useState('newest')
   const [confirmId, setConfirmId] = useState(null)
   const [confirmAction, setConfirmAction] = useState(null) // { kind: 'publish'|'share', sub, a }
   const [busy, setBusy] = useState(false)
@@ -33,28 +52,88 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
     .map(({ sub, a }) => {
       const last = sub.drafts[sub.drafts.length - 1]
       const words = (last.content || '').trim().split(/\s+/).filter(Boolean)
-      return { sub, a, st: statusOf(sub), wcount: words.length, excerpt: words.slice(0, 14).join(' '), shared: sharedIds.has(sub.id) }
+      return { sub, a, st: statusOf(sub), wcount: words.length, excerpt: words.slice(0, 14).join(' '), shared: sharedIds.has(sub.id), at: last.createdAt || '' }
     })
-    .sort((x, y) => (y.sub.drafts[y.sub.drafts.length - 1].createdAt > x.sub.drafts[x.sub.drafts.length - 1].createdAt ? 1 : -1))
 
-  const visible = pieces.filter((p) =>
-    filter === 'all' ? true : filter === 'published' ? p.sub.published : (!p.sub.published && !p.sub.completedAt))
+  const visible = pieces
+    .filter((p) => (filter === 'all' ? true : filter === 'published' ? p.sub.published : (!p.sub.published && !p.sub.completedAt)))
+    .filter((p) => (type === 'all' ? true : p.a.genre === type))
+    .filter((p) => {
+      const needle = q.trim().toLowerCase()
+      if (!needle) return true
+      return (p.a.title || '').toLowerCase().includes(needle) || (p.excerpt || '').toLowerCase().includes(needle)
+    })
+    .sort((x, y) => (sort === 'longest' ? y.wcount - x.wcount : sort === 'oldest' ? (x.at > y.at ? 1 : -1) : (y.at > x.at ? 1 : -1)))
+
+  const total = pieces.length
+  const publishedCount = pieces.filter((p) => p.sub.published).length
+  const progressCount = total - publishedCount
+  const relTime = (iso) => {
+    if (!iso) return 'today'
+    const days = Math.floor((Date.now() - new Date(iso)) / 86400000)
+    if (days <= 0) return 'today'
+    if (days === 1) return 'yesterday'
+    if (days < 30) return `${days} days ago`
+    return new Date(iso).toLocaleDateString(undefined, { month: 'short', d: 'numeric', year: 'numeric' }).replace(',', '')
+  }
 
   async function act(fn) { setBusy(true); try { await fn(); onChange && onChange() } finally { setBusy(false) } }
 
+  // Start a New Piece: make a fresh free write and open it.
+  async function startNew() {
+    setBusy(true)
+    try {
+      const r = await api.quickWrite('free')
+      await onChange?.()              // the new piece must be in state before the studio opens
+      onOpen && onOpen(r.submissionId)
+    } finally { setBusy(false) }
+  }
+
   return (
-    <div>
+    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '22px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box',
+      backgroundImage: `linear-gradient(rgba(240,246,252,.55), rgba(240,246,252,.75)), url(${BK}sky.webp)`, backgroundSize: 'cover', backgroundPosition: 'center top', backgroundAttachment: 'fixed' }}>
+      <div style={{ maxWidth: 1120, margin: '0 auto' }}>
       {onBack && <button className="backlink" onClick={onBack}>← Back to Dashboard</button>}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
-        <div>
-          <div className="eyebrow">The Writing Studio</div>
-          <h1 className="page" style={{ margin: '2px 0' }}>🗂️ My Writing Bank</h1>
-          <p className="page-sub" style={{ margin: 0 }}>
-            Every piece you've started — revise it, publish it, share it, or clear it out.
-            {onWall && <> · <button onClick={onWall} style={{ color: 'var(--link)', fontWeight: 800, fontSize: 14 }}>🌟 Visit the Writing Wall →</button></>}
-          </p>
+      {/* title */}
+      <div style={{ marginBottom: 16 }}>
+        <div className="eyebrow">The Writing Studio</div>
+        <h1 className="page" style={{ margin: '2px 0' }}>🗂️ My Writing Bank</h1>
+        <p className="page-sub" style={{ margin: 0 }}>
+          Every piece you've started — revise it, publish it, share it, or clear it out.
+          {onWall && <> · <button onClick={onWall} style={{ color: 'var(--link)', fontWeight: 800, fontSize: 14 }}>🌟 Visit the Writing Wall →</button></>}
+        </p>
+      </div>
+
+      {/* stats + new piece */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) auto', gap: 14, marginBottom: 14, alignItems: 'stretch' }}>
+        <div className="card" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', padding: '14px 4px' }}>
+          {[
+            { icon: '📄', bg: '#e5f1fb', n: total, label: 'pieces', sub: 'Total writing pieces' },
+            { icon: '✅', bg: '#e6f6ee', n: publishedCount, label: 'published', sub: 'Shared with the world' },
+            { icon: '✏️', bg: '#fdf3df', n: progressCount, label: 'in progress', sub: 'Keep going — great ideas ahead!' },
+          ].map((x, i) => (
+            <div key={x.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 16px', borderLeft: i ? '1px solid var(--line)' : 'none' }}>
+              <span style={{ width: 40, height: 40, borderRadius: 11, background: x.bg, display: 'grid', placeItems: 'center', fontSize: 19, flexShrink: 0 }}>{x.icon}</span>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                  <b style={{ fontSize: 22, color: '#0d2f55' }}>{x.n}</b>
+                  <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}>{x.label}</span>
+                </div>
+                <div style={{ fontSize: 11.5, color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{x.sub}</div>
+              </div>
+            </div>
+          ))}
         </div>
+        <button className="btn" onClick={startNew} disabled={busy}
+          style={{ padding: '0 26px', fontSize: 15.5, borderRadius: 14, background: 'linear-gradient(140deg,#0d2f55,#02384d)', minWidth: 230, justifyContent: 'center', gap: 10 }}>
+          <span style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 15 }}>+</span>
+          Start a New Piece <span style={{ opacity: .7 }}>›</span>
+        </button>
+      </div>
+
+      {/* filters + search + type + sort */}
+      <div className="card" style={{ padding: '10px 14px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'inline-flex', background: '#dcebf3', borderRadius: 11, padding: 3 }}>
           {FILTERS.map(([k, label]) => (
             <button key={k} onClick={() => setFilter(k)}
@@ -64,6 +143,17 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
             </button>
           ))}
         </div>
+        <label style={{ flex: 1, minWidth: 200, display: 'flex', alignItems: 'center', gap: 8, background: '#fff', border: '1px solid var(--line)', borderRadius: 10, padding: '8px 12px' }}>
+          <span style={{ fontSize: 14, color: 'var(--muted)' }}>🔍</span>
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search your writing pieces…"
+            style={{ flex: 1, border: 'none', outline: 'none', font: 'inherit', fontSize: 13.5, color: 'var(--ink)', background: 'transparent' }} />
+        </label>
+        {[[type, setType, TYPES], [sort, setSort, SORTS]].map(([val, set, opts], i) => (
+          <select key={i} value={val} onChange={(e) => set(e.target.value)}
+            style={{ border: '1px solid var(--line)', borderRadius: 10, padding: '9px 12px', font: 'inherit', fontSize: 13, fontWeight: 700, color: 'var(--ink)', background: '#fff' }}>
+            {opts.map(([k, label]) => <option key={k} value={k}>{label}</option>)}
+          </select>
+        ))}
       </div>
 
       {visible.length === 0 && (
@@ -74,11 +164,10 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {visible.map(({ sub, a, st, wcount, excerpt, shared }) => (
+        {visible.map(({ sub, a, st, wcount, excerpt, shared, at }) => (
           <div key={sub.id} className="card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
-            <span style={{ width: 44, height: 44, borderRadius: 12, background: a.genre === 'free' ? '#e8f5fb' : '#fdf3df', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>
-              {a.genre === 'free' ? '🕊️' : '⚡'}
-            </span>
+            <span aria-hidden style={{ width: 104, height: 70, borderRadius: 12, flexShrink: 0, overflow: 'hidden', border: '1px solid var(--gold-line)',
+              backgroundImage: `url(${BK}${thumbFor(sub.id)}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
             <div style={{ flex: 1, minWidth: 220 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                 <b style={{ fontSize: 15.5 }}>{a.title}</b>
@@ -89,7 +178,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                 {excerpt || 'Nothing written yet'}{excerpt ? '…' : ''}
               </div>
               <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3, fontWeight: 600 }}>
-                {wcount} words · {sub.drafts.length} draft{sub.drafts.length > 1 ? 's' : ''} · {a.type}
+                📄 {wcount} words · 📚 {sub.drafts.length} draft{sub.drafts.length > 1 ? 's' : ''} · 🏷️ {a.genre === 'free' ? 'Free Write' : 'Quick Write'} · 🕐 Last updated {relTime(at)}
               </div>
             </div>
 
@@ -170,6 +259,12 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
           </div>
         </div>
       )}
+
+      {/* closing banner */}
+      <div style={{ marginTop: 20, borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>
+        <img src={`${BK}footer.webp`} alt="Every draft is a step forward. Write. Revise. Share. Your ideas matter." style={{ display: 'block', width: '100%', height: 'auto' }} />
+      </div>
+      </div>
     </div>
   )
 }

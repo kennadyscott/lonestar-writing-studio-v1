@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { api } from '../lib/api.js'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
+import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
 
 /*
  * Writing Bank — every self-started piece (free writes + quick writes) in one
@@ -39,6 +40,7 @@ function statusOf(sub) {
 
 export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onChange }) {
   const t = useT()
+  const say = useSay()
   const locale = useLocale()
   const [filter, setFilter] = useState('all')
   const [q, setQ] = useState('')
@@ -84,6 +86,19 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
 
   async function act(fn) { setBusy(true); try { await fn(); onChange && onChange() } finally { setBusy(false) } }
 
+  /*
+   * Publish-vs-share is the one decision on this page a student cannot undo in
+   * their own head, so each modal offers ONE Listen that reads the whole
+   * decision — both the what-it-does line and the who-can-see-it line. The
+   * sentences stay split into their existing t() keys so the bolding (and the
+   * Spanish already written against those keys) survives; these strings are
+   * the same parts, joined, for the speech.
+   */
+  const ca = confirmAction
+  const teacherName = state.teacher?.name || t('your teacher')
+  const shareBody = ca && `"${ca.a.title}${say('" will appear on the class Writing Wall.')} ${t('Who can see it:')} ${say('only the students and teacher in')} ${t("{teacher}'s class", { teacher: teacherName })}. ${say('It never leaves your classroom, and you or your teacher can take it down anytime.')}`
+  const publishBody = ca && `${say('Publishing marks')} "${ca.a.title}" ${say('as finished — it becomes')} ${t('read-only')} ${say('and earns')} ${t('+15 coins')}. ${t('Who can see it:')} ${say('just you and your teacher — publishing does')} ${t('not')} ${say('put it on the Writing Wall. Sharing is a separate choice you make after.')}`
+
   // Start a New Piece: make a fresh free write and open it.
   async function startNew() {
     setBusy(true)
@@ -105,7 +120,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
         <div className="eyebrow">{t('The Writing Studio')}</div>
         <h1 className="page" style={{ margin: '2px 0' }}>{t('🗂️ My Writing Bank')}</h1>
         <p className="page-sub" style={{ margin: 0 }}>
-          {t("Every piece you've started — revise it, publish it, share it, or clear it out.")}
+          <Directions text="Every piece you've started — revise it, publish it, share it, or clear it out." inline />
           {onWall && <> · <button onClick={onWall} style={{ color: 'var(--link)', fontWeight: 800, fontSize: 14 }}>{t('🌟 Visit the Writing Wall →')}</button></>}
         </p>
       </div>
@@ -164,7 +179,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       {visible.length === 0 && (
         <div className="card" style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
           <div style={{ fontSize: 40, marginBottom: 8 }}>🗂️</div>
-          {t('Nothing here yet — start a Free Write or Quick Write and it will land in your bank.')}
+          <Directions text="Nothing here yet — start a Free Write or Quick Write and it will land in your bank." inline />
         </div>
       )}
 
@@ -183,7 +198,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                 {excerpt || t('Nothing written yet')}{excerpt ? '…' : ''}
               </div>
               <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3, fontWeight: 600 }}>
-                📄 {t('{n} words', { n: wcount })} · 📚 {t(sub.drafts.length > 1 ? '{n} drafts' : '{n} draft', { n: sub.drafts.length })} · 🏷️ {t(a.genre === 'free' ? 'Free Write' : 'Quick Write')} · 🕐 {t('Last updated {when}', { when: relTime(at) })}
+                📄 {t('{n} words', { n: wcount })} · 📚 <Glossed text={t(sub.drafts.length > 1 ? '{n} drafts' : '{n} draft', { n: sub.drafts.length })} /> · 🏷️ {t(a.genre === 'free' ? 'Free Write' : 'Quick Write')} · 🕐 {t('Last updated {when}', { when: relTime(at) })}
               </div>
             </div>
 
@@ -223,14 +238,16 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                   <span style={{ fontSize: 26 }}>💛</span>
-                  <b style={{ fontSize: 18 }}>{t('Share to the Writing Wall?')}</b>
+                  <b style={{ fontSize: 18 }}><Glossed text={t('Share to the Writing Wall?')} /></b>
                 </div>
                 <p style={{ fontSize: 14, lineHeight: 1.55, margin: '0 0 10px' }}>
-                  "<b>{confirmAction.a.title}</b>{t('" will appear on the class Writing Wall.')}
+                  "<b>{confirmAction.a.title}</b>
+                  <Glossed text={say('" will appear on the class Writing Wall.')} />
                 </p>
                 <div style={{ background: '#e5f1fb', borderRadius: 12, padding: '11px 14px', fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
-                  👀 <b>{t('Who can see it:')}</b> {t('only the students and teacher in')} <b>{t("{teacher}'s class", { teacher: state.teacher?.name || t('your teacher') })}</b>.
-                  {' '}{t('It never leaves your classroom, and you or your teacher can take it down anytime.')}
+                  👀 <b>{t('Who can see it:')}</b> <Glossed text={say('only the students and teacher in')} /> <b>{t("{teacher}'s class", { teacher: teacherName })}</b>.
+                  {' '}<Glossed text={say('It never leaves your classroom, and you or your teacher can take it down anytime.')} />
+                  {' '}<Speak text={shareBody} />
                 </div>
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                   <button className="btn ghost" style={{ padding: '10px 20px' }} onClick={() => setConfirmAction(null)}>{t('Not yet')}</button>
@@ -244,13 +261,14 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
               <>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
                   <span style={{ fontSize: 26 }}>🌟</span>
-                  <b style={{ fontSize: 18 }}>{t('Publish this piece?')}</b>
+                  <b style={{ fontSize: 18 }}><Glossed text={t('Publish this piece?')} /></b>
                 </div>
                 <p style={{ fontSize: 14, lineHeight: 1.55, margin: '0 0 10px' }}>
-                  {t('Publishing marks')} "<b>{confirmAction.a.title}</b>" {t('as finished — it becomes')} <b>{t('read-only')}</b> {t('and earns')} <b>{t('+15 coins')}</b>.
+                  <Glossed text={say('Publishing marks')} /> "<b>{confirmAction.a.title}</b>" <Glossed text={say('as finished — it becomes')} /> <b>{t('read-only')}</b> <Glossed text={say('and earns')} /> <b>{t('+15 coins')}</b>.
                 </p>
                 <div style={{ background: '#e5f1fb', borderRadius: 12, padding: '11px 14px', fontSize: 13, lineHeight: 1.5, marginBottom: 18 }}>
-                  👀 <b>{t('Who can see it:')}</b> {t('just you and your teacher — publishing does')} <b>{t('not')}</b> {t('put it on the Writing Wall. Sharing is a separate choice you make after.')}
+                  👀 <b>{t('Who can see it:')}</b> <Glossed text={say('just you and your teacher — publishing does')} /> <b>{t('not')}</b> <Glossed text={say('put it on the Writing Wall. Sharing is a separate choice you make after.')} />
+                  {' '}<Speak text={publishBody} />
                 </div>
                 <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
                   <button className="btn ghost" style={{ padding: '10px 20px' }} onClick={() => setConfirmAction(null)}>{t('Keep working on it')}</button>

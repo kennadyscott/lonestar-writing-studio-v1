@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useT } from '../lib/i18n/index.jsx'
+import { Directions } from './Scaffold.jsx'
 
 /*
  * Free Write idea bank — two randomizers:
@@ -125,7 +126,9 @@ export default function PromptsPanel({ streakDays = 0 }) {
         <div style={{ fontSize: 22 }}>💡</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 800, fontSize: 15.5, color: '#0d2f55' }}>{t('Inspiration Hub')}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('Need an idea? Spin for inspiration — then write wherever it takes you.')}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+            <Directions text="Need an idea? Spin for inspiration — then write wherever it takes you." />
+          </div>
         </div>
         {streakDays > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '5px 12px', flexShrink: 0 }}>
@@ -174,7 +177,9 @@ export default function PromptsPanel({ streakDays = 0 }) {
               </div>
             </div>
             <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={() => spin()}>{t('🎲 Another one!')}</button>
-            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 260 }}>{t(m.hint)}</p>
+            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 260 }}>
+              <Directions text={m.hint} inline />
+            </p>
           </>
         )}
       </div>

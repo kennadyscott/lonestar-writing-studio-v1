@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 import { useT } from '../lib/i18n/index.jsx'
+import { Directions, Glossed, useSay } from './Scaffold.jsx'
 
 /*
  * Luna's Writing Nook — the student's module page.
@@ -73,6 +74,7 @@ function White({ children, style }) {
 
 function ActivityCard({ a, onOpen }) {
   const t = useT()
+  const say = useSay()
   const passed = a.status === 'passed'
   const current = a.status === 'in_progress'
   const locked = a.status === 'todo'
@@ -83,21 +85,31 @@ function ActivityCard({ a, onOpen }) {
     <div role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
       onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
       onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      style={{ position: 'relative', background: '#fff', borderRadius: 18, overflow: 'hidden', cursor: clickable ? 'pointer' : 'default',
+      /* The card itself no longer clips: a glossary definition opens below the
+         lesson title and has to be able to escape the card. Only the art panel
+         clips, which is all the rounded corners ever needed it for. */
+      style={{ position: 'relative', background: '#fff', borderRadius: 18, cursor: clickable ? 'pointer' : 'default',
         boxShadow: frame, opacity: locked && !a.final ? .72 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
       {/* art panel */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '720 / 246', background: '#0d2f55' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '720 / 246', background: '#0d2f55', overflow: 'hidden', borderRadius: '18px 18px 0 0' }}>
         <img src={LESSON_ART(a.art)} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: locked ? 'saturate(.7) brightness(.85)' : 'none' }} />
         {locked && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,.85)', display: 'grid', placeItems: 'center', fontSize: 12 }}>🔒</span>}
-        <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: -1, height: 2, background: GOLD_FRAME, opacity: .9 }} />
+        <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: GOLD_FRAME, opacity: .9 }} />
       </div>
 
       {/* white panel */}
       <div style={{ padding: '10px 10px 12px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
         <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.6, color: a.final ? '#c98f00' : 'var(--link)' }}>{a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
-        <div style={{ fontWeight: 800, fontSize: 15.5, lineHeight: 1.15, color: NAVY, letterSpacing: '-.01em' }}>{t(a.title)}</div>
-        {a.sub && <div style={{ fontSize: 12, color: '#4a6f8c', fontWeight: 600 }}>{t(a.sub)}</div>}
+        {/* Lesson titles carry the strategy words — Restate, Cite, Evidence,
+            RACE, Module — so they are tappable. The whole card is a click
+            target, so a tap on a glossed word must not also open the lesson;
+            with no level set there is no button here and nothing changes. */}
+        <div style={{ fontWeight: 800, fontSize: 15.5, lineHeight: 1.15, color: NAVY, letterSpacing: '-.01em' }}
+          onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}>
+          <Glossed text={t(a.title)} />
+        </div>
+        {a.sub && <div style={{ fontSize: 12, color: '#4a6f8c', fontWeight: 600 }}>{say(a.sub)}</div>}
         <div style={{ margin: '2px 0 0' }}><Stars n={a.stars} size={20} dimColor="#d3dbe3" /></div>
         {current ? (
           <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: '100%', marginTop: 6, padding: '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 14, color: NAVY, background: 'linear-gradient(180deg,#ffd44d 0%,#f5b400 100%)', boxShadow: '0 3px 0 #c98f00, 0 0 18px rgba(245,180,0,.45)' }}>
@@ -230,6 +242,7 @@ function LessonGrid({ acts, onOpen }) {
 
 export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   const t = useT()
+  const say = useSay()
   const modules = state.modules
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const currentIdx = modules.indexOf(current)
@@ -278,7 +291,8 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                 <div style={{ flex: 1, minWidth: 260 }}>
                   <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.1, color: 'var(--link)', marginBottom: 4 }}>{t('MISSION {n}', { n: String(currentIdx + 1).padStart(2, '0') })}</div>
                   <div style={{ fontSize: 'clamp(19px, 1.7vw, 24px)', fontWeight: 800, color: NAVY, lineHeight: 1.15 }}>{t('Master the {label}', { label: t(current.label) })}</div>
-                  <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}>{t(MISSION_BLURB[current.id])}</div>
+                  {/* The mission blurb is the page's directions — the one Listen on this page. */}
+                  <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}><Directions text={MISSION_BLURB[current.id]} /></div>
                 </div>
                 <div style={{ minWidth: 220, maxWidth: 320, flex: '0 1 320px' }}>
                   <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--link)', marginBottom: 4 }}>{t('{done} of {total} lessons', { done, total: acts.length })} · {left === 0 ? t('mission complete!') : t('{n} to go', { n: left })}</div>
@@ -313,7 +327,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                   <div style={{ height: 8, background: '#e6eef3', borderRadius: 6, margin: '5px 0 4px', overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${Math.max(6, levelPct * 100)}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 6 }} />
                   </div>
-                  <div style={{ fontSize: 11, color: '#5c7285', fontWeight: 600 }}>{t("Keep going! You're making great progress!")}</div>
+                  <div style={{ fontSize: 11, color: '#5c7285', fontWeight: 600 }}>{say("Keep going! You're making great progress!")}</div>
                 </div>
               </div>
 
@@ -335,7 +349,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                 <ProgressRing pct={pct} />
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285' }}>{t('Module Progress')}</div>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, color: NAVY }}>{pct >= .5 ? t("Great work! You're more than halfway there!") : t('Every activity gets you closer!')}</div>
+                  <div style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, color: NAVY }}>{pct >= .5 ? say("Great work! You're more than halfway there!") : say('Every activity gets you closer!')}</div>
                 </div>
               </div>
 
@@ -351,8 +365,8 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
 
             <White style={{ padding: '10px 14px', display: 'flex', gap: 12, alignItems: 'center' }}>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 15.5, color: NAVY }}>{t("You're doing amazing, writer!")}</div>
-                <div style={{ fontSize: 12.5, color: '#5c7285', lineHeight: 1.4, fontWeight: 600 }}>{t('Keep up the great work and finish strong!')} <span style={{ color: '#f5b400' }}>✦</span></div>
+                <div style={{ fontWeight: 800, fontSize: 15.5, color: NAVY }}>{say("You're doing amazing, writer!")}</div>
+                <div style={{ fontSize: 12.5, color: '#5c7285', lineHeight: 1.4, fontWeight: 600 }}>{say('Keep up the great work and finish strong!')} <span style={{ color: '#f5b400' }}>✦</span></div>
               </div>
             </White>
           </div>

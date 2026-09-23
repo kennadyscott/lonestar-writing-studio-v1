@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { api } from '../lib/api.js'
 import { useT } from '../lib/i18n/index.jsx'
+import { useSay, Glossed, Directions } from './Scaffold.jsx'
 
 /*
  * Daily Revision Challenge — three parts:
@@ -11,11 +12,11 @@ import { useT } from '../lib/i18n/index.jsx'
  */
 
 function Stepper({ phase }) {
-  const t = useT()
+  const say = useSay()
   const steps = [
-    { k: 'evaluate', n: 1, label: t('Evaluate with the rubric') },
-    { k: 'rewrite', n: 2, label: t('Revise with your checklist') },
-    { k: 'done', n: 3, label: t('Get feedback') },
+    { k: 'evaluate', n: 1, label: say('Evaluate with the rubric') },
+    { k: 'rewrite', n: 2, label: say('Revise with your checklist') },
+    { k: 'done', n: 3, label: say('Get feedback') },
   ]
   const idx = steps.findIndex((s) => s.k === phase)
   return (
@@ -27,7 +28,9 @@ function Stepper({ phase }) {
               background: i < idx ? 'var(--good)' : i === idx ? 'var(--navy)' : '#dfe9ef', color: i <= idx ? '#fff' : 'var(--muted)' }}>
               {i < idx ? '✓' : s.n}
             </span>
-            <span style={{ fontSize: 13, fontWeight: i === idx ? 800 : 600, color: i === idx ? 'var(--ink)' : 'var(--muted)' }}>{s.label}</span>
+            <span style={{ fontSize: 13, fontWeight: i === idx ? 800 : 600, color: i === idx ? 'var(--ink)' : 'var(--muted)' }}>
+              <Glossed text={s.label} />
+            </span>
           </div>
           {i < steps.length - 1 && <span style={{ flex: 'none', width: 34, height: 2, background: i < idx ? 'var(--good)' : '#dfe9ef', borderRadius: 2 }} />}
         </React.Fragment>
@@ -38,6 +41,7 @@ function Stepper({ phase }) {
 
 function FeedbackModal({ result, onClose }) {
   const t = useT()
+  const say = useSay()
   if (!result) return null
   const rubric = result.rubric
   const agree = result.agreement
@@ -48,8 +52,10 @@ function FeedbackModal({ result, onClose }) {
       <div className="card" style={{ padding: 26, width: 520, maxWidth: '94vw', maxHeight: '92vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 42 }}>🎉</div>
-          <h2 style={{ margin: '4px 0 2px' }}>{t('Revision submitted!')}</h2>
-          <p style={{ color: 'var(--muted)', margin: '0 0 14px', fontSize: 14 }}>{t('You just did what real writers do — judge, then improve.')}</p>
+          <h2 style={{ margin: '4px 0 2px' }}><Glossed text={t('Revision submitted!')} /></h2>
+          <p style={{ color: 'var(--muted)', margin: '0 0 14px', fontSize: 14 }}>
+            <Directions inline text="You just did what real writers do — judge, then improve." />
+          </p>
         </div>
 
         {rubric && (
@@ -60,11 +66,11 @@ function FeedbackModal({ result, onClose }) {
                 <b style={{ fontSize: 22, color: tone }}>{rubric.met}<span style={{ fontSize: 14, color: 'var(--muted)' }}>/{rubric.total}</span></b>
               </div>
               <div style={{ flex: 1, minWidth: 0, fontSize: 13.5, lineHeight: 1.5 }}>
-                <b>{t('Your revision was scored on the same rubric you just used.')}</b>
+                <b><Glossed text={say('Your revision was scored on the same rubric you just used.')} /></b>
                 <div style={{ color: 'var(--muted)', marginTop: 2 }}>
-                  {rubric.fixed > 0
-                    ? t(rubric.fixed === 1 ? 'You fixed {n} criterion the draft was missing.' : 'You fixed {n} criteria the draft was missing.', { n: rubric.fixed })
-                    : t('None of the missing criteria are fixed yet — the ✗ items below are where to go next.')}
+                  <Glossed text={rubric.fixed > 0
+                    ? say(rubric.fixed === 1 ? 'You fixed {n} criterion the draft was missing.' : 'You fixed {n} criteria the draft was missing.', { n: rubric.fixed })
+                    : say('None of the missing criteria are fixed yet — the ✗ items below are where to go next.')} />
                 </div>
               </div>
             </div>
@@ -85,7 +91,8 @@ function FeedbackModal({ result, onClose }) {
 
         {agree && (
           <div style={{ background: '#eef6f9', borderRadius: 12, padding: '12px 14px', fontSize: 13.5, lineHeight: 1.45, marginBottom: 12 }}>
-            <b>{t('Your grader eye:')}</b>{' '}{t('you matched the rubric on {a} of {b} criteria when you scored the robot\u2019s draft.', { a: agree.matched, b: agree.total })}
+            <b>{t('Your grader eye:')}</b>{' '}
+            <Glossed text={say('you matched the rubric on {a} of {b} criteria when you scored the robot\u2019s draft.', { a: agree.matched, b: agree.total })} />
           </div>
         )}
 
@@ -125,8 +132,10 @@ function RubricPanel({ asg, answers, setAnswers, onStartRewrite, busy }) {
       <div style={{ padding: '12px 18px', background: 'linear-gradient(120deg,#fff6e3,#fff)', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <span style={{ fontSize: 20 }}>📋</span>
         <div style={{ flex: 1 }}>
-          <b style={{ fontSize: 15 }}>{t('The Rubric')}</b>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t("Score {name}'s draft the way a grader would.", { name: asg.teacher.name.split(' ')[0] })}</div>
+          <b style={{ fontSize: 15 }}><Glossed text={t('The Rubric')} /></b>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+            <Directions text="Score {name}'s draft the way a grader would." vars={{ name: asg.teacher.name.split(' ')[0] }} />
+          </div>
         </div>
         <span className="pill" style={{ background: judged === list.length ? '#e6f6ee' : '#fdf1dc', color: judged === list.length ? 'var(--good)' : '#b97e10' }}>
           {t('{n}/{total} scored', { n: judged, total: list.length })}
@@ -158,6 +167,7 @@ function RubricPanel({ asg, answers, setAnswers, onStartRewrite, busy }) {
 /* ---- Step 2: the revision checklist (their judgments become fix targets) ---- */
 function ChecklistPanel({ asg, sub, answers, fixed, setFixed }) {
   const t = useT()
+  const say = useSay()
   const list = asg.checklist || []
   const mine = sub.evaluation || answers
   const key = sub.rubricKey || null
@@ -166,12 +176,15 @@ function ChecklistPanel({ asg, sub, answers, fixed, setFixed }) {
     <div style={{ padding: 16, display: 'flex', flexDirection: 'column', gap: 9, height: '100%', overflowY: 'auto' }}>
       {agree && (
         <div style={{ background: agree.matched === agree.total ? '#f1faf4' : '#fff8ec', borderRadius: 10, padding: '10px 12px', fontSize: 12.5, lineHeight: 1.45 }}>
-          <b>{t('You matched the rubric on {a} of {b}.', { a: agree.matched, b: agree.total })}</b>{' '}
-          {agree.matched === agree.total ? t('You read this draft exactly like a grader would.') : t('The ✗ marks below are the rubric’s own scoring — fix those as you revise.')}
+          <b><Glossed text={say('You matched the rubric on {a} of {b}.', { a: agree.matched, b: agree.total })} /></b>{' '}
+          <Glossed text={agree.matched === agree.total
+            ? say('You read this draft exactly like a grader would.')
+            : say('The ✗ marks below are the rubric’s own scoring — fix those as you revise.')} />
         </div>
       )}
       <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5 }}>
-        <b style={{ color: '#d84a57' }}>{t('Fix the ✗ items')}</b> {t('as you revise, and check them off as you go.')}
+        <b style={{ color: '#d84a57' }}>{t('Fix the ✗ items')}</b>{' '}
+        <Directions inline text="as you revise, and check them off as you go." />
       </div>
       {list.map((item, i) => {
         const graderFailed = key ? key[i] === false : mine[i] === false
@@ -266,7 +279,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(340px,1fr)', gap: 16, alignItems: 'start' }}>
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f6f9fb' }}>
-              <b style={{ fontSize: 14 }}>{t("🤖 {name}'s draft", { name: asg.teacher.name })}</b>
+              <b style={{ fontSize: 14 }}><Glossed text={t("🤖 {name}'s draft", { name: asg.teacher.name })} /></b>
               <span className="pill" style={{ background: '#eef3f6', color: 'var(--muted)' }}>{t('read only')}</span>
             </div>
             <div style={{ padding: '16px 18px', fontSize: 15, lineHeight: 1.7, color: '#3a4149', whiteSpace: 'pre-wrap' }}>{original.content}</div>
@@ -281,7 +294,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="card" style={{ overflow: 'hidden' }}>
               <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f6f9fb' }}>
-                <b style={{ fontSize: 14 }}>{t("🤖 {name}'s original draft", { name: asg.teacher.name })}</b>
+                <b style={{ fontSize: 14 }}><Glossed text={t("🤖 {name}'s original draft", { name: asg.teacher.name })} /></b>
                 <span className="pill" style={{ background: '#eef3f6', color: 'var(--muted)' }}>{t('read only')}</span>
               </div>
               <div style={{ padding: 16, fontSize: 14, lineHeight: 1.6, color: '#3a4149', whiteSpace: 'pre-wrap' }}>{original.content}</div>
@@ -289,7 +302,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
 
             <div className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column', flex: 1 }}>
               <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f2fafd' }}>
-                <b style={{ fontSize: 14 }}>{t('✍️ Your revision')}</b>
+                <b style={{ fontSize: 14 }}><Glossed text={t('✍️ Your revision')} /></b>
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('{n} words · autosaves', { n: wc })}</span>
               </div>
               <textarea value={content} onChange={(e) => edit(e.target.value)} disabled={phase === 'done'}
@@ -309,7 +322,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
           <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 440 }}>
             <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
               <div style={{ flex: 1, padding: '12px', fontWeight: 800, fontSize: 13.5, background: '#fff', color: 'var(--navy)', borderBottom: '2px solid var(--navy)', textAlign: 'center' }}>
-                {t('✅ Revision Checklist')}
+                <Glossed text={t('✅ Revision Checklist')} />
               </div>
             </div>
             <div style={{ flex: 1, minHeight: 0 }}>

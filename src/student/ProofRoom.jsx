@@ -4,6 +4,7 @@ import { library } from '../lib/library.js'
 import { joinStandards } from '../../lib/content/taxonomy.mjs'
 import { prepareTopic, PASS_MARK, checkCompose, tokenize, parseHunt } from '../../server/proofRoom.mjs'
 import { useT } from '../lib/i18n/index.jsx'
+import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.jsx'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -173,15 +174,22 @@ function WithArt({ act, art: fallback, side: fallbackSide, children }) {
   return <Beside src={src} flip={side === 'left'} mirror={!!act.artMirror}>{children}</Beside>
 }
 
+/*
+ * The directions box, routed through the platform scaffolding. `text` arrives
+ * as the REAL ENGLISH sentence — never pre-translated — because the simplified
+ * rewrite and the translation are both keyed by that English string. The
+ * shared Directions does the rest: level-appropriate wording, tappable
+ * academic words, and the single Listen button for this block.
+ */
 function Directions({ text }) {
   const t = useT()
   return (
     <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#eef6f9', border: '1.5px solid #cfe6f0',
       borderRadius: 12, padding: '11px 14px', marginBottom: 12 }}>
       <span style={{ fontSize: 15, lineHeight: 1.3 }}>📋</span>
-      <div>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: CYAN }}>{t('DIRECTIONS')}</div>
-        <div style={{ fontSize: 13.5, lineHeight: 1.5, color: '#1f4a68', marginTop: 2 }}>{text}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: CYAN, marginBottom: 2 }}>{t('DIRECTIONS')}</div>
+        <ScaffoldDirections text={text} style={{ fontSize: 13.5, lineHeight: 1.5, color: '#1f4a68' }} />
       </div>
     </div>
   )
@@ -214,6 +222,7 @@ export function PathPreview({ topic: raw, onClose }) {
 
 export default function ProofRoom({ grade = 5, onClose, onChange }) {
   const t = useT()
+  const say = useSay()
   const [topicId, setTopicId] = useState(null)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
@@ -259,17 +268,19 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
   }
 
   if (!raw) {
-    return <Shell onClose={onClose} sub={t('Bring writing in broken, take it out clean')}>
+    return <Shell onClose={onClose} sub={say('Bring writing in broken, take it out clean')}>
       <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>
     </Shell>
   }
 
   return (
-    <Shell onClose={onClose} sub={t('Bring writing in broken, take it out clean')}>
+    <Shell onClose={onClose} sub={say('Bring writing in broken, take it out clean')}>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>{t('Pick a topic and start the path.')}</div>
+        <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>
+          <Glossed text={say('Pick a topic and start the path.')} />
+        </div>
         <p style={{ fontSize: 13, color: '#3f5f76', lineHeight: 1.5, margin: '5px 0 0' }}>
-          {t('Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic.')}
+          <ScaffoldDirections text="Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic." />
         </p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -539,7 +550,7 @@ function ChooseActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <WithArt act={act} art="" side="right">
-      <Directions text={act.directions || t(HOW_TO.choose)} />
+      <Directions text={act.directions || HOW_TO.choose} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1 }}>{act.brief}</span>
         <span className="pill">{t('{n} of {total} right', { n: right, total: spots.length })}</span>
@@ -620,7 +631,7 @@ function HuntActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || t(HOW_TO.hunt)} />
+      <Directions text={act.directions || HOW_TO.hunt} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
         <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{t('{n} of {total} fixed', { n: fixedCount, total: act.errorCount })}</span>
@@ -738,7 +749,7 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || t(HOW_TO.maze)} />
+      <Directions text={act.directions || HOW_TO.maze} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
         <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{t('{n} of {total} verbs fixed', { n: openedCount, total })}</span>
@@ -858,7 +869,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || t(HOW_TO.passage)} />
+      <Directions text={act.directions || HOW_TO.passage} />
       <WithArt act={act} art="" side="right">
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
 
@@ -1017,7 +1028,7 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || t(HOW_TO.compose)} />
+      <Directions text={act.directions || HOW_TO.compose} />
       <WithArt act={act} art="" side="right">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
@@ -1116,7 +1127,7 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || t(HOW_TO[mode] || HOW_TO.fix)} />
+      <Directions text={act.directions || HOW_TO[mode] || HOW_TO.fix} />
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
 
       {mode === 'drag' && (

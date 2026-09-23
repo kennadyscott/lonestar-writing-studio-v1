@@ -3,6 +3,7 @@ import { api } from '../lib/api.js'
 import { useT } from '../lib/i18n/index.jsx'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
 import { ReadAloudText } from './ReadAloud.jsx'
+import { useSay, Directions, Glossed } from './Scaffold.jsx'
 
 /*
  * Quick Write — the live product's 3-part flow, refreshed in the studio brand:
@@ -32,6 +33,7 @@ function StopwatchArt({ size = 54 }) {
 
 export default function QuickWritePage({ state, me, onBack, onChange }) {
   const t = useT()
+  const say = useSay()
   const supportLevel = me?.supportLevel || null
   // teacher-configured goal time (from their system)
   const GOAL_SECONDS = state.settings?.quickWriteSeconds ?? 180
@@ -119,7 +121,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                 <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 14, padding: '13px 16px', marginBottom: 22 }}>
                   <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>💡</span>
                   <div style={{ fontSize: 14, color: '#28506b', lineHeight: 1.45 }}>
-                    <b style={{ color: '#0f97c2' }}>{t('Think about:')}</b> {pick.hint || t('What details and examples will make your idea clear to a reader?')}
+                    <b style={{ color: '#0f97c2' }}>{t('Think about:')}</b> <Glossed text={pick.hint || say('What details and examples will make your idea clear to a reader?')} />
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
@@ -142,7 +144,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                   <span style={{ fontSize: 24, filter: `drop-shadow(0 1px 2px ${c}55)` }}>{icon}</span>
                   <span>
                     <b style={{ display: 'block', fontSize: 14.5, color: '#0d2440' }}>{t(title)}</b>
-                    <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}>{t(blurb)}</span>
+                    <span style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.4 }}><Glossed text={say(blurb)} /></span>
                   </span>
                 </div>
               ))}
@@ -195,7 +197,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
               <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>
-                {stage === 'done' ? t('✓ Submitted') : t('Quick writes are about showing up — words over perfection.')}
+                {stage === 'done' ? t('✓ Submitted') : say('Quick writes are about showing up — words over perfection.')}
               </span>
               {stage === 'writing' && (
                 <button className="btn gold" disabled={busy || wc === 0} onClick={submit}>{t("📬 I'm done — submit")}</button>

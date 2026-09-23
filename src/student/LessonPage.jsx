@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import { useT } from '../lib/i18n/index.jsx'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
+import { useSay, Directions, Glossed } from './Scaffold.jsx'
 
 /*
  * Lesson page — opened from a lesson card in Luna's Writing Nook.
@@ -241,6 +242,7 @@ function ReviewStep({ sentence, answers, pick }) {
 }
 
 export default function LessonPage({ lesson, moduleLabel, supportLevel = null, onBack }) {
+  const say = useSay()
   const t = useT()
   const [step, setStep] = useState(0)
   const [done, setDone] = useState(0) // furthest step reached
@@ -274,7 +276,7 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
         <div style={{ marginBottom: 26 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: '#0a7dba' }}>{t('Module {n}', { n: (moduleLabel.match(/\d+/) || [''])[0] }).toUpperCase()}</div>
           <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: 22, color: NAVY, lineHeight: 1.15 }}>{t(lesson.title.replace(/^Module \d+: /, ''))}</div>
-          <div style={{ fontSize: 12, color: '#4a6f8c', marginTop: 4, lineHeight: 1.35 }}>{t('Use what you know about {title} to expand a sentence.', { title: t(lesson.title.replace(/^Module \d+: /, '')) })}</div>
+          <div style={{ fontSize: 12, color: '#4a6f8c', marginTop: 4, lineHeight: 1.35 }}><Directions text="Use what you know about {title} to expand a sentence." vars={{ title: t(lesson.title.replace(/^Module \d+: /, '')) }} inline /></div>
         </div>
         <Stepper step={step} done={done} onJump={setStep} />
         <div style={{ marginTop: 'auto', marginBottom: 110, fontFamily: '"Bradley Hand", "Segoe Script", cursive', fontSize: 22, lineHeight: 1.15, color: NAVY, opacity: .85, whiteSpace: 'pre-line' }}>{t('Better\nWriters\nBrighter\nFutures')} <span style={{ color: '#f5b400' }}>✦</span></div>
@@ -296,7 +298,7 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
               <span style={{ width: 52, height: 52, borderRadius: '50%', background: '#fbf7ec', border: '1.5px solid #f0dfae', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{['▶', '✎', '☑', '✍', '★'][step]}</span>
               <div>
                 <div style={{ fontFamily: 'Georgia, serif', fontSize: 21, fontWeight: 700, color: NAVY }}>{step === 0 ? t(VIDEO.title) : step === 1 ? activity : t('{step}: {topic}', { step: t(STEPS[step]), topic: activityTopic })}</div>
-                <div style={{ fontSize: 13.5, color: '#4a6f8c', marginTop: 3, maxWidth: 560 }}>{step === 0 ? t('Watch Luna walk through the skill, then try it yourself in the next step.') : step === 1 ? t(STARBURST.directions) : step === 2 ? t('Check your eye for detail before you write your own.') : step === 3 ? t('Bring your answers together into one strong sentence.') : t('See how your sentence grew, and where the stars came from.')}</div>
+                <div style={{ fontSize: 13.5, color: '#4a6f8c', marginTop: 3, maxWidth: 560 }}>{step === 0 ? t('Watch Luna walk through the skill, then try it yourself in the next step.') : step === 1 ? say(STARBURST.directions) : step === 2 ? t('Check your eye for detail before you write your own.') : step === 3 ? t('Bring your answers together into one strong sentence.') : t('See how your sentence grew, and where the stars came from.')}</div>
               </div>
             </div>
             {step === 0 && <WatchStep watched={watched} onWatched={() => setWatched(true)} />}

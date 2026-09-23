@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react'
 import { api } from './lib/api.js'
 import { TopBar, DemoTools } from './components/Shell.jsx'
 import { useLang } from './lib/i18n/index.jsx'
+import { BridgeProvider } from './lib/bridgeContext.jsx'
 import { ShareWallTab } from './student/GrowthPage.jsx'
 import StudentHome from './student/StudentHome.jsx'
 import WritingStudio from './student/WritingStudio.jsx'
@@ -88,6 +89,7 @@ export default function App() {
   }
 
   return (
+    <BridgeProvider level={me.supportLevel}>
     <div className="app">
       <TopBar
         who={who}
@@ -99,5 +101,6 @@ export default function App() {
         settings={{ lang: me.lang, supportLevel: me.supportLevel }} onSettings={saveSettings} />
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
     </div>
+    </BridgeProvider>
   )
 }

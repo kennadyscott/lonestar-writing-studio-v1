@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { STRATEGIES, judge, feedbackParts, nextMoveFor, scoreSubmission } from '../lib/writingScore.js'
 import { useT, useLang, tIn } from '../lib/i18n/index.jsx'
 import { isBilingualFeedback, isOneThingAtATime, levelOf } from '../lib/languageBridge.js'
+import { Glossed } from './Scaffold.jsx'
 
 /*
  * FeedbackReview — what a student sees when they review a COMPLETED assignment.
@@ -162,7 +163,7 @@ export default function FeedbackReview({ state, sub, onBack }) {
             <Reveal label={t('Rubric')}>
               {rubricRows.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 8, marginTop: i ? 6 : 0 }}>
-                  <span style={{ fontWeight: 800, color: '#8fa5b8' }}>{i + 1}.</span><span>{r}</span>
+                  <span style={{ fontWeight: 800, color: '#8fa5b8' }}>{i + 1}.</span><span><Glossed text={r} /></span>
                 </div>
               ))}
             </Reveal>
@@ -176,7 +177,7 @@ export default function FeedbackReview({ state, sub, onBack }) {
                 <span style={{ width: 34, height: 34, borderRadius: 9, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 17, fontWeight: 800, color: an.color, background: an.bg }}>{an.letter}</span>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: .8, textTransform: 'uppercase', color: an.color }}>{t(an.label)}</div>
-                  <div style={{ fontSize: 13.5, color: '#33566e', marginTop: 2, lineHeight: 1.45 }}>{t(an.note)}</div>
+                  <div style={{ fontSize: 13.5, color: '#33566e', marginTop: 2, lineHeight: 1.45 }}><Glossed text={t(an.note)} /></div>
                 </div>
                 <span style={{ width: 26, height: 26, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 800, color: '#fff', background: an.hit ? 'var(--good)' : '#c0392b' }}>
                   {an.hit ? '✓' : '✕'}

@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { api } from '../lib/api.js'
 import { useT } from '../lib/i18n/index.jsx'
+import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
 
 export default function ConferencePanel({ sub, draft, readOnly, health, onChange }) {
   const t = useT()
+  const say = useSay()
   const [messages, setMessages] = useState(draft.conference || [])
   const [input, setInput] = useState('')
   const [busy, setBusy] = useState(false)
@@ -28,17 +30,20 @@ export default function ConferencePanel({ sub, draft, readOnly, health, onChange
   }
 
   const empty = messages.length === 0
+  // One Listen for the whole empty-state sentence, which is assembled from
+  // three parts so "Start conferring" can stay bold.
+  const openLine = `${say('Pull up a chair. Tap')} ${t('Start conferring')} ${say('and your coach will ask you a question about your draft.')}`
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 10 }}>
         <div style={{ fontSize: 22 }}>💬</div>
         <div>
-          <div style={{ fontWeight: 700, fontSize: 15 }}>{t('Writing Conference')}</div>
+          <div style={{ fontWeight: 700, fontSize: 15 }}><Glossed text={t('Writing Conference')} /></div>
           <div style={{ fontSize: 12, color: 'var(--muted)' }}>
-            {t('Your coach asks questions — it never writes for you.')}
+            <Directions text="Your coach asks questions — it never writes for you." inline />
             <span style={{ marginLeft: 6, color: health.hasKey ? 'var(--good)' : 'var(--warn)' }}>
-              {health.hasKey ? t('● live ({model})', { model: health.model }) : t('● scripted (add API key for live)')}
+              {health.hasKey ? t('● live coach') : t('● practice coach')}
             </span>
           </div>
         </div>
@@ -47,8 +52,11 @@ export default function ConferencePanel({ sub, draft, readOnly, health, onChange
       <div ref={scroller} style={{ flex: 1, overflowY: 'auto', padding: 16, display: 'flex', flexDirection: 'column', gap: 12, minHeight: 220 }}>
         {empty && (
           <div style={{ color: 'var(--muted)', fontSize: 14, textAlign: 'center', margin: 'auto', maxWidth: 260 }}>
-            {readOnly ? t('No conference happened on this version.') : (
-              <>{t('Pull up a chair. Tap')} <b>{t('Start conferring')}</b> {t('and your coach will ask you a question about your draft.')}</>
+            {readOnly ? <Glossed text={t('No conference happened on this version.')} /> : (
+              <>
+                <Glossed text={say('Pull up a chair. Tap')} /> <b>{t('Start conferring')}</b> <Glossed text={say('and your coach will ask you a question about your draft.')} />
+                {' '}<Speak text={openLine} />
+              </>
             )}
           </div>
         )}

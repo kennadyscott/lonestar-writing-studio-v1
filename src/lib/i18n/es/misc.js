@@ -121,8 +121,8 @@ export const misc = {
   'Writing Conference': 'Conferencia de Escritura',
   'Your coach asks questions — it never writes for you.':
     'Tu entrenador hace preguntas: nunca escribe por ti.',
-  '● live ({model})': '● en vivo ({model})',
-  '● scripted (add API key for live)': '● guionado (agrega la clave API para el modo en vivo)',
+  '● live coach': '● entrenador en vivo',
+  '● practice coach': '● entrenador de práctica',
   '(Sorry — I had trouble connecting. Try again.)':
     '(Lo siento, tuve problemas para conectarme. Inténtalo otra vez.)',
   'No conference happened on this version.': 'No hubo conferencia en esta versión.',

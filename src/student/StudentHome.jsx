@@ -8,6 +8,7 @@ import ModuleBadge from '../components/ModuleBadge.jsx'
 import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
+import { useSay, Glossed, Directions } from './Scaffold.jsx'
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const fmt = (d, locale = 'en-US') => d ? new Date(d + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : '—'
@@ -157,7 +158,9 @@ function GrowthSummaryCard({ gs, onGrowth }) {
       <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.2fr 0.9fr', gap: 24, alignItems: 'center' }}>
       <div>
         <div style={{ fontSize: 19, fontWeight: 800 }}>{t('My Data 📊')}</div>
-        <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, margin: '6px 0 12px' }}>{t('Your averages at a glance — dig deeper in Data & Goals.')}</p>
+        <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, margin: '6px 0 12px' }}>
+          <Directions text="Your averages at a glance — dig deeper in Data & Goals." />
+        </p>
         <button className="btn" style={{ padding: '8px 18px' }} onClick={onGrowth}>{t('See full data →')}</button>
       </div>
       <div>
@@ -247,7 +250,7 @@ function BridgeBanner({ level }) {
             {t('{n} supports are on for you', { n: rows.length })}
           </div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-            {t('Your teacher set this. The writing you are asked to do is the same as everyone else.')}
+            <Directions text="Your teacher set this. The writing you are asked to do is the same as everyone else." />
           </div>
         </div>
         <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: .5, color: '#fff', background: lv.color, borderRadius: 999, padding: '5px 13px' }}>
@@ -274,6 +277,7 @@ function BridgeBanner({ level }) {
 
 function GoalBanner({ me, classFocus }) {
   const t = useT()
+  const say = useSay()
   // read-only on Home — the goal is set and managed in a writing conference
   const half = { flex: '1 1 320px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 14, padding: '4px 2px' }
   return (
@@ -285,12 +289,16 @@ function GoalBanner({ me, classFocus }) {
           <div style={{ minWidth: 0 }}>
             <div className="eyebrow">{t('My goal')}</div>
             <div style={{ fontSize: 15.5, fontWeight: 800 }}>{me.goal.text}</div>
-            {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{t('Trait: {trait} · your coach keeps this in mind when you confer', { trait: t(TRAIT_LABELS[me.goal.trait]) })}</div>}
+            {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
+              <Glossed text={say('Trait: {trait} · your coach keeps this in mind when you confer', { trait: t(TRAIT_LABELS[me.goal.trait]) })} />
+            </div>}
           </div>
         ) : (
           <div style={{ minWidth: 0 }}>
             <div className="eyebrow">{t('My goal')}</div>
-            <div style={{ fontSize: 15, fontWeight: 700 }}>{t("You'll name your next goal in a writing conference with your teacher.")}</div>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>
+              <Glossed text={say("You'll name your next goal in a writing conference with your teacher.")} />
+            </div>
           </div>
         )}
       </div>
@@ -309,7 +317,7 @@ function GoalBanner({ me, classFocus }) {
               </div>
             </>
           ) : (
-            <div style={{ fontSize: 15, fontWeight: 700 }}>{t('Your class focus shows up here when your teacher sets one.')}</div>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>{say('Your class focus shows up here when your teacher sets one.')}</div>
           )}
         </div>
       </div>
@@ -374,6 +382,7 @@ function Comet({ x, y, c, rot = -18, w = 80 }) {
 
 function DailyBanner({ dc, busy, onGo }) {
   const t = useT()
+  const say = useSay()
   return (
     <div className="nova-banner" style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, color: '#fff', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
       background: 'radial-gradient(ellipse at 12% 15%, rgba(100,70,210,.4) 0%, transparent 45%), radial-gradient(ellipse at 88% 85%, rgba(80,55,180,.35) 0%, transparent 50%), linear-gradient(110deg,#151040 0%,#1e1656 55%,#151040 100%)',
@@ -408,11 +417,14 @@ function DailyBanner({ dc, busy, onGo }) {
           {dc?.genre && (<><span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span><span>{dc.genre}</span></>)}
         </div>
         <div style={{ fontSize: 23, fontWeight: 800, margin: '6px 0 4px', textShadow: '0 1px 8px rgba(0,0,0,.4)', textWrap: 'balance' }}>
-          {dc?.done ? t("Today's challenge is done — nice work! ✓") : t('{author} wrote something rough — can you fix it up?', { author: dc?.author || t('A robot') })}
+          {dc?.done
+            ? t("Today's challenge is done — nice work! ✓")
+            : <Glossed text={say('{author} wrote something rough — can you fix it up?', { author: dc?.author || t('A robot') })} />}
         </div>
         <div style={{ fontSize: 14.5, color: '#c9dbf4', marginBottom: 13 }}>
-          {dc?.done ? t('A brand-new challenge lands tomorrow. You can still look back at your revision.')
-            : t("Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!")}
+          <Directions text={dc?.done
+            ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.'
+            : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"} />
         </div>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, padding: '8px 20px', fontSize: 13.5, fontWeight: 800, letterSpacing: .6,
           background: 'linear-gradient(120deg,#f5c542,#e89a00)', color: '#3d2c00', border: '1.5px solid rgba(255,225,140,.9)', boxShadow: '0 0 16px rgba(245,180,0,.55)' }}>
@@ -456,7 +468,9 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
         <span style={{ fontSize: 20 }}>🌟</span>
         <div style={{ flex: 1, minWidth: 200 }}>
           <b style={{ fontSize: 16 }}>{t('Share Wall')}</b>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>{t('See what other students are writing — cheer them on with 👍 ❤️ 🎉')}</div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+            <Directions text="See what other students are writing — cheer them on with 👍 ❤️ 🎉" />
+          </div>
         </div>
         <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} onClick={onViewAll}>{t('View all →')}</button>
       </div>
@@ -501,6 +515,7 @@ function Coin({ size = 14 }) {
 
 function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal, lastMiss }) {
   const t = useT()
+  const say = useSay()
   const byKey = Object.fromEntries(games.map((g) => [g.game, g]))
   const playable = (c) => c.games.map((k) => byKey[k]).filter((g) => g && g.kind === 'builtin')
   const cleared = grid?.cleared || {}
@@ -525,7 +540,9 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
               <div style={{ ...arcadeFont, fontSize: 'clamp(24px, 2.6vw, 32px)', lineHeight: 1, letterSpacing: '.02em' }}>
                 <span style={{ color: '#fff' }}>{t('FLUENCY')}</span> <span style={{ color: '#f5b400' }}>{t('ZONE')}</span>
               </div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>{t('Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again.')} {t('Grade {n}', { n: grade })}.</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>
+                <Directions inline text="Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again." /> {t('Grade {n}', { n: grade })}.
+              </div>
             </div>
             <div style={{ flexShrink: 0, marginRight: 40, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 16px 6px 12px', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
               <Coin size={18} />{earned}
@@ -546,7 +563,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
             <span style={{ fontSize: 26 }}>🏆</span>
             <div style={{ flex: 1 }}>
               <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>{t('Board cleared!')} {grid?.bonusPaid ? t('+50 bonus coins banked.') : ''}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{t('Reset the board for a fresh round of surprise games.')}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{say('Reset the board for a fresh round of surprise games.')}</div>
             </div>
             <button className="btn" disabled={busy} onClick={onReset}>↺ {t('Reset & play again')}</button>
           </div>
@@ -571,7 +588,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
                 <div style={{ padding: '8px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', flex: 1 }}>
                   <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY, lineHeight: 1.15 }}>{tile.title}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, minHeight: 15 }}>{tile.blurb}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, minHeight: 15 }}><Glossed text={tile.blurb} /></div>
                   <div style={{ flex: 1 }} />
                   {done ? (
                     <>
@@ -611,7 +628,9 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
           <b style={{ fontSize: 18 }}>{t('Free Write')}</b>
           <button onClick={onClose} aria-label={t('Close')} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
-        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>{t('You have unfinished stories — pick one up where you left off, or start something brand new.')}</p>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>
+          <Directions text="You have unfinished stories — pick one up where you left off, or start something brand new." />
+        </p>
 
         <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .5, color: 'var(--teal)', textTransform: 'uppercase', marginBottom: 8 }}>✏️ {t('Revise stories')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 260, overflowY: 'auto', marginBottom: 16 }}>
@@ -647,6 +666,7 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
 /* ---- Full assignments list (owns its filter state) ---- */
 function AssignmentsCard({ rows, busy, begin, headerAction }) {
   const t = useT()
+  const say = useSay()
   const [tab, setTab] = useState('active')
   const [sort, setSort] = useState('due')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -698,7 +718,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
         </select>
       </div>
       <div style={{ maxHeight: 246, overflowY: 'auto' }}>
-        {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>{t('Nothing here — try the other tab or clear filters.')}</div>}
+        {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>{say('Nothing here — try the other tab or clear filters.')}</div>}
         {filtered.map((row) => {
           const s = STATUS_CHIP[row.status]
           return (
@@ -735,6 +755,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
 
 export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onChange }) {
   const t = useT()
+  const say = useSay()
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
@@ -820,7 +841,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           <div className="card" style={{ width: 400, maxWidth: '92vw', padding: '22px 24px', border: '1px solid var(--gold-line)', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ fontSize: 34 }}>⚠️</div>
             <div style={{ fontWeight: 800, fontSize: 17, margin: '6px 0 4px' }}>{t('Leave this game?')}</div>
-            <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.45 }}>{t("This round won't count. To clear the tile you'll need to start the game over and finish it.")}</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.45 }}>
+              <Directions text="This round won't count. To clear the tile you'll need to start the game over and finish it." />
+            </div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16 }}>
               <button className="btn" onClick={() => setLeaveConfirm(false)} style={{ background: 'var(--good)' }}>{t('Keep playing')}</button>
               <button onClick={() => { setLeaveConfirm(false); setGame(null); setGameFinished(false) }} style={{ background: '#fff', border: '1.5px solid var(--line)', borderRadius: 10, padding: '9px 16px', fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{t('Leave anyway')}</button>
@@ -867,10 +890,10 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
               </button>
             } />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <BigTask compact icon="🧾" title={t('The Proof Room')} sub={t("Find what's broken. Make it right.")} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
-            <BigTask compact icon="✒️" title={t('Free Write')} sub={t('Your page, your rules — write anything')} grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask compact icon="🎮" title={t('Fluency Zone')} sub={t('Small games, big progress · double coins')} grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
-            <BigTask compact icon="🗂️" title={t('Writing Bank')} sub={t('Revise, publish & share your pieces')} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
+            <BigTask compact icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
+            <BigTask compact icon="✒️" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
+            <BigTask compact icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask compact icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
           </div>
         </div>
         <LunaNook modules={state.modules} onLuna={onLuna} />

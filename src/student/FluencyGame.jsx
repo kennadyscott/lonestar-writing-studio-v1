@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useT } from '../lib/i18n/index.jsx'
+import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
 
 /*
  * Built-in fluency games — all play in a popup over the dashboard, never a new tab.
@@ -191,6 +192,11 @@ function QuizGame({ bank, onClose, onFinished }) {
   const [best, setBest] = useState(0)
   const finished = idx >= items.length
   const it = items[idx]
+  // The question text, at the level the student reads. A pure instruction
+  // prompt is translated; a sentence under study stays in English, so it is
+  // also spoken in English whatever the interface language is.
+  const isInstruction = it ? INSTRUCTION_PROMPTS.has(it.q) : false
+  const qText = it ? (isInstruction ? t(it.q) : it.q) : ''
 
   function pick(i) {
     if (picked != null) return
@@ -221,9 +227,11 @@ function QuizGame({ bank, onClose, onFinished }) {
             <span>{t('Question {n} of {total}', { n: idx + 1, total: items.length })}</span>
             <span>⭐ {score}{streak >= 2 ? ` · ${t('🔥 {n} streak', { n: streak })}` : ''}</span>
           </div>
-          {/* The sentence under study stays in English; only a pure instruction prompt is translated. */}
-          <div style={{ background: '#eef4f7', borderRadius: 12, padding: '14px 16px', marginBottom: 12, fontSize: 16.5, fontWeight: 700, lineHeight: 1.45 }}>
-            {INSTRUCTION_PROMPTS.has(it.q) ? t(it.q) : it.q}
+          {/* The sentence under study stays in English; only a pure instruction prompt is translated.
+              The question is the one thing on this screen worth hearing, so the Listen lives here. */}
+          <div style={{ background: '#eef4f7', borderRadius: 12, padding: '14px 16px', marginBottom: 12, fontSize: 16.5, fontWeight: 700, lineHeight: 1.45, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+            <span style={{ flex: 1, minWidth: 0 }}><Glossed text={qText} /></span>
+            <Speak text={qText} lang={isInstruction ? undefined : 'en'} />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {it.o.map((opt, i) => {
@@ -241,7 +249,7 @@ function QuizGame({ bank, onClose, onFinished }) {
           </div>
           {picked != null && (
             <div style={{ background: '#e9f5fb', borderRadius: 10, padding: '9px 13px', fontSize: 13, marginTop: 10, lineHeight: 1.45 }}>
-              💡 {t(it.why)}
+              💡 <Glossed text={t(it.why)} />
             </div>
           )}
           <div style={{ textAlign: 'right', marginTop: 12 }}>
@@ -257,6 +265,7 @@ function QuizGame({ bank, onClose, onFinished }) {
 
 function StretchGame({ onClose, onFinished }) {
   const t = useT()
+  const say = useSay()
   const [round, setRound] = useState(0)
   const [text, setText] = useState('')
   const [done, setDone] = useState([])
@@ -273,7 +282,7 @@ function StretchGame({ onClose, onFinished }) {
 
   if (round === -1) return (
     <div>
-      <p style={{ fontSize: 15 }}>{t('You stretched {n} sentences — nice fluency workout! 💪', { n: done.length })}</p>
+      <p style={{ fontSize: 15 }}><Glossed text={say('You stretched {n} sentences — nice fluency workout! 💪', { n: done.length })} /></p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '12px 0' }}>
         {done.map((d, i) => (
           <div key={i} style={{ background: '#f6f8f9', borderRadius: 10, padding: '8px 12px', fontSize: 14 }}>
@@ -288,17 +297,18 @@ function StretchGame({ onClose, onFinished }) {
     <div>
       <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 10 }}>{t('Round {n} of {total}', { n: round + 1, total: STRETCH_ROUNDS.length })}</div>
       <div style={{ background: '#eef4f7', borderRadius: 12, padding: 16, marginBottom: 10 }}>
-        <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t('Stretch this sentence:')}</div>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>{say('Stretch this sentence:')}</div>
         {/* The sentence being stretched is the English writing itself — never translated. */}
         <div style={{ fontSize: 20, fontWeight: 700 }}>{r.base}</div>
-        <div style={{ fontSize: 13, color: 'var(--cc-blue)', marginTop: 6 }}>{t(r.ask)}</div>
+        {/* The round's ask is the direction — the one Listen on this screen. */}
+        <div style={{ fontSize: 13, color: 'var(--cc-blue)', marginTop: 6 }}><Directions text={r.ask} /></div>
       </div>
       <textarea value={text} onChange={(e) => setText(e.target.value)} autoFocus
-        placeholder={t('Start with "{base}…" and keep going', { base: r.base.replace(/\.$/, '') })}
+        placeholder={say('Start with "{base}…" and keep going', { base: r.base.replace(/\.$/, '') })}
         style={{ width: '100%', minHeight: 90, borderRadius: 10, border: '1px solid var(--line)', padding: 12, fontFamily: 'inherit', fontSize: 15, resize: 'vertical' }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
         <span style={{ fontSize: 13, color: strong ? 'var(--good)' : 'var(--muted)' }}>
-          {extra === 0 ? t('Add at least a few vivid words') : strong ? t('🔥 Now that paints a picture!') : t('{n} words — keep stretching', { n: extra })}
+          {extra === 0 ? say('Add at least a few vivid words') : strong ? t('🔥 Now that paints a picture!') : t('{n} words — keep stretching', { n: extra })}
         </span>
         <button className="btn" disabled={extra < 2} onClick={next}>{round + 1 < STRETCH_ROUNDS.length ? t('Next →') : t('Finish')}</button>
       </div>
@@ -316,10 +326,12 @@ export default function FluencyGame({ gameKey = 'stretch', onClose, onFinished }
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
       <div className="card" style={{ width: 560, maxWidth: '92vw', maxHeight: '92vh', overflowY: 'auto', padding: 26 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <div><span className="eyebrow">{t('Fluency Game')} · {t(skill)}</span><h2 style={{ margin: '2px 0', fontSize: 20 }}>{title}</h2></div>
+          {/* The eyebrow and the title carry the heavy words — Fluency,
+              Transitions, Conventions, Fragment — so they are tappable. */}
+          <div><span className="eyebrow"><Glossed text={`${t('Fluency Game')} · ${t(skill)}`} /></span><h2 style={{ margin: '2px 0', fontSize: 20 }}><Glossed text={title} /></h2></div>
           <button onClick={onClose} style={{ background: 'none', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
-        {bank && <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}>{t(bank.intro)}</p>}
+        {bank && <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}><Directions text={bank.intro} /></p>}
         {bank
           ? <QuizGame bank={bank} onClose={onClose} onFinished={onFinished} />
           : <StretchGame onClose={onClose} onFinished={onFinished} />}

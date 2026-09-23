@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { TIERS, MODES, tierFor, buildRound } from '../../server/typingBank.mjs'
 import { useT } from '../lib/i18n/index.jsx'
+import { Directions, Glossed, useSay } from './Scaffold.jsx'
 
 /*
  * Type Right — typing practice where the keystrokes are also convention practice.
@@ -51,6 +52,7 @@ function Target({ typed, target }) {
 
 export default function TypingGame({ grade = 6, onClose, onChange, onFinished, payHere = true }) {
   const t = useT()
+  const say = useSay()
   const [level, setLevel] = useState(Math.max(2, Math.min(8, grade)))
   const [mode, setMode] = useState(null)
   const [items, setItems] = useState([])
@@ -164,7 +166,10 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
           </div>
 
           {!payHere ? (
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', margin: '6px 0' }}>{result.accuracy >= 70 ? t('Nice round. Your coins are revealed on the Fluency Zone board.') : t('Under 70% this time. Head back to the board and try the tile again.')}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', margin: '6px 0' }}>
+              <Directions style={{ justifyContent: 'center' }}
+                text={result.accuracy >= 70 ? 'Nice round. Your coins are revealed on the Fluency Zone board.' : 'Under 70% this time. Head back to the board and try the tile again.'} />
+            </div>
           ) : result.coins > 0 ? (
             <div className="pill gold" style={{ justifyContent: 'center', padding: '10px 16px', fontSize: 14, maxWidth: 420, margin: '0 auto' }}>
               🪙 {t('+{n} ClassCade coins', { n: result.coins })}{result.doubled ? ` · ${t('double for Fluency Practice')}` : ''}
@@ -172,8 +177,8 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
           ) : (
             <div style={{ background: '#f4f8fb', borderRadius: 10, padding: '11px 16px', fontSize: 13, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto' }}>
               {result.capped
-                ? t("You've earned all the typing coins for today — keep practicing for the speed.")
-                : t('Hit {n}% accuracy to earn coins. Slow down a little — accuracy first, speed follows.', { n: PASS_MARK })}
+                ? <Directions text="You've earned all the typing coins for today — keep practicing for the speed." />
+                : <Directions text='Hit {n}% accuracy to earn coins. Slow down a little — accuracy first, speed follows.' vars={{ n: PASS_MARK }} />}
             </div>
           )}
 
@@ -205,8 +210,11 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
         </div>
         <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 16px', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
           <div><b>{t(tier.unit)}</b> · {t(tier.keys)}</div>
-          <div style={{ color: 'var(--muted)' }}>{t('Working on:')} {t(tier.convention)}</div>
-          <div style={{ color: 'var(--muted)' }}>{t('Goal: {wpm} words per minute at {target}% accuracy', { wpm: tier.wpm, target: tier.target })}</div>
+          {/* The convention being enforced is the conventions vocabulary itself. */}
+          <div style={{ color: 'var(--muted)' }}>{t('Working on:')} <Glossed text={t(tier.convention)} /></div>
+          <div style={{ color: 'var(--muted)' }}>
+            <Directions text='Goal: {wpm} words per minute at {target}% accuracy' vars={{ wpm: tier.wpm, target: tier.target }} />
+          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 11 }}>
@@ -215,7 +223,8 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
               style={{ textAlign: 'left', border: '1.5px solid var(--line)', borderRadius: 14, padding: '14px 16px', cursor: 'pointer', background: '#fff' }}>
               <div style={{ fontSize: 24 }}>{m.icon}</div>
               <div style={{ fontWeight: 800, fontSize: 15, marginTop: 5, color: NAVY }}>{t(m.label)}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3, lineHeight: 1.45 }}>{t(m.blurb)}</div>
+              {/* A mode blurb is a direction, but it lives inside a button — say() only, no gloss buttons nested in it. */}
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3, lineHeight: 1.45 }}>{say(m.blurb)}</div>
             </button>
           ))}
         </div>
@@ -239,7 +248,7 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
 
       {mode === 'fixit' && (
         <div style={{ background: '#fff8ec', border: '1.5px solid #f0d9a8', borderRadius: 12, padding: '11px 15px', marginBottom: 12 }}>
-          <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: '#8a6400' }}>{t('FIX IT AS YOU TYPE')} — {t(item.skill).toUpperCase()}</div>
+          <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: '#8a6400' }}>{t('FIX IT AS YOU TYPE')} — <Glossed text={t(item.skill).toUpperCase()} /></div>
           {/* The broken sentence is the exercise — it stays exactly as written. */}
           <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 15, color: '#7a6224', marginTop: 4 }}>{item.given}</div>
         </div>
@@ -250,7 +259,7 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
       <div style={{ background: '#fbfdfe', border: '1.5px solid var(--line)', borderRadius: 14, padding: '18px 20px', minHeight: 96 }}>
         {mode === 'fixit' && !locked ? (
           <div style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 25, lineHeight: 1.6, letterSpacing: .4, wordBreak: 'break-word', color: '#16386b', minHeight: 40 }}>
-            {typed || <span style={{ color: '#b8c8d4' }}>{t('Type the sentence the way it should be written…')}</span>}
+            {typed || <span style={{ color: '#b8c8d4' }}>{say('Type the sentence the way it should be written…')}</span>}
             <span style={{ borderLeft: '2px solid #0f97c2', marginLeft: 1 }} />
           </div>
         ) : (
@@ -289,13 +298,15 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
         <div style={{ marginTop: 12, background: exactOk && posOk !== false ? '#f1faf4' : '#fff7f7', borderRadius: 12, padding: '11px 15px', fontSize: 13.5, lineHeight: 1.5 }}>
           {exactOk ? <b style={{ color: 'var(--good)' }}>{t('✓ Exactly right.')}</b> : <b style={{ color: '#c0392b' }}>{t('✕ Not quite.')}</b>}{' '}
           {!exactOk && <>{t('The correct version is')} <b style={{ fontFamily: 'ui-monospace, monospace' }}>{item.target}</b></>}
-          {mode === 'sort' && posOk === false && <div style={{ marginTop: 3 }}>{t('“{word}” is a {kind}.', { word: item.target, kind: t(item.pos) })}</div>}
+          {mode === 'sort' && posOk === false && <div style={{ marginTop: 3 }}><Glossed text={t('“{word}” is a {kind}.', { word: item.target, kind: t(item.pos) })} /></div>}
         </div>
       )}
 
       <div style={{ display: 'flex', gap: 10, marginTop: 16, alignItems: 'center' }}>
         <button className="btn ghost" onClick={() => { setMode(null); setResult(null) }} style={{ padding: '9px 16px' }}>{t('← Modes')}</button>
-        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{t('Press Enter to check, Enter again for the next one')}</span>
+        {/* The one Listen on the playing screen — the rest of this screen is the exercise itself. */}
+        <Directions text='Press Enter to check, Enter again for the next one'
+          style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }} />
         {locked
           ? <button className="btn" onClick={next}>{idx + 1 < items.length ? t('Next →') : t('See my score →')}</button>
           : <button className="btn" disabled={!typed || (mode === 'sort' && !posPick)} onClick={submitItem}>{t('Check ✓')}</button>}

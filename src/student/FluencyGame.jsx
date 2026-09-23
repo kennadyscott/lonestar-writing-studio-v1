@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useT } from '../lib/i18n/index.jsx'
 
 /*
  * Built-in fluency games — all play in a popup over the dashboard, never a new tab.
@@ -164,10 +165,24 @@ const BANKS = {
   },
 }
 
+/*
+ * Language: the BANKS above are the lesson itself, so they stay in English —
+ * every `q` that carries the sentence under study and every option `o`. Only
+ * the coaching voice is translated at the render site: intros, skill labels,
+ * the `why` notes, and the prompts below, which are pure instructions with no
+ * English item inside them.
+ */
+const INSTRUCTION_PROMPTS = new Set([
+  'Which one is a complete sentence?',
+  'Which is spelled correctly?',
+  'Which sentence is correct?',
+])
+
 const shuffle = (arr) => { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]] } return a }
 const ROUND_SIZE = 8
 
 function QuizGame({ bank, onClose, onFinished }) {
+  const t = useT()
   const [items] = useState(() => shuffle(bank.items).slice(0, ROUND_SIZE))
   const [idx, setIdx] = useState(0)
   const [picked, setPicked] = useState(null) // option index after answering
@@ -194,20 +209,21 @@ function QuizGame({ bank, onClose, onFinished }) {
       {finished ? (
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 46 }}>{score >= items.length - 1 ? '🏆' : score >= items.length / 2 ? '🌟' : '💪'}</div>
-          <h3 style={{ margin: '6px 0 4px', fontSize: 22 }}>{score} of {items.length} correct!</h3>
+          <h3 style={{ margin: '6px 0 4px', fontSize: 22 }}>{t('{score} of {total} correct!', { score, total: items.length })}</h3>
           <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 16px' }}>
-            {best >= 4 ? `Best streak: ${best} in a row 🔥` : score >= items.length / 2 ? 'Solid round — play again to beat it!' : 'Every round makes the next one easier.'}
+            {best >= 4 ? t('Best streak: {n} in a row 🔥', { n: best }) : score >= items.length / 2 ? t('Solid round — play again to beat it!') : t('Every round makes the next one easier.')}
           </p>
-          <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>Done — back to the dashboard</button>
+          <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>{t('Done — back to the dashboard')}</button>
         </div>
       ) : (
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5, fontWeight: 800, color: 'var(--muted)', marginBottom: 10 }}>
-            <span>Question {idx + 1} of {items.length}</span>
-            <span>⭐ {score}{streak >= 2 ? ` · 🔥 ${streak} streak` : ''}</span>
+            <span>{t('Question {n} of {total}', { n: idx + 1, total: items.length })}</span>
+            <span>⭐ {score}{streak >= 2 ? ` · ${t('🔥 {n} streak', { n: streak })}` : ''}</span>
           </div>
+          {/* The sentence under study stays in English; only a pure instruction prompt is translated. */}
           <div style={{ background: '#eef4f7', borderRadius: 12, padding: '14px 16px', marginBottom: 12, fontSize: 16.5, fontWeight: 700, lineHeight: 1.45 }}>
-            {it.q}
+            {INSTRUCTION_PROMPTS.has(it.q) ? t(it.q) : it.q}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {it.o.map((opt, i) => {
@@ -225,12 +241,12 @@ function QuizGame({ bank, onClose, onFinished }) {
           </div>
           {picked != null && (
             <div style={{ background: '#e9f5fb', borderRadius: 10, padding: '9px 13px', fontSize: 13, marginTop: 10, lineHeight: 1.45 }}>
-              💡 {it.why}
+              💡 {t(it.why)}
             </div>
           )}
           <div style={{ textAlign: 'right', marginTop: 12 }}>
             <button className="btn" disabled={picked == null} onClick={next}>
-              {idx + 1 >= items.length ? 'See my score →' : 'Next →'}
+              {idx + 1 >= items.length ? t('See my score →') : t('Next →')}
             </button>
           </div>
         </div>
@@ -240,6 +256,7 @@ function QuizGame({ bank, onClose, onFinished }) {
 }
 
 function StretchGame({ onClose, onFinished }) {
+  const t = useT()
   const [round, setRound] = useState(0)
   const [text, setText] = useState('')
   const [done, setDone] = useState([])
@@ -256,50 +273,53 @@ function StretchGame({ onClose, onFinished }) {
 
   if (round === -1) return (
     <div>
-      <p style={{ fontSize: 15 }}>You stretched {done.length} sentences — nice fluency workout! 💪</p>
+      <p style={{ fontSize: 15 }}>{t('You stretched {n} sentences — nice fluency workout! 💪', { n: done.length })}</p>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '12px 0' }}>
         {done.map((d, i) => (
           <div key={i} style={{ background: '#f6f8f9', borderRadius: 10, padding: '8px 12px', fontSize: 14 }}>
-            <span style={{ color: 'var(--muted)' }}>{d.base}</span> → <b>{d.stretched || '(skipped)'}</b>
+            <span style={{ color: 'var(--muted)' }}>{d.base}</span> → <b>{d.stretched || t('(skipped)')}</b>
           </div>
         ))}
       </div>
-      <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>Done — back to the dashboard</button>
+      <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>{t('Done — back to the dashboard')}</button>
     </div>
   )
   return (
     <div>
-      <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 10 }}>Round {round + 1} of {STRETCH_ROUNDS.length}</div>
+      <div style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 10 }}>{t('Round {n} of {total}', { n: round + 1, total: STRETCH_ROUNDS.length })}</div>
       <div style={{ background: '#eef4f7', borderRadius: 12, padding: 16, marginBottom: 10 }}>
-        <div style={{ fontSize: 13, color: 'var(--muted)' }}>Stretch this sentence:</div>
+        <div style={{ fontSize: 13, color: 'var(--muted)' }}>{t('Stretch this sentence:')}</div>
+        {/* The sentence being stretched is the English writing itself — never translated. */}
         <div style={{ fontSize: 20, fontWeight: 700 }}>{r.base}</div>
-        <div style={{ fontSize: 13, color: 'var(--cc-blue)', marginTop: 6 }}>{r.ask}</div>
+        <div style={{ fontSize: 13, color: 'var(--cc-blue)', marginTop: 6 }}>{t(r.ask)}</div>
       </div>
       <textarea value={text} onChange={(e) => setText(e.target.value)} autoFocus
-        placeholder={`Start with "${r.base.replace(/\.$/, '')}…" and keep going`}
+        placeholder={t('Start with "{base}…" and keep going', { base: r.base.replace(/\.$/, '') })}
         style={{ width: '100%', minHeight: 90, borderRadius: 10, border: '1px solid var(--line)', padding: 12, fontFamily: 'inherit', fontSize: 15, resize: 'vertical' }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
         <span style={{ fontSize: 13, color: strong ? 'var(--good)' : 'var(--muted)' }}>
-          {extra === 0 ? 'Add at least a few vivid words' : strong ? '🔥 Now that paints a picture!' : `${extra} words — keep stretching`}
+          {extra === 0 ? t('Add at least a few vivid words') : strong ? t('🔥 Now that paints a picture!') : t('{n} words — keep stretching', { n: extra })}
         </span>
-        <button className="btn" disabled={extra < 2} onClick={next}>{round + 1 < STRETCH_ROUNDS.length ? 'Next →' : 'Finish'}</button>
+        <button className="btn" disabled={extra < 2} onClick={next}>{round + 1 < STRETCH_ROUNDS.length ? t('Next →') : t('Finish')}</button>
       </div>
     </div>
   )
 }
 
 export default function FluencyGame({ gameKey = 'stretch', onClose, onFinished }) {
+  const t = useT()
   const bank = BANKS[gameKey]
+  // Game titles are product names — they stay in English in every language.
   const title = bank ? `${bank.icon} ${bank.title}` : '✨ Sentence Stretch'
   const skill = bank ? bank.skill : 'Sentence Fluency'
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
       <div className="card" style={{ width: 560, maxWidth: '92vw', maxHeight: '92vh', overflowY: 'auto', padding: 26 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-          <div><span className="eyebrow">Fluency Game · {skill}</span><h2 style={{ margin: '2px 0', fontSize: 20 }}>{title}</h2></div>
+          <div><span className="eyebrow">{t('Fluency Game')} · {t(skill)}</span><h2 style={{ margin: '2px 0', fontSize: 20 }}>{title}</h2></div>
           <button onClick={onClose} style={{ background: 'none', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
-        {bank && <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}>{bank.intro}</p>}
+        {bank && <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}>{t(bank.intro)}</p>}
         {bank
           ? <QuizGame bank={bank} onClose={onClose} onFinished={onFinished} />
           : <StretchGame onClose={onClose} onFinished={onFinished} />}

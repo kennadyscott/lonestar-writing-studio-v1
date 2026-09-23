@@ -6,17 +6,20 @@ import TypingGame from './TypingGame.jsx'
 import ProofRoom from './ProofRoom.jsx'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
+import { useT, useLocale } from '../lib/i18n/index.jsx'
 
 const TODAY = new Date('2026-07-02T00:00:00')
-const fmt = (d) => d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—'
+const fmt = (d, locale = 'en-US') => d ? new Date(d + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : '—'
 const daysTo = (d) => d ? Math.round((new Date(d + 'T00:00:00') - TODAY) / 86400000) : Infinity
 
 function DueChip({ dueDate, status }) {
-  if (status === 'completed') return <span className="pill green">✓ Turned in</span>
+  const t = useT()
+  const locale = useLocale()
+  if (status === 'completed') return <span className="pill green">{t('✓ Turned in')}</span>
   const dt = daysTo(dueDate)
-  if (dueDate == null) return <span style={{ fontSize: 13, color: 'var(--muted)' }}>No due date</span>
+  if (dueDate == null) return <span style={{ fontSize: 13, color: 'var(--muted)' }}>{t('No due date')}</span>
   const color = dt < 0 ? '#e5484d' : dt <= 2 ? '#e08a2b' : 'var(--muted)'
-  const label = dt < 0 ? `Overdue` : dt === 0 ? 'Due today' : dt === 1 ? 'Due tomorrow' : `Due ${fmt(dueDate)}`
+  const label = dt < 0 ? t('Overdue') : dt === 0 ? t('Due today') : dt === 1 ? t('Due tomorrow') : t('Due {date}', { date: fmt(dueDate, locale) })
   return <span style={{ fontSize: 13, fontWeight: 700, color }}>{label}</span>
 }
 
@@ -27,10 +30,11 @@ const STATUS_CHIP = {
 }
 
 function FormatBadge({ format }) {
-  if (!format) return <span title="Self-started practice" style={{ fontSize: 11, fontWeight: 800, letterSpacing: .4, color: '#8a94a0', background: '#eef3f6', padding: '3px 9px', borderRadius: 7 }}>PRACTICE</span>
+  const t = useT()
+  if (!format) return <span title={t('Self-started practice')} style={{ fontSize: 11, fontWeight: 800, letterSpacing: .4, color: '#8a94a0', background: '#eef3f6', padding: '3px 9px', borderRadius: 7 }}>{t('PRACTICE')}</span>
   const meta = format === 'ECR'
-    ? { bg: 'var(--ecr)', full: 'Extended Constructed Response' }
-    : { bg: 'var(--scr)', full: 'Short Constructed Response' }
+    ? { bg: 'var(--ecr)', full: t('Extended Constructed Response') }
+    : { bg: 'var(--scr)', full: t('Short Constructed Response') }
   return <span title={meta.full} style={{ fontSize: 11, fontWeight: 800, letterSpacing: .4, color: '#fff', background: meta.bg, padding: '3px 9px', borderRadius: 7 }}>{format}</span>
 }
 
@@ -49,6 +53,7 @@ function WayTile({ icon, title, sub, onClick, busy }) {
 const MODULE_SHORT = { m1: 'SCR', m2: 'ECR', m3: 'Stellar', m4: 'Process', m5: 'Revision', m6: 'Editing' }
 
 function LunaNook({ modules, onLuna }) {
+  const t = useT()
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
@@ -65,9 +70,9 @@ function LunaNook({ modules, onLuna }) {
             </span>
           </span>
           <div style={{ minWidth: 0 }}>
-            <b style={{ fontSize: 15, color: '#fff' }}>Luna's Writing Nook</b>
+            <b style={{ fontSize: 15, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
             <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>
-              Module {idx + 1}: {current.label} · 4 of 6 activities
+              {t('Module {n}', { n: idx + 1 })}: {current.label} · {t('{done} of {total} activities', { done: 4, total: 6 })}
             </div>
           </div>
         </div>
@@ -85,12 +90,12 @@ function LunaNook({ modules, onLuna }) {
           {modules.map((m, mi) => {
             const cur = m.status === 'in_progress'
             return (
-              <button key={m.id} onClick={onLuna} title={`Module ${mi + 1}: ${m.label}`}
+              <button key={m.id} onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, width: 62, padding: '5px 2px', borderRadius: 10, cursor: 'pointer',
                   background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
                 <ModuleBadge id={m.id} size={38} dim={m.status === 'not_started'} />
                 <span style={{ fontSize: 9.5, fontWeight: 800, letterSpacing: .3, color: cur ? '#f5c542' : m.status === 'not_started' ? '#7f9bb4' : '#a8dff5', whiteSpace: 'nowrap' }}>
-                  {MODULE_SHORT[m.id] || `M${mi + 1}`}
+                  {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                 </span>
               </button>
             )
@@ -98,7 +103,7 @@ function LunaNook({ modules, onLuna }) {
         </div>
 
         <button className="btn" onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-          Go to my path
+          {t('Go to my path')}
         </button>
       </div>
     </div>
@@ -107,6 +112,7 @@ function LunaNook({ modules, onLuna }) {
 
 // Average-score-over-time line (single series, direct-labeled per point).
 function ScoreLine({ points }) {
+  const t = useT()
   const W = 320, H = 128, PX = 26, PT = 26, PB = 24
   const lo = Math.min(...points.map((p) => p.pct)) - 6
   const hi = Math.max(...points.map((p) => p.pct)) + 6
@@ -115,7 +121,7 @@ function ScoreLine({ points }) {
   const line = points.map((p, i) => `${x(i)},${y(p.pct)}`).join(' ')
   const area = `${x(0)},${H - PB} ${line} ${x(points.length - 1)},${H - PB}`
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: 360, display: 'block' }} role="img" aria-label="Average writing score over time">
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', maxWidth: 360, display: 'block' }} role="img" aria-label={t('Average writing score over time')}>
       <defs>
         <linearGradient id="scoreFill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#06aade" stopOpacity=".22" />
@@ -138,44 +144,45 @@ function ScoreLine({ points }) {
 }
 
 function GrowthSummaryCard({ gs, onGrowth }) {
+  const t = useT()
   const away = Math.max(0, gs.goalPercent - gs.currentAverage)
   const stats = [
-    { k: 'Current Average', v: `${gs.currentAverage}% ↗`, sub: `↑ ${gs.weeklyDelta}% this week`, c: 'var(--good)' },
-    { k: 'Writing Streak', v: `${gs.streakDays} days 🔥`, sub: 'Keep it up!', c: 'var(--muted)' },
-    { k: 'Badges Earned', v: `${gs.badges} 🏅`, sub: 'See all badges', c: 'var(--muted)' },
+    { k: t('Current Average'), v: `${gs.currentAverage}% ↗`, sub: t('↑ {n}% this week', { n: gs.weeklyDelta }), c: 'var(--good)' },
+    { k: t('Writing Streak'), v: t('{n} days 🔥', { n: gs.streakDays }), sub: t('Keep it up!'), c: 'var(--muted)' },
+    { k: t('Badges Earned'), v: `${gs.badges} 🏅`, sub: t('See all badges'), c: 'var(--muted)' },
   ]
   return (
     <div className="card" style={{ padding: '18px 22px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
       <div style={{ display: 'grid', gridTemplateColumns: '0.9fr 1.2fr 0.9fr', gap: 24, alignItems: 'center' }}>
       <div>
-        <div style={{ fontSize: 19, fontWeight: 800 }}>My Data 📊</div>
-        <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, margin: '6px 0 12px' }}>Your averages at a glance — dig deeper in Data & Goals.</p>
-        <button className="btn" style={{ padding: '8px 18px' }} onClick={onGrowth}>See full data →</button>
+        <div style={{ fontSize: 19, fontWeight: 800 }}>{t('My Data 📊')}</div>
+        <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.5, margin: '6px 0 12px' }}>{t('Your averages at a glance — dig deeper in Data & Goals.')}</p>
+        <button className="btn" style={{ padding: '8px 18px' }} onClick={onGrowth}>{t('See full data →')}</button>
       </div>
       <div>
-        <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 2 }}>Average Score Over Time</div>
+        <div style={{ fontSize: 13, fontWeight: 800, marginBottom: 2 }}>{t('Average Score Over Time')}</div>
         <ScoreLine points={gs.scoreOverTime} />
       </div>
       <div>
-        <div style={{ fontSize: 13, fontWeight: 800 }}>Goal Progress</div>
+        <div style={{ fontSize: 13, fontWeight: 800 }}>{t('Goal Progress')}</div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', margin: '8px 0 6px' }}>
-          <span style={{ fontSize: 13, color: 'var(--muted)' }}>Goal: {gs.goalPercent}%</span>
+          <span style={{ fontSize: 13, color: 'var(--muted)' }}>{t('Goal: {n}%', { n: gs.goalPercent })}</span>
           <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--teal)' }}>{gs.currentAverage}%</span>
         </div>
         <div style={{ height: 12, background: '#e6eef3', borderRadius: 7 }}>
           <div style={{ height: '100%', width: `${(gs.currentAverage / gs.goalPercent) * 100}%`, background: 'linear-gradient(90deg,var(--cyan-bright),var(--teal))', borderRadius: 7 }} />
         </div>
         <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 8 }}>
-          You're <b style={{ color: 'var(--cyan-bright)' }}>{away}%</b> away from your goal!
+          {t("You're")} <b style={{ color: 'var(--cyan-bright)' }}>{away}%</b> {t('away from your goal!')}
         </div>
       </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10, borderTop: '1px solid var(--line)', paddingTop: 14, marginTop: 16 }}>
-        {stats.map((t) => (
-          <div key={t.k}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>{t.k}</div>
-            <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--teal)' }}>{t.v}</div>
-            <div style={{ fontSize: 10.5, color: t.c, fontWeight: 600 }}>{t.sub}</div>
+        {stats.map((st) => (
+          <div key={st.k}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)' }}>{st.k}</div>
+            <div style={{ fontSize: 17, fontWeight: 800, color: 'var(--teal)' }}>{st.v}</div>
+            <div style={{ fontSize: 10.5, color: st.c, fontWeight: 600 }}>{st.sub}</div>
           </div>
         ))}
       </div>
@@ -185,12 +192,13 @@ function GrowthSummaryCard({ gs, onGrowth }) {
 
 /* ---- Home tab: one featured assignment ---- */
 function UpNextCard({ row, busy, begin, onAll }) {
+  const t = useT()
   if (!row) return null
   const s = STATUS_CHIP[row.status]
   return (
     <div style={{ position: 'relative', background: '#fff', border: '2.5px solid #0a7dba', borderRadius: 18, boxShadow: '0 8px 24px rgba(6,170,222,.16)', padding: '24px 22px 14px' }}>
       <span style={{ position: 'absolute', top: -14, left: 18, background: 'linear-gradient(120deg,#f5b400,#e89a00)', color: '#3d2c00', fontSize: 11.5, fontWeight: 800, letterSpacing: .6, padding: '5px 15px', borderRadius: 999, boxShadow: '0 2px 8px rgba(180,120,0,.35)' }}>
-        ⭐ UP NEXT FOR YOU
+        {t('⭐ UP NEXT FOR YOU')}
       </span>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 240 }}>
@@ -206,9 +214,9 @@ function UpNextCard({ row, busy, begin, onAll }) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 9 }}>
           <button className="btn lg" disabled={busy} onClick={() => begin(row)}>
-            {row.status === 'in_progress' ? 'Continue' : 'Begin'}
+            {row.status === 'in_progress' ? t('Continue') : t('Begin')}
           </button>
-          <button onClick={onAll} style={{ color: 'var(--link)', fontSize: 13, fontWeight: 800 }}>See all assignments →</button>
+          <button onClick={onAll} style={{ color: 'var(--link)', fontSize: 13, fontWeight: 800 }}>{t('See all assignments →')}</button>
         </div>
       </div>
     </div>
@@ -217,6 +225,7 @@ function UpNextCard({ row, busy, begin, onAll }) {
 
 /* ---- Assignments tab: active goal banner ---- */
 function GoalBanner({ me, classFocus }) {
+  const t = useT()
   // read-only on Home — the goal is set and managed in a writing conference
   const half = { flex: '1 1 320px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 14, padding: '4px 2px' }
   return (
@@ -226,14 +235,14 @@ function GoalBanner({ me, classFocus }) {
         <span style={{ fontSize: 28 }}>🎯</span>
         {me.goal ? (
           <div style={{ minWidth: 0 }}>
-            <div className="eyebrow">My goal</div>
+            <div className="eyebrow">{t('My goal')}</div>
             <div style={{ fontSize: 15.5, fontWeight: 800 }}>{me.goal.text}</div>
-            {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>Trait: {TRAIT_LABELS[me.goal.trait]} · your coach keeps this in mind when you confer</div>}
+            {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{t('Trait: {trait} · your coach keeps this in mind when you confer', { trait: t(TRAIT_LABELS[me.goal.trait]) })}</div>}
           </div>
         ) : (
           <div style={{ minWidth: 0 }}>
-            <div className="eyebrow">My goal</div>
-            <div style={{ fontSize: 15, fontWeight: 700 }}>You'll name your next goal in a writing conference with your teacher.</div>
+            <div className="eyebrow">{t('My goal')}</div>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>{t("You'll name your next goal in a writing conference with your teacher.")}</div>
           </div>
         )}
       </div>
@@ -243,16 +252,16 @@ function GoalBanner({ me, classFocus }) {
       <div style={half}>
         <span style={{ fontSize: 28 }}>👥</span>
         <div style={{ minWidth: 0 }}>
-          <div className="eyebrow" style={{ color: CYAN_TEXT }}>Class focus</div>
+          <div className="eyebrow" style={{ color: CYAN_TEXT }}>{t('Class focus')}</div>
           {classFocus ? (
             <>
               <div style={{ fontSize: 15.5, fontWeight: 800 }}>{classFocus.text}</div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                {classFocus.note ? `${classFocus.note} · ` : ''}what the whole class is working on{classFocus.setBy ? ` — set by ${classFocus.setBy}` : ''}
+                {classFocus.note ? `${classFocus.note} · ` : ''}{t('what the whole class is working on')}{classFocus.setBy ? t(' — set by {name}', { name: classFocus.setBy }) : ''}
               </div>
             </>
           ) : (
-            <div style={{ fontSize: 15, fontWeight: 700 }}>Your class focus shows up here when your teacher sets one.</div>
+            <div style={{ fontSize: 15, fontWeight: 700 }}>{t('Your class focus shows up here when your teacher sets one.')}</div>
           )}
         </div>
       </div>
@@ -264,6 +273,7 @@ const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
 
 /* ---- the studio dashboard: mockup banner cards with art vignettes ---- */
 function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
+  const t = useT()
   const [c1, c2] = grad
   const BASE = import.meta.env.BASE_URL || '/'
   if (compact) {
@@ -280,7 +290,7 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
           <span style={{ display: 'block', fontSize: 15, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)', whiteSpace: 'nowrap' }}>{title}</span>
           <span style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 2, lineHeight: 1.3 }}>{sub}</span>
         </span>
-        <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 8, padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap' }}>Go</span>
+        <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 8, padding: '6px 12px', fontSize: 12, whiteSpace: 'nowrap' }}>{t('Go')}</span>
       </button>
     )
   }
@@ -300,7 +310,7 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
         <span style={{ display: 'block', fontSize: 20, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)' }}>{title}</span>
         <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.9)', fontWeight: 600, marginTop: 3 }}>{sub}</span>
       </span>
-      <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 10, padding: '8px 16px', fontSize: 13.5, whiteSpace: 'nowrap' }}>Go</span>
+      <span style={{ position: 'relative', background: '#fff', color: c1, fontWeight: 700, borderRadius: 10, padding: '8px 16px', fontSize: 13.5, whiteSpace: 'nowrap' }}>{t('Go')}</span>
     </button>
   )
 }
@@ -315,6 +325,7 @@ function Comet({ x, y, c, rot = -18, w = 80 }) {
 }
 
 function DailyBanner({ dc, busy, onGo }) {
+  const t = useT()
   return (
     <div className="nova-banner" style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, color: '#fff', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
       background: 'radial-gradient(ellipse at 12% 15%, rgba(100,70,210,.4) 0%, transparent 45%), radial-gradient(ellipse at 88% 85%, rgba(80,55,180,.35) 0%, transparent 50%), linear-gradient(110deg,#151040 0%,#1e1656 55%,#151040 100%)',
@@ -335,7 +346,7 @@ function DailyBanner({ dc, busy, onGo }) {
 
       {/* Nova robot art */}
       <div style={{ position: 'relative', flexShrink: 0 }}>
-        <img className="nova-robot" src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt="Nova the Robot" style={{ width: 148, display: 'block',
+        <img className="nova-robot" src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt={t('Nova the Robot')} style={{ width: 148, display: 'block',
           WebkitMaskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)',
           maskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)' }} />
       </div>
@@ -343,21 +354,21 @@ function DailyBanner({ dc, busy, onGo }) {
       {/* content */}
       <div style={{ flex: 1, minWidth: 300, position: 'relative' }}>
         <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2.2, color: '#e8f1ff', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <span>Daily Challenge</span>
+          <span>{t('Daily Challenge')}</span>
           <span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span>
-          <span>Revision</span>
+          <span>{t('Revision')}</span>
           {dc?.genre && (<><span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span><span>{dc.genre}</span></>)}
         </div>
-        <div style={{ fontSize: 23, fontWeight: 800, margin: '6px 0 4px', textShadow: '0 1px 8px rgba(0,0,0,.4)' }}>
-          {dc?.done ? "Today's challenge is done — nice work! ✓" : `${dc?.author || 'A robot'} wrote something rough — can you fix it up?`}
+        <div style={{ fontSize: 23, fontWeight: 800, margin: '6px 0 4px', textShadow: '0 1px 8px rgba(0,0,0,.4)', textWrap: 'balance' }}>
+          {dc?.done ? t("Today's challenge is done — nice work! ✓") : t('{author} wrote something rough — can you fix it up?', { author: dc?.author || t('A robot') })}
         </div>
         <div style={{ fontSize: 14.5, color: '#c9dbf4', marginBottom: 13 }}>
-          {dc?.done ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.'
-            : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"}
+          {dc?.done ? t('A brand-new challenge lands tomorrow. You can still look back at your revision.')
+            : t("Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!")}
         </div>
         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, padding: '8px 20px', fontSize: 13.5, fontWeight: 800, letterSpacing: .6,
           background: 'linear-gradient(120deg,#f5c542,#e89a00)', color: '#3d2c00', border: '1.5px solid rgba(255,225,140,.9)', boxShadow: '0 0 16px rgba(245,180,0,.55)' }}>
-          🪙 EARN 100 COINS!
+          {t('🪙 EARN 100 COINS!')}
         </span>
       </div>
 
@@ -371,21 +382,23 @@ function DailyBanner({ dc, busy, onGo }) {
         style={{ position: 'relative', flexShrink: 0, whiteSpace: 'nowrap', color: '#fff', fontWeight: 800, fontSize: 19, borderRadius: 20, padding: '20px 32px',
           background: 'linear-gradient(120deg,#1d3a8f,#2a4dab)', border: '2.5px solid #55d7ff',
           boxShadow: '0 0 26px rgba(85,215,255,.55), inset 0 0 18px rgba(85,215,255,.22)', cursor: 'pointer' }}>
-        {dc?.done ? 'Review →' : dc?.started ? 'Keep going →' : 'Start Revising →'}
+        {dc?.done ? t('Review →') : dc?.started ? t('Keep going →') : t('Start Revising →')}
       </button>
     </div>
   )
 }
 
 /* ---- Share Wall right rail (mockup) ---- */
-function relTime(d) {
+// `t` is passed in: this runs outside a component, so it cannot call useT().
+function relTime(d, t) {
   const days = Math.max(0, Math.floor((Date.now() - new Date(d + 'T12:00:00')) / 86400000))
-  if (days === 0) return 'Today'
-  if (days < 7) return `${days}d ago`
-  return `${Math.floor(days / 7)}w ago`
+  if (days === 0) return t('Today')
+  if (days < 7) return t('{n}d ago', { n: days })
+  return t('{n}w ago', { n: Math.floor(days / 7) })
 }
 
 function ShareWallStrip({ state, onChange, onViewAll }) {
+  const t = useT()
   const wall = (state.shareWall || []).slice(0, 3)
   async function react(id, type) { await api.react(id, type); onChange && onChange() }
   if (!wall.length) return null
@@ -394,10 +407,10 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
         <span style={{ fontSize: 20 }}>🌟</span>
         <div style={{ flex: 1, minWidth: 200 }}>
-          <b style={{ fontSize: 16 }}>Share Wall</b>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>See what other students are writing — cheer them on with 👍 ❤️ 🎉</div>
+          <b style={{ fontSize: 16 }}>{t('Share Wall')}</b>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>{t('See what other students are writing — cheer them on with 👍 ❤️ 🎉')}</div>
         </div>
-        <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} onClick={onViewAll}>View all →</button>
+        <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} onClick={onViewAll}>{t('View all →')}</button>
       </div>
       <div className="wall-strip">
         {wall.map((e) => (
@@ -406,7 +419,7 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
               <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#eef3f6', display: 'grid', placeItems: 'center', fontSize: 17, flexShrink: 0 }}>{e.avatar}</span>
               <div style={{ minWidth: 0, flex: 1 }}>
                 <div style={{ fontSize: 13.5, fontWeight: 800, lineHeight: 1.15 }}>{e.studentName}</div>
-                <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>{e.genre} · {relTime(e.sharedOn)}</div>
+                <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600 }}>{e.genre} · {relTime(e.sharedOn, t)}</div>
               </div>
             </div>
             <div style={{ fontSize: 14.5, fontWeight: 800, margin: '9px 0 5px', color: '#0d2f55' }}>{e.title}</div>
@@ -439,12 +452,13 @@ function Coin({ size = 14 }) {
 }
 
 function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal, lastMiss }) {
+  const t = useT()
   const byKey = Object.fromEntries(games.map((g) => [g.game, g]))
   const playable = (c) => c.games.map((k) => byKey[k]).filter((g) => g && g.kind === 'builtin')
   const cleared = grid?.cleared || {}
   const tiles = categories.map((c) => ({ ...c, options: playable(c), done: cleared[c.id] || null }))
-  const inPlay = tiles.filter((t) => t.options.length > 0)
-  const doneCount = inPlay.filter((t) => t.done).length
+  const inPlay = tiles.filter((tile) => tile.options.length > 0)
+  const doneCount = inPlay.filter((tile) => tile.done).length
   const allClear = inPlay.length > 0 && doneCount === inPlay.length
   const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + (grid?.bonusPaid ? 50 : 0)
   const BASE = import.meta.env.BASE_URL || '/'
@@ -457,24 +471,24 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
 
         {/* header: the same dark strip as Luna's Writing Nook on the home page, her backdrop faint behind it */}
         <div style={{ position: 'relative', padding: '12px 22px 12px', color: '#fff', backgroundImage: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 50%, rgba(13,36,64,.7) 100%), url(${BASE}zone/backdrop.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 30%', borderBottom: '1px solid var(--gold-line)' }}>
-          <button onClick={onClose} aria-label="Close" style={{ position: 'absolute', top: 12, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 17, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
+          <button onClick={onClose} aria-label={t('Close')} style={{ position: 'absolute', top: 12, right: 14, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.35)', color: '#fff', fontSize: 17, fontWeight: 800, display: 'grid', placeItems: 'center' }}>×</button>
           <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
             <div style={{ flexShrink: 0, marginRight: 'auto' }}>
               <div style={{ ...arcadeFont, fontSize: 'clamp(24px, 2.6vw, 32px)', lineHeight: 1, letterSpacing: '.02em' }}>
-                <span style={{ color: '#fff' }}>FLUENCY</span> <span style={{ color: '#f5b400' }}>ZONE</span>
+                <span style={{ color: '#fff' }}>{t('FLUENCY')}</span> <span style={{ color: '#f5b400' }}>{t('ZONE')}</span>
               </div>
-              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again. Grade {grade}.</div>
+              <div style={{ fontSize: 12.5, fontWeight: 600, color: 'rgba(255,255,255,.8)', marginTop: 4 }}>{t('Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again.')} {t('Grade {n}', { n: grade })}.</div>
             </div>
             <div style={{ flexShrink: 0, marginRight: 40, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 16px 6px 12px', display: 'flex', alignItems: 'center', gap: 8, fontWeight: 800, fontSize: 18 }}>
               <Coin size={18} />{earned}
             </div>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,.1)', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '7px 14px', fontSize: 12, fontWeight: 800, whiteSpace: 'nowrap', order: 3, marginLeft: 'auto' }}>
-              <span style={{ letterSpacing: .6 }}>ROUND {grid?.round || 1}</span>
-              <span style={{ display: 'inline-flex', gap: 5 }} aria-label={`${doneCount} of ${inPlay.length} cleared`}>
-                {inPlay.map((t) => <span key={t.id} style={{ width: 9, height: 9, borderRadius: '50%', background: t.done ? '#f5b400' : 'rgba(255,255,255,.28)', boxShadow: t.done ? '0 0 6px #f5b400' : 'none' }} />)}
+              <span style={{ letterSpacing: .6 }}>{t('ROUND')} {grid?.round || 1}</span>
+              <span style={{ display: 'inline-flex', gap: 5 }} aria-label={t('{done} of {total} cleared', { done: doneCount, total: inPlay.length })}>
+                {inPlay.map((tile) => <span key={tile.id} style={{ width: 9, height: 9, borderRadius: '50%', background: tile.done ? '#f5b400' : 'rgba(255,255,255,.28)', boxShadow: tile.done ? '0 0 6px #f5b400' : 'none' }} />)}
               </span>
               <span style={{ color: 'rgba(255,255,255,.35)' }}>|</span>
-              <span>🏆 Clear the board for <span style={{ color: '#f5b400' }}>+50 bonus coins</span></span>
+              <span>🏆 {t('Clear the board for')} <span style={{ color: '#f5b400' }}>{t('+50 bonus coins')}</span></span>
             </div>
           </div>
         </div>
@@ -483,45 +497,45 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
           <div style={{ margin: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 14, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 14, padding: '10px 16px' }}>
             <span style={{ fontSize: 26 }}>🏆</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>Board cleared! {grid?.bonusPaid ? '+50 bonus coins banked.' : ''}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>Reset the board for a fresh round of surprise games.</div>
+              <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>{t('Board cleared!')} {grid?.bonusPaid ? t('+50 bonus coins banked.') : ''}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{t('Reset the board for a fresh round of surprise games.')}</div>
             </div>
-            <button className="btn" disabled={busy} onClick={onReset}>↺ Reset & play again</button>
+            <button className="btn" disabled={busy} onClick={onReset}>↺ {t('Reset & play again')}</button>
           </div>
         )}
 
         {/* tiles */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 12, padding: '14px 22px 4px' }}>
-          {tiles.map((t) => {
-            const soon = t.options.length === 0
-            const done = !!t.done
-            const justNow = lastReveal === t.id
-            const played = done ? byKey[t.done.game] : null
+          {tiles.map((tile) => {
+            const soon = tile.options.length === 0
+            const done = !!tile.done
+            const justNow = lastReveal === tile.id
+            const played = done ? byKey[tile.done.game] : null
             return (
-              <div key={t.id} className={`zone-tile${!done && !soon ? ' playable' : ''}`} role={!done && !soon ? 'button' : undefined} tabIndex={!done && !soon ? 0 : -1}
-                onClick={() => !done && !soon && !busy && onPlay(t)} onKeyDown={(e) => !done && !soon && !busy && (e.key === 'Enter' || e.key === ' ') && onPlay(t)}
+              <div key={tile.id} className={`zone-tile${!done && !soon ? ' playable' : ''}`} role={!done && !soon ? 'button' : undefined} tabIndex={!done && !soon ? 0 : -1}
+                onClick={() => !done && !soon && !busy && onPlay(tile)} onKeyDown={(e) => !done && !soon && !busy && (e.key === 'Enter' || e.key === ' ') && onPlay(tile)}
                 style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
                 background: done ? '#f4f6f8' : '#fff', border: `1px solid ${done ? '#cbd8e2' : 'var(--gold-line)'}`,
                 boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: !done && !soon ? 'pointer' : 'default' }}>
                 {/* art panel cropped from her card render; the crops are ~2.2:1 so cover shows them whole */}
-                <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${t.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
+                <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${tile.id}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
                 <div style={{ padding: '8px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY, lineHeight: 1.15 }}>{t.title}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, minHeight: 15 }}>{t.blurb}</div>
+                  <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY, lineHeight: 1.15 }}>{tile.title}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, minHeight: 15 }}>{tile.blurb}</div>
                   <div style={{ flex: 1 }} />
                   {done ? (
                     <>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> <b style={{ fontSize: 16, color: NAVY }}>+{t.done.coins}</b> · {t.done.pct != null ? `${t.done.pct}% · ` : ''}{played?.title}</div>
-                      <div style={{ marginTop: 6, background: '#2e9e6b', color: '#fff', fontWeight: 800, fontSize: 12.5, borderRadius: 999, padding: '7px 14px', width: '100%' }}>✓ Completed</div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> <b style={{ fontSize: 16, color: NAVY }}>+{tile.done.coins}</b> · {tile.done.pct != null ? `${tile.done.pct}% · ` : ''}{played?.title}</div>
+                      <div style={{ marginTop: 6, background: '#2e9e6b', color: '#fff', fontWeight: 800, fontSize: 12.5, borderRadius: 999, padding: '7px 14px', width: '100%' }}>✓ {t('Completed')}</div>
                     </>
                   ) : soon ? (
-                    <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>COMING SOON</div>
+                    <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>{t('COMING SOON')}</div>
                   ) : (
                     <>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: lastMiss === t.id ? '#b23b3b' : 'var(--muted)' }}>{lastMiss === t.id ? <>Under 70% · try again</> : <><Coin /> up to <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(t.options)}</b></>}</div>
-                      <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>{t.options.length === 1 ? t.options[0].title : `Surprise: ${t.options.length} games in the mix`}</div>
+                      <div style={{ fontSize: 12.5, fontWeight: 700, color: lastMiss === tile.id ? '#b23b3b' : 'var(--muted)' }}>{lastMiss === tile.id ? <>{t('Under 70% · try again')}</> : <><Coin /> {t('up to')} <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(tile.options)}</b></>}</div>
+                      <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>{tile.options.length === 1 ? tile.options[0].title : t('Surprise: {n} games in the mix', { n: tile.options.length })}</div>
                     </>
                   )}
                 </div>
@@ -531,7 +545,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
         </div>
 
         <div style={{ padding: '8px 22px 12px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
-          <Coin /> 20 coins for 90%+, 10 for 70%+. Every round pays <b style={{ color: NAVY }}>double coins</b> in ClassCade <span style={{ color: '#f5b400' }}>✦</span>
+          <Coin /> {t('20 coins for 90%+, 10 for 70%+. Every round pays')} <b style={{ color: NAVY }}>{t('double coins')}</b> {t('in ClassCade')} <span style={{ color: '#f5b400' }}>✦</span>
         </div>
       </div>
     </div>
@@ -540,17 +554,18 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
 
 /* ---- Free Write chooser: revise an unfinished story or start fresh ---- */
 function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
+  const t = useT()
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
       <div className="card" style={{ width: 500, maxWidth: '94vw', padding: 24 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4 }}>
           <span style={{ fontSize: 26 }}>🕊️</span>
-          <b style={{ fontSize: 18 }}>Free Write</b>
-          <button onClick={onClose} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
+          <b style={{ fontSize: 18 }}>{t('Free Write')}</b>
+          <button onClick={onClose} aria-label={t('Close')} style={{ marginLeft: 'auto', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
-        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>You have unfinished stories — pick one up where you left off, or start something brand new.</p>
+        <p style={{ fontSize: 13.5, color: 'var(--muted)', margin: '0 0 14px' }}>{t('You have unfinished stories — pick one up where you left off, or start something brand new.')}</p>
 
-        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .5, color: 'var(--teal)', textTransform: 'uppercase', marginBottom: 8 }}>✏️ Revise stories</div>
+        <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .5, color: 'var(--teal)', textTransform: 'uppercase', marginBottom: 8 }}>✏️ {t('Revise stories')}</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 260, overflowY: 'auto', marginBottom: 16 }}>
           {stories.map(({ sub, a, wcount, excerpt }) => (
             <button key={sub.id} onClick={() => onPick(sub.id)} disabled={busy}
@@ -559,20 +574,20 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
               <span style={{ flex: 1, minWidth: 0 }}>
                 <span style={{ display: 'block', fontWeight: 800, fontSize: 14 }}>{a.title}</span>
                 <span style={{ display: 'block', fontSize: 12, color: 'var(--muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {excerpt || 'Nothing written yet'} · {wcount} words · Draft {sub.drafts.length}
+                  {excerpt || t('Nothing written yet')} · {t('{n} words', { n: wcount })} · {t('Draft {n}', { n: sub.drafts.length })}
                 </span>
               </span>
-              <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--link)', whiteSpace: 'nowrap' }}>Revise →</span>
+              <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--link)', whiteSpace: 'nowrap' }}>{t('Revise →')}</span>
             </button>
           ))}
         </div>
 
         <button className="btn" disabled={busy} onClick={onNew} style={{ width: '100%', justifyContent: 'center', padding: '11px 0' }}>
-          ✨ Start new writing piece
+          ✨ {t('Start new writing piece')}
         </button>
         {onBank && (
           <button onClick={onBank} style={{ width: '100%', marginTop: 10, color: 'var(--link)', fontSize: 13, fontWeight: 800 }}>
-            🗂️ See everything in my Writing Bank →
+            🗂️ {t('See everything in my Writing Bank →')}
           </button>
         )}
       </div>
@@ -583,6 +598,7 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
 
 /* ---- Full assignments list (owns its filter state) ---- */
 function AssignmentsCard({ rows, busy, begin, headerAction }) {
+  const t = useT()
   const [tab, setTab] = useState('active')
   const [sort, setSort] = useState('due')
   const [typeFilter, setTypeFilter] = useState('all')
@@ -607,34 +623,34 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
     <div className="card" style={{ overflow: 'hidden', flex: 1 }}>
       <div style={{ display: 'flex', alignItems: 'center', padding: '12px 16px 10px' }}>
         <div className="seg">
-          {['active', 'completed'].map((t) => (
-            <button key={t} className={tab === t ? 'on' : ''} onClick={() => setTab(t)}>
-              {t === 'active' ? 'Active assignments' : 'Completed'}
+          {['active', 'completed'].map((k) => (
+            <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>
+              {k === 'active' ? t('Active assignments') : t('Completed')}
             </button>
           ))}
         </div>
         {headerAction && <><span style={{ flex: 1 }} />{headerAction}</>}
       </div>
       <div style={{ display: 'flex', gap: 8, padding: '10px 16px', borderTop: '1px solid var(--line)', borderBottom: '1px solid var(--line)', background: '#f8fbfd', flexWrap: 'wrap' }}>
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="🔍 Search assignments…"
+        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('🔍 Search assignments…')}
           style={{ flex: 1, minWidth: 140, padding: '8px 12px', borderRadius: 10, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 13 }} />
         <select value={formatFilter} onChange={(e) => setFormatFilter(e.target.value)} style={selStyle}>
-          <option value="all">All formats</option>
-          <option value="SCR">SCR only</option>
-          <option value="ECR">ECR only</option>
+          <option value="all">{t('All formats')}</option>
+          <option value="SCR">{t('SCR only')}</option>
+          <option value="ECR">{t('ECR only')}</option>
         </select>
         <select value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)} style={selStyle}>
-          {types.map((t) => <option key={t} value={t}>{t === 'all' ? 'All types' : t}</option>)}
+          {types.map((ty) => <option key={ty} value={ty}>{ty === 'all' ? t('All types') : ty}</option>)}
         </select>
         <select value={sort} onChange={(e) => setSort(e.target.value)} style={selStyle}>
-          <option value="due">Sort: Due date</option>
-          <option value="title">Sort: Title</option>
-          <option value="type">Sort: Type</option>
-          <option value="teacher">Sort: Teacher</option>
+          <option value="due">{t('Sort: Due date')}</option>
+          <option value="title">{t('Sort: Title')}</option>
+          <option value="type">{t('Sort: Type')}</option>
+          <option value="teacher">{t('Sort: Teacher')}</option>
         </select>
       </div>
       <div style={{ maxHeight: 246, overflowY: 'auto' }}>
-        {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>Nothing here — try the other tab or clear filters.</div>}
+        {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>{t('Nothing here — try the other tab or clear filters.')}</div>}
         {filtered.map((row) => {
           const s = STATUS_CHIP[row.status]
           return (
@@ -653,7 +669,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
               <div style={{ width: 112, textAlign: 'right' }}><DueChip dueDate={row.a.dueDate} status={row.status} /></div>
               <div style={{ width: 104, textAlign: 'right' }}>
                 <button className={row.status === 'not_started' ? 'btn' : 'btn ghost'} disabled={busy} onClick={() => begin(row)}>
-                  {row.status === 'completed' ? 'Review' : row.status === 'in_progress' ? 'Continue' : 'Begin'}
+                  {row.status === 'completed' ? t('Review') : row.status === 'in_progress' ? t('Continue') : t('Begin')}
                 </button>
               </div>
             </div>
@@ -662,7 +678,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
       </div>
       {filtered.length > 3 && (
         <div style={{ padding: '8px 16px', borderTop: '1px solid var(--line)', fontSize: 11.5, fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>
-          ↕ {filtered.length - 3} more — scroll the list
+          ↕ {t('{n} more — scroll the list', { n: filtered.length - 3 })}
         </div>
       )}
     </div>
@@ -670,6 +686,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
 }
 
 export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onChange }) {
+  const t = useT()
   const [homeTab, setHomeTab] = useState('home')
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
@@ -754,11 +771,11 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 95 }} onClick={() => setLeaveConfirm(false)}>
           <div className="card" style={{ width: 400, maxWidth: '92vw', padding: '22px 24px', border: '1px solid var(--gold-line)', textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ fontSize: 34 }}>⚠️</div>
-            <div style={{ fontWeight: 800, fontSize: 17, margin: '6px 0 4px' }}>Leave this game?</div>
-            <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.45 }}>This round won't count. To clear the tile you'll need to start the game over and finish it.</div>
+            <div style={{ fontWeight: 800, fontSize: 17, margin: '6px 0 4px' }}>{t('Leave this game?')}</div>
+            <div style={{ fontSize: 13.5, color: 'var(--muted)', lineHeight: 1.45 }}>{t("This round won't count. To clear the tile you'll need to start the game over and finish it.")}</div>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 16 }}>
-              <button className="btn" onClick={() => setLeaveConfirm(false)} style={{ background: 'var(--good)' }}>Keep playing</button>
-              <button onClick={() => { setLeaveConfirm(false); setGame(null); setGameFinished(false) }} style={{ background: '#fff', border: '1.5px solid var(--line)', borderRadius: 10, padding: '9px 16px', fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>Leave anyway</button>
+              <button className="btn" onClick={() => setLeaveConfirm(false)} style={{ background: 'var(--good)' }}>{t('Keep playing')}</button>
+              <button onClick={() => { setLeaveConfirm(false); setGame(null); setGameFinished(false) }} style={{ background: '#fff', border: '1.5px solid var(--line)', borderRadius: 10, padding: '9px 16px', fontWeight: 700, fontSize: 13.5, color: 'var(--ink)' }}>{t('Leave anyway')}</button>
             </div>
           </div>
         </div>
@@ -766,7 +783,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {proofRoom && <ProofRoom grade={me.gradeLevel ?? 5} onClose={() => setProofRoom(false)} onChange={onChange} />}
       {gamePicker && (
         <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal} lastMiss={lastMiss}
-          onPlay={(t) => { const pick = t.options[Math.floor(Math.random() * t.options.length)]; setLastReveal(null); setLastMiss(null); setGameFinished(false); setGame({ key: pick.game, category: t.id }) }}
+          onPlay={(tile) => { const pick = tile.options[Math.floor(Math.random() * tile.options.length)]; setLastReveal(null); setLastMiss(null); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
           onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null) } }}
           onClose={() => setGamePicker(false)} />
       )}
@@ -781,7 +798,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
         <div className="seg" style={{ position: 'relative', zIndex: 2 }}>
           {[['home', 'Home'], ['data', 'Data & Goals']].map(([k, label]) => (
             <button key={k} className={homeTab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
-              {label}
+              {t(label)}
             </button>
           ))}
         </div>
@@ -797,14 +814,14 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
               <button onClick={onQuickWrite} disabled={busy}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 999, fontSize: 13, fontWeight: 800, color: '#fff', cursor: 'pointer',
                   background: 'linear-gradient(120deg,#2f3f96,#1e2a6b)', boxShadow: '0 4px 12px rgba(30,42,107,.35)' }}>
-                ⚡ Quick Write
+                ⚡ {t('Quick Write')}
               </button>
             } />
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <BigTask compact icon="🧾" title="The Proof Room" sub="Find what's broken. Make it right." grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
-            <BigTask compact icon="✒️" title="Free Write" sub="Your page, your rules — write anything" grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask compact icon="🎮" title="Fluency Zone" sub="Small games, big progress · double coins" grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
-            <BigTask compact icon="🗂️" title="Writing Bank" sub="Revise, publish & share your pieces" grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
+            <BigTask compact icon="🧾" title={t('The Proof Room')} sub={t("Find what's broken. Make it right.")} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
+            <BigTask compact icon="✒️" title={t('Free Write')} sub={t('Your page, your rules — write anything')} grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
+            <BigTask compact icon="🎮" title={t('Fluency Zone')} sub={t('Small games, big progress · double coins')} grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask compact icon="🗂️" title={t('Writing Bank')} sub={t('Revise, publish & share your pieces')} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
           </div>
         </div>
         <LunaNook modules={state.modules} onLuna={onLuna} />

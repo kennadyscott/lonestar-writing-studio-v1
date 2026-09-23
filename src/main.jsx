@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import './theme.css'
 import App from './App.jsx'
 import Platform from './publisher/Platform.jsx'
+import { LangProvider } from './lib/i18n/index.jsx'
 
 // Two surfaces, one bundle:
 //   /publisher  Crystal Writing — the publisher console
@@ -21,5 +22,5 @@ const root = createRoot(document.getElementById('root'))
 root.render(
   at('publisher')
     ? <Platform onExit={() => { location.hash = ''; location.pathname = location.pathname.replace(/\/publisher\/?$/, '/') }} />
-    : <App />
+    : <LangProvider><App /></LangProvider>
 )

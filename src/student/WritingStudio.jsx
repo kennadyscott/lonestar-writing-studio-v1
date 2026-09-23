@@ -2,19 +2,21 @@ import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
+import { useT } from '../lib/i18n/index.jsx'
 
 function CoinToast({ data, onClose }) {
+  const t = useT()
   if (!data) return null
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={onClose}>
       <div className="card" style={{ padding: 28, width: 420, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ fontSize: 46 }}>🎉</div>
-        <h2 style={{ margin: '6px 0' }}>Revision saved!</h2>
+        <h2 style={{ margin: '6px 0' }}>{t('Revision saved!')}</h2>
         {data.newMilestones.length === 0 ? (
-          <p style={{ color: 'var(--muted)' }}>New version saved. Keep going — bigger changes earn coins!</p>
+          <p style={{ color: 'var(--muted)' }}>{t('New version saved. Keep going — bigger changes earn coins!')}</p>
         ) : (
           <>
-            <p style={{ color: 'var(--muted)', marginTop: 0 }}>You earned <b>{data.coinsAwarded}</b> ClassCade coins for how you worked:</p>
+            <p style={{ color: 'var(--muted)', marginTop: 0 }}>{t('You earned')} <b>{data.coinsAwarded}</b> {t('ClassCade coins for how you worked:')}</p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8, margin: '14px 0' }}>
               {data.newMilestones.map((m) => (
                 <div key={m.id} className="pill gold" style={{ justifyContent: 'space-between', fontSize: 13, padding: '8px 12px' }}>
@@ -24,7 +26,7 @@ function CoinToast({ data, onClose }) {
             </div>
           </>
         )}
-        <button className="btn" style={{ marginTop: 6 }} onClick={onClose}>Keep writing</button>
+        <button className="btn" style={{ marginTop: 6 }} onClick={onClose}>{t('Keep writing')}</button>
       </div>
     </div>
   )
@@ -33,6 +35,7 @@ function CoinToast({ data, onClose }) {
 const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
 
 export default function WritingStudio({ state, sub, health, onChange, onBack }) {
+  const t = useT()
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
   const isFree = asg.genre === 'free'
   const published = !!sub.published
@@ -105,39 +108,39 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }}>
           <div className="card" style={{ padding: 30, width: 420, textAlign: 'center' }}>
             <div style={{ fontSize: 48 }}>🌟</div>
-            <h2 style={{ margin: '4px 0' }}>Published!</h2>
-            <p style={{ color: 'var(--muted)', margin: '0 0 12px', fontSize: 14.5 }}>"{asg.title}" is a finished piece — drafted, revised, and done. That's real writing.</p>
+            <h2 style={{ margin: '4px 0' }}>{t('Published!')}</h2>
+            <p style={{ color: 'var(--muted)', margin: '0 0 12px', fontSize: 14.5 }}>{t('"{title}" is a finished piece — drafted, revised, and done. That\'s real writing.', { title: asg.title })}</p>
             {pub.coins > 0 && (
               <div className="pill gold" style={{ justifyContent: 'center', padding: '9px 14px', fontSize: 14, marginBottom: 12 }}>
-                🏅 Published a finished piece&nbsp;&nbsp;<span className="coin"><span className="disc" />+{pub.coins}</span>
+                {t('🏅 Published a finished piece')}&nbsp;&nbsp;<span className="coin"><span className="disc" />+{pub.coins}</span>
               </div>
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <button className="btn" style={{ justifyContent: 'center', background: sharedNow ? 'var(--good)' : '#c2571f' }}
                 disabled={sharedNow} onClick={shareToWall}>
-                {sharedNow ? '✓ Shared to the Writing Wall!' : '💛 Share to the Writing Wall'}
+                {sharedNow ? t('✓ Shared to the Writing Wall!') : t('💛 Share to the Writing Wall')}
               </button>
               <button className="btn ghost" style={{ justifyContent: 'center' }} onClick={() => { setPub(null); onBack && onBack() }}>
-                Back to my dashboard
+                {t('Back to my dashboard')}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {onBack && <button className="backlink" onClick={onBack}>← Back to My Writing</button>}
+      {onBack && <button className="backlink" onClick={onBack}>{t('← Back to My Writing')}</button>}
 
       {isFree ? (
         /* Free Write hero */
-        <div style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', marginBottom: 16, boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>
-          <img src={`${FW}hero.webp`} alt="Free Write — your page, your rules." style={{ display: 'block', width: '100%', height: 'clamp(120px, 14vw, 172px)', objectFit: 'cover', objectPosition: 'center' }} />
+        <div style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', marginBottom: 12, boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>
+          <img src={`${FW}hero.webp`} alt="Free Write — your page, your rules." style={{ display: 'block', width: '100%', height: 'clamp(72px, 8vw, 104px)', objectFit: 'cover', objectPosition: 'center' }} />
         </div>
       ) : (
         /* prompt banner */
         <div className="card" style={{ padding: '14px 18px', marginBottom: 14, display: 'flex', gap: 14, alignItems: 'center' }}>
           <div style={{ fontSize: 24 }}>📣</div>
           <div style={{ flex: 1 }}>
-            <div className="eyebrow">{asg.format ? `${asg.format} · ` : ''}{asg.type || asg.genre} · Grade {asg.gradeLevel}{asg.scopeStage ? ` · ${asg.scopeStage}` : ''}</div>
+            <div className="eyebrow">{asg.format ? `${asg.format} · ` : ''}{asg.type || asg.genre} · {t('Grade {n}', { n: asg.gradeLevel })}{asg.scopeStage ? ` · ${asg.scopeStage}` : ''}</div>
             <div style={{ fontSize: 14, marginTop: 2 }}>{asg.prompt}</div>
           </div>
         </div>
@@ -145,7 +148,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
 
       {/* version strip */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>Versions:</span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{t('Versions:')}</span>
         {sub.drafts.map((d) => {
           const on = d.id === selectedId
           const isCur = d.id === currentDraft.id
@@ -154,11 +157,11 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
               style={{ padding: '6px 12px', borderRadius: 999, fontSize: 13, fontWeight: 600,
                 border: on ? '2px solid var(--navy-1)' : '1px solid var(--line)',
                 background: on ? '#eef4f7' : '#fff', color: 'var(--ink)' }}>
-              {d.isOriginal ? 'Original' : `Draft ${d.n}`}{isCur ? ' · now' : ''}
+              {d.isOriginal ? t('Original') : t('Draft {n}', { n: d.n })}{isCur ? ` · ${t('now')}` : ''}
             </button>
           )
         })}
-        {!isCurrent && <span className="pill" style={{ background: '#fff4d6', color: '#a37400' }}>viewing history — read only</span>}
+        {!isCurrent && <span className="pill" style={{ background: '#fff4d6', color: '#a37400' }}>{t('viewing history — read only')}</span>}
       </div>
 
       {/* two-column workspace */}
@@ -167,46 +170,46 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <b style={{ fontSize: 15 }}>
-              {published ? `🌟 ${asg.title} — Published` : isFree && isCurrent && selected.n > 1 ? `✏️ Revising Draft ${selected.n}` : `Draft ${selected.n} ${isCurrent ? '(working copy)' : ''}`}
+              {published ? `🌟 ${asg.title} — ${t('Published')}` : isFree && isCurrent && selected.n > 1 ? t('✏️ Revising Draft {n}', { n: selected.n }) : `${t('Draft {n}', { n: selected.n })} ${isCurrent ? t('(working copy)') : ''}`}
             </b>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{wc} words</span>
+            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('{n} words', { n: wc })}</span>
           </div>
           {isCurrent && !published ? (
-            <textarea value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? 'Start writing here…\nAnything goes.' : 'Start writing your argument here…'}
+            <textarea value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? t('Start writing here…\nAnything goes.') : t('Start writing your argument here…')}
               style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           ) : (
             <div style={{ flex: 1, minHeight: 380, padding: 18, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#3a4149' }}>{selected.content}</div>
           )}
           {isCurrent && published && (
             <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'center' }}>
-              <span className="pill gold" style={{ padding: '8px 16px' }}>🌟 Published — find it anytime in your Writing Bank</span>
+              <span className="pill gold" style={{ padding: '8px 16px' }}>{t('🌟 Published — find it anytime in your Writing Bank')}</span>
             </div>
           )}
           {isCurrent && !published && (
             <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-                {isFree ? 'Autosaves as you type · completing a draft saves it to your Versions' : 'Autosaves as you type · saving a revision snapshots this version'}
+                {isFree ? t('Autosaves as you type · completing a draft saves it to your Versions') : t('Autosaves as you type · saving a revision snapshots this version')}
               </span>
               {isFree ? (
                 <span style={{ display: 'inline-flex', gap: 8, flexWrap: 'wrap' }}>
-                  <button className="btn ghost" disabled={saving} onClick={saveAndClose} title="Save and finish later">💾 Save Writing</button>
+                  <button className="btn ghost" disabled={saving} onClick={saveAndClose} title={t('Save and finish later')}>{t('💾 Save Writing')}</button>
                   {currentDraft.n === 1 ? (
                     <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>
-                      {saving ? 'Saving…' : '✅ First Draft Complete'}
+                      {saving ? t('Saving…') : t('✅ First Draft Complete')}
                     </button>
                   ) : (
                     <>
-                      <button className="btn ghost" disabled={saving || wc < 5} onClick={saveRevision} title="Snapshot this draft and keep revising">
-                        ✅ Draft {currentDraft.n} Complete
+                      <button className="btn ghost" disabled={saving || wc < 5} onClick={saveRevision} title={t('Snapshot this draft and keep revising')}>
+                        {t('✅ Draft {n} Complete', { n: currentDraft.n })}
                       </button>
                       <button className="btn gold" disabled={saving || wc < 5} onClick={publishWork}>
-                        {saving ? 'Saving…' : '🌟 Publish Work'}
+                        {saving ? t('Saving…') : t('🌟 Publish Work')}
                       </button>
                     </>
                   )}
                 </span>
               ) : (
-                <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>{saving ? 'Saving…' : '💾 Save this revision'}</button>
+                <button className="btn gold" disabled={saving || wc < 5} onClick={saveRevision}>{saving ? t('Saving…') : t('💾 Save this revision')}</button>
               )}
             </div>
           )}
@@ -220,7 +223,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
             <>
               <div style={{ display: 'flex', borderBottom: '1px solid var(--line)' }}>
                 <div style={{ flex: 1, padding: '12px', fontWeight: 700, fontSize: 14, background: '#fff', color: 'var(--navy-1)',
-                  borderBottom: '2px solid var(--navy-1)', textAlign: 'center' }}>🎯 Traits</div>
+                  borderBottom: '2px solid var(--navy-1)', textAlign: 'center' }}>{t('🎯 Traits')}</div>
               </div>
               <div style={{ flex: 1, minHeight: 0 }}>
                 <TraitPanel draft={selected} readOnly={!isCurrent} onChange={onChange} />

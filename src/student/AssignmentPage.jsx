@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useT } from '../lib/i18n/index.jsx'
 
 /*
  * AssignmentPage — replica of the live LoneStar CR assignment runner
@@ -32,6 +33,7 @@ export default function AssignmentPage({ a, onBack, onComplete, busy }) {
   const [answers, setAnswers] = useState(Array(QUESTIONS.length).fill(''))
   const [submitted, setSubmitted] = useState(Array(QUESTIONS.length).fill(false))
   const [zoom, setZoom] = useState(1)
+  const t = useT()
 
   const answeredCount = submitted.filter(Boolean).length
   const allDone = answeredCount === QUESTIONS.length
@@ -51,25 +53,25 @@ export default function AssignmentPage({ a, onBack, onComplete, busy }) {
     <div>
       {/* page header: title + zoom + save/exit + demo complete */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-        <h1 className="page" style={{ margin: 0, fontSize: 26 }}>Assignment</h1>
+        <h1 className="page" style={{ margin: 0, fontSize: 26 }}>{t('Assignment')}</h1>
         {a && (
           <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)', marginLeft: 4 }}>
-            {a.format === 'ECR' ? 'Extended Constructed Response' : 'Short Constructed Response'} · {a.title}
+            {a.format === 'ECR' ? t('Extended Constructed Response') : t('Short Constructed Response')} · {a.title}
           </span>
         )}
         <span style={{ flex: 1 }} />
-        <button title="Zoom in" onClick={() => setZoom((z) => Math.min(1.3, z + 0.1))}
+        <button title={t('Zoom in')} onClick={() => setZoom((z) => Math.min(1.3, z + 0.1))}
           style={{ width: 42, height: 40, borderRadius: 10, border: `1.5px solid ${TEAL}`, background: '#fff', color: TEAL, fontSize: 17, fontWeight: 800 }}>⊕</button>
-        <button title="Zoom out" onClick={() => setZoom((z) => Math.max(0.85, z - 0.1))}
+        <button title={t('Zoom out')} onClick={() => setZoom((z) => Math.max(0.85, z - 0.1))}
           style={{ width: 42, height: 40, borderRadius: 10, border: `1.5px solid ${TEAL}`, background: TEAL, color: '#fff', fontSize: 17, fontWeight: 800 }}>⊖</button>
         <button onClick={onBack}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: NAVY, color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 10, padding: '11px 20px' }}>
-          ↩ Save And Exit
+          {t('↩ Save And Exit')}
         </button>
         <button disabled={busy} onClick={onComplete}
           style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'var(--good)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 10, padding: '11px 20px',
             boxShadow: '0 4px 14px rgba(46,158,107,.35)' }}>
-          ✓ Complete Assignment
+          {t('✓ Complete Assignment')}
         </button>
       </div>
 
@@ -78,16 +80,16 @@ export default function AssignmentPage({ a, onBack, onComplete, busy }) {
         <div className="card" style={{ padding: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 14 }}>
             <div style={{ flex: 1, minWidth: 150, display: 'flex', alignItems: 'center', background: '#eef1f4', borderRadius: 9, padding: '9px 14px' }}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>Passage</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--muted)' }}>{t('Passage')}</span>
               <b style={{ marginLeft: 'auto', fontSize: 14 }}>The Big Move</b>
             </div>
             <button style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: `1.5px solid ${TEAL}`, color: NAVY, background: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 9, padding: '9px 14px' }}>
-              📖 Dictionary
+              {t('📖 Dictionary')}
             </button>
             <button style={{ display: 'inline-flex', alignItems: 'center', gap: 7, border: `1.5px solid ${TEAL}`, color: NAVY, background: '#fff', fontWeight: 800, fontSize: 13, borderRadius: 9, padding: '9px 14px' }}>
-              🖥️ Line Reader
+              {t('🖥️ Line Reader')}
             </button>
-            <button title="Reset zoom" onClick={() => setZoom(1)}
+            <button title={t('Reset zoom')} onClick={() => setZoom(1)}
               style={{ width: 38, height: 38, borderRadius: 9, border: `1.5px solid ${TEAL}`, background: '#fff', color: TEAL, fontSize: 15 }}>⟳</button>
           </div>
           <div style={{ fontSize: 14 * zoom, lineHeight: 1.65, color: '#233c50', display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -100,7 +102,7 @@ export default function AssignmentPage({ a, onBack, onComplete, busy }) {
         {/* ---- questions ---- */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <div className="card" style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <b style={{ fontSize: 13.5, color: '#233c50' }}>Question No.</b>
+            <b style={{ fontSize: 13.5, color: '#233c50' }}>{t('Question No.')}</b>
             {QUESTIONS.map((_, i) => {
               const cur = i === q
               const done = submitted[i]
@@ -115,13 +117,13 @@ export default function AssignmentPage({ a, onBack, onComplete, busy }) {
               )
             })}
             <span style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 800, color: allDone ? 'var(--good)' : 'var(--muted)' }}>
-              {answeredCount}/{QUESTIONS.length} answered
+              {t('{n}/{total} answered', { n: answeredCount, total: QUESTIONS.length })}
             </span>
           </div>
 
           <div className="card" style={{ padding: '18px 20px' }}>
             <div style={{ fontSize: 15, fontWeight: 800, color: '#233c50', paddingBottom: 12, borderBottom: `2px solid ${TEAL}`, marginBottom: 14 }}>
-              Read the question carefully. Then enter your answer in the box provided.
+              {t('Read the question carefully. Then enter your answer in the box provided.')}
             </div>
             <p style={{ fontSize: 14, color: '#233c50', margin: '0 0 14px' }}>{QUESTIONS[q]}</p>
 
@@ -135,15 +137,15 @@ export default function AssignmentPage({ a, onBack, onComplete, busy }) {
               <span style={{ fontSize: 13, color: '#6b8296' }}>•≡</span>
             </div>
             <textarea value={answers[q]} maxLength={475} onChange={(e) => setAnswer(e.target.value)}
-              placeholder="Write your answer here...."
+              placeholder={t('Write your answer here....')}
               style={{ width: '100%', minHeight: 190, border: '1.5px solid #c9d6de', borderRadius: '0 0 8px 8px', padding: '12px 14px', fontSize: 14, lineHeight: 1.55, fontFamily: 'inherit', resize: 'vertical', outline: 'none', display: 'block' }} />
-            <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>Max. 475 characters</div>
+            <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 6 }}>{t('Max. {n} characters', { n: 475 })}</div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 12, marginTop: 14 }}>
-              {submitted[q] && <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--good)' }}>✓ Answer submitted</span>}
+              {submitted[q] && <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--good)' }}>{t('✓ Answer submitted')}</span>}
               <button onClick={submitAnswer} disabled={!answers[q].trim()}
                 style={{ background: answers[q].trim() ? NAVY : '#c3d0da', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 10, padding: '12px 24px' }}>
-                Submit Answer
+                {t('Submit Answer')}
               </button>
             </div>
           </div>
@@ -151,10 +153,10 @@ export default function AssignmentPage({ a, onBack, onComplete, busy }) {
           {allDone && (
             <div className="card" style={{ padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 12, background: '#e6f6ee', border: '1.5px solid #7ccfa4' }}>
               <span style={{ fontSize: 24 }}>🎉</span>
-              <b style={{ flex: 1, fontSize: 14, color: '#1e6a44' }}>All {QUESTIONS.length} questions answered — great work!</b>
+              <b style={{ flex: 1, fontSize: 14, color: '#1e6a44' }}>{t('All {n} questions answered — great work!', { n: QUESTIONS.length })}</b>
               <button disabled={busy} onClick={onComplete}
                 style={{ background: 'var(--good)', color: '#fff', fontWeight: 800, fontSize: 13.5, borderRadius: 999, padding: '10px 22px' }}>
-                ✓ Complete Assignment
+                {t('✓ Complete Assignment')}
               </button>
             </div>
           )}

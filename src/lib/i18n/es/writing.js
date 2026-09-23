@@ -1,0 +1,163 @@
+// The Writing Studio: editor, Writing Bank, Quick Write, Inspiration Hub.
+// Product names (LoneStar CR, ClassCade, Luna, RACE, STAAR, SCR, ECR) and the
+// Free Write prompt banks stay in English — see PromptsPanel.jsx.
+export const writing = {
+  // ---------- Inspiration Hub (PromptsPanel) ----------
+  'Need an idea? Spin for inspiration — then write wherever it takes you.': '¿Necesitas una idea? Gira para inspirarte y escribe a donde te lleve.',
+  '{n} day streak': 'racha de {n} días',
+  'Keep it going!': '¡Sigue así!',
+  '🎲 Story Sparks': '🎲 Chispas de Historia',
+  '✏️ First Lines': '✏️ Primeras Líneas',
+  '{n} fun story ideas are waiting. Spin one!': '{n} ideas divertidas te esperan. ¡Gira una!',
+  '{n} opening lines are ready. Spin one and keep it going!': '{n} líneas de apertura están listas. ¡Gira una y sigue!',
+  '🎲 Spin a prompt': '🎲 Girar una idea',
+  '✏️ Give me a first line': '✏️ Dame una primera línea',
+  'Story spark': 'Chispa de historia',
+  'First line': 'Primera línea',
+  '🎲 Another one!': '🎲 ¡Otra más!',
+  'No rules — twist it, break it, or ignore it. Your page, your story.': 'Sin reglas: cámbiala, rómpela o ignórala. Tu página, tu historia.',
+  'Steal this line as your opener — then take the story anywhere.': 'Usa esta línea para empezar y lleva la historia a donde quieras.',
+  'Or try a quick spark…': 'O prueba una chispa rápida…',
+  'A surprising discovery': 'Un descubrimiento sorprendente',
+  'What if…?': '¿Y si…?',
+  "A moment I'll always remember": 'Un momento que siempre recordaré',
+
+  // ---------- The editor (WritingStudio) ----------
+  '← Back to My Writing': '← Volver a Mi Escritura',
+  'Revision saved!': '¡Revisión guardada!',
+  'New version saved. Keep going — bigger changes earn coins!': 'Nueva versión guardada. ¡Sigue así: los cambios más grandes ganan monedas!',
+  'You earned': 'Ganaste',
+  'ClassCade coins for how you worked:': 'monedas de ClassCade por cómo trabajaste:',
+  'Keep writing': 'Seguir escribiendo',
+  'Published!': '¡Publicado!',
+  '"{title}" is a finished piece — drafted, revised, and done. That\'s real writing.': '"{title}" es una obra terminada: la escribiste, la revisaste y la cerraste. Eso es escribir de verdad.',
+  '🏅 Published a finished piece': '🏅 Publicaste una obra terminada',
+  '✓ Shared to the Writing Wall!': '✓ ¡Compartido en el Muro de Escritura!',
+  '💛 Share to the Writing Wall': '💛 Compartir en el Muro de Escritura',
+  'Back to my dashboard': 'Volver a mi panel',
+
+  // version strip
+  'Versions:': 'Versiones:',
+  'Original': 'Original',
+  'Draft {n}': 'Borrador {n}',
+  'now': 'ahora',
+  'viewing history — read only': 'viendo el historial: solo lectura',
+  '✏️ Revising Draft {n}': '✏️ Revisando el Borrador {n}',
+  '(working copy)': '(copia de trabajo)',
+
+  // editor body + save bar
+  'Start writing here…\nAnything goes.': 'Empieza a escribir aquí…\nTodo se vale.',
+  'Start writing your argument here…': 'Empieza a escribir tu argumento aquí…',
+  '🌟 Published — find it anytime in your Writing Bank': '🌟 Publicado: lo encuentras cuando quieras en tu Banco de Escritura',
+  'Autosaves as you type · completing a draft saves it to your Versions': 'Se guarda solo mientras escribes · terminar un borrador lo guarda en tus Versiones',
+  'Autosaves as you type · saving a revision snapshots this version': 'Se guarda solo mientras escribes · guardar una revisión captura esta versión',
+  'Save and finish later': 'Guardar y terminar después',
+  '💾 Save Writing': '💾 Guardar escritura',
+  'Saving…': 'Guardando…',
+  '✅ First Draft Complete': '✅ Primer borrador listo',
+  'Snapshot this draft and keep revising': 'Captura este borrador y sigue revisando',
+  '✅ Draft {n} Complete': '✅ Borrador {n} listo',
+  '🌟 Publish Work': '🌟 Publicar mi obra',
+  '💾 Save this revision': '💾 Guardar esta revisión',
+  '🎯 Traits': '🎯 Rasgos',
+
+  // ---------- My Writing Bank (WritingBankPage) ----------
+  '← Back to Dashboard': '← Volver al panel',
+  '🗂️ My Writing Bank': '🗂️ Mi Banco de Escritura',
+  "Every piece you've started — revise it, publish it, share it, or clear it out.": 'Todo lo que has empezado: revísalo, publícalo, compártelo o bórralo.',
+  '🌟 Visit the Writing Wall →': '🌟 Visitar el Muro de Escritura →',
+
+  // stat tiles
+  'pieces': 'obras',
+  'published': 'publicadas',
+  'in progress': 'en proceso',
+  'Total writing pieces': 'Total de obras escritas',
+  'Shared with the world': 'Compartidas con el mundo',
+  'Keep going — great ideas ahead!': '¡Sigue así: vienen grandes ideas!',
+  'Start a New Piece': 'Empezar una obra nueva',
+
+  // filters, search, sorts
+  'Search your writing pieces…': 'Busca en tus obras…',
+  'All types': 'Todos los tipos',
+  'Sort: Newest': 'Orden: Más recientes',
+  'Sort: Oldest': 'Orden: Más antiguas',
+  'Sort: Longest': 'Orden: Más largas',
+  'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.': 'Todavía no hay nada aquí: empieza una Escritura Libre o una Escritura Rápida y aparecerá en tu banco.',
+
+  // piece rows
+  '🌟 Published': '🌟 Publicado',
+  '✓ Completed': '✓ Completado',
+  '✏️ In progress': '✏️ En proceso',
+  '💛 On the Writing Wall': '💛 En el Muro de Escritura',
+  'Nothing written yet': 'Todavía no has escrito nada',
+  '{n} draft': '{n} borrador',
+  '{n} drafts': '{n} borradores',
+  'Last updated {when}': 'Última actualización {when}',
+  'Revise →': 'Revisar →',
+  '🌟 Publish': '🌟 Publicar',
+  '💛 Share to Wall': '💛 Compartir en el Muro',
+  "Delete this piece? You can't undo this.": '¿Borrar esta obra? No puedes deshacerlo.',
+  'Yes, delete': 'Sí, borrar',
+  'Keep it': 'Conservarla',
+  'Discard this piece': 'Descartar esta obra',
+
+  // share confirm dialog
+  'Share to the Writing Wall?': '¿Compartir en el Muro de Escritura?',
+  '" will appear on the class Writing Wall.': '" aparecerá en el Muro de Escritura de la clase.',
+  'Who can see it:': 'Quién puede verlo:',
+  'only the students and teacher in': 'solo los estudiantes y el maestro de',
+  "{teacher}'s class": 'la clase de {teacher}',
+  'your teacher': 'tu maestro',
+  'It never leaves your classroom, and you or your teacher can take it down anytime.': 'Nunca sale de tu salón, y tú o tu maestro pueden quitarlo cuando quieran.',
+  'Not yet': 'Todavía no',
+  '💛 Yes, share it': '💛 Sí, compartirlo',
+
+  // publish confirm dialog
+  'Publish this piece?': '¿Publicar esta obra?',
+  'Publishing marks': 'Publicar marca',
+  'as finished — it becomes': 'como terminada: pasa a ser',
+  'read-only': 'solo lectura',
+  'and earns': 'y gana',
+  '+15 coins': '+15 monedas',
+  'just you and your teacher — publishing does': 'solo tú y tu maestro; publicar',
+  'not': 'no',
+  'put it on the Writing Wall. Sharing is a separate choice you make after.': 'la pone en el Muro de Escritura. Compartir es una decisión aparte que tomas después.',
+  'Keep working on it': 'Seguir trabajando en ella',
+  '🌟 Publish it': '🌟 Publicarla',
+
+  // ---------- Quick Write (QuickWritePage) ----------
+  'About {n} min': 'Unos {n} min',
+  'Writing Topic': 'Tema de escritura',
+  'Writing Prompt': 'Idea de escritura',
+  'Think about:': 'Piensa en:',
+  'What details and examples will make your idea clear to a reader?': '¿Qué detalles y ejemplos harán que tu idea quede clara para quien lee?',
+  'Start writing': 'Empezar a escribir',
+  'The {time} timer starts right away': 'El cronómetro de {time} empieza de inmediato',
+  'goal set by {who}': 'meta puesta por {who}',
+
+  // intro benefits strip
+  'Share Your Ideas': 'Comparte tus ideas',
+  'Your voice matters. Big ideas can spark real change!': 'Tu voz importa. ¡Las grandes ideas pueden provocar cambios de verdad!',
+  'Be Creative': 'Sé creativo',
+  'There are no wrong answers — just your unique voice.': 'No hay respuestas equivocadas: solo tu voz única.',
+  'Make It Meaningful': 'Dale sentido',
+  'Explain the why behind your idea and how it helps others.': 'Explica el porqué de tu idea y cómo ayuda a los demás.',
+
+  // timed screen
+  'Title': 'Título',
+  '⏰ Time! Finish your thought & submit': '⏰ ¡Se acabó el tiempo! Termina tu idea y envía',
+  'keep writing…': 'sigue escribiendo…',
+  'Write your answer here…': 'Escribe tu respuesta aquí…',
+  '✓ Submitted': '✓ Enviado',
+  'Quick writes are about showing up — words over perfection.': 'La Escritura Rápida se trata de presentarte: palabras antes que perfección.',
+  "📬 I'm done — submit": '📬 Terminé: enviar',
+
+  // completion modal
+  'Quick write done!': '¡Escritura Rápida lista!',
+  'You wrote': 'Escribiste',
+  '— showing up is how writers are made.': '— presentarte es lo que te hace escritor.',
+  '🏅 Finished a timed Quick Write': '🏅 Terminaste una Escritura Rápida cronometrada',
+  '🔥 Writing streak:': '🔥 Racha de escritura:',
+  '{n} days': '{n} días',
+  ' — extended today!': ' — ¡extendida hoy!',
+}

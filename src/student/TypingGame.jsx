@@ -1,11 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { TIERS, MODES, tierFor, buildRound } from '../../server/typingBank.mjs'
+import { useT } from '../lib/i18n/index.jsx'
 
 /*
  * Type Right — typing practice where the keystrokes are also convention practice.
  * Four modes over seven grade tiers. A round is scored on accuracy and speed and
  * nothing else: no data leaves this screen. Clear 85% and the round pays coins.
+ *
+ * Language: the words, sentences and fix-its come from typingBank.mjs and are
+ * the English being practiced — they are never translated. The labels around
+ * them (tier unit, keys, convention, mode names, Fix It skill tags, parts of
+ * speech) are translated here at the render site, since the bank is a
+ * module-level constant and cannot call the hook itself.
  */
 
 const NAVY = '#16386b'
@@ -43,6 +50,7 @@ function Target({ typed, target }) {
 }
 
 export default function TypingGame({ grade = 6, onClose, onChange, onFinished, payHere = true }) {
+  const t = useT()
   const [level, setLevel] = useState(Math.max(2, Math.min(8, grade)))
   const [mode, setMode] = useState(null)
   const [items, setItems] = useState([])
@@ -135,15 +143,15 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
       <Shell onClose={onClose} level={level} tier={tier} mode={mode}>
         <div style={{ textAlign: 'center', padding: '10px 0 4px' }}>
           <div style={{ fontSize: 46 }}>{passed ? '🎉' : '💪'}</div>
-          <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? 'Round cleared!' : 'Round finished'}</h2>
+          <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? t('Round cleared!') : t('Round finished')}</h2>
           <p style={{ color: 'var(--muted)', margin: '0 0 16px', fontSize: 14 }}>
-            {MODES.find((m) => m.key === mode)?.label} · Level {level}
+            {t(MODES.find((m) => m.key === mode)?.label || '')} · {t('Level {n}', { n: level })}
           </p>
 
           <div style={{ display: 'flex', justifyContent: 'center', gap: 26, flexWrap: 'wrap', marginBottom: 16 }}>
-            <Stat big label="ACCURACY" value={`${result.accuracy}%`} tone={passed ? 'var(--good)' : '#c99312'} />
-            <Stat label="SPEED" value={`${result.wpm} wpm`} sub={`target ${tier.wpm}`} />
-            <Stat label="EXACT" value={`${result.exact}/${result.items}`} sub="typed perfectly" />
+            <Stat big label={t('ACCURACY')} value={`${result.accuracy}%`} tone={passed ? 'var(--good)' : '#c99312'} />
+            <Stat label={t('SPEED')} value={t('{n} wpm', { n: result.wpm })} sub={t('target {n}', { n: tier.wpm })} />
+            <Stat label={t('EXACT')} value={`${result.exact}/${result.items}`} sub={t('typed perfectly')} />
           </div>
 
           <div style={{ height: 12, borderRadius: 8, background: '#eef3f6', position: 'relative', margin: '0 auto 8px', maxWidth: 420 }}>
@@ -152,26 +160,26 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
             <div style={{ position: 'absolute', left: `${PASS_MARK}%`, top: -5, bottom: -5, width: 2, background: NAVY }} />
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto 16px', textAlign: 'right' }}>
-            ↑ {PASS_MARK}% earns coins
+            {t('↑ {n}% earns coins', { n: PASS_MARK })}
           </div>
 
           {!payHere ? (
-            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', margin: '6px 0' }}>{result.accuracy >= 70 ? 'Nice round. Your coins are revealed on the Fluency Zone board.' : 'Under 70% this time. Head back to the board and try the tile again.'}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--muted)', margin: '6px 0' }}>{result.accuracy >= 70 ? t('Nice round. Your coins are revealed on the Fluency Zone board.') : t('Under 70% this time. Head back to the board and try the tile again.')}</div>
           ) : result.coins > 0 ? (
             <div className="pill gold" style={{ justifyContent: 'center', padding: '10px 16px', fontSize: 14, maxWidth: 420, margin: '0 auto' }}>
-              🪙 +{result.coins} ClassCade coins{result.doubled ? ' · double for Fluency Practice' : ''}
+              🪙 {t('+{n} ClassCade coins', { n: result.coins })}{result.doubled ? ` · ${t('double for Fluency Practice')}` : ''}
             </div>
           ) : (
             <div style={{ background: '#f4f8fb', borderRadius: 10, padding: '11px 16px', fontSize: 13, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto' }}>
               {result.capped
-                ? "You've earned all the typing coins for today — keep practicing for the speed."
-                : `Hit ${PASS_MARK}% accuracy to earn coins. Slow down a little — accuracy first, speed follows.`}
+                ? t("You've earned all the typing coins for today — keep practicing for the speed.")
+                : t('Hit {n}% accuracy to earn coins. Slow down a little — accuracy first, speed follows.', { n: PASS_MARK })}
             </div>
           )}
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
-            <button className="btn" onClick={() => start(mode)}>↻ Play again</button>
-            <button className="btn ghost" onClick={() => { setMode(null); setResult(null) }}>Pick another mode</button>
+            <button className="btn" onClick={() => start(mode)}>{t('↻ Play again')}</button>
+            <button className="btn ghost" onClick={() => { setMode(null); setResult(null) }}>{t('Pick another mode')}</button>
           </div>
         </div>
       </Shell>
@@ -183,7 +191,7 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
     return (
       <Shell onClose={onClose} level={level} tier={tier}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 6 }}>
-          <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)' }}>LEVEL</span>
+          <span style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1, color: 'var(--muted)' }}>{t('LEVEL')}</span>
           <div style={{ display: 'inline-flex', background: '#eef3f6', borderRadius: 10, padding: 3, gap: 2 }}>
             {TIERS.map((t) => (
               <button key={t.grade} onClick={() => setLevel(t.grade)}
@@ -196,9 +204,9 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
           </div>
         </div>
         <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 16px', fontSize: 13, lineHeight: 1.6, marginBottom: 16 }}>
-          <div><b>{tier.unit}</b> · {tier.keys}</div>
-          <div style={{ color: 'var(--muted)' }}>Working on: {tier.convention}</div>
-          <div style={{ color: 'var(--muted)' }}>Goal: {tier.wpm} words per minute at {tier.target}% accuracy</div>
+          <div><b>{t(tier.unit)}</b> · {t(tier.keys)}</div>
+          <div style={{ color: 'var(--muted)' }}>{t('Working on:')} {t(tier.convention)}</div>
+          <div style={{ color: 'var(--muted)' }}>{t('Goal: {wpm} words per minute at {target}% accuracy', { wpm: tier.wpm, target: tier.target })}</div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: 11 }}>
@@ -206,8 +214,8 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
             <button key={m.key} onClick={() => start(m.key)}
               style={{ textAlign: 'left', border: '1.5px solid var(--line)', borderRadius: 14, padding: '14px 16px', cursor: 'pointer', background: '#fff' }}>
               <div style={{ fontSize: 24 }}>{m.icon}</div>
-              <div style={{ fontWeight: 800, fontSize: 15, marginTop: 5, color: NAVY }}>{m.label}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3, lineHeight: 1.45 }}>{m.blurb}</div>
+              <div style={{ fontWeight: 800, fontSize: 15, marginTop: 5, color: NAVY }}>{t(m.label)}</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 3, lineHeight: 1.45 }}>{t(m.blurb)}</div>
             </button>
           ))}
         </div>
@@ -220,7 +228,7 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
   return (
     <Shell onClose={onClose} level={level} tier={tier} mode={mode}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-        <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)' }}>{idx + 1} of {items.length}</span>
+        <span style={{ fontSize: 12.5, fontWeight: 800, color: 'var(--muted)' }}>{t('{n} of {total}', { n: idx + 1, total: items.length })}</span>
         <div style={{ flex: 1, height: 7, background: '#eef3f6', borderRadius: 5 }}>
           <div style={{ height: '100%', width: `${(idx / items.length) * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#0f97c2)', borderRadius: 5 }} />
         </div>
@@ -231,7 +239,8 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
 
       {mode === 'fixit' && (
         <div style={{ background: '#fff8ec', border: '1.5px solid #f0d9a8', borderRadius: 12, padding: '11px 15px', marginBottom: 12 }}>
-          <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: '#8a6400' }}>FIX IT AS YOU TYPE — {item.skill.toUpperCase()}</div>
+          <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: '#8a6400' }}>{t('FIX IT AS YOU TYPE')} — {t(item.skill).toUpperCase()}</div>
+          {/* The broken sentence is the exercise — it stays exactly as written. */}
           <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 15, color: '#7a6224', marginTop: 4 }}>{item.given}</div>
         </div>
       )}
@@ -241,7 +250,7 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
       <div style={{ background: '#fbfdfe', border: '1.5px solid var(--line)', borderRadius: 14, padding: '18px 20px', minHeight: 96 }}>
         {mode === 'fixit' && !locked ? (
           <div style={{ fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 25, lineHeight: 1.6, letterSpacing: .4, wordBreak: 'break-word', color: '#16386b', minHeight: 40 }}>
-            {typed || <span style={{ color: '#b8c8d4' }}>Type the sentence the way it should be written…</span>}
+            {typed || <span style={{ color: '#b8c8d4' }}>{t('Type the sentence the way it should be written…')}</span>}
             <span style={{ borderLeft: '2px solid #0f97c2', marginLeft: 1 }} />
           </div>
         ) : (
@@ -251,13 +260,13 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
 
       <input ref={inputRef} value={typed} onChange={(e) => onType(e.target.value)}
         onPaste={(e) => e.preventDefault()} spellCheck={false} autoComplete="off" autoCapitalize="off" autoCorrect="off"
-        placeholder="Type it here…"
+        placeholder={t('Type it here…')}
         style={{ width: '100%', marginTop: 12, padding: '13px 15px', borderRadius: 12, border: `2px solid ${locked ? (exactOk ? 'var(--good)' : '#e0a0a0') : '#cfe0ec'}`,
           fontFamily: 'ui-monospace, monospace', fontSize: 17, background: locked ? '#f7f9fb' : '#fff' }} />
 
       {mode === 'sort' && (
         <div style={{ marginTop: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', marginBottom: 7 }}>WHAT KIND OF WORD IS IT?</div>
+          <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', marginBottom: 7 }}>{t('WHAT KIND OF WORD IS IT?')}</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {buckets.map((b) => {
               const chosen = posPick === b
@@ -268,7 +277,7 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
                     background: reveal ? '#e6f6ee' : chosen ? '#e9f5fb' : '#eef3f6',
                     color: reveal ? 'var(--good)' : chosen ? CYAN : 'var(--muted)',
                     border: `1.5px solid ${reveal ? 'var(--good)' : chosen ? CYAN : 'transparent'}` }}>
-                  {b}{reveal ? ' ✓' : ''}
+                  {t(b)}{reveal ? ' ✓' : ''}
                 </button>
               )
             })}
@@ -278,18 +287,18 @@ export default function TypingGame({ grade = 6, onClose, onChange, onFinished, p
 
       {locked && (
         <div style={{ marginTop: 12, background: exactOk && posOk !== false ? '#f1faf4' : '#fff7f7', borderRadius: 12, padding: '11px 15px', fontSize: 13.5, lineHeight: 1.5 }}>
-          {exactOk ? <b style={{ color: 'var(--good)' }}>✓ Exactly right.</b> : <b style={{ color: '#c0392b' }}>✕ Not quite.</b>}{' '}
-          {!exactOk && <>The correct version is <b style={{ fontFamily: 'ui-monospace, monospace' }}>{item.target}</b></>}
-          {mode === 'sort' && posOk === false && <div style={{ marginTop: 3 }}>“{item.target}” is a <b>{item.pos}</b>.</div>}
+          {exactOk ? <b style={{ color: 'var(--good)' }}>{t('✓ Exactly right.')}</b> : <b style={{ color: '#c0392b' }}>{t('✕ Not quite.')}</b>}{' '}
+          {!exactOk && <>{t('The correct version is')} <b style={{ fontFamily: 'ui-monospace, monospace' }}>{item.target}</b></>}
+          {mode === 'sort' && posOk === false && <div style={{ marginTop: 3 }}>{t('“{word}” is a {kind}.', { word: item.target, kind: t(item.pos) })}</div>}
         </div>
       )}
 
       <div style={{ display: 'flex', gap: 10, marginTop: 16, alignItems: 'center' }}>
-        <button className="btn ghost" onClick={() => { setMode(null); setResult(null) }} style={{ padding: '9px 16px' }}>← Modes</button>
-        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>Press Enter to check, Enter again for the next one</span>
+        <button className="btn ghost" onClick={() => { setMode(null); setResult(null) }} style={{ padding: '9px 16px' }}>{t('← Modes')}</button>
+        <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{t('Press Enter to check, Enter again for the next one')}</span>
         {locked
-          ? <button className="btn" onClick={next}>{idx + 1 < items.length ? 'Next →' : 'See my score →'}</button>
-          : <button className="btn" disabled={!typed || (mode === 'sort' && !posPick)} onClick={submitItem}>Check ✓</button>}
+          ? <button className="btn" onClick={next}>{idx + 1 < items.length ? t('Next →') : t('See my score →')}</button>
+          : <button className="btn" disabled={!typed || (mode === 'sort' && !posPick)} onClick={submitItem}>{t('Check ✓')}</button>}
       </div>
     </Shell>
   )
@@ -306,15 +315,17 @@ function Stat({ label, value, sub, tone, big }) {
 }
 
 function Shell({ children, onClose, level, tier, mode }) {
+  const t = useT()
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 80, padding: 16 }} onClick={onClose}>
       <div className="card" style={{ width: 640, maxWidth: '96vw', maxHeight: '94vh', overflowY: 'auto', padding: 0 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ padding: '14px 20px', background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 62%,#0e2748 100%)', color: '#fff', display: 'flex', alignItems: 'center', gap: 11 }}>
           <span style={{ fontSize: 22 }}>⌨️</span>
           <div style={{ flex: 1, minWidth: 0 }}>
+            {/* Type Right is the product name — English in every language. */}
             <b style={{ fontSize: 17 }}>Type Right</b>
             <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>
-              Level {level} · {mode ? MODES.find((m) => m.key === mode)?.label : tier.unit}
+              {t('Level {n}', { n: level })} · {mode ? t(MODES.find((m) => m.key === mode)?.label || '') : t(tier.unit)}
             </div>
           </div>
           <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 22, background: 'none', cursor: 'pointer' }}>×</button>

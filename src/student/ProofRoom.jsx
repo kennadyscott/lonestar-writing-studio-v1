@@ -3,6 +3,7 @@ import { api } from '../lib/api.js'
 import { library } from '../lib/library.js'
 import { joinStandards } from '../../lib/content/taxonomy.mjs'
 import { prepareTopic, PASS_MARK, checkCompose, tokenize, parseHunt } from '../../server/proofRoom.mjs'
+import { useT } from '../lib/i18n/index.jsx'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -97,24 +98,26 @@ const MEDIA_BASE = import.meta.env.VITE_MEDIA_BASE || ((import.meta.env.BASE_URL
 const SOLUTION = (id) => MEDIA_BASE.replace(/\/?$/, '/') + id + '.mp4'
 
 function WatchButton({ id, onPlay, label = 'Watch the solution' }) {
+  const t = useT()
   if (!id) return null
   return (
     <button onClick={() => onPlay(id)}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#eef6f9', color: CYAN, border: '1.5px solid #cfe6f0',
         borderRadius: 999, padding: '5px 12px', fontSize: 12, fontWeight: 800, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-      ▶ {label}
+      ▶ {t(label)}
     </button>
   )
 }
 
 function SolutionPlayer({ id, onClose }) {
+  const t = useT()
   if (!id) return null
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(6,14,24,.72)', display: 'grid', placeItems: 'center', zIndex: 90, padding: 20 }} onClick={onClose}>
       <div style={{ width: 720, maxWidth: '94vw', background: '#0d2440', borderRadius: 16, overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,.5)' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '11px 16px', color: '#fff' }}>
           <span style={{ fontSize: 17 }}>▶</span>
-          <b style={{ flex: 1, fontSize: 14.5 }}>How to solve it</b>
+          <b style={{ flex: 1, fontSize: 14.5 }}>{t('How to solve it')}</b>
           <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 20, background: 'none', cursor: 'pointer' }}>×</button>
         </div>
         <video src={SOLUTION(id)} controls autoPlay style={{ width: '100%', display: 'block', background: '#000' }} />
@@ -171,12 +174,13 @@ function WithArt({ act, art: fallback, side: fallbackSide, children }) {
 }
 
 function Directions({ text }) {
+  const t = useT()
   return (
     <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', background: '#eef6f9', border: '1.5px solid #cfe6f0',
       borderRadius: 12, padding: '11px 14px', marginBottom: 12 }}>
       <span style={{ fontSize: 15, lineHeight: 1.3 }}>📋</span>
       <div>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: CYAN }}>DIRECTIONS</div>
+        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1, color: CYAN }}>{t('DIRECTIONS')}</div>
         <div style={{ fontSize: 13.5, lineHeight: 1.5, color: '#1f4a68', marginTop: 2 }}>{text}</div>
       </div>
     </div>
@@ -209,6 +213,7 @@ export function PathPreview({ topic: raw, onClose }) {
 }
 
 export default function ProofRoom({ grade = 5, onClose, onChange }) {
+  const t = useT()
   const [topicId, setTopicId] = useState(null)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
@@ -223,13 +228,13 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
       .catch(() => api.proofContent().then((r) => live && setRaw(r.topics || [])).catch(() => live && setRaw([])))
     return () => { live = false }
   }, [])
-  const topics = useMemo(() => (raw || []).map((t) => ({
-    id: t.id, title: t.title, grade: t.grade, standards: t.standards, blurb: t.blurb, icon: t.icon,
-    stops: (t.core || []).length + 1,
+  const topics = useMemo(() => (raw || []).map((tp) => ({
+    id: tp.id, title: tp.title, grade: tp.grade, standards: tp.standards, blurb: tp.blurb, icon: tp.icon,
+    stops: (tp.core || []).length + 1,
   })), [raw])
   const topic = useMemo(() => {
     if (!topicId || !raw) return null
-    return prepareTopic(raw.find((t) => t.id === topicId))
+    return prepareTopic(raw.find((tp) => tp.id === topicId))
   }, [topicId, raw])
 
   useEffect(() => {
@@ -254,40 +259,40 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
   }
 
   if (!raw) {
-    return <Shell onClose={onClose} sub="Bring writing in broken, take it out clean">
-      <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>Loading today's jobs…</div>
+    return <Shell onClose={onClose} sub={t('Bring writing in broken, take it out clean')}>
+      <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>
     </Shell>
   }
 
   return (
-    <Shell onClose={onClose} sub="Bring writing in broken, take it out clean">
+    <Shell onClose={onClose} sub={t('Bring writing in broken, take it out clean')}>
       <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>Pick a topic and start the path.</div>
+        <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>{t('Pick a topic and start the path.')}</div>
         <p style={{ fontSize: 13, color: '#3f5f76', lineHeight: 1.5, margin: '5px 0 0' }}>
-          Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic.
+          {t('Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic.')}
         </p>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {topics.map((t) => {
-          const done = t.stops // placeholder count for display
+        {topics.map((tp) => {
+          const done = tp.stops // placeholder count for display
           return (
-            <button key={t.id} onClick={() => setTopicId(t.id)}
+            <button key={tp.id} onClick={() => setTopicId(tp.id)}
               style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 14, border: '1.5px solid var(--line)',
                 borderRadius: 16, padding: '15px 17px', background: '#fff', cursor: 'pointer' }}>
-              <span style={{ width: 46, height: 46, borderRadius: 13, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 22, background: '#eef6f9' }}>{t.icon}</span>
+              <span style={{ width: 46, height: 46, borderRadius: 13, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 22, background: '#eef6f9' }}>{tp.icon}</span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: 16, fontWeight: 800, color: NAVY }}>{t.title}</span>
-                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t.blurb}</span>
+                <span style={{ display: 'block', fontSize: 16, fontWeight: 800, color: NAVY }}>{tp.title}</span>
+                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{tp.blurb}</span>
                 <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: .5, color: CYAN, marginTop: 6 }}>
-                  {joinStandards(t.standards)} · GRADE {t.grade} · {done} STOPS
+                  {joinStandards(tp.standards)} · {t('GRADE {n}', { n: tp.grade })} · {t('{n} STOPS', { n: done })}
                 </span>
               </span>
-              <span className="btn" style={{ flexShrink: 0, padding: '9px 17px', fontSize: 13 }}>Open path →</span>
+              <span className="btn" style={{ flexShrink: 0, padding: '9px 17px', fontSize: 13 }}>{t('Open path →')}</span>
             </button>
           )
         })}
         <div style={{ border: '1.5px dashed var(--line)', borderRadius: 16, padding: '15px 17px', fontSize: 13, color: 'var(--muted)', textAlign: 'center' }}>
-          More topics arrive as your teacher loads them.
+          {t('More topics arrive as your teacher loads them.')}
         </div>
       </div>
     </Shell>
@@ -296,6 +301,7 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
 
 /* ---------------- the path ---------------- */
 function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
+  const t = useT()
   // walk the core list; a missed stop drops its Skill Builder in as a detour
   const stops = []
   let blocked = false
@@ -320,8 +326,8 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 22 }}>{topic.icon}</span>
         <div style={{ flex: 1, minWidth: 170 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{joinStandards(topic.standards)} · GRADE {topic.grade}</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{cleared} of {topic.core.length} skills cleared</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{joinStandards(topic.standards)} · {t('GRADE {n}', { n: topic.grade })}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{t('{n} of {total} skills cleared', { n: cleared, total: topic.core.length })}</div>
         </div>
         <div style={{ flex: '1 1 140px', minWidth: 120, height: 9, background: '#e3ecf2', borderRadius: 6 }}>
           <div style={{ height: '100%', width: `${pct}%`, borderRadius: 6, background: 'linear-gradient(90deg,#35c3e8,#0f97c2)' }} />
@@ -341,6 +347,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
 }
 
 function Stop({ stop, onPlay }) {
+  const t = useT()
   const { ws, state, best } = stop
   const isSb = state === 'sb'
   const locked = state === 'locked'
@@ -367,27 +374,27 @@ function Stop({ stop, onPlay }) {
       <div style={{ flex: 1, minWidth: 0, background: bg, border, borderRadius: 14, padding: '12px 15px',
         display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 150 }}>
-          {isSb && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>SKILL BUILDER · REQUIRED FIRST</div>}
-          {capstone && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>FULL TOPIC · THE FINISH LINE</div>}
+          {isSb && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('SKILL BUILDER · REQUIRED FIRST')}</div>}
+          {capstone && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('FULL TOPIC · THE FINISH LINE')}</div>}
           <div style={{ fontSize: 14.5, fontWeight: 800, color: locked ? '#8fa5b8' : NAVY, lineHeight: 1.25 }}>{ws.title}</div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{ws.skill}</div>
         </div>
 
         {best > 0 && (
           <span className="pill" style={{ background: passed ? '#e6f6ee' : '#fdecec', color: passed ? 'var(--good)' : '#c0392b', fontWeight: 800 }}>
-            best {best}%
+            {t('best {n}%', { n: best })}
           </span>
         )}
         <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, whiteSpace: 'nowrap' }}>
-          {ws.activities.length} activities · {ws.points} pts
+          {t('{n} activities · {p} pts', { n: ws.activities.length, p: ws.points })}
         </span>
 
         {locked ? (
-          <span style={{ fontSize: 12, fontWeight: 800, color: '#9fb3c2', whiteSpace: 'nowrap' }}>Clear the stop above</span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: '#9fb3c2', whiteSpace: 'nowrap' }}>{t('Clear the stop above')}</span>
         ) : (
           <button className={passed ? 'btn ghost' : 'btn'} style={{ padding: '9px 18px', fontSize: 13, whiteSpace: 'nowrap' }}
             onClick={() => onPlay(ws)}>
-            {passed ? 'Run it again' : isSb ? 'Build it up →' : best > 0 ? 'Try again →' : 'Start →'}
+            {passed ? t('Run it again') : isSb ? t('Build it up →') : best > 0 ? t('Try again →') : t('Start →')}
           </button>
         )}
       </div>
@@ -397,6 +404,7 @@ function Stop({ stop, onPlay }) {
 
 /* ---------------- one worksheet, start to finish ---------------- */
 export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext, preview }) {
+  const t = useT()
   const [step, setStep] = useState(0)
   const [scores, setScores] = useState([])     // points earned per activity
   const [result, setResult] = useState(null)
@@ -425,9 +433,9 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
         <div style={{ textAlign: 'center' }}>
           <img src={passed ? KID_READER : KID_CLIPBOARD} alt=""
             style={{ height: 150, display: 'block', margin: '0 auto -6px' }} />
-          <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? 'Stop cleared!' : 'Not clean enough yet'}</h2>
+          <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? t('Stop cleared!') : t('Not clean enough yet')}</h2>
           <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 14px' }}>
-            {result.got} of {ws.points} points · {ws.activities.length} activities
+            {t('{got} of {total} points · {n} activities', { got: result.got, total: ws.points, n: ws.activities.length })}
           </p>
 
           <div style={{ fontSize: 52, fontWeight: 800, color: passed ? 'var(--good)' : '#c99312', lineHeight: 1 }}>{result.pct}%</div>
@@ -437,41 +445,41 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
             <div style={{ position: 'absolute', left: `${PASS_MARK}%`, top: -5, bottom: -5, width: 2, background: NAVY }} />
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto 16px', textAlign: 'right' }}>
-            ↑ {PASS_MARK}% clears the stop
+            {t('↑ {n}% clears the stop', { n: PASS_MARK })}
           </div>
 
           {result.coins > 0 && (
             <div className="pill gold" style={{ justifyContent: 'center', padding: '10px 16px', fontSize: 14, maxWidth: 400, margin: '0 auto 12px' }}>
-              🪙 +{result.coins} ClassCade coins
+              {t('🪙 +{n} ClassCade coins', { n: result.coins })}
             </div>
           )}
 
           {!passed && sb && (
             <div style={{ background: '#fff8ec', border: '1.5px solid #f0d9a8', borderRadius: 12, padding: '13px 16px', maxWidth: 440, margin: '0 auto', textAlign: 'left' }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>SKILL BUILDER UNLOCKED</div>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('SKILL BUILDER UNLOCKED')}</div>
               <div style={{ fontSize: 13.5, marginTop: 3, lineHeight: 1.5 }}>
-                <b>{sb.title}</b> just dropped onto your path. Build the skill back up there, then come take this stop again.
+                <b>{sb.title}</b>{' '}{t('just dropped onto your path. Build the skill back up there, then come take this stop again.')}
               </div>
             </div>
           )}
           {!passed && !sb && (
             <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 16px', fontSize: 13, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto' }}>
-              Give it another run — you keep your best score.
+              {t('Give it another run — you keep your best score.')}
             </div>
           )}
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
             {passed && nextCore && (
               <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(nextCore) }}>
-                Next stop: {nextCore.title} →
+                {t('Next stop: {title} →', { title: nextCore.title })}
               </button>
             )}
             {!passed && sb && (
               <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(sb) }}>
-                🛠 Build it up: {sb.title.replace('SB: ', '')} →
+                {t('🛠 Build it up: {title} →', { title: sb.title.replace('SB: ', '') })}
               </button>
             )}
-            <button className={passed && nextCore ? 'btn ghost' : !passed && sb ? 'btn ghost' : 'btn'} onClick={onQuit}>Back to the path</button>
+            <button className={passed && nextCore ? 'btn ghost' : !passed && sb ? 'btn ghost' : 'btn'} onClick={onQuit}>{t('Back to the path')}</button>
           </div>
         </div>
       </Shell>
@@ -485,11 +493,11 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
             background: i < step ? '#e6f6ee' : i === step ? '#e9f5fb' : '#eef3f6',
             color: i < step ? 'var(--good)' : i === step ? CYAN : 'var(--muted)' }}>
-            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? 'Error hunt' : a.kind === 'maze' ? 'Verb maze' : a.kind === 'compose' ? 'Write it' : a.kind === 'passage' ? 'Read & answer' : 'Fill it in'}
+            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? t('Error hunt') : a.kind === 'maze' ? t('Verb maze') : a.kind === 'compose' ? t('Write it') : a.kind === 'passage' ? t('Read & answer') : t('Fill it in')}
           </span>
         ))}
         <span style={{ flex: 1 }} />
-        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>one worksheet · scored together</span>
+        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{t('one worksheet · scored together')}</span>
       </div>
 
       <SolutionPlayer id={video} onClose={() => setVideo(null)} />
@@ -512,33 +520,34 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
  * student has to tell apart. A list of unrelated words would be a different,
  * easier question. */
 function ChooseActivity({ act, onDone, onPlay, doneLabel }) {
-  const spots = act.tokens.filter((t) => t.bad)
+  const t = useT()
+  const spots = act.tokens.filter((tok) => tok.bad)
   const [picked, setPicked] = useState({})
   const [checked, setChecked] = useState(false)
 
   const options = useMemo(() => {
-    const pool = [...new Set(spots.map((t) => t.fix))]
-    return spots.map((t) => {
-      const others = pool.filter((w) => norm(w) !== norm(t.fix))
-      const near = [t.t, ...others].filter((w) => norm(w) !== norm(t.fix))
-      return shuffled([t.fix, ...near.slice(0, 3)])
+    const pool = [...new Set(spots.map((tok) => tok.fix))]
+    return spots.map((tok) => {
+      const others = pool.filter((w) => norm(w) !== norm(tok.fix))
+      const near = [tok.t, ...others].filter((w) => norm(w) !== norm(tok.fix))
+      return shuffled([tok.fix, ...near.slice(0, 3)])
     })
   }, [act])
 
-  const right = spots.filter((t, i) => norm(picked[i]) === norm(t.fix)).length
+  const right = spots.filter((tok, i) => norm(picked[i]) === norm(tok.fix)).length
   let seen = -1
 
   return (
     <WithArt act={act} art="" side="right">
-      <Directions text={act.directions || HOW_TO.choose} />
+      <Directions text={act.directions || t(HOW_TO.choose)} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 10 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1 }}>{act.brief}</span>
-        <span className="pill">{right} of {spots.length} right</span>
+        <span className="pill">{t('{n} of {total} right', { n: right, total: spots.length })}</span>
       </div>
 
       <div style={{ background: '#fbfdfe', border: '1.5px solid #e3edf4', borderRadius: 12, padding: '16px 18px', lineHeight: 2.5, fontSize: 15.5 }}>
-        {act.tokens.map((t, i) => {
-          if (!t.bad) return <span key={i}>{t.t}</span>
+        {act.tokens.map((tok, i) => {
+          if (!tok.bad) return <span key={i}>{tok.t}</span>
           seen += 1
           const k = seen
           const chosen = picked[k]
@@ -552,7 +561,7 @@ function ChooseActivity({ act, onDone, onPlay, doneLabel }) {
                 background: ok ? '#e6f6ee' : wrong ? '#fdecea' : chosen ? '#eaf4f9' : '#fff',
                 color: ok ? 'var(--good)' : wrong ? '#c0392b' : NAVY,
                 border: `1.5px solid ${ok ? 'var(--good)' : wrong ? '#c0392b' : chosen ? CYAN : '#cfe0ec'}` }}>
-              <option value="">choose…</option>
+              <option value="">{t('choose…')}</option>
               {options[k].map((o) => <option key={o} value={o}>{o}</option>)}
             </select>
           )
@@ -561,9 +570,9 @@ function ChooseActivity({ act, onDone, onPlay, doneLabel }) {
 
       {checked && (
         <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginTop: 11 }}>
-          {spots.map((t, i) => norm(picked[i]) === norm(t.fix) ? null : (
+          {spots.map((tok, i) => norm(picked[i]) === norm(tok.fix) ? null : (
             <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: '#fdecea', borderRadius: 999, padding: '5px 12px', fontSize: 12.5, fontWeight: 800, color: '#c0392b' }}>
-              {t.t} → {t.fix}
+              {tok.t} → {tok.fix}
               <WatchButton id={(act.videos || [])[i]} onPlay={onPlay} label="Why?" />
             </span>
           ))}
@@ -573,14 +582,15 @@ function ChooseActivity({ act, onDone, onPlay, doneLabel }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14 }}>
         {act.hint && <span style={{ flex: 1, fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>}
         {!checked
-          ? <button className="btn" disabled={Object.keys(picked).length < spots.length} onClick={() => setChecked(true)}>Check my answers ✓</button>
-          : <button className="btn" onClick={() => onDone(right)}>{doneLabel || <>Done with this one →</>}</button>}
+          ? <button className="btn" disabled={Object.keys(picked).length < spots.length} onClick={() => setChecked(true)}>{t('Check my answers ✓')}</button>
+          : <button className="btn" onClick={() => onDone(right)}>{doneLabel || <>{t('Done with this one →')}</>}</button>}
       </div>
     </WithArt>
   )
 }
 
 function HuntActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
   const [caught, setCaught] = useState({})
   const [fixes, setFixes] = useState({})
   const [typing, setTyping] = useState(null)
@@ -599,7 +609,7 @@ function HuntActivity({ act, onDone, onPlay, doneLabel }) {
   }
   function submit(tok) {
     if (norm(draft) !== norm(tok.fix)) {
-      setTries((t) => ({ ...t, [tok.i]: (t[tok.i] || 0) + 1 }))
+      setTries((prev) => ({ ...prev, [tok.i]: (prev[tok.i] || 0) + 1 }))
       setDraft('')
       const vid = (act.videos || [])[tok.i]
       if (vid && onPlay) onPlay(vid)
@@ -610,12 +620,12 @@ function HuntActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || HOW_TO.hunt} />
+      <Directions text={act.directions || t(HOW_TO.hunt)} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
-        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{fixedCount} of {act.errorCount} fixed</span>
+        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{t('{n} of {total} fixed', { n: fixedCount, total: act.errorCount })}</span>
         <span className="pill" style={{ background: misses ? '#fdecec' : '#f1faf4', color: misses ? '#c0392b' : 'var(--good)' }}>
-          {misses} false {misses === 1 ? 'alarm' : 'alarms'}
+          {misses === 1 ? t('{n} false alarm', { n: misses }) : t('{n} false alarms', { n: misses })}
         </span>
       </div>
 
@@ -631,13 +641,13 @@ function HuntActivity({ act, onDone, onPlay, doneLabel }) {
             <span key={ti} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: '#fff8ec', border: '1.5px solid #f0b429', borderRadius: 8, padding: '2px 6px', margin: '0 2px' }}>
               <s style={{ color: '#c0392b', fontWeight: 700 }}>{tok.t}</s>
               <input autoFocus value={draft} onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') submit(tok) }} placeholder="type the fix"
+                onKeyDown={(e) => { if (e.key === 'Enter') submit(tok) }} placeholder={t('type the fix')}
                 style={{ width: 140, padding: '4px 8px', borderRadius: 6, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 14 }} />
               <button onClick={() => submit(tok)} disabled={!draft.trim()}
                 style={{ fontSize: 12, fontWeight: 800, color: draft.trim() ? '#fff' : '#9db0c0', background: draft.trim() ? NAVY : '#eef0f6', borderRadius: 6, padding: '4px 10px', cursor: 'pointer' }}>✓</button>
               {(tries[tok.i] || 0) >= 2 && (
                 <>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: '#a37400' }}>it is <b>{tok.fix}</b></span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: '#a37400' }}>{t('it is')} <b>{tok.fix}</b></span>
                   <WatchButton id={(act.videos || [])[tok.i]} onPlay={onPlay} label="Why?" />
                 </>
               )}
@@ -655,7 +665,7 @@ function HuntActivity({ act, onDone, onPlay, doneLabel }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" onClick={() => onDone(Math.max(0, fixedCount - Math.floor(misses / 2)))}>
-          {doneLabel || (done ? 'Next activity →' : 'Done with this one →')}
+          {doneLabel || (done ? t('Next activity →') : t('Done with this one →'))}
         </button>
       </div>
     </div>
@@ -664,6 +674,7 @@ function HuntActivity({ act, onDone, onPlay, doneLabel }) {
 
 /* --- activity: walk the maze, fixing the verb at every gate --- */
 function MazeActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
   const grid = act.grid
   const H = grid.length, W = grid[0].length
   const cellAt = (r, c) => (r >= 0 && r < H && c >= 0 && c < W ? grid[r][c] : '#')
@@ -691,7 +702,7 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
     if (ch === '#') return
     if (/[A-J]/.test(ch) && !cleared[ch]) { setGate({ letter: ch, r: nr, c: nc }); setDraft(''); setTries(0); setReveal(false); return }
     setPos({ r: nr, c: nc })
-    setTrail((t) => ({ ...t, [`${nr},${nc}`]: true }))
+    setTrail((prev) => ({ ...prev, [`${nr},${nc}`]: true }))
   }
 
   useEffect(() => {
@@ -711,7 +722,7 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
       setCleared((c) => ({ ...c, [gate.letter]: true }))
       if (tries === 0) setEarned((e) => ({ ...e, [gate.letter]: true }))
       setPos({ r: gate.r, c: gate.c })
-      setTrail((t) => ({ ...t, [`${gate.r},${gate.c}`]: true }))
+      setTrail((prev) => ({ ...prev, [`${gate.r},${gate.c}`]: true }))
       setGate(null); setDraft('')
       return
     }
@@ -727,11 +738,11 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || HOW_TO.maze} />
+      <Directions text={act.directions || t(HOW_TO.maze)} />
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
-        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{openedCount} of {total} verbs fixed</span>
-        <span className="pill" style={{ background: '#f1faf4', color: 'var(--good)' }}>{firstTry} first-try</span>
+        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{t('{n} of {total} verbs fixed', { n: openedCount, total })}</span>
+        <span className="pill" style={{ background: '#f1faf4', color: 'var(--good)' }}>{t('{n} first-try', { n: firstTry })}</span>
       </div>
 
       <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start' }}>
@@ -764,37 +775,37 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
           {gate ? (
             <div style={{ background: '#fff8ec', border: '2px solid #f0b429', borderRadius: 14, padding: '14px 16px',
               transform: shake ? 'translateX(-4px)' : 'none', transition: 'transform .08s' }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>GATE {gate.letter} — BLOCKED</div>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('GATE {letter} — BLOCKED', { letter: gate.letter })}</div>
               <div style={{ fontSize: 22, fontWeight: 800, color: '#c0392b', margin: '6px 0 2px', textDecoration: 'line-through' }}>
                 {act.gates[gate.letter].wrong}
               </div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 9 }}>Write it correctly to walk through.</div>
+              <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 9 }}>{t('Write it correctly to walk through.')}</div>
               <input autoFocus value={draft} onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') tryGate() }} placeholder="past tense…"
+                onKeyDown={(e) => { if (e.key === 'Enter') tryGate() }} placeholder={t('past tense…')}
                 style={{ width: '100%', padding: '9px 11px', borderRadius: 9, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 15 }} />
-              {tries > 0 && !reveal && <div style={{ fontSize: 12, color: '#c0392b', fontWeight: 700, marginTop: 6 }}>Not it — one more try for the point.</div>}
+              {tries > 0 && !reveal && <div style={{ fontSize: 12, color: '#c0392b', fontWeight: 700, marginTop: 6 }}>{t('Not it — one more try for the point.')}</div>}
               {reveal && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap', marginTop: 7 }}>
-                  <span style={{ fontSize: 12.5, color: '#a37400', fontWeight: 700 }}>It is <b>{act.gates[gate.letter].right}</b> — type it to pass.</span>
+                  <span style={{ fontSize: 12.5, color: '#a37400', fontWeight: 700 }}>{t('It is')} <b>{act.gates[gate.letter].right}</b> {t('— type it to pass.')}</span>
                   <WatchButton id={act.video} onPlay={onPlay} label="Watch the maze solution" />
                 </div>
               )}
               <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
-                <button className="btn" style={{ padding: '8px 16px', fontSize: 13 }} disabled={!draft.trim()} onClick={tryGate}>Unlock →</button>
-                <button className="btn ghost" style={{ padding: '8px 14px', fontSize: 13 }} onClick={() => setGate(null)}>Back up</button>
+                <button className="btn" style={{ padding: '8px 16px', fontSize: 13 }} disabled={!draft.trim()} onClick={tryGate}>{t('Unlock →')}</button>
+                <button className="btn ghost" style={{ padding: '8px 14px', fontSize: 13 }} onClick={() => setGate(null)}>{t('Back up')}</button>
               </div>
             </div>
           ) : done ? (
             <div style={{ background: '#f1faf4', border: '2px solid #b8e6cd', borderRadius: 14, padding: '16px' }}>
               <div style={{ fontSize: 26 }}>🏁</div>
-              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--good)', marginTop: 4 }}>You made it out.</div>
+              <div style={{ fontSize: 15, fontWeight: 800, color: 'var(--good)', marginTop: 4 }}>{t('You made it out.')}</div>
               <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 3 }}>
-                {firstTry} of {total} verbs fixed on the first try.
+                {t('{n} of {total} verbs fixed on the first try.', { n: firstTry, total })}
               </div>
             </div>
           ) : (
             <div style={{ background: '#f4f8fb', borderRadius: 14, padding: '14px 16px' }}>
-              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>VERBS IN YOUR WAY</div>
+              <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>{t('VERBS IN YOUR WAY')}</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {Object.entries(act.gates).map(([k, g]) => (
                   <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12.5 }}>
@@ -814,7 +825,7 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" disabled={!done} onClick={() => onDone(firstTry)}>
-          {doneLabel || (done ? 'Next activity →' : 'Reach the finish flag first')}
+          {doneLabel || (done ? t('Next activity →') : t('Reach the finish flag first'))}
         </button>
       </div>
     </div>
@@ -823,6 +834,7 @@ function MazeActivity({ act, onDone, onPlay, doneLabel }) {
 
 /* --- activity: one numbered passage, several questions about it --- */
 function PassageActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
   const choices = useMemo(
     () => (act.questions || []).map((q) => (q.options && q.options.length ? shuffled(q.options) : null)),
     [act])
@@ -846,7 +858,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || HOW_TO.passage} />
+      <Directions text={act.directions || t(HOW_TO.passage)} />
       <WithArt act={act} art="" side="right">
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
 
@@ -898,13 +910,13 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
 
                   {q.kind === 'pick' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>You clicked:</span>
+                      <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>{t('You clicked:')}</span>
                       <span style={{ background: picked[i] ? '#fff3d6' : '#eef3f6', color: picked[i] ? '#8a6400' : '#9fb3c2',
                         borderRadius: 8, padding: '4px 12px', fontSize: 13.5, fontWeight: 800 }}>
-                        {picked[i] || (on ? 'click a word above' : '—')}
+                        {picked[i] || (on ? t('click a word above') : '—')}
                       </span>
                       <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>→</span>
-                      <input value={fixes[i] || ''} disabled={checked} placeholder="correction"
+                      <input value={fixes[i] || ''} disabled={checked} placeholder={t('correction')}
                         onChange={(e) => setFixes((f) => ({ ...f, [i]: e.target.value }))}
                         style={{ width: 140, padding: '5px 10px', borderRadius: 8, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 13.5 }} />
                       {checked && !results[i] && (
@@ -921,7 +933,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
                     // so give them somewhere to write. Without this the question
                     // renders with nothing to answer with.
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 8, flexWrap: 'wrap' }}>
-                      <input value={blanks[i] || ''} disabled={checked} placeholder="your answer"
+                      <input value={blanks[i] || ''} disabled={checked} placeholder={t('your answer')}
                         onChange={(e) => setBlanks((b) => ({ ...b, [i]: e.target.value }))}
                         style={{ width: 180, padding: '6px 11px', borderRadius: 8, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 13.5 }} />
                       {checked && !results[i] && (
@@ -955,7 +967,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
                     <div style={{ marginTop: 8 }}>
                       <textarea value={writes[i] || ''} rows={2} disabled={checked}
                         onChange={(e) => setWrites((w) => ({ ...w, [i]: e.target.value }))}
-                        placeholder={q.placeholder || "Write your answer…"}
+                        placeholder={q.placeholder || t('Write your answer…')}
                         style={{ width: '100%', padding: '9px 11px', borderRadius: 9, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 14, resize: 'vertical' }} />
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 7 }}>
                         {checkCompose(q, writes[i] || '').map((c, j) => (
@@ -966,7 +978,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
                         ))}
                       </div>
                       {checked && !results[i] && (
-                        <div style={{ fontSize: 12.5, color: CYAN, marginTop: 6 }}><b>One that works:</b> {q.model}</div>
+                        <div style={{ fontSize: 12.5, color: CYAN, marginTop: 6 }}><b>{t('One that works:')}</b> {q.model}</div>
                       )}
                     </div>
                   )}
@@ -980,14 +992,14 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         {checked
-          ? <button className="btn" onClick={() => onDone(score)}>{doneLabel || <>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.questions.length}</b></>}</button>
+          ? <button className="btn" onClick={() => onDone(score)}>{doneLabel || <>{t('Next activity →')} <b style={{ marginLeft: 6 }}>{score}/{act.questions.length}</b></>}</button>
           : <button className="btn" onClick={() => {
               setChecked(true)
               // A wrong answer opens its own explanation, the way every other
               // activity kind already does.
               const miss = results.findIndex((ok) => !ok)
               if (miss >= 0 && act.questions[miss].video && onPlay) onPlay(act.questions[miss].video)
-            }}>Check my answers ✓</button>}
+            }}>{t('Check my answers ✓')}</button>}
       </div>
       </WithArt>
     </div>
@@ -996,6 +1008,7 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
 
 /* --- activity: write the sentence yourself, judged only on the moves --- */
 function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
   const [drafts, setDrafts] = useState(act.items.map(() => ''))
   const [shown, setShown] = useState({})   // item index -> model sentence revealed
   const results = act.items.map((it, i) => checkCompose(it, drafts[i]))
@@ -1004,11 +1017,11 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || HOW_TO.compose} />
+      <Directions text={act.directions || t(HOW_TO.compose)} />
       <WithArt act={act} art="" side="right">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 11 }}>
         <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1, minWidth: 190 }}>{act.brief}</span>
-        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{score} of {act.items.length} landed</span>
+        <span className="pill" style={{ background: '#eef4f8', color: NAVY }}>{t('{n} of {total} landed', { n: score, total: act.items.length })}</span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -1028,7 +1041,7 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
               </div>
               <textarea value={drafts[i]} rows={2}
                 onChange={(e) => setDrafts((d) => d.map((v, j) => (j === i ? e.target.value : v)))}
-                placeholder={it.placeholder || "Write your answer…"}
+                placeholder={it.placeholder || t('Write your answer…')}
                 style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1.5px solid ${ok ? '#8fd6ae' : '#cfe0ec'}`,
                   fontFamily: 'inherit', fontSize: 14.5, resize: 'vertical' }} />
 
@@ -1043,13 +1056,13 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
 
               {shown[i] && (
                 <div style={{ background: '#eef6f9', borderRadius: 10, padding: '10px 12px', marginTop: 9, fontSize: 13, lineHeight: 1.5 }}>
-                  <b style={{ color: CYAN }}>One that works:</b> {it.model}
+                  <b style={{ color: CYAN }}>{t('One that works:')}</b> {it.model}
                 </div>
               )}
               {!ok && drafts[i].trim().length > 0 && !shown[i] && (
                 <button onClick={() => setShown((sh) => ({ ...sh, [i]: true }))}
                   style={{ marginTop: 9, fontSize: 11.5, fontWeight: 800, color: CYAN, background: 'none', cursor: 'pointer', padding: 0 }}>
-                  Show me one that works →
+                  {t('Show me one that works →')}
                 </button>
               )}
             </div>
@@ -1060,7 +1073,7 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         <button className="btn" onClick={() => onDone(score)}>
-          {doneLabel || <>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></>}
+          {doneLabel || <>{t('Next activity →')} <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></>}
         </button>
       </div>
       </WithArt>
@@ -1070,6 +1083,7 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
 
 /* --- activity: fill the blanks by typing, clicking, or dragging --- */
 function FixActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
   const mode = act.mode || 'type'
   const bank = useMemo(() => shuffled(act.bank), [act])
   // Across the authored content the right answer sits first 43% of the time,
@@ -1102,14 +1116,14 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
 
   return (
     <div>
-      <Directions text={act.directions || HOW_TO[mode] || HOW_TO.fix} />
+      <Directions text={act.directions || t(HOW_TO[mode] || HOW_TO.fix)} />
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
 
       {mode === 'drag' && (
         <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap', marginBottom: 13, minHeight: 40, background: '#f4f8fb', borderRadius: 12, padding: '9px 11px' }}
           onDragOver={(e) => e.preventDefault()}
           onDrop={() => { if (held != null && held.from != null) { put(held.from, ''); setHeld(null) } }}>
-          <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', alignSelf: 'center', marginRight: 4 }}>WORD BANK</span>
+          <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', alignSelf: 'center', marginRight: 4 }}>{t('WORD BANK')}</span>
           {remaining.map((w, k) => {
             const picked = held && held.word === w && held.from == null
             return (
@@ -1122,7 +1136,7 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
               </span>
             )
           })}
-          {!remaining.length && <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700, alignSelf: 'center' }}>Bank empty — every word is placed.</span>}
+          {!remaining.length && <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700, alignSelf: 'center' }}>{t('Bank empty — every word is placed.')}</span>}
         </div>
       )}
 
@@ -1164,7 +1178,7 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
                         border: `2px ${filled ? 'solid' : 'dashed'} ${ok ? 'var(--good)' : bad ? '#e0a0a0' : held ? CYAN : '#cfe0ec'}`,
                         background: filled ? '#fff' : held ? '#eef6f9' : '#f7fafc', color: filled ? NAVY : '#9fb3c2',
                         fontWeight: filled ? 800 : 600, cursor: checked ? 'default' : 'pointer' }}>
-                      {filled || (mode === 'drag' ? 'drop here' : '?')}
+                      {filled || (mode === 'drag' ? t('drop here') : '?')}
                     </span>
                   )}
                   {after}
@@ -1205,25 +1219,26 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14, flexWrap: 'wrap' }}>
         <span style={{ flex: 1, fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {act.hint}</span>
         {checked
-          ? <button className="btn" onClick={() => onDone(score)}>{doneLabel || <>Next activity → <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></>}</button>
-          : <button className="btn" disabled={answers.every((a) => !a.trim())} onClick={check}>Check my answers ✓</button>}
+          ? <button className="btn" onClick={() => onDone(score)}>{doneLabel || <>{t('Next activity →')} <b style={{ marginLeft: 6 }}>{score}/{act.items.length}</b></>}</button>
+          : <button className="btn" disabled={answers.every((a) => !a.trim())} onClick={check}>{t('Check my answers ✓')}</button>}
       </div>
     </div>
   )
 }
 
 function Shell({ children, onClose, sub, onBack }) {
+  const t = useT()
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 80, padding: 16 }} onClick={onClose}>
       <div className="card" style={{ width: 760, maxWidth: '96vw', maxHeight: '94vh', overflowY: 'auto', padding: 0 }} onClick={(e) => e.stopPropagation()}>
         <div style={{ padding: '14px 20px', background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 62%,#0e2748 100%)', color: '#fff', display: 'flex', alignItems: 'center', gap: 11 }}>
           <span style={{ fontSize: 22 }}>🧾</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <b style={{ fontSize: 17 }}>The Proof Room</b>
+            <b style={{ fontSize: 17 }}>{t('The Proof Room')}</b>
             <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>{sub}</div>
           </div>
           {onBack && (
-            <button onClick={onBack} style={{ color: '#a8dff5', fontSize: 12.5, fontWeight: 800, background: 'rgba(255,255,255,.12)', borderRadius: 999, padding: '6px 13px', cursor: 'pointer' }}>← Path</button>
+            <button onClick={onBack} style={{ color: '#a8dff5', fontSize: 12.5, fontWeight: 800, background: 'rgba(255,255,255,.12)', borderRadius: 999, padding: '6px 13px', cursor: 'pointer' }}>{t('← Path')}</button>
           )}
           <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 22, background: 'none', cursor: 'pointer' }}>×</button>
         </div>

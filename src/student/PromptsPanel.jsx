@@ -1,10 +1,16 @@
 import React, { useState } from 'react'
+import { useT } from '../lib/i18n/index.jsx'
 
 /*
  * Free Write idea bank — two randomizers:
  *   🎲 Story sparks  — 30 fun situations to write about
  *   ✏️ First lines   — 30 opening lines to steal and run with
  * Display-only: the student still does all the writing.
+ *
+ * i18n: the SPARKS and FIRST_LINES banks below stay in English on purpose —
+ * this platform teaches English writing, so the story prompt a student writes
+ * from is the lesson content, not interface chrome. Only the UI around the
+ * banks is translated.
  */
 
 const SPARKS = [
@@ -73,9 +79,10 @@ const FIRST_LINES = [
   'We were not lost. We just did not know where we were, which Dad said was different.',
 ]
 
+// English is kept here; each display string is passed through t() at the render site.
 const MODES = {
-  spark: { bank: SPARKS, tag: 'Story spark', hint: 'No rules — twist it, break it, or ignore it. Your page, your story.', empty: 'fun story ideas are waiting. Spin one!' },
-  line: { bank: FIRST_LINES, tag: 'First line', hint: 'Steal this line as your opener — then take the story anywhere.', empty: 'opening lines are ready. Spin one and keep it going!' },
+  spark: { bank: SPARKS, tag: 'Story spark', hint: 'No rules — twist it, break it, or ignore it. Your page, your story.', empty: '{n} fun story ideas are waiting. Spin one!' },
+  line: { bank: FIRST_LINES, tag: 'First line', hint: 'Steal this line as your opener — then take the story anywhere.', empty: '{n} opening lines are ready. Spin one and keep it going!' },
 }
 
 const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
@@ -88,6 +95,7 @@ const QUICK = [
 ]
 
 export default function PromptsPanel({ streakDays = 0 }) {
+  const t = useT()
   const [mode, setMode] = useState('spark')
   const [idx, setIdx] = useState(null)
   const [spins, setSpins] = useState(0)
@@ -116,15 +124,15 @@ export default function PromptsPanel({ streakDays = 0 }) {
       <div style={{ padding: '14px 16px', borderBottom: '1px solid var(--line)', display: 'flex', alignItems: 'center', gap: 12 }}>
         <div style={{ fontSize: 22 }}>💡</div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 800, fontSize: 15.5, color: '#0d2f55' }}>Inspiration Hub</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Need an idea? Spin for inspiration — then write wherever it takes you.</div>
+          <div style={{ fontWeight: 800, fontSize: 15.5, color: '#0d2f55' }}>{t('Inspiration Hub')}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('Need an idea? Spin for inspiration — then write wherever it takes you.')}</div>
         </div>
         {streakDays > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '5px 12px', flexShrink: 0 }}>
             <span style={{ fontSize: 15 }}>🔥</span>
             <div style={{ lineHeight: 1.15 }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: '#0d2f55' }}>{streakDays} day streak</div>
-              <div style={{ fontSize: 10, color: '#8a6d1a', fontWeight: 600 }}>Keep it going!</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: '#0d2f55' }}>{t('{n} day streak', { n: streakDays })}</div>
+              <div style={{ fontSize: 10, color: '#8a6d1a', fontWeight: 600 }}>{t('Keep it going!')}</div>
             </div>
           </div>
         )}
@@ -138,7 +146,7 @@ export default function PromptsPanel({ streakDays = 0 }) {
               style={{ flex: 1, padding: '8px 0', borderRadius: 8, fontSize: 12.5, fontWeight: 800,
                 background: mode === k ? '#fff' : 'transparent', color: mode === k ? 'var(--navy)' : 'var(--muted)',
                 boxShadow: mode === k ? 'var(--shadow)' : 'none' }}>
-              {label}
+              {t(label)}
             </button>
           ))}
         </div>
@@ -149,10 +157,10 @@ export default function PromptsPanel({ streakDays = 0 }) {
           <>
             <img src={`${FW}dice.webp`} alt="" style={{ width: 168, height: 168, objectFit: 'contain', marginTop: -6 }} />
             <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 250, margin: 0, lineHeight: 1.5 }}>
-              {m.bank.length} {m.empty}
+              {t(m.empty, { n: m.bank.length })}
             </p>
             <button className="btn" style={{ padding: '12px 28px', fontSize: 15, borderRadius: 12 }} onClick={() => spin()}>
-              {mode === 'spark' ? '🎲 Spin a prompt' : '✏️ Give me a first line'}
+              {mode === 'spark' ? t('🎲 Spin a prompt') : t('✏️ Give me a first line')}
             </button>
           </>
         ) : (
@@ -160,26 +168,26 @@ export default function PromptsPanel({ streakDays = 0 }) {
             <div key={mode + spins} style={{ background: 'linear-gradient(140deg,#eaf6fd,#d8eefa)', border: '1.5px solid #bfe0f2', borderRadius: 16, padding: '22px 20px', width: '100%', position: 'relative' }}>
               <span style={{ position: 'absolute', top: 10, left: 14, color: '#8fcbe8', fontSize: 13 }}>✦</span>
               <span style={{ position: 'absolute', bottom: 12, right: 16, color: '#f5c542', fontSize: 12 }}>✦</span>
-              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .6, color: 'var(--link)', textTransform: 'uppercase', marginBottom: 8 }}>{m.tag} #{idx + 1}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: .6, color: 'var(--link)', textTransform: 'uppercase', marginBottom: 8 }}>{t(m.tag)} #{idx + 1}</div>
               <div style={{ fontSize: 16.5, fontWeight: 700, lineHeight: 1.5, color: '#0d2f55', fontStyle: mode === 'line' ? 'italic' : 'normal' }}>
                 {mode === 'line' ? `“${m.bank[idx]}”` : m.bank[idx]}
               </div>
             </div>
-            <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={() => spin()}>🎲 Another one!</button>
-            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 260 }}>{m.hint}</p>
+            <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={() => spin()}>{t('🎲 Another one!')}</button>
+            <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 260 }}>{t(m.hint)}</p>
           </>
         )}
       </div>
 
       {/* quick sparks */}
       <div style={{ padding: '14px 16px 16px', borderTop: '1px solid var(--line)', marginTop: 14 }}>
-        <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600, marginBottom: 8 }}>Or try a quick spark…</div>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600, marginBottom: 8 }}>{t('Or try a quick spark…')}</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
           {QUICK.map((q) => (
             <button key={q.label} onClick={() => quick(q)}
               style={{ background: '#fff', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, boxShadow: 'var(--shadow)' }}>
               <span style={{ fontSize: 18 }}>{q.icon}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#0d2f55', lineHeight: 1.25, textAlign: 'center' }}>{q.label}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#0d2f55', lineHeight: 1.25, textAlign: 'center' }}>{t(q.label)}</span>
             </button>
           ))}
         </div>

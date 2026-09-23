@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { api, TRAIT_LABELS } from '../lib/api.js'
 import { scoreSubmission } from '../lib/writingScore.js'
+import { useT, useLocale } from '../lib/i18n/index.jsx'
 
 /*
  * Student "Data & Goals" and "Share Wall" tabs — rendered inside the home page's
@@ -15,10 +16,11 @@ const PRESET_GOALS = [
   { id: 'g_fluency', trait: 'sentence_fluency', icon: '🌊', text: 'Vary my sentences so my writing flows when read aloud' },
 ]
 
-const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''
+const fmtDate = (d, locale = 'en-US') => d ? new Date(d).toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : ''
 
 /* ---------- Monthly progress chart (compact) ---------- */
 function MonthChart({ label, months, data, color, height = 84 }) {
+  const t = useT()
   const vals = data.filter((v) => v != null)
   const cur = vals[vals.length - 1], first = vals[0]
   const delta = cur != null && first != null ? +(cur - first).toFixed(1) : 0
@@ -26,10 +28,10 @@ function MonthChart({ label, months, data, color, height = 84 }) {
     <div style={{ flex: 1 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
         <span style={{ fontWeight: 700, fontSize: 12.5, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 10, height: 10, borderRadius: 3, background: color }} /> {label}
+          <span style={{ width: 10, height: 10, borderRadius: 3, background: color }} /> {t(label)}
         </span>
         <span style={{ fontSize: 12, color: 'var(--muted)' }}>
-          now <b style={{ color: 'var(--ink)' }}>{cur?.toFixed(1) ?? '—'}</b>/4
+          {t('now')} <b style={{ color: 'var(--ink)' }}>{cur?.toFixed(1) ?? '—'}</b>/4
           {delta > 0 && <span style={{ color: 'var(--good)', fontWeight: 700 }}> ▲ +{delta}</span>}
         </span>
       </div>
@@ -44,7 +46,7 @@ function MonthChart({ label, months, data, color, height = 84 }) {
               {months.map((m, i) => {
                 const v = data[i]
                 return (
-                  <div key={m} style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%' }} title={v != null ? `${m}: ${v}/4` : `${m}: no data`}>
+                  <div key={m} style={{ flex: 1, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', height: '100%' }} title={v != null ? t('{m}: {v}/4', { m, v }) : t('{m}: no data', { m })}>
                     <div style={{ width: '62%', height: v != null ? `${(v / 4) * 100}%` : '2px', background: v != null ? color : '#e6e8ec', borderRadius: '7px 7px 2px 2px' }} />
                   </div>
                 )
@@ -82,32 +84,34 @@ function DataBar({ pct }) {
 }
 
 function ScrPanel({ rows }) {
+  const t = useT()
   return (
     <div>
-      <div className="eyebrow" style={{ marginBottom: 6 }}>Strategy</div>
-      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.02em', marginBottom: 14 }}>Anchor adherence</div>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>{t('Strategy')}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.02em', marginBottom: 14 }}>{t('Anchor adherence')}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {rows.map((r) => (
-          <div key={r.label} title={`${r.k} = ${ANCHOR_MEANING[r.label] || r.label}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div key={r.label} title={`${r.k} = ${t(ANCHOR_MEANING[r.label] || r.label)}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span className="anchor-k" style={{ color: ANCHOR_COLORS[r.label] || 'var(--navy)' }}>{r.k}</span>
             <span style={{ width: 42, fontSize: 13, fontWeight: 700 }}>{r.pct}%</span>
             <DataBar pct={r.pct} />
-            <span style={{ width: 16, fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, textAlign: 'right' }} title={`${r.n} response${r.n === 1 ? '' : 's'} assessed`}>{r.n}</span>
+            <span style={{ width: 16, fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, textAlign: 'right' }} title={r.n === 1 ? t('{n} response assessed', { n: r.n }) : t('{n} responses assessed', { n: r.n })}>{r.n}</span>
           </div>
         ))}
       </div>
-      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 14 }}>R-A-C-E — Restate, Answer, Cite, Explain</div>
+      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 14 }}>{t('R-A-C-E — Restate, Answer, Cite, Explain')}</div>
     </div>
   )
 }
 
 function EcrCombined({ org, conv }) {
+  const t = useT()
   const section = (label, rows) => (
     <>
       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .5, textTransform: 'uppercase', color: 'var(--ecr)', margin: '2px 0 1px' }}>{label}</div>
       {rows.map((r) => (
         <div key={r.label} style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-          <span style={{ width: 122, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={r.label}>{r.label}</span>
+          <span style={{ width: 122, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={t(r.label)}>{t(r.label)}</span>
           <span style={{ width: 34, fontSize: 12, fontWeight: 800, textAlign: 'right', color: r.pct === 0 ? 'var(--muted)' : 'var(--ink)' }}>{r.pct}%</span>
           <DataBar pct={r.pct} />
         </div>
@@ -116,18 +120,20 @@ function EcrCombined({ org, conv }) {
   )
   return (
     <div>
-      <div className="eyebrow" style={{ marginBottom: 6 }}>Rubric</div>
-      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.02em', marginBottom: 14 }}>ECR domains</div>
+      <div className="eyebrow" style={{ marginBottom: 6 }}>{t('Rubric')}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.02em', marginBottom: 14 }}>{t('ECR domains')}</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {section('Organization & Development', org)}
+        {section(t('Organization & Development'), org)}
         <div style={{ borderTop: '1px solid var(--line)', margin: '6px 0' }} />
-        {section('Conventions', conv)}
+        {section(t('Conventions'), conv)}
       </div>
     </div>
   )
 }
 
 function RecentResults({ state, me, onReview }) {
+  const locale = useLocale()
+  const t = useT()
   const rows = state.submissions
     .filter((s) => s.studentId === me.id && s.completedAt && !s.isPeerRevision)
     .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
@@ -138,7 +144,7 @@ function RecentResults({ state, me, onReview }) {
   if (!rows.length) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f9fc', borderRadius: 10, padding: '14px 16px', fontSize: 13, color: 'var(--muted)' }}>
-        🌵 Nothing turned in yet — finished assignments and their feedback land here.
+        {t('🌵 Nothing turned in yet — finished assignments and their feedback land here.')}
       </div>
     )
   }
@@ -159,19 +165,19 @@ function RecentResults({ state, me, onReview }) {
                 <b style={{ fontSize: 14.5 }}>{a.title}</b>
               </div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-                Turned in {fmtDate(s.completedAt)} · {a.teacher?.name}
-                {missed.length > 0 && <> · next step: <b style={{ color: tone }}>{missed[0].label.toLowerCase()}</b></>}
+                {t('Turned in {date}', { date: fmtDate(s.completedAt, locale) })} · {a.teacher?.name}
+                {missed.length > 0 && <> · {t('next step:')} <b style={{ color: tone }}>{t(missed[0].label).toLowerCase()}</b></>}
               </div>
             </div>
             <div style={{ textAlign: 'center', minWidth: 78 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}>RUBRIC</div>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}>{t('RUBRIC')}</div>
               <b style={{ fontSize: 16, color: tone }}>{sc.rubricScore}<span style={{ fontSize: 12, color: 'var(--muted)' }}>/{sc.rubricMax}</span></b>
             </div>
             <div style={{ textAlign: 'center', minWidth: 78 }}>
               <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}>{sc.strategyName}</div>
               <b style={{ fontSize: 16, color: tone }}>{sc.pct}%</b>
             </div>
-            <button className="btn ghost" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }} onClick={() => onReview && onReview(s.id)}>See feedback →</button>
+            <button className="btn ghost" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }} onClick={() => onReview && onReview(s.id)}>{t('See feedback →')}</button>
           </div>
         )
       })}
@@ -180,6 +186,7 @@ function RecentResults({ state, me, onReview }) {
 }
 
 function WritingDataCard({ writingData, state, me, onReview }) {
+  const t = useT()
   const [top, setTop] = useState('data')
   const [subject, setSubject] = useState('ELA')
   const [fmt, setFmt] = useState('SCR')
@@ -191,18 +198,18 @@ function WritingDataCard({ writingData, state, me, onReview }) {
   return (
     <div className="card gold-edge" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <div className="data-title">My writing data</div>
+        <div className="data-title">{t('My writing data')}</div>
         <div className="seg">
-          <button className={top === 'recent' ? 'on' : ''} onClick={() => setTop('recent')}>Recently completed</button>
+          <button className={top === 'recent' ? 'on' : ''} onClick={() => setTop('recent')}>{t('Recently completed')}</button>
           {writingData.subjects.map((sub) => (
-            <button key={sub} className={top === 'data' && subject === sub ? 'on' : ''} onClick={() => { setTop('data'); setSubject(sub) }}>{sub}</button>
+            <button key={sub} className={top === 'data' && subject === sub ? 'on' : ''} onClick={() => { setTop('data'); setSubject(sub) }}>{t(sub)}</button>
           ))}
         </div>
       </div>
 
       {top === 'recent' ? (
         <div style={{ marginTop: 14 }}>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 12 }}>Your most recent finished assignments — open one to see the feedback again.</div>
+          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 12 }}>{t('Your most recent finished assignments — open one to see the feedback again.')}</div>
           <RecentResults state={state} me={me} onReview={onReview} />
         </div>
       ) : (<>
@@ -214,15 +221,15 @@ function WritingDataCard({ writingData, state, me, onReview }) {
             <button className={view === 'ECR' ? 'on' : ''} onClick={() => setFmt('ECR')}>ECR</button>
           </div>
         ) : (
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--scr)' }}>{subject} collects SCR data only</span>
+          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--scr)' }}>{t('{subject} collects SCR data only', { subject: t(subject) })}</span>
         )}
-        <span style={{ fontSize: 12, color: 'var(--muted)', marginLeft: 'auto' }}>vs. the grading rubric</span>
+        <span style={{ fontSize: 12, color: 'var(--muted)', marginLeft: 'auto' }}>{t('vs. the grading rubric')}</span>
       </div>
 
       {view === 'SCR' ? (
         scrEmpty ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f9fc', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--muted)' }}>
-            🌵 Nothing here yet — data appears when Kayla answers {subject} prompts.
+            {t('🌵 Nothing here yet — data appears when Kayla answers {subject} prompts.', { subject: t(subject) })}
           </div>
         ) : (
           <ScrPanel rows={d.scr} />
@@ -284,14 +291,15 @@ const mmss = (n) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`
 /* One clock for the whole conference — it counts up and never stops, so the
  * teacher can see how long they have been sitting with this writer. */
 function MeetingClock() {
+  const t = useT()
   const [secs, setSecs] = useState(0)
   useEffect(() => {
-    const t = setInterval(() => setSecs((v) => v + 1), 1000)
-    return () => clearInterval(t)
+    const id = setInterval(() => setSecs((v) => v + 1), 1000)
+    return () => clearInterval(id)
   }, [])
   const long = secs >= 420 // the protocol asks for 4–7 minutes
   return (
-    <span title="Time in this conference"
+    <span title={t('Time in this conference')}
       style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 999, padding: '5px 13px', fontSize: 13, fontWeight: 800,
         fontVariantNumeric: 'tabular-nums', background: long ? 'rgba(245,197,66,.2)' : 'rgba(255,255,255,.14)',
         color: long ? '#f5c542' : '#a8dff5', border: `1px solid ${long ? 'rgba(245,197,66,.5)' : 'rgba(255,255,255,.22)'}` }}>
@@ -301,6 +309,7 @@ function MeetingClock() {
 }
 
 function ConferenceEvidence({ state, me }) {
+  const t = useT()
   const [openId, setOpenId] = useState(null)
   const anchors = state.writingData?.ELA?.scr || []
   const mine = state.submissions
@@ -318,17 +327,17 @@ function ConferenceEvidence({ state, me }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14, height: '100%', overflowY: 'auto', paddingRight: 4 }}>
       <div>
-        <div className="eyebrow" style={{ color: '#0f97c2' }}>What the writing shows</div>
-        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>Look at this together — it is the evidence for the conversation.</div>
+        <div className="eyebrow" style={{ color: '#0f97c2' }}>{t('What the writing shows')}</div>
+        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{t('Look at this together — it is the evidence for the conversation.')}</div>
       </div>
 
       {/* the anchors, small enough to glance at mid-conversation */}
       <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 14px' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>SCR · STRATEGY ANCHORS</div>
+        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>{t('SCR · STRATEGY ANCHORS')}</div>
         {anchors.map((r) => (
           <div key={r.k} style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 6 }}>
             <span style={{ width: 20, height: 20, borderRadius: 6, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, color: '#fff', background: '#16386b' }}>{r.k}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, width: 52, color: 'var(--ink)' }}>{r.label}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, width: 52, color: 'var(--ink)' }}>{t(r.label)}</span>
             <div style={{ flex: 1, height: 8, background: '#e3ecf2', borderRadius: 5 }}>
               <div style={{ height: '100%', width: `${r.pct}%`, borderRadius: 5, background: r.pct >= 75 ? 'var(--good)' : r.pct >= 50 ? '#e0a51c' : '#c0392b' }} />
             </div>
@@ -340,7 +349,7 @@ function ConferenceEvidence({ state, me }) {
       {drafting.length > 0 && (
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#a37400', marginBottom: 8 }}>
-            IN PROGRESS RIGHT NOW · {drafting.length}
+            {t('IN PROGRESS RIGHT NOW · {n}', { n: drafting.length })}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {drafting.map(({ s, a }) => {
@@ -353,14 +362,14 @@ function ConferenceEvidence({ state, me }) {
                     style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: 'transparent' }}>
                     <span style={{ fontSize: 9.5, fontWeight: 800, color: '#fff', background: a.format === 'ECR' ? 'var(--ecr)' : 'var(--scr)', padding: '2px 7px', borderRadius: 6 }}>{a.format || 'SCR'}</span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#a37400', whiteSpace: 'nowrap' }}>Draft {draft.n} · {wc}w</span>
+                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#a37400', whiteSpace: 'nowrap' }}>{t('Draft {n}', { n: draft.n })} · {t('{n}w', { n: wc })}</span>
                     <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
                   </button>
                   {open && (
                     <div style={{ padding: '2px 12px 12px', borderTop: '1px solid #f0d9a8' }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>WHERE THE DRAFT IS NOW</div>
+                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>{t('WHERE THE DRAFT IS NOW')}</div>
                       <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 170, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
-                        {(draft.content || '').trim() || 'Nothing written yet — this is a good place to start the conference.'}
+                        {(draft.content || '').trim() || t('Nothing written yet — this is a good place to start the conference.')}
                       </div>
                     </div>
                   )}
@@ -373,11 +382,11 @@ function ConferenceEvidence({ state, me }) {
 
       <div>
         <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>
-          FINISHED WRITING{rows.length ? ` · ${rows.length}` : ''}
+          {t('FINISHED WRITING')}{rows.length ? ` · ${rows.length}` : ''}
         </div>
         {rows.length === 0 && (
           <div style={{ fontSize: 12.5, color: 'var(--muted)', background: '#f4f8fb', borderRadius: 10, padding: '12px 14px' }}>
-            Nothing turned in yet — talk about what is in progress instead.
+            {t('Nothing turned in yet — talk about what is in progress instead.')}
           </div>
         )}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -396,16 +405,16 @@ function ConferenceEvidence({ state, me }) {
                 </button>
                 {open && (
                   <div style={{ padding: '2px 12px 12px', borderTop: '1px solid var(--line)' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>WHAT THEY WROTE</div>
+                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>{t('WHAT THEY WROTE')}</div>
                     <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fbfdfe', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 150, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
-                      {sc.questions[0].answer.trim() || 'No response recorded.'}
+                      {sc.questions[0].answer.trim() || t('No response recorded.')}
                     </div>
                     <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '11px 0 5px' }}>{sc.strategyName}</div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
                       {sc.questions[0].anchors.map((an) => (
                         <div key={an.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, lineHeight: 1.4 }}>
                           <span style={{ width: 17, height: 17, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 800, color: '#fff', background: an.hit ? 'var(--good)' : '#c0392b' }}>{an.hit ? '✓' : '✕'}</span>
-                          <span style={{ color: an.hit ? 'var(--muted)' : '#33566e', fontWeight: an.hit ? 600 : 700 }}>{an.label}</span>
+                          <span style={{ color: an.hit ? 'var(--muted)' : '#33566e', fontWeight: an.hit ? 600 : 700 }}>{t(an.label)}</span>
                         </div>
                       ))}
                     </div>
@@ -420,7 +429,7 @@ function ConferenceEvidence({ state, me }) {
       {freeWrites.length > 0 && (
         <div>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#3b5fb8', marginBottom: 8 }}>
-            THEIR OWN FREE WRITES · {freeWrites.length}
+            {t('THEIR OWN FREE WRITES · {n}', { n: freeWrites.length })}
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {freeWrites.map(({ s, a }) => {
@@ -434,20 +443,20 @@ function ConferenceEvidence({ state, me }) {
                     <span style={{ fontSize: 14 }}>{s.published ? '🌟' : '✒️'}</span>
                     <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
                     <span style={{ fontSize: 11.5, fontWeight: 800, color: '#3b5fb8', whiteSpace: 'nowrap' }}>
-                      {s.published ? 'Published' : `Draft ${draft.n}`} · {wc}w
+                      {s.published ? t('Published') : t('Draft {n}', { n: draft.n })} · {t('{n}w', { n: wc })}
                     </span>
                     <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
                   </button>
                   {open && (
                     <div style={{ padding: '2px 12px 12px', borderTop: '1px solid #d6dffa' }}>
                       <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>
-                        {s.published ? 'THE PIECE THEY PUBLISHED' : 'WHERE THIS ONE STANDS'}
+                        {s.published ? t('THE PIECE THEY PUBLISHED') : t('WHERE THIS ONE STANDS')}
                       </div>
                       <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 170, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
-                        {(draft.content || '').trim() || 'Started, but nothing written yet.'}
+                        {(draft.content || '').trim() || t('Started, but nothing written yet.')}
                       </div>
                       <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 7 }}>
-                        Their own choice of topic — no rubric on this one.
+                        {t('Their own choice of topic — no rubric on this one.')}
                       </div>
                     </div>
                   )}
@@ -460,9 +469,9 @@ function ConferenceEvidence({ state, me }) {
 
       {me.goal && (
         <div style={{ background: '#eef6f9', borderRadius: 12, padding: '11px 14px' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#0f97c2' }}>THE GOAL WE SET LAST TIME</div>
-          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, lineHeight: 1.4 }}>{me.goal.text}</div>
-          {me.goal.teachingPoint && <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3 }}>Taught as: {me.goal.teachingPoint}</div>}
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#0f97c2' }}>{t('THE GOAL WE SET LAST TIME')}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, lineHeight: 1.4 }}>{t(me.goal.text)}</div>
+          {me.goal.teachingPoint && <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3 }}>{t('Taught as:')} {me.goal.teachingPoint}</div>}
         </div>
       )}
     </div>
@@ -470,6 +479,8 @@ function ConferenceEvidence({ state, me }) {
 }
 
 function ConferenceProtocol({ teacher, state, me, onClose, onSetGoal }) {
+  const t = useT()
+  const locale = useLocale()
   const [i, setI] = useState(0)
   const [notes, setNotes] = useState({ working: '', strength: '', teachingPoint: '', strategy: '', tried: false })
   const [goalText, setGoalText] = useState('')
@@ -506,9 +517,9 @@ function ConferenceProtocol({ teacher, state, me, onClose, onSetGoal }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 22 }}>🤝</span>
             <div style={{ flex: 1 }}>
-              <b style={{ fontSize: 18 }}>Writing Conference</b>
+              <b style={{ fontSize: 18 }}>{t('Writing Conference')}</b>
               <div style={{ fontSize: 12.5, color: '#a8dff5', fontWeight: 700, marginTop: 2 }}>
-You and {teacher} · about 5 minutes · Research · Decide · Teach · Link
+                {t('You and {teacher}', { teacher })} · {t('about 5 minutes')} · {t('Research')} · {t('Decide')} · {t('Teach')} · {t('Link')}
               </div>
             </div>
             <MeetingClock />
@@ -522,12 +533,12 @@ You and {teacher} · about 5 minutes · Research · Decide · Teach · Link
               return (
                 <React.Fragment key={st.key}>
                   {idx > 0 && <span style={{ flex: 1, height: 3, borderRadius: 3, background: done || cur ? 'linear-gradient(90deg,#f5c542,#e89a00)' : 'rgba(255,255,255,.22)' }} />}
-                  <button onClick={() => setI(idx)} title={st.label}
+                  <button onClick={() => setI(idx)} title={t(st.label)}
                     style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, padding: '6px 13px', cursor: 'pointer',
                       background: cur ? 'linear-gradient(120deg,#f5c542,#e89a00)' : done ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.14)',
                       color: cur ? '#3d2c00' : done ? '#16386b' : 'rgba(255,255,255,.8)', fontWeight: 800, fontSize: 12.5,
                       border: cur ? '1.5px solid rgba(255,235,170,.9)' : '1.5px solid transparent' }}>
-                    <span style={{ fontSize: 13 }}>{done ? '✓' : st.letter}</span>{st.label}
+                    <span style={{ fontSize: 13 }}>{done ? '✓' : st.letter}</span>{t(st.label)}
                   </button>
                 </React.Fragment>
               )
@@ -546,35 +557,35 @@ You and {teacher} · about 5 minutes · Research · Decide · Teach · Link
         <div style={{ padding: '20px 22px 8px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 22 }}>{step.icon}</span>
-            <b style={{ fontSize: 17 }}>{step.label}</b>
-            <span className="pill" style={{ background: '#eef4f8', color: '#16386b' }}>about {step.time}</span>
+            <b style={{ fontSize: 17 }}>{t(step.label)}</b>
+            <span className="pill" style={{ background: '#eef4f8', color: '#16386b' }}>{t('about {time}', { time: t(step.time) })}</span>
           </div>
-          <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, margin: '6px 0 12px' }}>{step.aim}</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, margin: '6px 0 12px' }}>{t(step.aim)}</div>
 
           <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
             {step.moves.map((m, mi) => (
               <div key={mi} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', fontSize: 13.5, lineHeight: 1.5, marginTop: mi ? 7 : 0 }}>
-                <span style={{ color: CONF_CYAN, fontWeight: 800 }}>›</span><span>{m}</span>
+                <span style={{ color: CONF_CYAN, fontWeight: 800 }}>›</span><span>{t(m)}</span>
               </div>
             ))}
           </div>
 
           {step.key === 'research' && (
             <label style={{ display: 'block' }}>
-              <span style={lbl}>What am I working on?</span>
-              <textarea value={notes.working} onChange={set('working')} rows={3} placeholder="In your own words…" style={{ ...field, resize: 'vertical' }} />
+              <span style={lbl}>{t('What am I working on?')}</span>
+              <textarea value={notes.working} onChange={set('working')} rows={3} placeholder={t('In your own words…')} style={{ ...field, resize: 'vertical' }} />
             </label>
           )}
 
           {step.key === 'decide' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <label style={{ display: 'block' }}>
-                <span style={lbl}>What I already did well</span>
-                <input value={notes.strength} onChange={set('strength')} placeholder="I backed up my reason with a detail from the text…" style={field} />
+                <span style={lbl}>{t('What I already did well')}</span>
+                <input value={notes.strength} onChange={set('strength')} placeholder={t('I backed up my reason with a detail from the text…')} style={field} />
               </label>
               <label style={{ display: 'block' }}>
-                <span style={lbl}>The one thing I am learning today</span>
-                <input value={notes.teachingPoint} onChange={set('teachingPoint')} placeholder="Say what the other side thinks before I answer it." style={field} />
+                <span style={lbl}>{t('The one thing I am learning today')}</span>
+                <input value={notes.teachingPoint} onChange={set('teachingPoint')} placeholder={t('Say what the other side thinks before I answer it.')} style={field} />
               </label>
             </div>
           )}
@@ -582,12 +593,12 @@ You and {teacher} · about 5 minutes · Research · Decide · Teach · Link
           {step.key === 'teach' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               <label style={{ display: 'block' }}>
-                <span style={lbl}>The strategy I am trying</span>
-                <input value={notes.strategy} onChange={set('strategy')} placeholder='We used "The Big Move," paragraph 3, as our example' style={field} />
+                <span style={lbl}>{t('The strategy I am trying')}</span>
+                <input value={notes.strategy} onChange={set('strategy')} placeholder={t('We used "The Big Move," paragraph 3, as our example')} style={field} />
               </label>
               <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 700, background: '#f4f8fb', borderRadius: 10, padding: '11px 14px', cursor: 'pointer' }}>
                 <input type="checkbox" checked={notes.tried} onChange={(e) => setNotes((n) => ({ ...n, tried: e.target.checked }))} style={{ width: 17, height: 17 }} />
-I tried it in my own writing
+                {t('I tried it in my own writing')}
               </label>
             </div>
           )}
@@ -596,21 +607,21 @@ I tried it in my own writing
             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {(notes.strength || notes.teachingPoint) && (
                 <div style={{ background: '#eef6f9', borderRadius: 12, padding: '12px 16px', fontSize: 13.5, lineHeight: 1.55 }}>
-                  {notes.strength && <div><b>What I did well:</b> {notes.strength}</div>}
-                  {notes.teachingPoint && <div style={{ marginTop: 4 }}><b>What I am learning:</b> {notes.teachingPoint}</div>}
+                  {notes.strength && <div><b>{t('What I did well:')}</b> {notes.strength}</div>}
+                  {notes.teachingPoint && <div style={{ marginTop: 4 }}><b>{t('What I am learning:')}</b> {notes.teachingPoint}</div>}
                 </div>
               )}
               <label style={{ display: 'block' }}>
-                <span style={lbl}>My goal, in my own words</span>
+                <span style={lbl}>{t('My goal, in my own words')}</span>
                 <textarea value={goalText} onChange={(e) => setGoalText(e.target.value)} rows={2} maxLength={140}
-                  placeholder="Say it the way you would say it to a friend…" style={{ ...field, resize: 'vertical' }} />
+                  placeholder={t('Say it the way you would say it to a friend…')} style={{ ...field, resize: 'vertical' }} />
                 <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{goalText.length}/140</span>
               </label>
               <label style={{ display: 'block' }}>
-                <span style={lbl}>Which part of writing is this? (optional)</span>
+                <span style={lbl}>{t('Which part of writing is this? (optional)')}</span>
                 <select value={trait} onChange={(e) => setTrait(e.target.value)} style={{ ...field, background: '#fff' }}>
-                  <option value="">Skip this — just my goal</option>
-                  {Object.entries(TRAIT_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  <option value="">{t('Skip this — just my goal')}</option>
+                  {Object.entries(TRAIT_LABELS).map(([k, v]) => <option key={k} value={k}>{t(v)}</option>)}
                 </select>
               </label>
             </div>
@@ -621,21 +632,21 @@ I tried it in my own writing
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 22px 20px' }}>
           <button onClick={() => (i === 0 ? onClose() : setI(i - 1))}
             style={{ padding: '11px 18px', borderRadius: 11, fontWeight: 800, fontSize: 13.5, color: 'var(--muted)', background: '#eef3f6', cursor: 'pointer' }}>
-            {i === 0 ? 'Cancel' : '← Back'}
+            {i === 0 ? t('Cancel') : t('← Back')}
           </button>
-          <span style={{ flex: 1, fontSize: 12, color: 'var(--muted)', fontWeight: 700 }}>Step {i + 1} of 4 · work through it together</span>
+          <span style={{ flex: 1, fontSize: 12, color: 'var(--muted)', fontWeight: 700 }}>{t('Step {n} of 4 · work through it together', { n: i + 1 })}</span>
           {i < 3 ? (
             <button onClick={() => setI(i + 1)}
               style={{ padding: '12px 24px', borderRadius: 12, fontWeight: 800, fontSize: 14, color: '#fff', cursor: 'pointer',
                 background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.42)' }}>
-              Next: {RDTL_STEPS[i + 1].label} →
+              {t('Next: {step} →', { step: t(RDTL_STEPS[i + 1].label) })}
             </button>
           ) : (
             <button onClick={finish} disabled={!goalText.trim() || saving}
               style={{ padding: '12px 24px', borderRadius: 12, fontWeight: 800, fontSize: 14, cursor: goalText.trim() ? 'pointer' : 'default',
                 color: goalText.trim() ? '#3d2c00' : '#9db0c0', background: goalText.trim() ? 'linear-gradient(120deg,#f5c542,#e89a00)' : '#eef0f6',
                 boxShadow: goalText.trim() ? '0 0 16px rgba(245,180,0,.5)' : 'none' }}>
-              🎯 This is my goal
+              {t('🎯 This is my goal')}
             </button>
           )}
         </div>
@@ -650,6 +661,7 @@ const CONF_CYAN = '#0f97c2'
 
 /* ================= Data & Goals tab ================= */
 export function DataGoalsTab({ state, me, onChange, onReview }) {
+  const t = useT()
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const mp = state.monthlyProgress
   const [picking, setPicking] = useState(!me.goal)
@@ -673,28 +685,28 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={() => setToast(null)}>
           <div className="card" style={{ padding: 28, width: 380, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
             <div style={{ fontSize: 46 }}>🏆</div>
-            <h2 style={{ margin: '6px 0' }}>Goal reached!</h2>
-            <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>Amazing work sticking with it. You earned</p>
+            <h2 style={{ margin: '6px 0' }}>{t('Goal reached!')}</h2>
+            <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>{t('Amazing work sticking with it. You earned')}</p>
             <div className="coin" style={{ fontSize: 22, justifyContent: 'center' }}><span className="disc" style={{ width: 20, height: 20 }} />+{toast}</div>
-            <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>Pick my next goal</button>
+            <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Pick my next goal')}</button>
           </div>
         </div>
       )}
 
       {conferring && (
-        <ConferenceProtocol teacher={state.teacher?.name || 'your teacher'} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />
+        <ConferenceProtocol teacher={state.teacher?.name || t('your teacher')} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />
       )}
 
       {/* focus goal */}
       <div className="card" style={{ padding: 22, marginBottom: 18 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-          <b style={{ fontSize: 17 }}>🎯 My Focus Goal</b>
+          <b style={{ fontSize: 17 }}>{t('🎯 My Focus Goal')}</b>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {me.goal && !picking && <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(true)}>Change goal</button>}
+            {me.goal && !picking && <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(true)}>{t('Change goal')}</button>}
             <button onClick={() => setConferring(true)}
               style={{ padding: '9px 18px', borderRadius: 11, fontWeight: 800, fontSize: 13.5, color: '#fff', cursor: 'pointer',
                 background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.42)' }}>
-              🤝 Conference with my teacher
+              {t('🤝 Conference with my teacher')}
             </button>
           </div>
         </div>
@@ -703,23 +715,23 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: 'linear-gradient(120deg,#eef6f9,#fff)', border: '1px solid var(--line)', borderRadius: 12, padding: 18, marginTop: 10 }}>
             <div style={{ fontSize: 34 }}>{PRESET_GOALS.find((g) => g.id === me.goal.id)?.icon || '✍️'}</div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 17, fontWeight: 700 }}>{me.goal.text}</div>
+              <div style={{ fontSize: 17, fontWeight: 700 }}>{t(me.goal.text)}</div>
               <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>
-                {me.goal.trait ? `Trait: ${TRAIT_LABELS[me.goal.trait]} · ` : ''}Set {fmtDate(me.goal.setOn)} · your coach will keep this in mind when you confer
+                {me.goal.trait ? `${t('Trait: {trait}', { trait: t(TRAIT_LABELS[me.goal.trait]) })} · ` : ''}{t('Set {date}', { date: fmtDate(me.goal.setOn, locale) })} · {t('your coach will keep this in mind when you confer')}
               </div>
               {me.goal.source === 'conference' && (
                 <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 7 }}>
-                  <span className="pill" style={{ background: '#e9f5fb', color: '#0f97c2' }}>🤝 Set in a writing conference</span>
-                  {me.goal.strength && <span style={{ fontSize: 12, color: 'var(--muted)' }}><b>What I did well:</b> {me.goal.strength}</span>}
+                  <span className="pill" style={{ background: '#e9f5fb', color: '#0f97c2' }}>{t('🤝 Set in a writing conference')}</span>
+                  {me.goal.strength && <span style={{ fontSize: 12, color: 'var(--muted)' }}><b>{t('What I did well:')}</b> {me.goal.strength}</span>}
                 </div>
               )}
             </div>
-            <button className="btn gold" onClick={achieve}>🎉 I reached this goal!</button>
+            <button className="btn gold" onClick={achieve}>{t('🎉 I reached this goal!')}</button>
           </div>
         ) : (
           <div style={{ marginTop: 10 }}>
             <div style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12 }}>
-              Best way: <button onClick={() => setConferring(true)} style={{ color: 'var(--link)', fontWeight: 800, background: 'none', cursor: 'pointer', padding: 0 }}>sit down with your teacher</button> and work out your goal together. Or pick one to focus on now — you can change it anytime.
+              {t('Best way:')} <button onClick={() => setConferring(true)} style={{ color: 'var(--link)', fontWeight: 800, background: 'none', cursor: 'pointer', padding: 0 }}>{t('sit down with your teacher')}</button> {t('and work out your goal together. Or pick one to focus on now — you can change it anytime.')}
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {PRESET_GOALS.map((g) => {
@@ -730,18 +742,18 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
                       border: on ? '2px solid var(--navy)' : '1px solid var(--line)', background: on ? '#eef4f7' : '#fff', cursor: 'pointer' }}>
                     <span style={{ fontSize: 24 }}>{g.icon}</span>
                     <span>
-                      <span style={{ display: 'block', fontWeight: 600, fontSize: 14 }}>{g.text}</span>
-                      <span style={{ display: 'block', fontSize: 11, color: 'var(--link)', fontWeight: 700, marginTop: 2 }}>{TRAIT_LABELS[g.trait]}</span>
+                      <span style={{ display: 'block', fontWeight: 600, fontSize: 14 }}>{t(g.text)}</span>
+                      <span style={{ display: 'block', fontSize: 11, color: 'var(--link)', fontWeight: 700, marginTop: 2 }}>{t(TRAIT_LABELS[g.trait])}</span>
                     </span>
                   </button>
                 )
               })}
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '12px 14px', borderRadius: 12, border: '1px dashed var(--line)', gridColumn: '1 / -1' }}>
                 <span style={{ fontSize: 22 }}>✏️</span>
-                <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder="Or write your own goal…"
+                <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder={t('Or write your own goal…')}
                   onKeyDown={(e) => e.key === 'Enter' && setCustomGoal()}
                   style={{ flex: 1, padding: '9px 12px', borderRadius: 9, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 14 }} />
-                <button className="btn" disabled={!custom.trim()} onClick={setCustomGoal}>Set goal</button>
+                <button className="btn" disabled={!custom.trim()} onClick={setCustomGoal}>{t('Set goal')}</button>
               </div>
             </div>
           </div>
@@ -749,10 +761,10 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
 
         {me.goalHistory?.length > 0 && (
           <div style={{ marginTop: 16, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)' }}>🏆 Goals you've conquered</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)' }}>{t("🏆 Goals you've conquered")}</span>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
               {me.goalHistory.map((g, i) => (
-                <span key={i} className="pill green" style={{ padding: '6px 12px' }}>✓ {g.text} <span style={{ opacity: .7, marginLeft: 4 }}>{fmtDate(g.achievedOn)}</span></span>
+                <span key={i} className="pill green" style={{ padding: '6px 12px' }}>✓ {t(g.text)} <span style={{ opacity: .7, marginLeft: 4 }}>{fmtDate(g.achievedOn, locale)}</span></span>
               ))}
             </div>
           </div>
@@ -766,8 +778,8 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           <div className="card gold-edge" style={{ padding: '18px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 10, flexWrap: 'wrap' }}>
               <div>
-                <div className="data-title">Monthly progress</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{mp.year} · average score /4</div>
+                <div className="data-title">{t('Monthly progress')}</div>
+                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{mp.year} · {t('average score /4')}</div>
               </div>
               <div className="seg">
                 <button className={mpTab === 'scr' ? 'on' : ''} onClick={() => setMpTab('scr')}>SCR</button>
@@ -780,7 +792,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           </div>
 
           <div className="card gold-edge" style={{ padding: '18px 20px' }}>
-            <div className="data-title">Writing habits</div>
+            <div className="data-title">{t('Writing habits')}</div>
             <div className="habit-grid">
               {[
                 { k: 'Revisions made', v: revisions, sub: 'Each one makes you stronger' },
@@ -789,8 +801,8 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
               ].map((s) => (
                 <div key={s.k} className="habit-tile">
                   <div className="v">{s.v}</div>
-                  <div className="k">{s.k}</div>
-                  <div className="s">{s.sub}</div>
+                  <div className="k">{t(s.k)}</div>
+                  <div className="s">{t(s.sub)}</div>
                 </div>
               ))}
             </div>
@@ -806,14 +818,14 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
         return (
           <div key={sub.id} className="card" style={{ padding: 22, marginBottom: 18 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-              <b style={{ fontSize: 17 }}>📖 Growth Story — "{asg.title}"</b>
-              <span style={{ fontSize: 12, color: 'var(--muted)' }}>Draft {first.n} → Draft {last.n}</span>
+              <b style={{ fontSize: 17 }}>{t('📖 Growth Story — "{title}"', { title: asg.title })}</b>
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('Draft {a} → Draft {b}', { a: first.n, b: last.n })}</span>
             </div>
-            <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 14px' }}>Look what revising did — same writer, {withTraits.length} drafts apart.</p>
+            <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 14px' }}>{t('Look what revising did — same writer, {n} drafts apart.', { n: withTraits.length })}</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
               {[{ d: first, tag: 'First draft', bg: '#f6f8f9' }, { d: last, tag: 'Latest draft', bg: '#eef6f2' }].map((c) => (
                 <div key={c.tag} style={{ background: c.bg, borderRadius: 12, padding: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{c.tag}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{t(c.tag)}</div>
                   <div style={{ fontSize: 13, lineHeight: 1.5, marginTop: 6, maxHeight: 90, overflow: 'hidden', color: '#3a4149' }}>
                     {c.d.content.slice(0, 180)}{c.d.content.length > 180 ? '…' : ''}
                   </div>
@@ -835,6 +847,7 @@ export const REACTION_KINDS = [
 ]
 
 export function ReactionBar({ entry, onReact, size = 'md' }) {
+  const t = useT()
   const counts = { like: 0, heart: 0, celebrate: 0, ...(entry.reactions || {}) }
   const mine = entry.myReactions || []
   const pad = size === 'sm' ? '4px 9px' : '6px 12px'
@@ -844,7 +857,7 @@ export function ReactionBar({ entry, onReact, size = 'md' }) {
       {REACTION_KINDS.map((r) => {
         const on = mine.includes(r.key)
         return (
-          <button key={r.key} onClick={() => onReact(entry.id, r.key)} title={on ? `Undo ${r.label.toLowerCase()}` : r.label}
+          <button key={r.key} onClick={() => onReact(entry.id, r.key)} title={on ? t('Undo {reaction}', { reaction: t(r.label).toLowerCase() }) : t(r.label)}
             style={{ display: 'inline-flex', alignItems: 'center', gap: 5, borderRadius: 999, padding: pad, fontSize: font, fontWeight: 800, cursor: 'pointer',
               background: on ? r.on : r.bg, color: r.fg, border: on ? `1.5px solid ${r.fg}` : '1.5px solid transparent' }}>
             <span style={{ fontSize: font + 1 }}>{r.glyph}</span>{counts[r.key]}
@@ -856,6 +869,7 @@ export function ReactionBar({ entry, onReact, size = 'md' }) {
 }
 
 export function ShareWallTab({ state, me, onChange }) {
+  const t = useT()
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const shareWall = state.shareWall || []
   const sharedSubIds = new Set(shareWall.map((e) => e.submissionId).filter(Boolean))
@@ -868,8 +882,8 @@ export function ShareWallTab({ state, me, onChange }) {
     <div className="card" style={{ padding: 22 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
         <div>
-          <b style={{ fontSize: 17 }}>🌟 Share Wall <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--muted)' }}>See what other students are writing!</span></b>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>Cheer for each other with a 👍, ❤️, or 🎉 — reactions only, no comments.</div>
+          <b style={{ fontSize: 17 }}>🌟 {t('Share Wall')} <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--muted)' }}>{t('See what other students are writing!')}</span></b>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>{t('Cheer for each other with a 👍, ❤️, or 🎉 — reactions only, no comments.')}</div>
         </div>
       </div>
 
@@ -877,10 +891,10 @@ export function ShareWallTab({ state, me, onChange }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'linear-gradient(120deg,#eef4ff,#fff)', border: '1px solid var(--line)', borderRadius: 12, padding: '12px 16px', margin: '14px 0' }}>
           <span style={{ fontSize: 22 }}>🎉</span>
           <div style={{ flex: 1 }}>
-            <b style={{ fontSize: 14 }}>You finished "{state.assignments.find((a) => a.id === shareable[0].assignmentId)?.title}"!</b>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>Proud of it? Share it with the class.</div>
+            <b style={{ fontSize: 14 }}>{t('You finished "{title}"!', { title: state.assignments.find((a) => a.id === shareable[0].assignmentId)?.title })}</b>
+            <div style={{ fontSize: 12, color: 'var(--muted)' }}>{t('Proud of it? Share it with the class.')}</div>
           </div>
-          <button className="btn" onClick={() => share(shareable[0].id)}>Share to wall →</button>
+          <button className="btn" onClick={() => share(shareable[0].id)}>{t('Share to wall →')}</button>
         </div>
       )}
 

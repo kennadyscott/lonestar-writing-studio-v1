@@ -173,3 +173,10 @@ a { color: var(--link); }
 /* Fluency Zone tiles: the whole card is the button */
 .zone-tile { transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
 .zone-tile.playable:hover, .zone-tile.playable:focus-visible { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(2,56,77,.18), 0 0 0 2px var(--gold); outline: none; }
+
+/* Language toggle — first control in the top bar */
+.lang-toggle { display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--gold-line); border-radius: 999px; padding: 3px 5px 3px 10px; margin-left: 12px; }
+.lang-toggle .lang-label { font-size: 10px; font-weight: 800; letter-spacing: .7px; color: var(--muted); text-transform: uppercase; margin-right: 3px; }
+.lang-toggle button { border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 800; color: var(--muted); line-height: 1; display: inline-flex; align-items: center; gap: 4px; }
+.lang-toggle button:hover { background: #eef6fa; color: var(--ink); }
+.lang-toggle button.on { background: var(--navy); color: #fff; }

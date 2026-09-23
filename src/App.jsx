@@ -76,9 +76,7 @@ export default function App() {
   } else if (view === 'lesson' && lesson) {
     body = <LessonPage lesson={lesson.a} moduleLabel={lesson.moduleLabel} supportLevel={me.supportLevel} onBack={() => setView('luna')} />
   } else if (view === 'quickwrite') {
-    body = <QuickWritePage state={state} me={me} onBack={goHome} onChange={refresh}
-      onBank={() => setView('bank')} onWall={() => setView('wall')}
-      onOpen={(id) => { setView('bank'); setOpenSub(id) }} />
+    body = <QuickWritePage state={state} me={me} onBack={goHome} onChange={refresh} />
   } else if (view === 'wall') {
     body = (
       <div>

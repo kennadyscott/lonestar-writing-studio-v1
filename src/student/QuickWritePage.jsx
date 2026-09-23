@@ -77,30 +77,22 @@ function PiecePreview({ text }) {
   )
 }
 
-function PieceActions({ submissionId, shared, busy, teacherName, onOpen, onBank, onWall, onShare }) {
+function ShareToWall({ submissionId, shared, busy, teacherName, onShare }) {
   const t = useT()
+  if (shared) {
+    return <div className="pill" style={{ justifyContent: 'center', background: '#fdeef4', color: '#c23f74', marginTop: 14 }}>{t('💛 On the Writing Wall')}</div>
+  }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 14, textAlign: 'left' }}>
-      <button className="btn" disabled={busy || !submissionId} onClick={() => onOpen?.(submissionId)} style={{ justifyContent: 'center' }}>{t('Read what I wrote')}</button>
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-        <button className="btn ghost" style={{ flex: '1 1 160px', justifyContent: 'center' }} disabled={busy} onClick={onBank}>{t('Open my Writing Bank')}</button>
-        <button className="btn ghost" style={{ flex: '1 1 160px', justifyContent: 'center' }} disabled={busy} onClick={onWall}>{t('See the Writing Wall')}</button>
+      <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.45 }}>
+        <b>{t('Who can see it:')}</b> {t('only the students and teacher in')} {t("{teacher}'s class", { teacher: teacherName })}. {t('It never leaves your classroom, and you or your teacher can take it down anytime.')}
       </div>
-      {shared ? (
-        <div className="pill" style={{ justifyContent: 'center', background: '#fdeef4', color: '#c23f74' }}>{t('💛 On the Writing Wall')}</div>
-      ) : (
-        <>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.45 }}>
-            <b>{t('Who can see it:')}</b> {t('only the students and teacher in')} {t("{teacher}'s class", { teacher: teacherName })}. {t('It never leaves your classroom, and you or your teacher can take it down anytime.')}
-          </div>
-          <button className="btn" disabled={busy || !submissionId} onClick={onShare} style={{ justifyContent: 'center', background: '#c2571f' }}>{t('💛 Share to Wall')}</button>
-        </>
-      )}
+      <button className="btn" disabled={busy || !submissionId} onClick={onShare} style={{ justifyContent: 'center', background: '#c2571f' }}>{t('💛 Share to Wall')}</button>
     </div>
   )
 }
 
-export default function QuickWritePage({ state, me, onBack, onChange, onBank, onWall, onOpen }) {
+export default function QuickWritePage({ state, me, onBack, onChange }) {
   const t = useT()
   const say = useSay()
   const supportLevel = me?.supportLevel || null
@@ -111,13 +103,14 @@ export default function QuickWritePage({ state, me, onBack, onChange, onBank, on
   const bank = state.quickPrompts || []
   const pick = bank.length ? bank[Math.floor(Date.now() / 86400000) % bank.length] : { title: 'Quick Write', prompt: 'Write!' }
 
-  const saved = readDraft(me?.id, pick.title, pick.prompt, GOAL_SECONDS)
+  // One Quick Write a day. A finished piece for today's prompt wins over a
+  // leftover draft, so there is no second try.
   const finished = completedQuickWrite(state, me?.id, pick)
+  const saved = finished ? null : readDraft(me?.id, pick.title, pick.prompt, GOAL_SECONDS)
   const [stage, setStage] = useState(saved ? 'writing' : finished ? 'finished' : 'intro') // intro | writing | done | finished
   const [secondsLeft, setSecondsLeft] = useState(saved ? saved.secondsLeft : GOAL_SECONDS)
   const [text, setText] = useState(saved ? saved.text : '')
   const [restored] = useState(Boolean(saved))
-  const [freshTry, setFreshTry] = useState(false)
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const editorRef = useRef(null)
@@ -148,6 +141,17 @@ export default function QuickWritePage({ state, me, onBack, onChange, onBank, on
     draftRef.current.stage = stage
     draftRef.current.secondsLeft = secondsLeft
   }, [stage, secondsLeft])
+
+  // Today's prompt is already done. Drop a second-try draft if one was saved.
+  const finishedId = finished?.sub?.id || null
+  useEffect(() => {
+    if (!finishedId) return
+    try {
+      const raw = localStorage.getItem(draftKey(me?.id))
+      const d = raw ? JSON.parse(raw) : null
+      if (d && d.title === pick.title && d.prompt === pick.prompt) localStorage.removeItem(draftKey(me?.id))
+    } catch { /* nothing stored */ }
+  }, [finishedId, me?.id, pick.title, pick.prompt])
 
   // Keep the latest words even if they leave from the logo, not the back link.
   useEffect(() => () => {
@@ -222,35 +226,9 @@ export default function QuickWritePage({ state, me, onBack, onChange, onBank, on
     } finally { setBusy(false) }
   }
 
-  // The celebration is not the end. Put the words back and take the coins
-  // back, so a mis-tap mid-sentence is not a finished piece.
-  async function keepWriting() {
-    setBusy(true)
-    try {
-      if (result?.submissionId) await api.undoQuickWrite(result.submissionId, result.streakExtended)
-      remember(text, secondsLeft, 'writing')
-      setResult(null)
-      setStage('writing')
-      onChange && onChange()
-      setTimeout(() => editorRef.current?.focus(), 0)
-    } finally { setBusy(false) }
-  }
-
   function leaveDone() {
     remember('', 0, 'done')
     onBack && onBack()
-  }
-
-  function writeAnother() {
-    setFreshTry(true)
-    setResult(null)
-    setText('')
-    setSecondsLeft(GOAL_SECONDS)
-    seededRef.current = true
-    if (editorRef.current) editorRef.current.innerText = ''
-    remember('', GOAL_SECONDS, 'writing')
-    setStage('writing')
-    setTimeout(() => editorRef.current?.focus(), 0)
   }
 
   async function sharePiece(submissionId) {
@@ -332,17 +310,14 @@ export default function QuickWritePage({ state, me, onBack, onChange, onBank, on
             <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700, marginTop: 8 }}>
               {t('{n} words', { n: finished.content.trim().split(/\s+/).filter(Boolean).length })}
             </div>
-            <PieceActions
+            <ShareToWall
               submissionId={finished.sub.id}
               shared={shared(finished.sub.id)}
               busy={busy}
               teacherName={teacherName}
-              onOpen={onOpen}
-              onBank={onBank}
-              onWall={onWall}
               onShare={() => sharePiece(finished.sub.id)}
             />
-            <button className="btn lg" style={{ marginTop: 16 }} disabled={busy} onClick={writeAnother}>{t('Write another')}</button>
+            <button className="btn" style={{ marginTop: 8, width: '100%', justifyContent: 'center' }} disabled={busy} onClick={leave}>{t('Back to my dashboard')}</button>
           </div>
         )}
 
@@ -362,11 +337,8 @@ export default function QuickWritePage({ state, me, onBack, onChange, onBank, on
                 <div style={{ fontSize: 12, fontWeight: 700, marginTop: 6, color: timeUp ? 'var(--good)' : 'var(--muted)' }}>
                   {timeUp ? t('⏰ Time! Finish your thought & submit') : t('keep writing…')}
                 </div>
-                {restored && stage === 'writing' && !freshTry && (
+                {restored && stage === 'writing' && (
                   <div style={{ fontSize: 12.5, fontWeight: 700, marginTop: 6, color: 'var(--teal)' }}>{t('Picked up where you left off.')}</div>
-                )}
-                {freshTry && stage === 'writing' && (
-                  <div style={{ fontSize: 12.5, fontWeight: 700, marginTop: 6, color: 'var(--teal)' }}>{t('Your first one is saved in your Writing Bank.')}</div>
                 )}
               </div>
             </div>
@@ -435,18 +407,13 @@ export default function QuickWritePage({ state, me, onBack, onChange, onBank, on
             )}
             <div className="eyebrow" style={{ textAlign: 'left', margin: '16px 0 8px' }}>{t('Your piece')}</div>
             <PiecePreview text={text} />
-            <PieceActions
+            <ShareToWall
               submissionId={result.submissionId}
               shared={shared(result.submissionId)}
               busy={busy}
               teacherName={teacherName}
-              onOpen={onOpen}
-              onBank={onBank}
-              onWall={onWall}
               onShare={() => sharePiece(result.submissionId)}
             />
-            <button className="btn ghost" style={{ marginTop: 14, width: '100%', justifyContent: 'center' }} disabled={busy} onClick={writeAnother}>{t('Write another')}</button>
-            <button className="btn ghost" style={{ marginTop: 8, width: '100%', justifyContent: 'center' }} disabled={busy} onClick={keepWriting}>{t('Actually, keep writing')}</button>
             <button className="btn" style={{ marginTop: 8, width: '100%', justifyContent: 'center' }} disabled={busy} onClick={leaveDone}>{t('Back to my dashboard')}</button>
           </div>
         </div>

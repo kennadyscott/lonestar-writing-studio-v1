@@ -5,6 +5,7 @@ import { seedState } from '../../server/seed.mjs'
 import { fallbackConference, fallbackTraits, isBegging } from '../../server/fallback.mjs'
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from '../../server/peerTasks.mjs'
 import { rawTopics } from '../../server/proofRoom.mjs'
+import { localDay } from '../../server/day.mjs'
 
 const ME = 'stu_kscott'
 const COIN_CAP = 150
@@ -141,7 +142,7 @@ export const localApi = {
     const task = todaysTask()
     const stu = findStu(ME)
     const band = bandFor(stu?.gradeLevel ?? 6)
-    const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === new Date().toISOString().slice(0, 10))
+    const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === localDay())
     return { ...clone(state), dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } }
   },
   reset: async () => { state = seedState(); forgetSaved(); return clone(state) },
@@ -186,7 +187,7 @@ export const localApi = {
     const prompt = extra.prompt || (mode === 'free'
       ? 'Free write! Write about anything on your mind — a story, an idea, a rant, a memory. Your coach is here whenever you want to talk it through.'
       : QUICK_PROMPTS[Math.floor((state.submissions.length + n) % QUICK_PROMPTS.length)])
-    const asg = { id: uid('asg'), title: extra.title || (mode === 'free' ? '' : `Quick Write #${n}`), genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6, teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null, scopeStage: 'sentence', prompt }
+    const asg = { id: uid('asg'), title: extra.title || (mode === 'free' ? '' : `Quick Write #${n}`), genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6, teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: localDay(), dueDate: null, scopeStage: 'sentence', prompt }
     const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: extra.complete ? now() : null, drafts: [{ id: uid('drf'), n: 1, content: extra.content || '', createdAt: now(), conference: [], traits: null }], milestones: [] }
     let coins = 0
     let streakDays = state.growthSummary?.streakDays ?? 0
@@ -197,7 +198,7 @@ export const localApi = {
       sub.milestones.push(m)
       state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: sub.id, type: m.type, coins, ts: m.ts })
       const stu = findStu(ME); if (stu) stu.coins += coins
-      const today = now().slice(0, 10)
+      const today = localDay()
       const gsum = state.growthSummary
       if (gsum && gsum.lastStreakDate !== today) {
         gsum.streakDays += 1
@@ -250,7 +251,7 @@ export const localApi = {
   },
   peerRevision: async () => {
     const task = todaysTask()
-    const today = new Date().toISOString().slice(0, 10)
+    const today = localDay()
     let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today)
     if (!sub) {
       const stu = findStu(ME)
@@ -338,7 +339,7 @@ export const localApi = {
     const sub = findSub(submissionId); if (!sub) return { error: 'no submission' }
     if (state.shareWall.some((e) => e.submissionId === sub.id)) return { already: true }
     const asg = findAsg(sub.assignmentId), stu = findStu(sub.studentId); const draft = sub.drafts[sub.drafts.length - 1]
-    const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar, title: (asg.title || '').trim() || 'Untitled', genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
+    const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar, title: (asg.title || '').trim() || 'Untitled', genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: localDay(), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
     state.shareWall.unshift(entry)
     return entry
   },
@@ -356,8 +357,8 @@ export const localApi = {
   drillFinish: async (payload) => {
     const accuracy = Number(payload?.accuracy) || 0
     if (accuracy < 75) return { coins: 0, passed: false }
-    const today = now().slice(0, 10)
-    const paidToday = state.coinEvents.filter((e) => e.type === 'proof_job' && e.ts.slice(0, 10) === today).length
+    const today = localDay()
+    const paidToday = state.coinEvents.filter((e) => e.type === 'proof_job' && localDay(e.ts) === today).length
     if (paidToday >= 5) return { coins: 0, passed: true, capped: true }
     const coins = 20
     state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'proof_job', coins, ts: now() })
@@ -406,8 +407,8 @@ export const localApi = {
   typingFinish: async (payload) => {
     const accuracy = Number(payload?.accuracy) || 0
     if (accuracy < 85) return { coins: 0, passed: false }
-    const today = now().slice(0, 10)
-    const paidToday = state.coinEvents.filter((e) => e.type === 'typing_round' && e.ts.slice(0, 10) === today).length
+    const today = localDay()
+    const paidToday = state.coinEvents.filter((e) => e.type === 'typing_round' && localDay(e.ts) === today).length
     if (paidToday >= TYPING_DAILY_ROUNDS) return { coins: 0, passed: true, capped: true }
     const coins = 20 // 10, doubled for Fluency Practice
     state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'typing_round', coins, ts: now() })
@@ -425,7 +426,7 @@ export const localApi = {
     e.reactions[type] = Math.max(0, e.reactions[type] + (had ? -1 : 1))
     return { reactions: e.reactions, myReactions: e.myReactions }
   },
-  shoutOut: async (payload) => { const stu = findStu(payload.studentId); if (!stu) return { error: 'no student' }; stu.shoutOut = { from: payload.from || 'Your teacher', initials: payload.initials || 'T', text: (payload.text || '').slice(0, 240), date: now().slice(0, 10) }; return stu.shoutOut },
+  shoutOut: async (payload) => { const stu = findStu(payload.studentId); if (!stu) return { error: 'no student' }; stu.shoutOut = { from: payload.from || 'Your teacher', initials: payload.initials || 'T', text: (payload.text || '').slice(0, 240), date: localDay() }; return stu.shoutOut },
 }
 
 // Save after any call that changed the studio. Reads compare equal and skip.

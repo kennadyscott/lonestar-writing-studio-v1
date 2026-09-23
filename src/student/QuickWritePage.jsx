@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useLayoutEffect } from 'react'
 import { api } from '../lib/api.js'
+import { localDay, dayNumber } from '../../server/day.mjs'
 import { useT } from '../lib/i18n/index.jsx'
 import { writingStreak } from '../lib/streak.js'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
@@ -61,6 +62,9 @@ function completedQuickWrite(state, studentId, pick) {
   let best = null
   for (const sub of state?.submissions || []) {
     if (sub.studentId !== studentId || !sub.completedAt) continue
+    // Only a piece finished TODAY closes today. The prompt bank repeats, so a
+    // match on the prompt alone would lock out a later day's turn.
+    if (localDay(sub.completedAt) !== localDay()) continue
     const a = (state.assignments || []).find((x) => x.id === sub.assignmentId)
     if (!a || a.genre !== 'quick' || a.title !== pick.title || a.prompt !== pick.prompt) continue
     if (!best || sub.completedAt > best.sub.completedAt) {
@@ -102,7 +106,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
   const setBy = state.settings?.quickWriteSetBy
   // rotate the static prompt bank daily
   const bank = state.quickPrompts || []
-  const pick = bank.length ? bank[Math.floor(Date.now() / 86400000) % bank.length] : { title: 'Quick Write', prompt: 'Write!' }
+  const pick = bank.length ? bank[dayNumber() % bank.length] : { title: 'Quick Write', prompt: 'Write!' }
 
   // One Quick Write a day. A finished piece for today's prompt wins over a
   // leftover draft, so there is no second try.

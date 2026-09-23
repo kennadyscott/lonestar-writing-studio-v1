@@ -1,3 +1,4 @@
+import { dayNumber } from './day.mjs'
 // Daily Revision Challenge bank — the robot drafts students judge and rewrite.
 //
 // 25 tasks × 2 grade bands (elem = gr 3–5, mid = gr 6–8) = 50 hand-written weak
@@ -389,4 +390,5 @@ export const PEER_TASKS = [
 ]
 
 export const bandFor = (grade) => (grade <= 5 ? 'elem' : 'mid')
-export const todaysTask = () => PEER_TASKS[Math.floor(Date.now() / 86400000) % PEER_TASKS.length]
+// Rotates at the student's local midnight, not UTC.
+export const todaysTask = () => PEER_TASKS[dayNumber() % PEER_TASKS.length]

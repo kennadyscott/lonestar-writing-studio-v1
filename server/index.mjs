@@ -64,6 +64,7 @@ const QUICK_PROMPTS = [
   'Is it better to be a leader or a helper? Why?',
 ]
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from './peerTasks.mjs'
+import { localDay } from './day.mjs'
 import { rawTopics } from './proofRoom.mjs'
 import { libraryRoute } from '../lib/server/library.mjs'
 import { authorized } from '../lib/server/auth.mjs'
@@ -200,7 +201,7 @@ const server = http.createServer(async (req, res) => {
       const task = todaysTask()
       const stu = findStu(ME)
       const band = bandFor(stu?.gradeLevel ?? 6)
-      const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === new Date().toISOString().slice(0, 10))
+      const existing = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === localDay())
       return send(res, 200, { ...state, dailyChallenge: { author: task.author, genre: task.genre, band, done: !!existing?.completedAt, started: !!existing } })
     }
 
@@ -271,7 +272,7 @@ const server = http.createServer(async (req, res) => {
     // POST /api/peerrevision -> open today's revision challenge (grade-banded, two-phase)
     if (req.method === 'POST' && url.pathname === '/api/peerrevision') {
       const task = todaysTask()
-      const today = new Date().toISOString().slice(0, 10)
+      const today = localDay()
       let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today)
       if (!sub) {
         const stu = findStu(ME)
@@ -351,7 +352,7 @@ const server = http.createServer(async (req, res) => {
       const asg = findAsg(sub.assignmentId), stu = findStu(sub.studentId)
       const draft = sub.drafts[sub.drafts.length - 1]
       const entry = { id: uid('sw'), submissionId: sub.id, studentId: stu.id, studentName: stu.name, avatar: stu.avatar,
-        title: (asg.title || '').trim() || 'Untitled', genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: now().slice(0, 10), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
+        title: (asg.title || '').trim() || 'Untitled', genre: asg.type || asg.genre, excerpt: (draft.content || '').slice(0, 180), sharedOn: localDay(), reactions: { like: 0, heart: 0, celebrate: 0 }, myReactions: [] }
       state.shareWall.unshift(entry); save()
       return send(res, 200, entry)
     }
@@ -385,7 +386,7 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req)
       const stu = findStu(body.studentId)
       if (!stu) return send(res, 404, { error: 'no student' })
-      stu.shoutOut = { from: body.from || 'Your teacher', initials: body.initials || 'T', text: (body.text || '').slice(0, 240), date: now().slice(0, 10) }
+      stu.shoutOut = { from: body.from || 'Your teacher', initials: body.initials || 'T', text: (body.text || '').slice(0, 240), date: localDay() }
       save()
       return send(res, 200, stu.shoutOut)
     }
@@ -490,7 +491,7 @@ const server = http.createServer(async (req, res) => {
       const asg = {
         id: uid('asg'), title: body.title || (mode === 'free' ? '' : `Quick Write #${n}`),
         genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6,
-        teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null,
+        teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: localDay(), dueDate: null,
         scopeStage: 'sentence', prompt,
       }
       const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: body.complete ? now() : null,
@@ -505,7 +506,7 @@ const server = http.createServer(async (req, res) => {
         state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: sub.id, type: m.type, coins, ts: m.ts })
         const stu = findStu(ME); if (stu) stu.coins += coins
         // feed the writing streak — at most once per day
-        const today = now().slice(0, 10)
+        const today = localDay()
         const gsum = state.growthSummary
         if (gsum && gsum.lastStreakDate !== today) {
           gsum.streakDays += 1
@@ -619,8 +620,8 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req)
       const accuracy = Number(body.accuracy) || 0
       if (accuracy < TYPING_PASS) return send(res, 200, { coins: 0, passed: false })
-      const today = now().slice(0, 10)
-      const paidToday = state.coinEvents.filter((e) => e.type === 'typing_round' && e.ts.slice(0, 10) === today).length
+      const today = localDay()
+      const paidToday = state.coinEvents.filter((e) => e.type === 'typing_round' && localDay(e.ts) === today).length
       if (paidToday >= TYPING_DAILY_ROUNDS) return send(res, 200, { coins: 0, passed: true, capped: true })
       const coins = TYPING_COINS * 2 // Fluency Practice pays double
       state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'typing_round', coins, ts: now() })
@@ -658,8 +659,8 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req)
       const accuracy = Number(body.accuracy) || 0
       if (accuracy < DRILL_PASS) return send(res, 200, { coins: 0, passed: false })
-      const today = now().slice(0, 10)
-      const paidToday = state.coinEvents.filter((e) => e.type === 'proof_job' && e.ts.slice(0, 10) === today).length
+      const today = localDay()
+      const paidToday = state.coinEvents.filter((e) => e.type === 'proof_job' && localDay(e.ts) === today).length
       if (paidToday >= DRILL_DAILY_JOBS) return send(res, 200, { coins: 0, passed: true, capped: true })
       const coins = DRILL_COINS
       state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'proof_job', coins, ts: now() })
@@ -679,7 +680,7 @@ const server = http.createServer(async (req, res) => {
       const asg = {
         id: uid('asg'), title: mode === 'free' ? '' : `Quick Write #${n}`,
         genre: mode, type: mode === 'free' ? 'Free Write' : 'Quick Write', gradeLevel: 6,
-        teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: now().slice(0, 10), dueDate: null,
+        teacher: { name: 'Self-started', initials: '✍️' }, dateAssigned: localDay(), dueDate: null,
         scopeStage: 'sentence', prompt,
       }
       const sub = { id: uid('sub'), studentId: ME, assignmentId: asg.id, completedAt: null,

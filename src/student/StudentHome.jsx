@@ -551,14 +551,14 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
               <button onClick={onClose} aria-label={t('Close')} style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--line)', color: 'var(--muted)', fontSize: 18, fontWeight: 700, display: 'grid', placeItems: 'center', background: '#fff' }}>×</button>
             </div>
           </div>
-          <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', background: '#f7fafc', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '8px 14px' }}>
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '.08em', color: 'var(--teal)' }}>{t('ROUND')} {grid?.round || 1}</span>
-              <span style={{ display: 'inline-flex', gap: 5 }} aria-label={t('{done} of {total} cleared', { done: doneCount, total: inPlay.length })}>
-                {inPlay.map((tile) => <span key={tile.id} style={{ width: 8, height: 8, borderRadius: '50%', background: tile.done ? 'var(--gold)' : '#d5e0e8' }} />)}
-              </span>
-            </span>
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--ink)' }}>🏆 {t('Clear the board for')} <span style={{ color: '#a37400' }}>{t('+50 bonus coins')}</span></span>
+          <div className="zone-progress">
+            <div className="zone-progress-top">
+              <span>{t('{done} of {total} cleared', { done: doneCount, total: inPlay.length })}</span>
+              <span>🏆 {t('+50 bonus coins')}</span>
+            </div>
+            <div className="zone-progress-track" role="progressbar" aria-valuenow={doneCount} aria-valuemin={0} aria-valuemax={inPlay.length} aria-label={t('{done} of {total} cleared', { done: doneCount, total: inPlay.length })}>
+              <div className="zone-progress-fill" style={{ width: `${inPlay.length ? (doneCount / inPlay.length) * 100 : 0}%` }} />
+            </div>
           </div>
         </div>
 

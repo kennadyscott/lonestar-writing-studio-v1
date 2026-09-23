@@ -42,6 +42,8 @@ export const writing = {
   'Draft {n}': 'Borrador {n}',
   'now': 'ahora',
   'viewing history — read only': 'viendo el historial: solo lectura',
+  'Compare side by side': 'Comparar lado a lado',
+  'Close compare': 'Cerrar la comparación',
   '✏️ Revising Draft {n}': '✏️ Revisando el Borrador {n}',
   '(working copy)': '(copia de trabajo)',
 

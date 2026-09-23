@@ -195,6 +195,17 @@ h1.page { font-size: 28px; font-weight: 700; margin: 4px 0 2px; color: var(--ink
 .bank-piece { padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .bank-piece-copy { flex: 1; min-width: 220px; }
 .bank-piece-title { margin: 0; font-size: 15.5px; font-weight: 800; line-height: 1.3; color: var(--ink); }
+.write-layout { display: grid; grid-template-columns: 1.35fr 1fr; gap: 16px; align-items: stretch; }
+.read-layout { display: grid; gap: 16px; align-items: start; }
+.read-layout.compare { grid-template-columns: 1fr 1fr; }
+.read-pane-head { padding: 12px 16px; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.read-pane-title { margin: 0; font-size: 15px; font-weight: 800; line-height: 1.35; color: var(--ink); }
+.read-pane-body { padding: 18px; font-size: 16px; line-height: 1.6; white-space: pre-wrap; color: var(--ink); }
+.read-pane-note { border-top: 1px solid var(--line); padding: 12px; display: flex; justify-content: center; }
+@media (max-width: 720px) {
+  .write-layout { grid-template-columns: 1fr; }
+  .read-layout.compare { grid-template-columns: 1fr; }
+}
 .bank-row-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .bank-row-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .bank-delete { margin-left: 6px; padding: 10px 16px; min-height: 44px; border-radius: 10px; border: 1.5px solid #e7a8ae; background: #fff; color: #b42318; font-weight: 800; font-size: 13px; }

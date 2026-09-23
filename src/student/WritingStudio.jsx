@@ -5,7 +5,7 @@ import PromptBridge from './PromptBridge.jsx'
 import { ReadAloudText } from './ReadAloud.jsx'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
-import { useT } from '../lib/i18n/index.jsx'
+import { useT, useLocale } from '../lib/i18n/index.jsx'
 
 function CoinToast({ data, onClose }) {
   const t = useT()
@@ -37,9 +37,40 @@ function CoinToast({ data, onClose }) {
 
 const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
 
+function draftDate(iso, locale) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  return d.toLocaleDateString(locale, { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function wordCount(text) {
+  return (text || '').trim().split(/\s+/).filter(Boolean).length
+}
+
+function ReadPane({ draft, heading, publishedNote }) {
+  const t = useT()
+  return (
+    <article className="card read-pane">
+      <header className="read-pane-head">
+        <h2 className="read-pane-title">{heading}</h2>
+        <span>{t('{n} words', { n: wordCount(draft.content) })}</span>
+      </header>
+      <div className="read-pane-body">{draft.content}</div>
+      {publishedNote && (
+        <div className="read-pane-note">
+          <span className="pill gold" style={{ padding: '8px 16px' }}>{t('🌟 Published — find it anytime in your Writing Bank')}</span>
+        </div>
+      )}
+    </article>
+  )
+}
+
 export default function WritingStudio({ state, sub, health, onChange, onBack }) {
   const supportLevel = state.students?.find((x) => x.id === sub.studentId)?.supportLevel || null
   const t = useT()
+  const locale = useLocale()
+  const [compare, setCompare] = useState(false)
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
   const isFree = asg.genre === 'free'
   const published = !!sub.published
@@ -162,6 +193,13 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   }
 
   const wc = (content || '').split(/\s+/).filter(Boolean).length
+  const writing = isCurrent && !published && !compare
+  function versionBits(d) {
+    const name = d.isOriginal ? t('Original') : t('Draft {n}', { n: d.n })
+    const when = draftDate(d.createdAt || d.updatedAt, locale)
+    const mark = d.id === currentDraft.id && published ? t('Published') : ''
+    return [name, when, mark].filter(Boolean).join(' · ')
+  }
 
   return (
     <div style={isFree ? { margin: '-26px calc(50% - 50vw) -70px', padding: '18px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box',
@@ -231,39 +269,39 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         {sub.drafts.map((d) => {
           const on = d.id === selectedId
           const isCur = d.id === currentDraft.id
+          const when = draftDate(d.createdAt || d.updatedAt, locale)
           return (
             <button key={d.id} onClick={() => { void flushRef.current().then(() => setSelectedId(d.id)) }}
               style={{ padding: '6px 12px', borderRadius: 999, fontSize: 13, fontWeight: 600,
                 border: on ? '2px solid var(--navy-1)' : '1px solid var(--line)',
                 background: on ? '#eef4f7' : '#fff', color: 'var(--ink)' }}>
-              {d.isOriginal ? t('Original') : t('Draft {n}', { n: d.n })}{isCur ? ` · ${t('now')}` : ''}
+              {d.isOriginal ? t('Original') : t('Draft {n}', { n: d.n })}
+              {when ? ` · ${when}` : ''}
+              {isCur ? ` · ${published ? t('Published') : t('now')}` : ''}
             </button>
           )
         })}
-        {!isCurrent && <span className="pill" style={{ background: '#fff4d6', color: '#a37400' }}>{t('viewing history — read only')}</span>}
+        {sub.drafts.length > 1 && (
+          <button type="button" className="btn ghost" aria-pressed={compare} onClick={() => setCompare((v) => !v)}
+            style={{ marginLeft: 'auto', padding: '6px 12px', fontSize: 13 }}>
+            {compare ? t('Close compare') : t('Compare side by side')}
+          </button>
+        )}
+        {!isCurrent && !compare && <span className="pill" style={{ background: '#fff4d6', color: '#a37400' }}>{t('viewing history — read only')}</span>}
       </div>
 
-      {/* two-column workspace */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.35fr 1fr', gap: 16, alignItems: 'stretch' }}>
+      {writing ? (
+      <div className="write-layout">
         {/* editor */}
         <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <b style={{ fontSize: 15 }}>
-              {published ? `🌟 ${asg.title} — ${t('Published')}` : isFree && isCurrent && selected.n > 1 ? t('✏️ Revising Draft {n}', { n: selected.n }) : `${t('Draft {n}', { n: selected.n })} ${isCurrent ? t('(working copy)') : ''}`}
+              {isFree && isCurrent && selected.n > 1 ? t('✏️ Revising Draft {n}', { n: selected.n }) : `${t('Draft {n}', { n: selected.n })} ${isCurrent ? t('(working copy)') : ''}`}
             </b>
             <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('{n} words', { n: wc })}</span>
           </div>
-          {isCurrent && !published ? (
-            <textarea id="ws-editor" value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? t('Start writing here…\nAnything goes.') : t('Start writing your argument here…')}
-              style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
-          ) : (
-            <div style={{ flex: 1, minHeight: 380, padding: 18, fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#3a4149' }}>{selected.content}</div>
-          )}
-          {isCurrent && published && (
-            <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'center' }}>
-              <span className="pill gold" style={{ padding: '8px 16px' }}>{t('🌟 Published — find it anytime in your Writing Bank')}</span>
-            </div>
-          )}
+          <textarea id="ws-editor" value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? t('Start writing here…\nAnything goes.') : t('Start writing your argument here…')}
+            style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           {isCurrent && !published && (
             <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
               <span style={{ fontSize: 12, color: 'var(--muted)' }}>
@@ -317,6 +355,22 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         </div>
         </div>
       </div>
+      ) : (
+        <div className={compare && sub.drafts.length > 1 ? 'read-layout compare' : 'read-layout'}>
+          {compare && sub.drafts.length > 1 ? (
+            <>
+              <ReadPane draft={selected.id === currentDraft.id ? sub.drafts[sub.drafts.length - 2] : selected}
+                heading={versionBits(selected.id === currentDraft.id ? sub.drafts[sub.drafts.length - 2] : selected)} />
+              <ReadPane draft={currentDraft} publishedNote={published} heading={versionBits(currentDraft)} />
+            </>
+          ) : (
+            <ReadPane draft={selected} publishedNote={published && isCurrent}
+              heading={published && isCurrent
+                ? `🌟 ${((asg.title || '').trim() || t('Untitled'))} — ${t('Published')}`
+                : versionBits(selected)} />
+          )}
+        </div>
+      )}
 
       {isFree && (
         <div style={{ marginTop: 18, borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>

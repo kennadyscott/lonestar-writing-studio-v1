@@ -921,7 +921,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   return (
     <div>
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        background: `url(${import.meta.env.BASE_URL || '/'}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-woodland.jpg) center / cover no-repeat`, opacity: .22 }} />
       {game?.key === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} payHere={!game?.category} />
         : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}

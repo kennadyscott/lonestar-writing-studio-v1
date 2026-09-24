@@ -269,7 +269,7 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', minHeight: 'calc(100vh - 64px)', display: 'grid', gridTemplateColumns: '190px minmax(0,1fr)', color: 'var(--ink)',
       background: 'var(--canvas)' }}>
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-stars.jpg) center / cover no-repeat`, opacity: .22 }} />
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-woodland.jpg) center / cover no-repeat`, opacity: .22 }} />
 
       {/* left rail */}
       <aside style={{ position: 'relative', background: 'rgba(255,255,255,.72)', borderRight: '1px solid rgba(188,217,236,.7)', padding: '22px 18px 24px 24px', display: 'flex', flexDirection: 'column' }}>

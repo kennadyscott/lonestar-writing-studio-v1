@@ -67,37 +67,46 @@ function WayTile({ icon, title, sub, onClick, busy }) {
 
 const MODULE_SHORT = { m1: 'SCR', m2: 'ECR', m3: 'Stellar', m4: 'Process', m5: 'Revision', m6: 'Editing' }
 
-function LunaNook({ modules, onLuna }) {
+function LunaNook({ modules, onLuna, large = false }) {
+  const L = large // layout B: Home has room now that practice moved to its own tab
   const t = useT()
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
-    <div className="luna-bar" style={{ position: 'relative', borderRadius: 18, overflow: 'hidden', border: '2px solid rgba(9,26,52,.6)', boxShadow: '0 8px 22px rgba(20,15,70,.3)',
+    <div className={`luna-bar${L ? ' lg' : ''}`} style={{ position: 'relative', borderRadius: L ? 22 : 18, overflow: 'hidden', border: '2px solid rgba(9,26,52,.6)', boxShadow: '0 8px 22px rgba(20,15,70,.3)',
       background: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 46%, rgba(13,36,64,.55) 74%, rgba(13,36,64,.35) 100%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '12px 18px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: L ? 26 : 18, padding: L ? '24px 28px' : '12px 18px', flexWrap: 'wrap' }}>
 
         {/* who + where you are */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 11, flex: '1 1 260px', minWidth: 0 }}>
-          <span style={{ width: 46, height: 46, borderRadius: '50%', padding: 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: L ? 16 : 11, flex: L ? '1 1 340px' : '1 1 260px', minWidth: 0 }}>
+          <span style={{ width: L ? 68 : 46, height: L ? 68 : 46, borderRadius: '50%', padding: L ? 3 : 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
             <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-              <img src={BRAND.luna} alt="Luna" style={{ height: 32 }} />
+              <img src={BRAND.luna} alt="Luna" style={{ height: L ? 48 : 32 }} />
             </span>
           </span>
           <div style={{ minWidth: 0 }}>
-            <b style={{ fontSize: 15, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
+            <b style={{ fontSize: L ? 21 : 15, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
+            {L ? (
+              /* two real lines, so the module name never breaks mid-phrase */
+              <div style={{ marginTop: 3, lineHeight: 1.35 }}>
+                <div style={{ fontSize: 14, color: '#a8dff5', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
+                <div style={{ fontSize: 13, color: '#7fc4e3', fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
+              </div>
+            ) : (
             <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>
               {t('Module {n}', { n: idx + 1 })}: {current.label} · {t('{done} of {total} activities', { done: 4, total: 6 })}
             </div>
+            )}
           </div>
         </div>
 
         {/* progress */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, flex: '1 1 150px', minWidth: 130, maxWidth: 240 }}>
-          <div style={{ flex: 1, height: 8, background: 'rgba(255,255,255,.22)', borderRadius: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: L ? 12 : 9, flex: '1 1 150px', minWidth: 130, maxWidth: L ? 300 : 240 }}>
+          <div style={{ flex: 1, height: L ? 12 : 8, background: 'rgba(255,255,255,.22)', borderRadius: 8 }}>
             <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#a5e6ff)', borderRadius: 6 }} />
           </div>
-          <b style={{ fontSize: 12.5, color: '#a8dff5' }}>{Math.round(current.progress * 100)}%</b>
+          <b style={{ fontSize: L ? 16 : 12.5, color: '#a8dff5' }}>{Math.round(current.progress * 100)}%</b>
         </div>
 
         {/* the six modules, still readable */}
@@ -107,7 +116,7 @@ function LunaNook({ modules, onLuna }) {
             return (
               <button key={m.id} className="luna-mod" onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
                 style={{ background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
-                <ModuleBadge id={m.id} size={38} dim={m.status === 'not_started'} />
+                <ModuleBadge id={m.id} size={L ? 52 : 38} dim={m.status === 'not_started'} />
                 <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#7f9bb4' : '#a8dff5' }}>
                   {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                 </span>
@@ -116,7 +125,7 @@ function LunaNook({ modules, onLuna }) {
           })}
         </div>
 
-        <button className="btn" onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+        <button className={L ? 'btn lg' : 'btn'} onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
           {t('Go to my path')}
         </button>
       </div>
@@ -750,7 +759,12 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
 
 
 /* ---- Full assignments list (owns its filter state) ---- */
-function AssignmentsCard({ rows, busy, begin, headerAction }) {
+function AssignmentsCard({ rows, busy, begin, headerAction, fill = false }) {
+  // fill (layout B): the card stretches to the Quick Write block beside it and
+  // the list grows into the room instead of leaving a gap under it. The list is
+  // absolutely positioned so it never pushes the row taller itself.
+  const listRef = React.useRef(null)
+  const [visible, setVisible] = useState(3)
   const t = useT()
   const say = useSay()
   const [tab, setTab] = useState('active')
@@ -773,8 +787,54 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
       return 0
     })
 
+  // How many rows actually fit, so "N more" is true however tall the list is.
+  useEffect(() => {
+    if (!fill) return
+    const el = listRef.current; if (!el) return
+    const count = () => {
+      const rowsEls = [...el.querySelectorAll('.assign-row')]
+      setVisible(rowsEls.filter((r) => r.offsetTop + r.offsetHeight <= el.clientHeight + 2).length)
+    }
+    count()
+    const ro = new ResizeObserver(count); ro.observe(el)
+    return () => ro.disconnect()
+  }, [fill, filtered.length, tab])
+  const hidden = Math.max(0, filtered.length - (fill ? visible : 3))
+
+  const listBody = (
+    <>
+        {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>{say('Nothing here — try the other tab or clear filters.')}</div>}
+        {filtered.map((row) => {
+          const s = STATUS_CHIP[row.status]
+          return (
+            <div key={row.a.id} className="assign-row">
+              <div className="assign-main">
+                <div className="assign-title">{row.a.title}</div>
+                <div className="assign-meta">
+                  <FormatBadge format={row.a.format} />
+                  <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
+                  <span style={{ fontSize: 12, color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
+                    <span style={{ width: 21, height: 21, borderRadius: '50%', background: '#e2eef5', color: 'var(--teal)', display: 'grid', placeItems: 'center', fontSize: 9.5, fontWeight: 800 }}>{row.a.teacher.initials}</span>
+                    {row.a.teacher.name}
+                  </span>
+                </div>
+              </div>
+              <div className="assign-actions">
+                <div className="assign-due"><DueChip dueDate={row.a.dueDate} status={row.status} /></div>
+                <div className="assign-go">
+                  <button className={row.status === 'not_started' ? 'btn' : 'btn ghost'} disabled={busy} onClick={() => begin(row)}>
+                    {row.status === 'completed' ? t('Review') : row.status === 'in_progress' ? t('Continue') : t('Begin')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+    </>
+  )
+
   return (
-    <div className="card" style={{ overflow: 'hidden', flex: 1 }}>
+    <div className="card" style={{ overflow: 'hidden', flex: 1, ...(fill ? { display: 'flex', flexDirection: 'column' } : {}) }}>
       <div className="assign-head">
         <div className="seg">
           {['active', 'completed'].map((k) => (
@@ -803,38 +863,16 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
           <option value="teacher">{t('Sort: Teacher')}</option>
         </select>
       </div>
-      <div style={{ maxHeight: 246, overflowY: 'auto' }}>
-        {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>{say('Nothing here — try the other tab or clear filters.')}</div>}
-        {filtered.map((row) => {
-          const s = STATUS_CHIP[row.status]
-          return (
-            <div key={row.a.id} className="assign-row">
-              <div className="assign-main">
-                <div className="assign-title">{row.a.title}</div>
-                <div className="assign-meta">
-                  <FormatBadge format={row.a.format} />
-                  <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
-                  <span style={{ fontSize: 12, color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-                    <span style={{ width: 21, height: 21, borderRadius: '50%', background: '#e2eef5', color: 'var(--teal)', display: 'grid', placeItems: 'center', fontSize: 9.5, fontWeight: 800 }}>{row.a.teacher.initials}</span>
-                    {row.a.teacher.name}
-                  </span>
-                </div>
-              </div>
-              <div className="assign-actions">
-                <div className="assign-due"><DueChip dueDate={row.a.dueDate} status={row.status} /></div>
-                <div className="assign-go">
-                  <button className={row.status === 'not_started' ? 'btn' : 'btn ghost'} disabled={busy} onClick={() => begin(row)}>
-                    {row.status === 'completed' ? t('Review') : row.status === 'in_progress' ? t('Continue') : t('Begin')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          )
-        })}
-      </div>
-      {filtered.length > 3 && (
+      {fill ? (
+        <div style={{ position: 'relative', flex: 1, minHeight: 246 }}>
+          <div ref={listRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>{listBody}</div>
+        </div>
+      ) : (
+        <div style={{ maxHeight: 246, overflowY: 'auto' }}>{listBody}</div>
+      )}
+      {hidden > 0 && (
         <div style={{ padding: '8px 16px', borderTop: '1px solid var(--line)', fontSize: 11.5, fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>
-          ↕ {t('{n} more — scroll the list', { n: filtered.length - 3 })}
+          ↕ {t('{n} more — scroll the list', { n: hidden })}
         </div>
       )}
     </div>
@@ -984,8 +1022,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <BridgeBanner level={me.supportLevel} />
         <GoalBanner me={me} classFocus={state.classFocus} />
-        <div className="home-main">
-          <AssignmentsCard rows={rows} busy={busy} begin={begin}
+        <div className={`home-main${isB ? ' stretch' : ''}`}>
+          <AssignmentsCard rows={rows} busy={busy} begin={begin} fill={isB}
             headerAction={isB ? null :
               <button onClick={onQuickWrite} disabled={busy}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 999, fontSize: 13, fontWeight: 800, color: '#fff', cursor: 'pointer',
@@ -1000,7 +1038,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
             <BigTask compact icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
           </div>}
         </div>
-        <LunaNook modules={state.modules} onLuna={onLuna} />
+        <LunaNook modules={state.modules} onLuna={onLuna} large={isB} />
         {!isB && <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />}
         {!isB && <DailyBanner dc={dc} busy={busy} onGo={peer} />}
       </div>

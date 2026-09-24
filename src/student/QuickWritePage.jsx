@@ -262,7 +262,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
     <div>
       {onBack && <button className="backlink" onClick={leave}>{t('← Back to Dashboard')}</button>}
 
-      <h1 className="page" style={{ margin: '4px 0 18px' }}>{t('Quick Write')}</h1>
+      <h1 className="page" style={{ margin: '0 0 12px' }}>{t('Quick Write')}</h1>
 
       <div className="card" style={{ overflow: 'hidden', position: 'relative' }}>
 
@@ -270,20 +270,22 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
         {/* ============ intro: one screen, one click ============ */}
         {stage === 'intro' && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,0.95fr) 1.1fr', gap: 34, padding: '26px 30px 22px', alignItems: 'center' }}>
-              {/* her forest writing-desk scene (2026-09-24); qw-hero.jpg was the old night-sky one */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,0.95fr) 1.1fr', gap: 30, padding: '20px 26px', alignItems: 'center' }}>
+              {/* her forest writing-desk scene (2026-09-24); qw-hero.jpg was the old night-sky one.
+                  The painting is nearly square, so its height follows the window (cropping a
+                  little) instead of the column width: Start writing stays above the fold. */}
               <img src={`${import.meta.env.BASE_URL || '/'}qw-hero-forest.jpg`} alt=""
-                style={{ width: '100%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
+                style={{ width: '100%', height: 'clamp(240px, calc(100vh - 250px), 420px)', objectFit: 'cover', objectPosition: 'center 55%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>
                   <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>{t('Writing Topic')}</span>
                 </div>
-                <div style={{ fontSize: 42, fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '10px 0 10px' }}>{pick.title}</div>
+                <div style={{ fontSize: 'clamp(30px, 5.5vh, 42px)', fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '8px 0 8px' }}>{pick.title}</div>
                 <div className="constellation-rule" aria-hidden><i /><i /><i /><span /></div>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>{t('Writing Prompt')}</div>
-                <div style={{ fontSize: 24, fontWeight: 700, color: '#10294a', lineHeight: 1.4, marginBottom: 18 }}>{pick.prompt}</div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 14, padding: '13px 16px', marginBottom: 22 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 6 }}>{t('Writing Prompt')}</div>
+                <div style={{ fontSize: 'clamp(19px, 3.4vh, 24px)', fontWeight: 700, color: '#10294a', lineHeight: 1.35, marginBottom: 14, textWrap: 'pretty' }}>{pick.prompt}</div>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 14, padding: '11px 14px', marginBottom: 16 }}>
                   <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>💡</span>
                   <div style={{ fontSize: 14, color: '#28506b', lineHeight: 1.45 }}>
                     <b style={{ color: '#0f97c2' }}>{t('Think about:')}</b> <Glossed text={pick.hint || say('What details and examples will make your idea clear to a reader?')} />

@@ -365,13 +365,13 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
   const streak = writingStreak(state.growthSummary)
   return (
     <div className="qw-block">
-      {/* the laptop scene, cropped to its middle so the baked-in labels fall outside */}
-      <div aria-hidden className="qw-art" style={{ backgroundImage: `url(${BASE}qw-hero.jpg)` }} />
+      {/* a crop of the woodland lake backdrop, so the block belongs to the same scene */}
+      <div aria-hidden className="qw-art" style={{ backgroundImage: `url(${BASE}bg-woodland.jpg)` }} />
       <div className="qw-body">
         {/* the label, as a badge: it is the one thing that says what this block is */}
         <div className="qw-label"><span aria-hidden>⚡</span>{t('Quick Write')}</div>
         <div className="qw-prompt">
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: '#9fb6e8', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--wood-mint)', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>
           <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
           <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>
         </div>
@@ -384,13 +384,13 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
           </span>
         </div>
         {done && (
-          <div style={{ fontSize: 12.5, color: '#c9d8f4', lineHeight: 1.4 }}>{t('Done for today. A new prompt comes tomorrow.')}</div>
+          <div style={{ fontSize: 12.5, color: 'var(--wood-mist)', lineHeight: 1.4 }}>{t('Done for today. A new prompt comes tomorrow.')}</div>
         )}
         <span style={{ flex: 1 }} />
         <button onClick={onQuickWrite} disabled={busy}
-          style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? '#1e2a6b' : '#fff',
-            background: done ? '#e8eeff' : 'linear-gradient(120deg,#1d3a8f,#2a4dab)', border: done ? '1.5px solid #fff' : '2px solid #55d7ff',
-            boxShadow: done ? 'none' : '0 0 20px rgba(85,215,255,.45), inset 0 0 14px rgba(85,215,255,.2)' }}>
+          style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? 'var(--wood-deep)' : '#fff',
+            background: done ? '#eef7f0' : 'linear-gradient(120deg, var(--wood-leaf), var(--wood-forest))', border: done ? '1.5px solid #fff' : '2px solid var(--wood-mint)',
+            boxShadow: done ? 'none' : '0 0 18px rgba(191,230,201,.4), inset 0 0 12px rgba(191,230,201,.18)' }}>
           {done ? t('✓ See what I wrote →') : t('Start writing →')}
         </button>
       </div>

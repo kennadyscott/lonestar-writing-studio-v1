@@ -1,3 +1,14 @@
+/* ---- Woodland palette (2026-09-24): drawn from the lake painting that replaced
+   the starfield. Deep pine to sunlit leaf, with the lake's mint and mist for
+   text on green. The gold "sun" is the existing --gold accents. ---- */
+:root {
+  --wood-deep: #1c4334;
+  --wood-forest: #2d6a52;
+  --wood-leaf: #3f8a64;
+  --wood-mint: #bfe6c9;
+  --wood-mist: #d6ecdc;
+}
+
 :root {
   /* LoneStar CR brand — sampled from the live app + brand mockup */
   --navy-deep: #01172d;
@@ -326,9 +337,9 @@ a { color: var(--link); }
 /* The Home Quick Write block. Tall in the side column; sideways when
    the home grid drops to one column, so it never becomes a wide empty strip. */
 .qw-block { position: relative; overflow: hidden; border-radius: 20px; color: #fff; display: flex; flex-direction: column;
-  background: linear-gradient(160deg, #2f3f96 0%, #1e2a6b 70%); border: 1.5px solid rgba(245,180,0,.45); box-shadow: 0 10px 26px rgba(20,15,70,.32); }
-.qw-art { height: 150px; flex-shrink: 0; background-position: center 48%; background-size: cover; background-repeat: no-repeat; position: relative; }
-.qw-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, #2c3b8f); }
+  background: linear-gradient(165deg, var(--wood-forest) 0%, #214f3e 62%, var(--wood-deep) 100%); border: 1.5px solid rgba(243,213,138,.55); box-shadow: 0 10px 26px rgba(20,50,35,.28); }
+.qw-art { height: 150px; flex-shrink: 0; background-position: center 62%; background-size: cover; background-repeat: no-repeat; position: relative; }
+.qw-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 50%, var(--wood-forest)); }
 .qw-body { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .qw-label { align-self: flex-start; display: inline-flex; align-items: center; gap: 7px; padding: 6px 16px; border-radius: 999px;
   font-size: 13px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; color: #ffe08a;
@@ -338,7 +349,7 @@ a { color: var(--link); }
 @media (max-width: 1120px) and (min-width: 700px) {
   .qw-block { flex-direction: row; }
   .qw-art { height: auto; width: 38%; min-height: 230px; }
-  .qw-art::after { background: linear-gradient(90deg, transparent 55%, #283888); }
+  .qw-art::after { background: linear-gradient(90deg, transparent 50%, var(--wood-forest)); }
   .qw-body { padding: 20px 22px; }
 }
 

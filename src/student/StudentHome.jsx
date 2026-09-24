@@ -815,7 +815,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
     return state.assignments
-      .filter((a) => !a.isPeerRevision)
+      // Only teacher assignments: the student's own Free Writes and Quick Writes live in the Writing Bank.
+      .filter((a) => !a.isPeerRevision && !['free', 'quick'].includes(a.genre))
       .map((a) => {
         const sub = subFor(a.id)
         const status = sub?.completedAt ? 'completed' : sub ? 'in_progress' : 'not_started'

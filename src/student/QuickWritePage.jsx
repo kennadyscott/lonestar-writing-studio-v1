@@ -270,22 +270,23 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
         {/* ============ intro: one screen, one click ============ */}
         {stage === 'intro' && (
           <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,0.95fr) 1.1fr', gap: 30, padding: '20px 26px', alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,0.95fr) 1.1fr', gap: 30, padding: '18px 26px', alignItems: 'center' }}>
               {/* her forest writing-desk scene (2026-09-24); qw-hero.jpg was the old night-sky one.
                   The painting is nearly square, so its height follows the window (cropping a
-                  little) instead of the column width: Start writing stays above the fold. */}
+                  little) instead of the column width. 310px = header + card padding + the three
+                  cards below, so the whole intro fits on one screen. */}
               <img src={`${import.meta.env.BASE_URL || '/'}qw-hero-forest.jpg`} alt=""
-                style={{ width: '100%', height: 'clamp(240px, calc(100vh - 250px), 420px)', objectFit: 'cover', objectPosition: 'center 55%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
+                style={{ width: '100%', height: 'clamp(200px, calc(100vh - 310px), 400px)', objectFit: 'cover', objectPosition: 'center 55%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ width: 50, height: 50, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 23 }}>🪶</span>
                   <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>{t('Writing Topic')}</span>
                 </div>
-                <div style={{ fontSize: 'clamp(38px, 7.5vh, 56px)', fontWeight: 800, color: '#0d2440', lineHeight: 1.08, margin: '10px 0 10px' }}>{pick.title}</div>
+                <div style={{ fontSize: 'clamp(32px, 6vh, 46px)', fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '8px 0 8px' }}>{pick.title}</div>
                 <div className="constellation-rule" aria-hidden><i /><i /><i /><span /></div>
                 <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>{t('Writing Prompt')}</div>
-                <div style={{ fontSize: 'clamp(24px, 4.6vh, 32px)', fontWeight: 700, color: '#10294a', lineHeight: 1.3, marginBottom: 26, textWrap: 'pretty' }}>{pick.prompt}</div>
-                <button className="btn lg" style={{ fontSize: 19, padding: '15px 30px', borderRadius: 16 }} onClick={() => setStage('writing')}>{t('Start writing')}</button>
+                <div style={{ fontSize: 'clamp(20px, 3.6vh, 26px)', fontWeight: 700, color: '#10294a', lineHeight: 1.3, marginBottom: 20, textWrap: 'pretty' }}>{pick.prompt}</div>
+                <button className="btn lg" style={{ fontSize: 17, padding: '13px 26px', borderRadius: 14 }} onClick={() => setStage('writing')}>{t('Start writing')}</button>
               </div>
             </div>
             {/* benefits strip */}
@@ -295,7 +296,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                 ['🚀', '#2f8ceb', 'Be Creative', 'There are no wrong answers — just your unique voice.'],
                 ['💜', '#8b5cf6', 'Make It Meaningful', 'Explain the why behind your idea and how it helps others.'],
               ].map(([icon, c, title, blurb], i) => (
-                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '18px 22px', borderLeft: i ? '1px solid var(--line)' : 'none' }}>
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: '14px 22px', borderLeft: i ? '1px solid var(--line)' : 'none' }}>
                   <span style={{ fontSize: 24, filter: `drop-shadow(0 1px 2px ${c}55)` }}>{icon}</span>
                   <span>
                     <b style={{ display: 'block', fontSize: 14.5, color: '#0d2440' }}>{t(title)}</b>

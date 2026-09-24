@@ -489,10 +489,6 @@ a { color: var(--link); }
   .daily-cta { width: 100%; }
 }
 
-/* ---- Luna's Writing Nook: layout that holds up on smaller screens ---- */
-@media (max-width: 760px) {
-  .nook-luna { height: 56px !important; }
-}
 
 /* Home goal banner: the goal and the class focus are the headline, one size, no sub-lines. */
 .goal-text { font-size: 17px; font-weight: 800; line-height: 1.25; margin-top: 2px; text-wrap: balance; }

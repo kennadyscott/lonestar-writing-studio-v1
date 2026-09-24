@@ -667,13 +667,33 @@ export function parseHunt(text) {
 }
 
 /* A worksheet with its activities ready to play, and its point total. */
+// Documents connected from ClearSheets in the ClearK12 Studio can leave optional
+// lists out, and they add four kinds (quiz, order, match, sort; 2026-09-24).
+const list = (v) => (Array.isArray(v) ? v : [])
+function normalizeActivity(a) {
+  return {
+    ...a, bank: list(a.bank), videos: list(a.videos), sentences: list(a.sentences), gates: a.gates || {},
+    items: list(a.items).map((it) => ({ ...it, pieces: list(it && it.pieces), checks: list(it && it.checks), options: it && Array.isArray(it.options) ? it.options : undefined })),
+    questions: list(a.questions).map((q) => ({ ...q, checks: list(q && q.checks), options: q && Array.isArray(q.options) ? q.options : undefined })),
+    quiz: list(a.quiz).map((q) => ({ ...q, options: list(q && q.options) })),
+    order: list(a.order).map((o) => ({ ...o, steps: list(o && o.steps) })),
+    pairs: list(a.pairs), groups: list(a.groups), words: list(a.words),
+  }
+}
+
 export function prepare(ws) {
-  const activities = ws.activities.map((a) =>
-    a.kind === 'hunt' || a.kind === 'choose' ? { ...a, ...parseHunt(a.text), text: undefined } : { ...a })
+  const activities = list(ws.activities).map((raw) => {
+    const a = normalizeActivity(raw)
+    return a.kind === 'hunt' || a.kind === 'choose' ? { ...a, ...parseHunt(a.text), text: undefined } : a
+  })
   const points = activities.reduce((n, a) =>
     n + (a.kind === 'hunt' || a.kind === 'choose' ? a.errorCount
       : a.kind === 'maze' ? Object.keys(a.gates).length
       : a.kind === 'passage' ? a.questions.length
+      : a.kind === 'quiz' ? a.quiz.length
+      : a.kind === 'order' ? a.order.length
+      : a.kind === 'match' ? a.pairs.length
+      : a.kind === 'sort' ? a.words.length
       : a.items.length), 0)
   return { ...ws, activities, points }
 }

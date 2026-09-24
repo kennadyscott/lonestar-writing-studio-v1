@@ -8,3 +8,6 @@ server/data.json
 pages-dist
 server/library.json
 .vercel
+
+# ClearK12 curriculum pulled from the Studio for local preview only: never publish (public repo)
+data/studio-paths/

@@ -100,7 +100,11 @@ const HOW_TO = {
 // bucket's public URL and nothing else changes: activities store a video id, never
 // a URL, so the videos can move hosts without touching a single worksheet.
 const MEDIA_BASE = import.meta.env.VITE_MEDIA_BASE || ((import.meta.env.BASE_URL || '/') + 'solutions/')
-const SOLUTION = (id) => MEDIA_BASE.replace(/\/?$/, '/') + id + '.mp4'
+// Paths connected from ClearSheets carry their own id -> URL map (topic.media):
+// their videos are the sheets' hint videos, which live at their own addresses.
+const KNOWN_MEDIA = {}
+export function registerMedia(map) { Object.assign(KNOWN_MEDIA, map || {}) }
+const SOLUTION = (id) => KNOWN_MEDIA[id] || (MEDIA_BASE.replace(/\/?$/, '/') + id + '.mp4')
 
 function WatchButton({ id, onPlay, label = 'Watch the solution' }) {
   const t = useT()
@@ -151,6 +155,10 @@ export function ActivityPreview({ act, onPlay, onDone, doneLabel }) {
   if (ready.kind === 'maze') return <MazeActivity {...props} />
   if (ready.kind === 'compose') return <ComposeActivity {...props} />
   if (ready.kind === 'passage') return <PassageActivity {...props} />
+  if (ready.kind === 'quiz') return <QuizActivity {...props} />
+  if (ready.kind === 'order') return <OrderActivity {...props} />
+  if (ready.kind === 'match') return <MatchActivity {...props} />
+  if (ready.kind === 'sort') return <SortActivity {...props} />
   return <FixActivity {...props} />
 }
 
@@ -266,6 +274,7 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
         const byId = new Map(all.map((tp) => [tp.id, tp]))
         pub.forEach((tp) => byId.set(tp.id, tp))
         const merged = all.length ? [...byId.values()] : pub
+        merged.forEach((tp) => registerMedia(tp.media))
         if (merged.length) return live && setRaw(merged)
         throw new Error('empty')
       })
@@ -618,7 +627,8 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
             background: i < step ? '#e6f6ee' : i === step ? '#e9f5fb' : '#eef3f6',
             color: i < step ? 'var(--good)' : i === step ? CYAN : 'var(--muted)' }}>
-            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? t('Error hunt') : a.kind === 'maze' ? t('Verb maze') : a.kind === 'compose' ? t('Write it') : a.kind === 'passage' ? t('Read & answer') : t('Fill it in')}
+            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? t('Error hunt') : a.kind === 'maze' ? t('Verb maze') : a.kind === 'compose' ? t('Write it') : a.kind === 'passage' ? t('Read & answer')
+              : a.kind === 'quiz' ? t('Quiz') : a.kind === 'order' ? t('Put in order') : a.kind === 'match' ? t('Match') : a.kind === 'sort' ? t('Sort') : t('Fill it in')}
           </span>
         ))}
         <span style={{ flex: 1 }} />
@@ -626,12 +636,19 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
       </div>
 
       <SolutionPlayer id={video} onClose={() => setVideo(null)} />
+      {/* one bad activity in a connected path must not blank the page */}
+      <ActivityBoundary resetKey={step} onSkip={() => finishActivity(0)}>
       {act.kind === 'hunt' ? <HuntActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'choose' ? <ChooseActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'maze' ? <MazeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'compose' ? <ComposeActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'passage' ? <PassageActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'quiz' ? <QuizActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'order' ? <OrderActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'match' ? <MatchActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'sort' ? <SortActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : <FixActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />}
+      </ActivityBoundary>
     </Shell>
   )
 }
@@ -1386,5 +1403,274 @@ function Shell({ children, onClose, sub, onBack }) {
         <div style={{ padding: '18px 20px 20px' }}>{children}</div>
       </div>
     </div>
+  )
+}
+
+/* One activity that cannot render (a connected worksheet with a field the
+ * players do not expect) shows a short note and a way on, not a blank page. */
+class ActivityBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(error) { return { error } }
+  componentDidUpdate(prev) { if (prev.resetKey !== this.props.resetKey && this.state.error) this.setState({ error: null }) }
+  render() {
+    if (!this.state.error) return this.props.children
+    return (
+      <div style={{ padding: '16px 18px', borderRadius: 12, background: '#fff8ec', border: '1.5px solid #f0d9a8', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <span style={{ flex: 1, minWidth: 200, fontSize: 14, fontWeight: 700, color: '#7a5200' }}>This activity is not ready yet. Your teacher has been told.</span>
+        {this.props.onSkip && <button className="btn" onClick={this.props.onSkip}>Skip it →</button>}
+      </div>
+    )
+  }
+}
+
+/* The four newer activity kinds, lifted as they are from the ClearK12 Studio's
+ * student renderers (ck12-CMS-V2 src/components/proof-room-play/activities.jsx,
+ * 2026-09-24), which were written in this file's style for coming back here. */
+
+function Footer({ hint, children }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 14, flexWrap: 'wrap' }}>
+      {hint && <span style={{ flex: 1, fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>💡 {hint}</span>}
+      {!hint && <span style={{ flex: 1 }} />}
+      {children}
+    </div>
+  )
+}
+
+/* Quiz: one card per question. A question with `answers` is select-all-that-apply. */
+function QuizActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
+  const qs = act.quiz || []
+  const [picked, setPicked] = useState({})   // question -> Set of option indices
+  const [checked, setChecked] = useState(false)
+  const rightSet = (q) => new Set(q.answers && q.answers.length > 1 ? q.answers : [q.answer])
+  const isRight = (q, i) => { const want = rightSet(q), got = picked[i] || new Set(); return want.size === got.size && [...want].every((k) => got.has(k)) }
+  const score = qs.filter((q, i) => isRight(q, i)).length
+  const toggle = (qi, k, multi) => setPicked((p) => {
+    const cur = new Set(p[qi] || [])
+    if (multi) { if (cur.has(k)) cur.delete(k); else cur.add(k) } else { cur.clear(); cur.add(k) }
+    return { ...p, [qi]: cur }
+  })
+  return (
+    <WithArt act={act} art="" side="right">
+      <Directions text={act.directions || act.brief || 'Choose the right answer.'} />
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+        <span style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, flex: 1 }}>{act.brief}</span>
+        {checked && <span className="pill">{t('{n} of {total} right', { n: score, total: qs.length })}</span>}
+      </div>
+      {qs.map((q, qi) => {
+        const multi = !!(q.answers && q.answers.length > 1)
+        const want = rightSet(q)
+        const ok = checked && isRight(q, qi)
+        return (
+          <div key={qi} style={{ border: `1.5px solid ${checked ? (ok ? 'var(--good)' : '#f3c4bf') : '#e3edf4'}`, borderRadius: 12, padding: '12px 14px', marginBottom: 10, background: '#fbfdfe' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', background: NAVY, borderRadius: 6, padding: '2px 7px' }}>{qi + 1}</span>
+              <span style={{ fontSize: 14.5, fontWeight: 700, color: NAVY, flex: 1 }}>{q.q}</span>
+              {multi && <span className="pill" style={{ background: '#fff4d6', color: '#a37400' }}>{t('Choose all that apply')}</span>}
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+              {q.options.map((o, k) => {
+                const on = (picked[qi] || new Set()).has(k)
+                const good = checked && want.has(k)
+                const bad = checked && on && !want.has(k)
+                return (
+                  <button key={k} disabled={checked} onClick={() => toggle(qi, k, multi)}
+                    style={{ padding: '8px 13px', borderRadius: 10, fontSize: 13.5, fontWeight: 700, textAlign: 'left', cursor: checked ? 'default' : 'pointer',
+                      background: good ? '#e6f6ee' : bad ? '#fdecea' : on ? '#eaf4f9' : '#eef3f7',
+                      color: good ? 'var(--good)' : bad ? '#c0392b' : NAVY,
+                      border: `1.5px solid ${good ? 'var(--good)' : bad ? '#c0392b' : on ? CYAN : 'transparent'}` }}>
+                    {multi ? (on ? '☑ ' : '☐ ') : ''}{o}
+                  </button>
+                )
+              })}
+            </div>
+            {checked && !ok && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 9, flexWrap: 'wrap' }}>
+                {q.why && <span style={{ fontSize: 12.5, color: '#8a4b12', fontWeight: 700 }}>{q.why}</span>}
+                <WatchButton id={q.video} onPlay={onPlay} label="Why?" />
+              </div>
+            )}
+          </div>
+        )
+      })}
+      <Footer hint={act.hint}>
+        {!checked
+          ? <button className="btn" disabled={qs.some((q, i) => !(picked[i] && picked[i].size))} onClick={() => setChecked(true)}>{t('Check my answers ✓')}</button>
+          : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}
+      </Footer>
+    </WithArt>
+  )
+}
+
+/* Order: tiles shuffled once; the student drags them into place (or taps one tile, then the spot it goes; arrows for the keyboard), then checks.
+ * Short items — single words, as in alphabetizing — lay out as a row of tiles; longer steps as a list. */
+function OrderActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
+  const seqs = act.order || []
+  const [orders, setOrders] = useState(() => seqs.map((s) => shuffled(s.steps)))
+  const [checked, setChecked] = useState(false)
+  const [drag, setDrag] = useState(null)   // { si, k } being dragged or tapped
+  const [over, setOver] = useState(null)   // { si, k } hovered drop spot
+  const rightOf = (i) => orders[i].every((st, k) => st === seqs[i].steps[k])
+  const score = seqs.filter((_, i) => rightOf(i)).length
+  const place = (si, from, to) => setOrders((o) => o.map((list, i) => {
+    if (i !== si || from === to) return list
+    const next = [...list]
+    const [item] = next.splice(from, 1)
+    next.splice(to, 0, item)
+    return next
+  }))
+  const tap = (si, k) => {
+    if (checked) return
+    if (drag && drag.si === si) { place(si, drag.k, k); setDrag(null) } else setDrag({ si, k })
+  }
+  return (
+    <WithArt act={act} art="" side="right">
+      <Directions text={act.directions || 'Drag the tiles into the right order — or tap a tile, then tap the spot it goes. Check when it looks right.'} />
+      <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
+      {seqs.map((s, si) => {
+        const row = s.steps.every((st) => st.length <= 24 && st.trim().split(/\s+/).length <= 3)
+        return (
+          <div key={si} style={{ border: '1.5px solid #e3edf4', borderRadius: 12, padding: '12px 14px', marginBottom: 10, background: '#fbfdfe' }}>
+            {s.prompt && <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginBottom: 8 }}>{s.prompt}</div>}
+            <ol style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: row ? 'row' : 'column', flexWrap: 'wrap', gap: row ? 8 : 6 }}>
+              {orders[si].map((st, k) => {
+                const good = checked && st === s.steps[k]
+                const lifted = drag && drag.si === si && drag.k === k
+                const hovered = over && over.si === si && over.k === k && drag && drag.k !== k
+                return (
+                  <li key={st ? 's:' + st : 'blank:' + k}
+                    draggable={!checked}
+                    onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(k)); setDrag({ si, k }) }}
+                    onDragOver={(e) => { if (drag && drag.si === si) { e.preventDefault(); setOver({ si, k }) } }}
+                    onDragLeave={() => setOver(null)}
+                    onDrop={(e) => { e.preventDefault(); if (drag && drag.si === si) place(si, drag.k, k); setDrag(null); setOver(null) }}
+                    onDragEnd={() => { setDrag(null); setOver(null) }}
+                    onClick={() => tap(si, k)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, padding: row ? '9px 14px' : '8px 10px', borderRadius: 10, cursor: checked ? 'default' : 'grab', userSelect: 'none',
+                      fontSize: row ? 15 : 14, fontWeight: row ? 800 : 500,
+                      background: checked ? (good ? '#e6f6ee' : '#fdecea') : lifted ? '#eaf4f9' : '#fff',
+                      border: `1.5px ${hovered ? 'dashed' : 'solid'} ${checked ? (good ? 'var(--good)' : '#f3c4bf') : hovered || lifted ? CYAN : '#dbe6ee'}`,
+                      boxShadow: lifted ? '0 4px 12px rgba(15,151,194,.18)' : 'none' }}>
+                    {!row && <span style={{ fontSize: 11.5, fontWeight: 800, color: '#93a3b3', width: 16 }}>{k + 1}</span>}
+                    {!checked && <span aria-hidden="true" style={{ color: '#b6c4cf', fontSize: 13, letterSpacing: -2 }}>⋮⋮</span>}
+                    <span style={{ flex: row ? 'none' : 1, color: checked ? (good ? 'var(--good)' : '#c0392b') : NAVY }}>{st}</span>
+                    {!checked && !row && <>
+                      <button className="btn ghost" style={{ padding: '3px 8px' }} disabled={k === 0} onClick={(e) => { e.stopPropagation(); place(si, k, k - 1) }} aria-label="Move up">↑</button>
+                      <button className="btn ghost" style={{ padding: '3px 8px' }} disabled={k === orders[si].length - 1} onClick={(e) => { e.stopPropagation(); place(si, k, k + 1) }} aria-label="Move down">↓</button>
+                    </>}
+                  </li>
+                )
+              })}
+            </ol>
+            {drag && drag.si === si && !checked && <div style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 700, marginTop: 6 }}>{t('Now tap the spot where it goes.')}</div>}
+            {checked && !rightOf(si) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12.5, color: '#8a4b12', fontWeight: 700 }}>{t('Right order')}: {s.steps.join(row ? ', ' : ' → ')}</span>
+                <WatchButton id={s.video} onPlay={onPlay} label="Why?" />
+              </div>
+            )}
+          </div>
+        )
+      })}
+      <Footer hint={act.hint}>
+        {!checked
+          ? <button className="btn" onClick={() => { setDrag(null); setChecked(true) }}>{t('Check my answers ✓')}</button>
+          : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}
+      </Footer>
+    </WithArt>
+  )
+}
+
+/* Match: tap a card on the left, then its partner on the right. */
+function MatchActivity({ act, onDone, doneLabel }) {
+  const t = useT()
+  const pairs = act.pairs || []
+  const right = useMemo(() => shuffled(pairs.map((p, i) => ({ text: p.b, i }))), [act])
+  const [held, setHeld] = useState(null)
+  const [made, setMade] = useState({})   // left index -> right index chosen
+  const [checked, setChecked] = useState(false)
+  const score = pairs.filter((_, i) => made[i] === i).length
+  const taken = new Set(Object.values(made))
+  return (
+    <WithArt act={act} art="" side="right">
+      <Directions text={act.directions || 'Tap a card on the left, then the card on the right that goes with it.'} />
+      <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          {pairs.map((p, i) => {
+            const good = checked && made[i] === i, bad = checked && made[i] !== undefined && made[i] !== i
+            return (
+              <button key={i} disabled={checked} onClick={() => setHeld(held === i ? null : i)}
+                style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 10, fontSize: 14, fontWeight: 700, color: good ? 'var(--good)' : bad ? '#c0392b' : NAVY,
+                  background: good ? '#e6f6ee' : bad ? '#fdecea' : held === i ? '#eaf4f9' : '#fff', border: `1.5px solid ${good ? 'var(--good)' : bad ? '#c0392b' : held === i ? CYAN : '#e3edf4'}` }}>
+                {p.a}{made[i] !== undefined && <span style={{ color: '#93a3b3', fontWeight: 600 }}> → {pairs[made[i]].b}</span>}
+              </button>
+            )
+          })}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+          {right.map((r) => (
+            <button key={r.i} disabled={checked || held === null || taken.has(r.i)} onClick={() => { setMade((m) => ({ ...m, [held]: r.i })); setHeld(null) }}
+              style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 10, fontSize: 14, fontWeight: 600, color: NAVY, opacity: taken.has(r.i) ? 0.45 : 1,
+                background: '#fbfdfe', border: '1.5px solid #e3edf4', cursor: held === null || taken.has(r.i) ? 'default' : 'pointer' }}>
+              {r.text}
+            </button>
+          ))}
+        </div>
+      </div>
+      <Footer hint={act.hint}>
+        {!checked && Object.keys(made).length > 0 && <button className="btn ghost" onClick={() => setMade({})}>{t('Start over')}</button>}
+        {!checked
+          ? <button className="btn" disabled={Object.keys(made).length < pairs.length} onClick={() => setChecked(true)}>{t('Check my answers ✓')}</button>
+          : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}
+      </Footer>
+    </WithArt>
+  )
+}
+
+/* Sort: tap a word, then the column it belongs in. */
+function SortActivity({ act, onDone, doneLabel }) {
+  const t = useT()
+  const groups = act.groups || [], words = act.words || []
+  const order = useMemo(() => shuffled(words.map((_, i) => i)), [act])
+  const [placed, setPlaced] = useState({})
+  const [held, setHeld] = useState(null)
+  const [checked, setChecked] = useState(false)
+  const left = order.filter((i) => placed[i] === undefined)
+  const score = words.filter((w, i) => placed[i] === w.g).length
+  return (
+    <WithArt act={act} art="" side="right">
+      <Directions text={act.directions || 'Tap a word, then tap the column it belongs in. Check when every word is sorted.'} />
+      <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, minHeight: 38, marginBottom: 10 }}>
+        {left.map((i) => (
+          <button key={i} onClick={() => setHeld(held === i ? null : i)}
+            style={{ padding: '7px 12px', borderRadius: 10, fontSize: 14, fontWeight: 700, color: NAVY, background: held === i ? '#eaf4f9' : '#fff', border: `1.5px solid ${held === i ? CYAN : '#e3edf4'}` }}>{words[i].w}</button>
+        ))}
+        {!left.length && !checked && <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 700 }}>{t('Every word is sorted. Check your work.')}</span>}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.max(1, groups.length)}, minmax(0, 1fr))`, gap: 10 }}>
+        {groups.map((g, gi) => (
+          <div key={gi} onClick={() => { if (held !== null && !checked) { setPlaced((p) => ({ ...p, [held]: gi })); setHeld(null) } }}
+            style={{ minHeight: 110, borderRadius: 12, padding: 10, border: `2px dashed ${held !== null ? CYAN : '#dbe6ee'}`, background: held !== null ? '#f2f9fc' : '#fbfdfe', cursor: held !== null ? 'pointer' : 'default' }}>
+            <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#5c7285', textTransform: 'uppercase', marginBottom: 6 }}>{g}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {words.map((w, i) => placed[i] === gi && (
+                <span key={i} onClick={(e) => { e.stopPropagation(); if (!checked) setPlaced((p) => { const n = { ...p }; delete n[i]; return n }) }}
+                  style={{ padding: '5px 10px', borderRadius: 8, fontSize: 13.5, fontWeight: 700, cursor: checked ? 'default' : 'pointer',
+                    color: checked ? (w.g === gi ? 'var(--good)' : '#c0392b') : NAVY, background: checked ? (w.g === gi ? '#e6f6ee' : '#fdecea') : '#fff', border: '1.5px solid #e3edf4' }}>{w.w}</span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <Footer hint={act.hint}>
+        {!checked
+          ? <button className="btn" disabled={left.length > 0} onClick={() => setChecked(true)}>{t('Check my answers ✓')}</button>
+          : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}
+      </Footer>
+    </WithArt>
   )
 }

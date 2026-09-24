@@ -66,6 +66,7 @@ const QUICK_PROMPTS = [
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from './peerTasks.mjs'
 import { localDay } from './day.mjs'
 import { rawTopics } from './proofRoom.mjs'
+import { SHIPPED } from '../data/topics.mjs'
 import { libraryRoute } from '../lib/server/library.mjs'
 import { authorized } from '../lib/server/auth.mjs'
 
@@ -628,6 +629,24 @@ const server = http.createServer(async (req, res) => {
       const stu = findStu(ME); if (stu) stu.coins += coins
       save()
       return send(res, 200, { coins, passed: true, doubled: true, roundsLeft: TYPING_DAILY_ROUNDS - paidToday - 1 })
+    }
+
+    // ---- Every Proof Room path the ClearK12 Studio holds, for the local student page ----
+    // (2026-09-24: "I want the local version to show all that we currently have in
+    // the ClearK12 Studio".) The six shipped paths, plus any path document dropped
+    // into data/studio-paths/*.json (e.g. ClearSheets topics connected in the CMS).
+    // Local server only: the static demo has no such route and keeps its own list.
+    if (req.method === 'GET' && url.pathname === '/api/proof/studio') {
+      const extra = []
+      const dir = path.join(__dirname, '..', 'data', 'studio-paths')
+      try {
+        for (const f of fs.readdirSync(dir).filter((x) => x.endsWith('.json')).sort()) {
+          try { const doc = JSON.parse(fs.readFileSync(path.join(dir, f), 'utf8')); (Array.isArray(doc) ? doc : [doc]).forEach((d) => d && d.id && extra.push(d)) } catch { /* skip a bad file */ }
+        }
+      } catch { /* no folder yet */ }
+      const seen = new Set()
+      const topics = [...rawTopics(), ...JSON.parse(JSON.stringify(SHIPPED)), ...extra].filter((t) => !seen.has(t.id) && seen.add(t.id))
+      return send(res, 200, { topics })
     }
 
     // ---- Proof Room content, editable by a publisher ----

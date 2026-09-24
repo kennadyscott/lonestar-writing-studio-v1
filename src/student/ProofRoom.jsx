@@ -230,7 +230,7 @@ function topicStatus(tp, progress) {
   const cleared = core.filter((w) => (progress[w.id] || {}).passed).length
   const ids = [...core.map((w) => w.id), tp.full?.id, ...Object.values(tp.skillBuilders || {}).map((w) => w.id)].filter(Boolean)
   const started = ids.some((id) => (progress[id] || {}).best > 0)
-  const finished = cleared === core.length && !!(progress[tp.full?.id] || {}).passed
+  const finished = cleared === core.length && (!tp.full || !!(progress[tp.full.id] || {}).passed)
   const next = finished ? null : core.find((w) => !(progress[w.id] || {}).passed) || tp.full
   return { cleared, total: core.length, started, finished, next }
 }
@@ -255,10 +255,20 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
+  // On the local server the page also shows every path the ClearK12 Studio holds,
+  // with a published version standing in for its draft wherever one exists.
   useEffect(() => {
     let live = true
-    library.live()
-      .then((r) => { if (live && (r.topics || []).length) return setRaw(r.topics) ; throw new Error('empty') })
+    const published = () => library.live().then((r) => r.topics || []).catch(() => [])
+    const studio = () => (api.proofStudio ? api.proofStudio().then((r) => r.topics || []).catch(() => []) : Promise.resolve([]))
+    Promise.all([published(), studio()])
+      .then(([pub, all]) => {
+        const byId = new Map(all.map((tp) => [tp.id, tp]))
+        pub.forEach((tp) => byId.set(tp.id, tp))
+        const merged = all.length ? [...byId.values()] : pub
+        if (merged.length) return live && setRaw(merged)
+        throw new Error('empty')
+      })
       .catch(() => api.proofContent().then((r) => live && setRaw(r.topics || [])).catch(() => live && setRaw([])))
     return () => { live = false }
   }, [])
@@ -361,6 +371,9 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
 
   return (
     <PageMode.Provider value={true}>
+      {/* the dashboard's enchanted-forest painting, just as soft (22%) */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div className="proof-page">
         {onBack && <button className="backlink" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
           {running ? t('← Back to the path') : topic ? t('← All topics') : t('← Back to Practice')}
@@ -415,16 +428,20 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   let blocked = false
   for (const ws of topic.core) {
     const p = progress[ws.id] || { best: 0, passed: false }
-    const sb = topic.skillBuilders[ws.id]
-    const sbP = progress[sb.id] || { best: 0, passed: false }
-    const needsSb = p.best > 0 && !p.passed && !sbP.passed
+    // Not every path has a Skill Builder for every stop (Developing a Draft has none).
+    const sb = topic.skillBuilders?.[ws.id]
+    const sbP = (sb && progress[sb.id]) || { best: 0, passed: false }
+    const needsSb = !!sb && p.best > 0 && !p.passed && !sbP.passed
     stops.push({ ws, state: blocked ? 'locked' : p.passed ? 'passed' : needsSb ? 'retry' : 'open', best: p.best })
     if (needsSb) stops.push({ ws: sb, state: 'sb', best: sbP.best, forId: ws.id })
     if (!p.passed) blocked = true
   }
   const allCore = topic.core.every((w) => (progress[w.id] || {}).passed)
-  const fullP = progress[topic.full.id] || { best: 0, passed: false }
-  stops.push({ ws: topic.full, state: fullP.passed ? 'passed' : allCore ? 'open' : 'locked', best: fullP.best, capstone: true })
+  // a connected path can arrive without its Full Topic capstone
+  if (topic.full) {
+    const fullP = progress[topic.full.id] || { best: 0, passed: false }
+    stops.push({ ws: topic.full, state: fullP.passed ? 'passed' : allCore ? 'open' : 'locked', best: fullP.best, capstone: true })
+  }
 
   const cleared = topic.core.filter((w) => (progress[w.id] || {}).passed).length
   const pct = Math.round((cleared / topic.core.length) * 100)

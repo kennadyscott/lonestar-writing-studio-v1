@@ -36,6 +36,8 @@ const networkApi = {
   discard: (subId) => fetch(u(`/api/submissions/${subId}/discard`), { method: 'POST' }).then(j),
   share: (submissionId) => fetch(u('/api/share'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ submissionId }) }).then(j),
   proofContent: () => fetch(u('/api/proof/content')).then(j),
+  // local server only: every path the ClearK12 Studio holds (the static build has none)
+  proofStudio: () => fetch(u('/api/proof/studio')).then((r) => { if (!r.ok) throw new Error('no studio feed'); return r.json() }),
   saveTopic: (topic) => fetch(u('/api/proof/topic'), { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ topic }) }).then(j),
   revertProof: () => fetch(u('/api/proof/revert'), { method: 'POST' }).then(j),
   drillFinish: (payload) => fetch(u('/api/drill/finish'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),

@@ -5,6 +5,7 @@ import { joinStandards } from '../../lib/content/taxonomy.mjs'
 import { prepareTopic, PASS_MARK, checkCompose, tokenize, parseHunt } from '../../server/proofRoom.mjs'
 import { useT } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.jsx'
+import { withSamples } from '../lib/proofSamples.js'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -235,6 +236,11 @@ export function PathPreview({ topic: raw, onClose }) {
 // What a student has done on one topic, read from the progress map.
 function topicStatus(tp, progress) {
   const core = tp.core || []
+  if (tp.sample) {
+    // sample cards carry a made-up state so the shelf shows every kind of card
+    const cleared = Math.min(tp.sampleCleared || 0, core.length)
+    return { cleared, total: core.length, started: cleared > 0, finished: cleared > 0 && cleared === core.length, next: core[cleared] || null }
+  }
   const cleared = core.filter((w) => (progress[w.id] || {}).passed).length
   const ids = [...core.map((w) => w.id), tp.full?.id, ...Object.values(tp.skillBuilders || {}).map((w) => w.id)].filter(Boolean)
   const started = ids.some((id) => (progress[id] || {}).best > 0)
@@ -260,6 +266,7 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
   const [query, setQuery] = useState('')
   const [strand, setStrand] = useState('all')
+  const [sampleNote, setSampleNote] = useState(null)   // title of the sample card just tapped
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
@@ -308,12 +315,12 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
   } else if (topic) {
     body = <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={() => setTopicId(null)} />
   } else {
-    const topics = (raw || []).map((tp) => ({ tp, st: topicStatus(tp, progress) }))
+    const topics = withSamples(raw || []).map((tp) => ({ tp, st: topicStatus(tp, progress) }))
     const strands = Array.from(new Set(topics.map(({ tp }) => tp.domain).filter(Boolean)))
     const q = query.trim().toLowerCase()
     const shown = topics.filter(({ tp }) => (strand === 'all' || tp.domain === strand)
       && (!q || [tp.title, tp.short, tp.blurb, ...(tp.core || []).map((w) => w.title)].join(' ').toLowerCase().includes(q)))
-    const resume = topics.find(({ st }) => st.started && !st.finished)
+    const resume = topics.find(({ tp, st }) => !tp.sample && st.started && !st.finished)
     const skills = topics.reduce((n, { tp }) => n + (tp.core || []).length, 0)
     body = (
       <>
@@ -368,10 +375,17 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
               </div>
             )}
             <div className="proof-grid">
-              {shown.map(({ tp, st }) => <TopicCard key={tp.id} tp={tp} st={st} grade={grade} onOpen={() => setTopicId(tp.id)} />)}
+              {shown.map(({ tp, st }) => <TopicCard key={tp.id} tp={tp} st={st} grade={grade}
+                onOpen={() => (tp.sample ? setSampleNote(tp.short || tp.title) : setTopicId(tp.id))} />)}
               {!shown.length && <div className="proof-empty">{t('No topics match that search.')}</div>}
             </div>
             <div className="proof-more">{t('More topics arrive as your teacher loads them.')}</div>
+          </div>
+        )}
+        {sampleNote && (
+          <div className="proof-sample-note" role="status">
+            <span><b>{sampleNote}</b> — {t('this is a sample card, here to show how the shelf looks with 20 topics. It has no worksheets yet.')}</span>
+            <button className="btn ghost" onClick={() => setSampleNote(null)}>{t('Got it')}</button>
           </div>
         )}
       </>
@@ -413,6 +427,7 @@ function TopicCard({ tp, st, onOpen }) {
   return (
     <button className="proof-card" onClick={onOpen}>
       <span className={`proof-card-art${coverId ? '' : ' icon-only'}`}>
+        {tp.sample && <span className="proof-card-sample">{t('Sample')}</span>}
         <span className="proof-card-icon" aria-hidden>{tp.icon}</span>
         {coverId && <img src={ART_SRC[coverId]} alt="" />}
       </span>

@@ -145,4 +145,7 @@ export const proof = {
   "Author's Purpose": 'Propósito del autor',
   'Composition': 'Composición',
   'Inquiry and Research': 'Indagación e investigación',
+  'Sample': 'Muestra',
+  'this is a sample card, here to show how the shelf looks with 20 topics. It has no worksheets yet.': 'es una tarjeta de muestra, para ver cómo se ve la sala con 20 temas. Todavía no tiene hojas de trabajo.',
+  'Got it': 'Entendido',
 }

@@ -63,14 +63,15 @@ function LunaNook({ modules, onLuna }) {
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
-    <div className="luna-bar lg" style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', border: '2px solid rgba(9,26,52,.6)', boxShadow: '0 8px 22px rgba(20,15,70,.3)',
-      background: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 46%, rgba(13,36,64,.55) 74%, rgba(13,36,64,.35) 100%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
+    /* woodland: forest green over the sunlit right edge of the lake painting */
+    <div className="luna-bar lg" style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', border: '1.5px solid rgba(243,213,138,.55)', boxShadow: '0 8px 22px rgba(20,50,35,.26)',
+      background: `linear-gradient(90deg, rgba(28,67,52,.97) 0%, rgba(33,79,62,.92) 46%, rgba(40,96,74,.8) 74%, rgba(45,106,82,.58) 100%), url(${BASE}bg-woodland.jpg) right 40% / cover no-repeat` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 26, padding: '24px 28px', flexWrap: 'wrap' }}>
 
         {/* who + where you are */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 340px', minWidth: 0 }}>
-          <span style={{ width: 68, height: 68, borderRadius: '50%', padding: 3, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
-            <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+          <span style={{ width: 68, height: 68, borderRadius: '50%', padding: 3, flexShrink: 0, background: 'conic-gradient(from 200deg, var(--wood-leaf), var(--wood-mint), var(--wood-leaf))', display: 'grid', placeItems: 'center' }}>
+            <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--wood-deep)', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
               <img src={BRAND.luna} alt="Luna" style={{ height: 48 }} />
             </span>
           </span>
@@ -78,8 +79,8 @@ function LunaNook({ modules, onLuna }) {
             <b style={{ fontSize: 21, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
             {/* two real lines, so the module name never breaks mid-phrase */}
             <div style={{ marginTop: 3, lineHeight: 1.35 }}>
-              <div style={{ fontSize: 14, color: '#a8dff5', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
-              <div style={{ fontSize: 13, color: '#7fc4e3', fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
+              <div style={{ fontSize: 14, color: 'var(--wood-mint)', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
+              <div style={{ fontSize: 13, color: 'var(--wood-mist)', opacity: .8, fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
             </div>
           </div>
         </div>
@@ -87,9 +88,9 @@ function LunaNook({ modules, onLuna }) {
         {/* progress */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 150px', minWidth: 130, maxWidth: 300 }}>
           <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,.22)', borderRadius: 8 }}>
-            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#a5e6ff)', borderRadius: 6 }} />
+            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg, var(--wood-leaf), var(--wood-mint))', borderRadius: 6 }} />
           </div>
-          <b style={{ fontSize: 16, color: '#a8dff5' }}>{Math.round(current.progress * 100)}%</b>
+          <b style={{ fontSize: 16, color: 'var(--wood-mint)' }}>{Math.round(current.progress * 100)}%</b>
         </div>
 
         {/* the six modules, still readable */}
@@ -100,7 +101,7 @@ function LunaNook({ modules, onLuna }) {
               <button key={m.id} className="luna-mod" onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
                 style={{ background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
                 <ModuleBadge id={m.id} size={52} dim={m.status === 'not_started'} />
-                <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#7f9bb4' : '#a8dff5' }}>
+                <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#9dbba8' : 'var(--wood-mint)' }}>
                   {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                 </span>
               </button>
@@ -108,7 +109,9 @@ function LunaNook({ modules, onLuna }) {
           })}
         </div>
 
-        <button className={'btn lg'} onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+        <button className="btn lg" onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap',
+          background: 'linear-gradient(120deg, var(--wood-leaf), var(--wood-forest))', border: '2px solid var(--wood-mint)',
+          boxShadow: '0 0 16px rgba(191,230,201,.35)' }}>
           {t('Go to my path')}
         </button>
       </div>

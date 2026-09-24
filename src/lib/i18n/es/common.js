@@ -14,6 +14,7 @@ export const common = {
   // feature names
   'The Writing Studio': 'El Estudio de Escritura',
   "Luna's Writing Nook": 'El Rincón de Escritura de Luna',
+  "Luna's Writing Adventure": 'La Aventura de Escritura de Luna',
   'Free Write': 'Escritura Libre',
   'Quick Write': 'Escritura Rápida',
   'Writing Bank': 'Banco de Escritura',

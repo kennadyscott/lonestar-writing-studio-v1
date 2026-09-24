@@ -62,40 +62,26 @@ function LunaNook({ modules, onLuna }) {
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   const done = 4, total = 6 // demo figures, as the bar has always shown
-  // Temporary A/B (2026-09-24): both keep Go to my path in the same lane.
-  // A = progress bar tucked under the module name; B = progress as a glowing
-  // line along the bar's bottom edge, with the count beside the module name.
-  const [barStyle, setBarStyleState] = useState(() => { try { return localStorage.getItem('lscr.lunaBar') === 'B' ? 'B' : 'A' } catch { return 'A' } })
-  const setBarStyle = (v) => { setBarStyleState(v); try { localStorage.setItem('lscr.lunaBar', v) } catch { /* fine */ } }
-  const edge = barStyle === 'B'
-  const track = (
-    <div className="journey-progress" title={t('{done} of {total} activities', { done, total })}>
-      <div className="journey-track"><div className="journey-fill" style={{ width: `${current.progress * 100}%` }} /></div>
-      <b>{done} / {total}</b>
-    </div>
-  )
   // Her "Writing Journey" mockup: deep navy, a glowing crystal-blue edge, the
   // module name in crystal blue, and a glowing button. The current module keeps its gold.
+  // One lane (2026-09-24): title, module and progress stacked on the left so
+  // Go to my path never wraps under the badges.
   return (
     <div>
-      <div className="style-pick" role="group" aria-label={t('Luna bar style')} style={{ marginBottom: 8 }}>
-        <span className="lbl">{t('Style')}</span>
-        {['A', 'B'].map((v) => (
-          <button key={v} className={barStyle === v ? 'on' : ''} aria-pressed={barStyle === v} onClick={() => setBarStyle(v)}>{v}</button>
-        ))}
-      </div>
-      <div className={`luna-bar lg journey one-lane${edge ? ' edge' : ''}`}>
+      <div className="luna-bar lg journey one-lane">
         <div className="journey-row">
           <div className="journey-who">
             <div style={{ minWidth: 0 }}>
-              {/* her Luna's Writing Adventure lockup, lettering turned white for the navy bar */}
-              <img className="journey-logo" src={BRAND.lunaAdventureLight} alt={t("Luna's Writing Adventure")} />
+              {/* written out, not the logo (her call, 2026-09-24) */}
+              <div className="journey-title">{t("Luna's Writing Adventure")}</div>
               {/* the only allowed break is after "Module 1:", never inside the module name */}
               <div className="journey-sub">
                 {t('Module {n}', { n: idx + 1 })}: <span className="journey-modname">{current.label}</span>
-                {edge && <span className="journey-count"> · {done} / {total}</span>}
               </div>
-              {!edge && track}
+              <div className="journey-progress" title={t('{done} of {total} activities', { done, total })}>
+                <div className="journey-track"><div className="journey-fill" style={{ width: `${current.progress * 100}%` }} /></div>
+                <b>{done} / {total}</b>
+              </div>
             </div>
           </div>
 
@@ -120,11 +106,6 @@ function LunaNook({ modules, onLuna }) {
             {t('Go to my path')} <span aria-hidden>→</span>
           </button>
         </div>
-        {edge && (
-          <div className="journey-edge" title={t('{done} of {total} activities', { done, total })} aria-hidden>
-            <div style={{ width: `${current.progress * 100}%` }} />
-          </div>
-        )}
       </div>
     </div>
   )

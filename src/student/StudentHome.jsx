@@ -63,9 +63,9 @@ function LunaNook({ modules, onLuna }) {
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
-    /* woodland scene in brand navy: navy over the sunlit right edge of the lake painting */
+    /* enchanted forest in brand navy: navy over the glowing-mushroom edge of the forest painting */
     <div className="luna-bar lg" style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', border: '1.5px solid rgba(243,213,138,.55)', boxShadow: '0 8px 22px rgba(1,23,45,.28)',
-      background: `linear-gradient(90deg, rgba(1,23,45,.96) 0%, rgba(2,44,64,.9) 46%, rgba(2,56,77,.78) 74%, rgba(3,72,98,.58) 100%), url(${BASE}bg-woodland.jpg) right 40% / cover no-repeat` }}>
+      background: `linear-gradient(90deg, rgba(1,23,45,.96) 0%, rgba(2,44,64,.9) 46%, rgba(2,56,77,.78) 74%, rgba(3,72,98,.58) 100%), url(${BASE}bg-enchanted.jpg) right 55% / cover no-repeat` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 26, padding: '24px 28px', flexWrap: 'wrap' }}>
 
         {/* who + where you are */}
@@ -924,7 +924,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   return (
     <div>
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        background: `url(${import.meta.env.BASE_URL || '/'}bg-woodland.jpg) center / cover no-repeat`, opacity: .22 }} />
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
       {game?.key === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} payHere={!game?.category} />
         : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}

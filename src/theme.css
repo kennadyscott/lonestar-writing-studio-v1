@@ -1,13 +1,13 @@
-/* ---- Scene palette (2026-09-24): the woodland art stays, the colors are the
-   brand navy. Deep and navy are the logo's own navy; blue is the brand teal;
+/* ---- Scene palette (2026-09-24): enchanted-forest art, brand navy colors, gold
+   accents kept. The light blues match the Crystal Writing logo's crystal. Deep and navy are the logo's own navy; blue is the brand teal;
    sky and mist are the light blues used for text on navy. Gold stays as the
    sunlight accent. (Briefly green, as --wood-*; she asked for navy instead.) ---- */
 :root {
   --scene-deep: #01172d;
   --scene-navy: #02384d;
   --scene-blue: #035c78;
-  --scene-sky: #a8dff5;
-  --scene-mist: #d6ecf6;
+  --scene-sky: #90d8f0;   /* the Crystal Writing logo's light crystal */
+  --scene-mist: #d4eef8;
 }
 
 :root {

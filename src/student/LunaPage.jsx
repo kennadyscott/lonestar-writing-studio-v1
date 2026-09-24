@@ -12,7 +12,7 @@ import { Directions, Glossed, useSay } from './Scaffold.jsx'
  * Lesson data is prototype content until the decks are converted.
  */
 
-// Backdrop is the dashboard's: canvas colour + bg-woodland.jpg at 22%.
+// Backdrop is the dashboard's: canvas colour + bg-enchanted.jpg (enchanted forest) at 22%.
 
 const BASE = import.meta.env.BASE_URL || '/'
 const NAVY = '#0d2f55'
@@ -265,7 +265,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
       background: 'var(--canvas)' }}>
       {/* same backdrop as the dashboard */}
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-woodland.jpg) center / cover no-repeat`, opacity: .22 }} />
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
 
       <div style={{ position: 'relative', maxWidth: 1500, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
         {/* header */}

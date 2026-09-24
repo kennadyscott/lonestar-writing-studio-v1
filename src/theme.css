@@ -391,6 +391,8 @@ a { color: var(--link); }
   box-shadow: 0 0 16px rgba(92,192,230,.5), inset 0 0 12px rgba(92,192,230,.3); }
 .journey-emblem img { height: 50px; }
 .journey-title { font-size: 18px; font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #eaf6fc; white-space: nowrap; }
+.journey-title-row { display: flex; align-items: center; gap: 9px; }
+.journey-gem { height: 40px; width: auto; flex-shrink: 0; margin: -9px 0 -6px; filter: drop-shadow(0 0 8px rgba(92,192,230,.45)); }
 .journey-sub { margin-top: 6px; font-size: 12.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--scene-sky); text-wrap: balance; line-height: 1.4; }
 .journey-progress { display: flex; align-items: center; gap: 12px; flex: 1 1 140px; min-width: 130px; max-width: 240px; }
 .journey-track { flex: 1; height: 12px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(92,192,230,.28); }

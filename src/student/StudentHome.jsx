@@ -72,8 +72,11 @@ function LunaNook({ modules, onLuna }) {
         <div className="journey-row">
           <div className="journey-who">
             <div style={{ minWidth: 0 }}>
-              {/* written out, not the logo (her call, 2026-09-24) */}
-              <div className="journey-title">{t("Luna's Writing Adventure")}</div>
+              {/* written out, not the logo (her call, 2026-09-24), with the logo's crystal cluster beside it */}
+              <div className="journey-title-row">
+                <img className="journey-gem" src={BRAND.crystalSet} alt="" />
+                <div className="journey-title">{t("Luna's Writing Adventure")}</div>
+              </div>
               {/* the only allowed break is after "Module 1:", never inside the module name */}
               <div className="journey-sub">
                 {t('Module {n}', { n: idx + 1 })}: <span className="journey-modname">{current.label}</span>

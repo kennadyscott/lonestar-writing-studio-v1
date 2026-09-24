@@ -9,7 +9,8 @@ import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
  */
 
 const BK = (import.meta.env.BASE_URL || '/') + 'bank/'
-const THUMBS = ['feather', 'book', 'door', 'sunset']
+// Forest crops of her practice paintings (2026-09-24); feather/book/door/sunset were the sky set.
+const THUMBS = ['quill-forest', 'cards-forest', 'notebook-forest', 'desk-forest']
 // Stable per piece: same id always draws the same picture.
 const thumbFor = (id) => THUMBS[[...String(id)].reduce((a, c) => a + c.charCodeAt(0), 0) % THUMBS.length]
 
@@ -120,9 +121,11 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
   }
 
   return (
-    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '22px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box',
-      backgroundImage: `linear-gradient(rgba(240,246,252,.55), rgba(240,246,252,.75)), url(${BK}sky.webp)`, backgroundSize: 'cover', backgroundPosition: 'center top', backgroundAttachment: 'fixed' }}>
-      <div style={{ maxWidth: 1120, margin: '0 auto' }}>
+    <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '22px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box', position: 'relative' }}>
+      {/* the dashboard's enchanted forest, just as soft (22%); the sky/space backdrop is retired */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
+      <div style={{ maxWidth: 1120, margin: '0 auto', position: 'relative', zIndex: 1 }}>
       {onBack && <button className="backlink" onClick={onBack}>{t('← Back to Dashboard')}</button>}
 
       {/* title */}
@@ -229,7 +232,10 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                 <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy} onClick={() => onOpen(sub.id)}>
                   {sub.published ? t('Read') : sub.drafts.length > 1 ? t('Revise →') : t('Open →')}
                 </button>
-                {!sub.published && wcount > 0 && (
+                {/* a free write needs a title before it can be published (2026-09-24) */}
+                {!sub.published && wcount > 0 && a.genre === 'free' && !(a.title || '').trim() ? (
+                  <button className="btn" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy} onClick={() => onOpen(sub.id)}>{t('✏️ Add a title')}</button>
+                ) : !sub.published && wcount > 0 && (
                   <button className="btn" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy}
                     onClick={() => setConfirmAction({ kind: 'publish', sub, a })}>{t('🌟 Publish')}</button>
                 )}

@@ -178,4 +178,15 @@ export const writing = {
   '🔥 Writing streak:': '🔥 Racha de escritura:',
   '{n} days': '{n} días',
   ' — extended today!': ' — ¡extendida hoy!',
+  // ---- Free Write title + Share Wall (2026-09-24) ----
+  'Give your piece a title…': 'Ponle un título a tu texto…',
+  '✏️ Give your piece a title first, then finish your draft.': '✏️ Primero ponle un título a tu texto y luego termina tu borrador.',
+  '✏️ Every piece needs a title.': '✏️ Todo texto necesita un título.',
+  '✏️ Add a title': '✏️ Agrega un título',
+  'Writing builds brighter thinkers': 'Escribir forma mentes más brillantes',
+  'Every word you write makes your mind a little stronger.': 'Cada palabra que escribes hace tu mente un poco más fuerte.',
+  'Nothing on the wall yet. Finish a piece and be the first to share!': 'Todavía no hay nada en el muro. ¡Termina un texto y sé el primero en compartir!',
+  'Argument': 'Argumentativo',
+  'Narrative': 'Narrativo',
+  'Informational': 'Informativo',
 }

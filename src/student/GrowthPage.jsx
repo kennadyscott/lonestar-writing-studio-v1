@@ -866,8 +866,8 @@ export function ReactionBar({ entry, onReact, size = 'md' }) {
   const t = useT()
   const counts = { like: 0, heart: 0, celebrate: 0, ...(entry.reactions || {}) }
   const mine = entry.myReactions || []
-  const pad = size === 'sm' ? '4px 9px' : '6px 12px'
-  const font = size === 'sm' ? 12 : 13
+  const pad = size === 'sm' ? '4px 9px' : size === 'lg' ? '8px 16px' : '6px 12px'
+  const font = size === 'sm' ? 12 : size === 'lg' ? 15 : 13
   return (
     <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
       {REACTION_KINDS.map((r) => {
@@ -884,54 +884,66 @@ export function ReactionBar({ entry, onReact, size = 'md' }) {
   )
 }
 
-export function ShareWallTab({ state, me, onChange }) {
+export function ShareWallTab({ state, me, onChange, onBack }) {
   const t = useT()
   const say = useSay()
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const shareWall = state.shareWall || []
   const sharedSubIds = new Set(shareWall.map((e) => e.submissionId).filter(Boolean))
   const shareable = subs.filter((s) => s.completedAt && !s.isPeerRevision && !sharedSubIds.has(s.id))
+  const BASE = import.meta.env.BASE_URL || '/'
 
   async function share(subId) { await api.share(subId); onChange && onChange() }
   async function react(id, type) { await api.react(id, type); onChange && onChange() }
 
+  // Her Share Wall mockup (2026-09-24): the night forest behind a parchment
+  // board, a crystal by the storybook title, an owl on the "share yours" strip,
+  // and cards that read like pages.
+  const title = shareable.length ? (state.assignments.find((a) => a.id === shareable[0].assignmentId)?.title || '').trim() || t('Untitled') : ''
   return (
-    <div className="card" style={{ padding: 22 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-        <div>
-          <b style={{ fontSize: 17 }}>🌟 {t('Share Wall')} <span style={{ fontWeight: 600, fontSize: 13, color: 'var(--muted)' }}>{say('See what other students are writing!')}</span></b>
-          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}><Directions text="Cheer for each other with a 👍, ❤️, or 🎉 — reactions only, no comments." /></div>
-        </div>
-      </div>
-
-      {shareable.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: 'linear-gradient(120deg,#eef4ff,#fff)', border: '1px solid var(--line)', borderRadius: 12, padding: '12px 16px', margin: '14px 0' }}>
-          <span style={{ fontSize: 22 }}>🎉</span>
-          <div style={{ flex: 1 }}>
-            <b style={{ fontSize: 14 }}>{t('You finished "{title}"!', { title: state.assignments.find((a) => a.id === shareable[0].assignmentId)?.title })}</b>
-            <div style={{ fontSize: 12, color: 'var(--muted)' }}>{say('Proud of it? Share it with the class.')}</div>
+    <div className="wall-page">
+      <div aria-hidden className="wall-backdrop" style={{ '--wall-bg': `url(${BASE}bg-enchanted.jpg)` }} />
+      <div className="wall-inner">
+        {onBack && <button className="backlink wall-back" onClick={onBack}>{t('← Back to Dashboard')}</button>}
+        <div className="wall-board">
+          <div className="wall-head">
+            <img className="wall-gem" src={`${BASE}crystal-set.png`} alt="" />
+            <div>
+              <h1 className="wall-title">{t('Share Wall')}</h1>
+              <div className="wall-sub">{say('See what other students are writing!')}</div>
+              <div className="wall-dir"><Directions text="Cheer for each other with a 👍, ❤️, or 🎉 — reactions only, no comments." /></div>
+            </div>
           </div>
-          <button className="btn" onClick={() => share(shareable[0].id)}>{t('Share to wall →')}</button>
-        </div>
-      )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 14 }}>
-        {shareWall.map((e) => (
-          <div key={e.id} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: 14, display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-              <span style={{ width: 30, height: 30, borderRadius: '50%', background: '#eef3f6', display: 'grid', placeItems: 'center', fontSize: 16 }}>{e.avatar}</span>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, lineHeight: 1.1 }}>{e.studentName}</div>
-                <div style={{ fontSize: 11, color: 'var(--muted)' }}>{e.genre}</div>
+          {shareable.length > 0 && (
+            <div className="wall-share">
+              <img className="wall-owl" src={`${BASE}wall-owl.jpg`} alt="" />
+              <div className="wall-share-words">
+                <div className="wall-share-title">{t('You finished "{title}"!', { title })}</div>
+                <div className="wall-share-sub">{say('Proud of it? Share it with the class.')}</div>
               </div>
+              <button className="wall-share-btn" onClick={() => share(shareable[0].id)}>✦ {t('Share to wall →')}</button>
             </div>
-            <div style={{ fontWeight: 700, fontSize: 14 }}>{e.title}</div>
-            <div style={{ fontSize: 12, color: '#3a4149', lineHeight: 1.5, marginTop: 4, flex: 1 }}>{e.excerpt}{e.excerpt.length >= 180 ? '…' : ''}</div>
-            <div style={{ marginTop: 10 }}>
-              <ReactionBar entry={e} onReact={react} />
-            </div>
+          )}
+
+          <div className="wall-grid">
+            {shareWall.map((e) => (
+              <article key={e.id} className="wall-card">
+                <div className="wall-card-who">
+                  <span className="wall-avatar" aria-hidden>{e.avatar}</span>
+                  <div style={{ minWidth: 0 }}>
+                    <div className="wall-name">{e.studentName}</div>
+                    <div className="wall-genre">{t(e.genre)}</div>
+                  </div>
+                </div>
+                <h2 className="wall-card-title">{e.title}</h2>
+                <p className="wall-excerpt">{e.excerpt}{e.excerpt.length >= 180 ? '…' : ''}</p>
+                <div style={{ marginTop: 'auto' }}><ReactionBar entry={e} onReact={react} size="lg" /></div>
+              </article>
+            ))}
+            {!shareWall.length && <div className="wall-empty">{t('Nothing on the wall yet. Finish a piece and be the first to share!')}</div>}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   )

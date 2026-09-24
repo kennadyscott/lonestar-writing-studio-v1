@@ -87,7 +87,6 @@ const MODES = {
   line: { bank: FIRST_LINES, tag: 'First line', hint: 'Steal this line as your opener — then take the story anywhere.', empty: '{n} opening lines are ready. Spin one and keep it going!' },
 }
 
-const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
 
 // Quick sparks: one tap for a themed prompt, no spin.
 const QUICK = [
@@ -160,7 +159,9 @@ export default function PromptsPanel({ summary, streakDays = 0 }) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, textAlign: 'center' }}>
         {idx === null ? (
           <>
-            <img src={`${FW}dice.webp`} alt="" style={{ width: 168, height: 168, objectFit: 'contain', marginTop: -6 }} />
+            {/* a plain glowing die; the ringed-planet dice was the space set */}
+            <span aria-hidden style={{ width: 120, height: 120, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 64,
+              background: 'radial-gradient(circle at 50% 42%, #fff8e1 0%, #e8f3f9 62%, #d6e9f3 100%)', boxShadow: '0 0 26px rgba(245,197,66,.45), inset 0 0 18px rgba(92,192,230,.25)' }}>🎲</span>
             <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 250, margin: 0, lineHeight: 1.5 }}>
               {t(m.empty, { n: m.bank.length })}
             </p>

@@ -87,12 +87,7 @@ export default function App() {
   } else if (view === 'quickwrite') {
     body = <QuickWritePage state={state} me={me} onBack={goHome} onChange={refresh} />
   } else if (view === 'wall') {
-    body = (
-      <div>
-        <button className="backlink" onClick={goHome}>← Back to Dashboard</button>
-        <ShareWallTab state={state} me={me} onChange={refresh} />
-      </div>
-    )
+    body = <ShareWallTab state={state} me={me} onChange={refresh} onBack={goHome} />
   } else if (view === 'proof') {
     body = <ProofRoom grade={me.gradeLevel ?? 5} onBack={goHome} onChange={refresh} />
   } else if (view === 'bank') {

@@ -148,8 +148,8 @@ export function seedState() {
       shoutOut: { from: 'Mr. Nowitski', initials: 'DN', date: '2026-06-30',
         text: 'Kayla — your recess argument blew me away. Taking on the other side is exactly what strong writers do. So proud of your growth!' } },
     { id: 'stu_anicole', name: 'Ava Nicole', gradeLevel: 6, initials: 'AN', avatar: '🌻', coins: 2700, goal: null, goalHistory: [] },
-    { id: 'stu_knelson', name: 'Kai Nelson', gradeLevel: 6, initials: 'KN', avatar: '🐯', coins: 2275, goal: null, goalHistory: [] },
-    { id: 'stu_jdennis', name: 'Jordan Dennis', gradeLevel: 6, initials: 'JD', avatar: '🐲', coins: 2275, goal: null, goalHistory: [] },
+    { id: 'stu_knelson', name: 'Kai Nelson', gradeLevel: 6, initials: 'KN', avatar: '🦊', coins: 2275, goal: null, goalHistory: [] },
+    { id: 'stu_jdennis', name: 'Jordan Dennis', gradeLevel: 6, initials: 'JD', avatar: '🦌', coins: 2275, goal: null, goalHistory: [] },
     { id: 'stu_kle', name: 'Kim Le', gradeLevel: 6, initials: 'KL', avatar: '🦔', coins: 1250, goal: null, goalHistory: [] },
   ]
 
@@ -246,9 +246,9 @@ export function seedState() {
     shareWall: [
       { id: 'sw_ava', submissionId: null, studentId: 'stu_anicole', studentName: 'Ava Nicole', avatar: '🌻', title: 'Why Dogs Are the Best Pets', genre: 'Argument',
         excerpt: 'Dogs are the best pets because they are loyal, active, and they help you feel less lonely. When I come home sad, my dog Biscuit always knows.', sharedOn: '2026-06-22', reactions: { like: 12, heart: 19, celebrate: 7 }, myReactions: [] },
-      { id: 'sw_kai', submissionId: null, studentId: 'stu_knelson', studentName: 'Kai Nelson', avatar: '🐯', title: 'The Cave Adventure', genre: 'Narrative',
+      { id: 'sw_kai', submissionId: null, studentId: 'stu_knelson', studentName: 'Kai Nelson', avatar: '🦊', title: 'The Cave Adventure', genre: 'Narrative',
         excerpt: 'The flashlight flickered as we stepped into the cave. My heart pounded like a drum. Then, in the dark, something moved.', sharedOn: '2026-06-19', reactions: { like: 15, heart: 24, celebrate: 11 }, myReactions: [] },
-      { id: 'sw_jordan', submissionId: null, studentId: 'stu_jdennis', studentName: 'Jordan Dennis', avatar: '🐲', title: 'How Volcanoes Erupt', genre: 'Informational',
+      { id: 'sw_jordan', submissionId: null, studentId: 'stu_jdennis', studentName: 'Jordan Dennis', avatar: '🦌', title: 'How Volcanoes Erupt', genre: 'Informational',
         excerpt: 'A volcano erupts when hot melted rock called magma pushes up through cracks in the earth. The pressure builds until it finally bursts out.', sharedOn: '2026-06-17', reactions: { like: 9, heart: 15, celebrate: 4 }, myReactions: [] },
     ],
     // Monthly averages across the 2025–26 school year, split by format (out of 4).

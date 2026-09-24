@@ -35,7 +35,6 @@ function CoinToast({ data, onClose }) {
   )
 }
 
-const FW = (import.meta.env.BASE_URL || '/') + 'freewrite/'
 
 function draftDate(iso, locale) {
   if (!iso) return ''
@@ -159,7 +158,20 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
     poke()
   }
 
+  // A free write needs a title before a draft is finished or published (her call,
+  // 2026-09-24: "it's easy to bypass"). Saving to finish later still works.
+  const titleInputRef = useRef(null)
+  const [titleNudge, setTitleNudge] = useState(false)
+  function needsTitle() {
+    if (!isFree || (titleRef.current || '').trim()) return false
+    setTitleNudge(true)
+    const el = titleInputRef.current
+    if (el) { el.scrollIntoView({ block: 'center', behavior: 'smooth' }); el.focus() }
+    return true
+  }
+
   async function saveRevision() {
+    if (needsTitle()) return
     setSaving(true)
     await flushRef.current()
     const res = await api.saveRevision(sub.id)
@@ -170,6 +182,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
 
   // free write: publish the finished piece
   async function publishWork() {
+    if (needsTitle()) return
     setSaving(true)
     await flushRef.current()
     const r = await api.publish(sub.id)
@@ -202,9 +215,11 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   }
 
   return (
-    <div style={isFree ? { margin: '-26px calc(50% - 50vw) -70px', padding: '18px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box',
-      backgroundImage: `linear-gradient(rgba(233,240,249,.5), rgba(233,240,249,.5)), url(${FW}sky.webp)`, backgroundSize: 'cover', backgroundPosition: 'center top', backgroundAttachment: 'fixed' } : undefined}>
-      <div style={isFree ? { maxWidth: 1180, margin: '0 auto' } : undefined}>
+    <div style={isFree ? { margin: '-26px calc(50% - 50vw) -70px', padding: '18px clamp(22px, 2.6vw, 56px) 40px', minHeight: 'calc(100vh - 64px)', boxSizing: 'border-box', position: 'relative' } : undefined}>
+      {/* the dashboard's enchanted forest at 22%; the sky/space backdrop is retired */}
+      {isFree && <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />}
+      <div style={isFree ? { maxWidth: 1180, margin: '0 auto', position: 'relative', zIndex: 1 } : undefined}>
       <CoinToast data={toast} onClose={() => setToast(null)} />
 
       {pub && (
@@ -236,8 +251,14 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
       {isFree ? (
         <div style={{ marginBottom: 10 }}>
           <div className="eyebrow">{t('Free Write')}</div>
-          <input className="piece-title" value={title} onChange={(e) => editTitle(e.target.value)}
-            placeholder={t('Name this piece')} aria-label={t('Title')} maxLength={80} />
+          <input ref={titleInputRef} className={`piece-title${!title.trim() ? ' empty' : ''}${titleNudge && !title.trim() ? ' needs' : ''}`}
+            value={title} onChange={(e) => editTitle(e.target.value)} readOnly={published}
+            placeholder={t('Give your piece a title…')} aria-label={t('Title')} aria-required="true" aria-invalid={titleNudge && !title.trim()} maxLength={80} />
+          {!title.trim() && !published && (
+            <div className={`piece-title-hint${titleNudge ? ' needs' : ''}`} role={titleNudge ? 'alert' : undefined}>
+              {titleNudge ? t('✏️ Give your piece a title first, then finish your draft.') : t('✏️ Every piece needs a title.')}
+            </div>
+          )}
         </div>
       ) : (
         /* prompt banner */
@@ -373,8 +394,11 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
       )}
 
       {isFree && (
-        <div style={{ marginTop: 18, borderRadius: 16, overflow: 'hidden', boxShadow: 'var(--shadow)', border: '1px solid var(--gold-line)' }}>
-          <img src={`${FW}footer.webp`} alt="Writing builds brighter thinkers. Every word you write makes your mind a little stronger." style={{ display: 'block', width: '100%', height: 'auto' }} />
+        <div className="fw-footer" style={{ '--fw-img': `url(${import.meta.env.BASE_URL || '/'}prac-free.jpg)` }}>
+          <div className="fw-footer-words">
+            <div className="fw-footer-kicker">{t('Writing builds brighter thinkers')}</div>
+            <div className="fw-footer-line">{t('Every word you write makes your mind a little stronger.')}</div>
+          </div>
         </div>
       )}
       </div>

@@ -613,3 +613,61 @@ a { color: var(--link); }
 }
 .proof-card-art.icon-only { align-items: center; justify-content: center; }
 .proof-card-art.icon-only .proof-card-icon { position: static; width: 76px; height: 76px; border-radius: 20px; font-size: 40px; }
+
+/* ---- Share Wall page (2026-09-24, her mockup): night forest, parchment board, storybook type ---- */
+.wall-page { margin: -26px calc(50% - 50vw) -70px; padding: 22px clamp(18px, 3vw, 56px) 48px; min-height: calc(100vh - 64px); box-sizing: border-box; position: relative; }
+.wall-backdrop { position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: linear-gradient(rgba(4,18,36,.28), rgba(4,18,36,.42)), var(--wall-bg) center / cover no-repeat, #06203a; }
+.wall-inner { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; }
+.wall-back { color: #fff !important; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; margin-bottom: 12px; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
+.wall-board { position: relative; border-radius: 24px; padding: 26px clamp(18px, 2.4vw, 34px) 30px;
+  background: radial-gradient(120% 90% at 50% 0%, #fffdf8 0%, #f8f3e8 60%, #f2ead9 100%);
+  border: 1.5px solid rgba(201,160,70,.45); box-shadow: 0 18px 50px rgba(2,12,28,.45), inset 0 0 40px rgba(201,160,70,.08); }
+.wall-head { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+.wall-gem { height: 96px; width: auto; flex-shrink: 0; filter: drop-shadow(0 4px 14px rgba(92,160,230,.45)); }
+.wall-title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(32px, 3.4vw, 46px); line-height: 1.05; color: #10294a; }
+.wall-sub { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(17px, 1.6vw, 22px); color: #2b4a66; margin-top: 4px; }
+.wall-dir { font-family: Georgia, 'Times New Roman', serif; font-size: 15px; color: #3d5670; margin-top: 6px; }
+.wall-share { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; border-radius: 16px; overflow: hidden; margin-bottom: 22px; padding-right: 18px;
+  background: linear-gradient(100deg, #cfdcf4 0%, #e9eefb 38%, #eef1fb 70%, #dfe7f8 100%); border: 1px solid rgba(160,180,220,.55); }
+.wall-owl { width: 200px; height: 98px; object-fit: cover; flex-shrink: 0; -webkit-mask-image: linear-gradient(90deg, #000 70%, transparent); mask-image: linear-gradient(90deg, #000 70%, transparent); }
+.wall-share-words { flex: 1; min-width: 220px; padding: 12px 0; }
+.wall-share-title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(18px, 1.8vw, 24px); color: #10294a; }
+.wall-share-sub { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: #3d5670; margin-top: 2px; }
+.wall-share-btn { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; font-weight: 700; color: #fff; padding: 12px 24px; border-radius: 999px; cursor: pointer; white-space: nowrap;
+  background: linear-gradient(180deg, #16587a 0%, #0b3a58 100%); border: 2px solid #e9b93a; box-shadow: 0 0 0 3px rgba(233,185,58,.18), 0 6px 16px rgba(8,40,70,.3); }
+.wall-share-btn:hover { background: linear-gradient(180deg, #1b6690 0%, #0d4466 100%); }
+.wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+.wall-card { display: flex; flex-direction: column; gap: 8px; background: #fffdf8; border: 1px solid #ece2cc; border-radius: 18px; padding: 18px 20px 18px; box-shadow: 0 4px 14px rgba(60,45,15,.07); }
+.wall-card-who { display: flex; align-items: center; gap: 12px; }
+.wall-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-size: 28px;
+  background: radial-gradient(circle at 40% 35%, #fff 0%, #eef3e4 70%); border: 2px solid #e2d6b8; box-shadow: 0 2px 8px rgba(60,45,15,.12); }
+.wall-name { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 17px; color: #10294a; }
+.wall-genre { font-family: Georgia, 'Times New Roman', serif; font-size: 14.5px; color: #5c6f80; }
+.wall-card-title { margin: 6px 0 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 22px; line-height: 1.2; color: #10294a; }
+.wall-excerpt { margin: 0 0 10px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: #3a4a58; }
+.wall-empty { grid-column: 1 / -1; padding: 28px; text-align: center; font-family: Georgia, 'Times New Roman', serif; color: #5c6f80; }
+@media (max-width: 720px) {
+  .wall-head { align-items: flex-start; }
+  .wall-gem { height: 64px; }
+  .wall-owl { width: 100%; height: 110px; -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent); }
+  .wall-share { padding: 0 16px 16px; }
+  .wall-share-btn { width: 100%; }
+}
+
+/* Free Write: the title is required to finish or publish (2026-09-24) */
+.piece-title.empty { border-bottom: 1.5px dashed #b8c8d6; }
+.piece-title.needs { border-bottom: 2px solid #d9534f; }
+.piece-title-hint { margin-top: 4px; font-size: 13px; font-weight: 700; color: #6b8196; }
+.piece-title-hint.needs { color: #c0392b; }
+/* Free Write footer: her forest painting in place of the space banner */
+.fw-footer { margin-top: 18px; border-radius: 16px; overflow: hidden; min-height: 120px; display: flex; align-items: center; justify-content: flex-end; color: #fff;
+  background: linear-gradient(90deg, rgba(2,28,48,0) 22%, rgba(2,40,62,.85) 45%, #032a42 62%), var(--fw-img) left center / cover no-repeat, #032a42;
+  border: 1px solid var(--gold-line); box-shadow: var(--shadow); }
+.fw-footer-words { width: min(56%, 620px); padding: 22px 28px 22px 0; }
+.fw-footer-kicker { font-size: 12px; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; color: var(--scene-sky); }
+.fw-footer-line { margin-top: 4px; font-size: clamp(17px, 1.7vw, 22px); font-weight: 800; line-height: 1.3; }
+@media (max-width: 720px) {
+  .fw-footer { background: linear-gradient(0deg, rgba(3,42,66,.94), rgba(3,42,66,.78)), var(--fw-img) left center / cover no-repeat, #032a42; }
+  .fw-footer-words { width: 100%; padding: 18px; }
+}

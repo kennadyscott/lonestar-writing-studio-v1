@@ -61,36 +61,25 @@ function LunaNook({ modules, onLuna }) {
   const t = useT()
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
-  const BASE = import.meta.env.BASE_URL || '/'
+  const done = 4, total = 6 // demo figures, as the bar has always shown
+  // Her "Writing Journey" mockup: deep navy, a glowing crystal-blue edge, the
+  // module name in crystal blue, the count beside the progress bar, and a
+  // glowing button. The current module keeps its gold.
   return (
-    /* enchanted forest in brand navy: navy over the glowing-mushroom edge of the forest painting */
-    <div className="luna-bar lg" style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', border: '1.5px solid rgba(243,213,138,.55)', boxShadow: '0 8px 22px rgba(1,23,45,.28)',
-      background: `linear-gradient(90deg, rgba(1,23,45,.96) 0%, rgba(2,44,64,.9) 46%, rgba(2,56,77,.78) 74%, rgba(3,72,98,.58) 100%), url(${BASE}bg-enchanted.jpg) right 55% / cover no-repeat` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 26, padding: '24px 28px', flexWrap: 'wrap' }}>
-
-        {/* who + where you are */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 340px', minWidth: 0 }}>
-          <span style={{ width: 68, height: 68, borderRadius: '50%', padding: 3, flexShrink: 0, background: 'conic-gradient(from 200deg, var(--scene-blue), var(--scene-sky), var(--scene-blue))', display: 'grid', placeItems: 'center' }}>
-            <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--scene-deep)', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-              <img src={BRAND.luna} alt="Luna" style={{ height: 48 }} />
-            </span>
-          </span>
+    <div className="luna-bar lg journey">
+      <div className="journey-row">
+        <div className="journey-who">
+          <span className="journey-emblem"><img src={BRAND.luna} alt="Luna" /></span>
           <div style={{ minWidth: 0 }}>
-            <b style={{ fontSize: 21, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
-            {/* two real lines, so the module name never breaks mid-phrase */}
-            <div style={{ marginTop: 3, lineHeight: 1.35 }}>
-              <div style={{ fontSize: 14, color: 'var(--scene-sky)', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
-              <div style={{ fontSize: 13, color: 'var(--scene-mist)', opacity: .8, fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
-            </div>
+            <div className="journey-title">{t("Luna's Writing Nook")}</div>
+            {/* the only allowed break is after "Module 1:", never inside the module name */}
+            <div className="journey-sub">{t('Module {n}', { n: idx + 1 })}: <span className="journey-modname">{current.label}</span></div>
           </div>
         </div>
 
-        {/* progress */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 150px', minWidth: 130, maxWidth: 300 }}>
-          <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,.22)', borderRadius: 8 }}>
-            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg, var(--scene-blue), var(--scene-sky))', borderRadius: 6 }} />
-          </div>
-          <b style={{ fontSize: 16, color: 'var(--scene-sky)' }}>{Math.round(current.progress * 100)}%</b>
+        <div className="journey-progress" title={t('{done} of {total} activities', { done, total })}>
+          <div className="journey-track"><div className="journey-fill" style={{ width: `${current.progress * 100}%` }} /></div>
+          <b>{done} / {total}</b>
         </div>
 
         {/* the six modules, still readable */}
@@ -98,10 +87,10 @@ function LunaNook({ modules, onLuna }) {
           {modules.map((m, mi) => {
             const cur = m.status === 'in_progress'
             return (
-              <button key={m.id} className="luna-mod" onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
-                style={{ background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
+              <button key={m.id} className={`luna-mod${cur ? ' on' : ''}`} onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
+                aria-current={cur ? 'step' : undefined}>
                 <ModuleBadge id={m.id} size={52} dim={m.status === 'not_started'} />
-                <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#8fb3c8' : 'var(--scene-sky)' }}>
+                <span className="luna-mod-label" style={cur ? undefined : { color: m.status === 'not_started' ? '#8fb3c8' : 'var(--scene-sky)' }}>
                   {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                 </span>
               </button>
@@ -109,10 +98,9 @@ function LunaNook({ modules, onLuna }) {
           })}
         </div>
 
-        <button className="btn lg" onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap',
-          background: 'linear-gradient(120deg, var(--scene-blue), var(--scene-navy))', border: '2px solid var(--scene-sky)',
-          boxShadow: '0 0 16px rgba(168,223,245,.35)' }}>
-          {t('Go to my path')}
+        <span className="journey-divider" aria-hidden />
+        <button className="journey-btn" onClick={onLuna}>
+          {t('Go to my path')} <span aria-hidden>→</span>
         </button>
       </div>
     </div>

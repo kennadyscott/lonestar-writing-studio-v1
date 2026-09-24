@@ -241,6 +241,71 @@ function LessonGrid({ acts, onOpen }) {
   )
 }
 
+/* ---------------- style B: one lesson up front, the rest quiet ---------------- */
+
+// Her "this feels super busy" (2026-09-24): six full paintings at equal weight,
+// gold frames on every card and dots between them all competed. B gives the
+// lesson she is on the one big painting and the gold; the others shrink to
+// small plain tiles in order, with no connectors.
+function UpNextLesson({ a, onOpen }) {
+  const t = useT()
+  const say = useSay()
+  const current = a.status === 'in_progress'
+  return (
+    <div className="nook-upnext" role="button" tabIndex={0} onClick={() => onOpen?.(a)}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}>
+      <div className="nook-upnext-art"><img src={LESSON_ART(a.art)} alt="" /></div>
+      <div className="nook-upnext-words">
+        <div className="nook-upnext-kicker">{current ? t('Up next') : t('Your next lesson')} · {a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
+        <div className="nook-upnext-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}>
+          <Glossed text={t(a.title)} />
+        </div>
+        {a.sub && <div style={{ fontSize: 14, color: '#4a6f8c', fontWeight: 600 }}>{say(a.sub)}</div>}
+        <Stars n={a.stars} size={22} dimColor="#d3dbe3" />
+        <button className="nook-upnext-btn" onClick={(e) => { e.stopPropagation(); onOpen?.(a) }}>
+          {current ? t('✦ Continue →') : t('Start →')}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function MiniLesson({ a, onOpen }) {
+  const t = useT()
+  const passed = a.status === 'passed'
+  const locked = a.status === 'todo'
+  return (
+    <div className={`nook-mini${locked ? ' locked' : ''}`} role={passed ? 'button' : undefined} tabIndex={passed ? 0 : -1}
+      onClick={() => passed && onOpen?.(a)} onKeyDown={(e) => passed && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
+      title={passed ? t('View summary →') : a.final ? t('Unlocks after lesson 5') : undefined}>
+      <div className="nook-mini-art"><img src={LESSON_ART(a.art)} alt="" />{locked && <span aria-hidden className="nook-mini-lock">🔒</span>}</div>
+      <div className="nook-mini-words">
+        <div className="nook-mini-kicker">{a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
+        <div className="nook-mini-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}><Glossed text={t(a.title)} /></div>
+        <div className="nook-mini-foot">
+          <Stars n={a.stars} size={14} dimColor="#d3dbe3" />
+          {passed && <span aria-label={t('Passed')} className="nook-mini-check">✓</span>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function FocusLessons({ acts, onOpen }) {
+  const t = useT()
+  const up = acts.find((a) => a.status === 'in_progress') || acts.find((a) => a.status === 'todo') || acts[acts.length - 1]
+  const rest = acts.filter((a) => a !== up)
+  return (
+    <div style={{ display: 'grid', gap: 18 }}>
+      <UpNextLesson a={up} onOpen={onOpen} />
+      <div>
+        <div className="nook-rest-label">{t('All lessons')}</div>
+        <div className="nook-rest">{rest.map((a) => <MiniLesson key={a.n} a={a} onOpen={onOpen} />)}</div>
+      </div>
+    </div>
+  )
+}
+
 /* ---------------- page ---------------- */
 
 export default function LunaPage({ state, me, onBack, onOpenLesson }) {
@@ -263,6 +328,10 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   // English label: LessonPage translates it on render, so switching language
   // mid-lesson does not leave a snapshot of the old one on screen.
   const open = (a) => onOpenLesson?.(a, `Module ${currentIdx + 1}: ${current.label}`)
+  // Temporary A/B (2026-09-24): A = the 3 x 2 painting grid, B = one lesson up front.
+  const [nookStyle, setNookStyleState] = useState(() => { try { return localStorage.getItem('lscr.nookStyle') === 'A' ? 'A' : 'B' } catch { return 'B' } })
+  const setNookStyle = (v) => { setNookStyleState(v); try { localStorage.setItem('lscr.nookStyle', v) } catch { /* fine */ } }
+  const calm = nookStyle === 'B'
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
@@ -276,6 +345,12 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
           <img className="nook-luna" src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
           <img src={BRAND.lunaWordmark} alt={t("Luna's Writing Nook")} style={{ height: 'clamp(54px, 5vw, 74px)', width: 'auto', display: 'block', marginTop: 2 }} />
           <div style={{ flex: 1 }} />
+          <div className="style-pick" role="group" aria-label={t('Nook style')}>
+            <span className="lbl">{t('Style')}</span>
+            {['A', 'B'].map((v) => (
+              <button key={v} className={nookStyle === v ? 'on' : ''} aria-pressed={nookStyle === v} onClick={() => setNookStyle(v)}>{v}</button>
+            ))}
+          </div>
           {onBack && (
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)', whiteSpace: 'nowrap' }}>
               {t('← Back to Previous Page')}
@@ -304,7 +379,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                   </div>
                 </div>
               </div>
-              <LessonGrid acts={acts} onOpen={open} />
+              {calm ? <FocusLessons acts={acts} onOpen={open} /> : <LessonGrid acts={acts} onOpen={open} />}
             </White>
           </div>
 
@@ -347,13 +422,13 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                 </div>
               </Stat>
 
-              <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #e6eef3' }}>
+              {!calm && <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #e6eef3' }}>
                 <ProgressRing pct={pct} />
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285' }}>{t('Module Progress')}</div>
                   <div style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, color: NAVY }}>{pct >= .5 ? say("Great work! You're more than halfway there!") : say('Every activity gets you closer!')}</div>
                 </div>
-              </div>
+              </div>}
 
               <div style={{ padding: '9px 14px 12px' }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285', marginBottom: 6 }}>{t('Badges Earned')}</div>
@@ -365,12 +440,12 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
 
             </White>
 
-            <White style={{ padding: '10px 14px', display: 'flex', gap: 12, alignItems: 'center' }}>
+            {!calm && <White style={{ padding: '10px 14px', display: 'flex', gap: 12, alignItems: 'center' }}>
               <div>
                 <div style={{ fontWeight: 800, fontSize: 15.5, color: NAVY }}>{say("You're doing amazing, writer!")}</div>
                 <div style={{ fontSize: 12.5, color: '#5c7285', lineHeight: 1.4, fontWeight: 600 }}>{say('Keep up the great work and finish strong!')} <span style={{ color: '#f5b400' }}>✦</span></div>
               </div>
-            </White>
+            </White>}
           </div>
         </div>
 

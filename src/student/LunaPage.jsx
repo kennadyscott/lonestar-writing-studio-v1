@@ -80,7 +80,7 @@ function BandHead({ modules, right }) {
   const t = useT()
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 5 }}>
-      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.6, color: 'var(--scene-sky)' }}>{t('YOUR WRITING JOURNEY')}</div>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.6, color: 'var(--scene-sky)' }}>{t('YOUR PATH TO BECOMING A STRONGER WRITER')}</div>
       <div style={{ fontSize: 11, fontWeight: 700, color: '#bcd6e6' }}>{right || <>{t('{n} Modules · A Brighter You', { n: modules.length })} <span style={{ color: '#f5b400' }}>✦</span></>}</div>
     </div>
   )
@@ -208,7 +208,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
       <div style={{ position: 'relative', maxWidth: 1500, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
         {/* header */}
         <div className="nook-head" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
-          <img src={BRAND.lunaAdventure} alt={t("Luna's Writing Adventure")} style={{ height: 'clamp(58px, 5.5vw, 80px)', width: 'auto', display: 'block', marginTop: 2 }} />
+          <img src={BRAND.lunaAdventure} alt={t("Luna's Writing Adventure")} style={{ height: 'clamp(51px, 4.8vw, 70px)', width: 'auto', display: 'block', marginTop: 2 }} />
           <div style={{ flex: 1 }} />
           {onBack && (
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)', whiteSpace: 'nowrap' }}>

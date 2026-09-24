@@ -8,7 +8,7 @@
 // reason.
 export const luna = {
   /* ---------------- module page: journey band ---------------- */
-  'YOUR WRITING JOURNEY': 'TU CAMINO DE ESCRITURA',
+  'YOUR PATH TO BECOMING A STRONGER WRITER': 'TU CAMINO PARA SER UN ESCRITOR MÁS FUERTE',
   '{n} Modules · A Brighter You': '{n} Módulos · Un Tú Más Brillante',
 
   // module labels (server data, rendered on this page)

@@ -139,4 +139,8 @@ export const luna = {
   '• {n} words so far. Aim for eight or more.': '• {n} palabras por ahora. Trata de llegar a ocho o más.',
   '✓ Uses {n} of your Starburst answers.': '✓ Usa {n} de tus respuestas Starburst.',
   '• Work in at least two of your Starburst answers.': '• Incorpora al menos dos de tus respuestas Starburst.',
+  // Nook lessons (2026-09-24)
+  'Your next lesson': 'Tu próxima lección',
+  'All lessons': 'Todas las lecciones',
+  'Now': 'Ahora',
 }

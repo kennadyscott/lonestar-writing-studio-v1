@@ -7,8 +7,8 @@ import { Directions, Glossed, useSay } from './Scaffold.jsx'
 /*
  * Luna's Writing Nook — the student's module page.
  * Dashboard backdrop, wordmark header, slim Writing Journey band, then one
- * white panel: mission header + the six lessons as a 3 x 2 grid of Luna V2
- * cards joined by gold constellation rules. Profile sidebar on the right.
+ * white panel: mission header, an "Up next" card for the current lesson, then
+ * every other lesson as a small tile. Profile sidebar on the right.
  * Lesson data is prototype content until the decks are converted.
  */
 
@@ -36,7 +36,6 @@ const M1_ACTIVITIES = [
 ]
 // g1-g6: her 16:9 lesson cards (2026-09-24), replacing the f1-f6 strips. l1-l6.webp are the old space set.
 const LESSON_ART = (key) => `${BASE}lessons/${key}.jpg`
-const GOLD_FRAME = '#e9b93a'
 
 const MISSION_BLURB = {
   m1: 'Build a strong foundation for clear, thoughtful answers.',
@@ -68,64 +67,6 @@ function White({ children, style }) {
   return (
     <div style={{ background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid var(--gold-line)', borderRadius: 18, boxShadow: 'var(--shadow)', ...style }}>
       {children}
-    </div>
-  )
-}
-
-/* ---------------- activity cards ---------------- */
-
-function ActivityCard({ a, onOpen }) {
-  const t = useT()
-  const say = useSay()
-  const passed = a.status === 'passed'
-  const current = a.status === 'in_progress'
-  const locked = a.status === 'todo'
-  const [hover, setHover] = useState(false)
-  const clickable = passed || current
-  const frame = current ? `0 0 0 3px ${GOLD_FRAME}, 0 0 26px rgba(245,180,0,.55), 0 10px 26px rgba(2,20,50,.18)` : `0 0 0 2px ${GOLD_FRAME}, var(--shadow)`
-  return (
-    <div role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
-      onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
-      onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}
-      /* The card itself no longer clips: a glossary definition opens below the
-         lesson title and has to be able to escape the card. Only the art panel
-         clips, which is all the rounded corners ever needed it for. */
-      style={{ position: 'relative', background: '#fff', borderRadius: 18, cursor: clickable ? 'pointer' : 'default',
-        boxShadow: frame, opacity: locked && !a.final ? .72 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
-
-      {/* art panel */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '1672 / 941' /* the paintings' own shape: nothing is cropped */, background: '#0d2f55', overflow: 'hidden', borderRadius: '18px 18px 0 0' }}>
-        <img src={LESSON_ART(a.art)} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: locked ? 'saturate(.7) brightness(.85)' : 'none' }} />
-        {locked && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,.85)', display: 'grid', placeItems: 'center', fontSize: 12 }}>🔒</span>}
-        <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: GOLD_FRAME, opacity: .9 }} />
-      </div>
-
-      {/* white panel */}
-      <div style={{ padding: '10px 10px 12px', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
-        <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: 1.6, color: a.final ? '#c98f00' : 'var(--link)' }}>{a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
-        {/* Lesson titles carry the strategy words — Restate, Cite, Evidence,
-            RACE, Module — so they are tappable. The whole card is a click
-            target, so a tap on a glossed word must not also open the lesson;
-            with no level set there is no button here and nothing changes. */}
-        <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 17, lineHeight: 1.15, color: NAVY }}
-          onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}>
-          <Glossed text={t(a.title)} />
-        </div>
-        {a.sub && <div style={{ fontSize: 12, color: '#4a6f8c', fontWeight: 600 }}>{say(a.sub)}</div>}
-        <div style={{ margin: '2px 0 0' }}><Stars n={a.stars} size={20} dimColor="#d3dbe3" /></div>
-        {current ? (
-          <button onClick={(e) => { e.stopPropagation(); onOpen?.(a) }} style={{ width: '100%', marginTop: 6, padding: '9px 0', borderRadius: 10, fontWeight: 800, fontSize: 14, color: NAVY, background: 'linear-gradient(180deg,#ffd44d 0%,#f5b400 100%)', boxShadow: '0 3px 0 #c98f00, 0 0 18px rgba(245,180,0,.45)' }}>
-            {t('✦ Continue →')}
-          </button>
-        ) : passed ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginTop: 4, fontSize: 13.5, fontWeight: 700, color: hover ? 'var(--link)' : '#4a6f8c' }}>
-            <span aria-hidden style={{ width: 20, height: 20, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>
-            {hover ? t('View summary →') : t('Passed')}
-          </div>
-        ) : (
-          <div style={{ marginTop: 4, fontSize: 12.5, fontWeight: 600, color: '#7d93a6' }}>{a.final ? t('Unlocks after lesson 5') : t('Up next')}</div>
-        )}
-      </div>
     </div>
   )
 }
@@ -177,76 +118,12 @@ function JourneyAll({ modules, currentId }) {
   )
 }
 
-/* ---------------- sidebar bits ---------------- */
+/* ---------------- lessons: the current one up front, the rest quiet ---------------- */
 
-function Stat({ icon, label, children, last }) {
-  return (
-    <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: last ? 'none' : '1px solid #e6eef3' }}>
-      <span style={{ fontSize: 24, width: 34, textAlign: 'center', flexShrink: 0 }}>{icon}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285' }}>{label}</div>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-function ProgressRing({ pct }) {
-  const R = 22, C = 2 * Math.PI * R
-  return (
-    <svg width="58" height="58" viewBox="0 0 58 58" style={{ flexShrink: 0 }}>
-      <circle cx="29" cy="29" r={R} fill="none" stroke="#e2eef5" strokeWidth="7" />
-      <circle cx="29" cy="29" r={R} fill="none" stroke="#06aade" strokeWidth="7" strokeLinecap="round" strokeDasharray={`${C * pct} ${C}`} transform="rotate(-90 29 29)" />
-      <text x="29" y="33" textAnchor="middle" fontSize="12.5" fontWeight="800" fill="#14344a">{Math.round(pct * 100)}%</text>
-    </svg>
-  )
-}
-
-
-/* ---------------- all lessons, in order ---------------- */
-
-// Rows of three. Between cards, the homepage's gold constellation rule
-// carries the eye from one lesson to the next; between rows a full-width
-// rule does the same, so the order reads 1 → 2 → 3, then 4 → 5 → 6.
-function Connector({ style, className = '' }) {
-  return (
-    <div className={`constellation-rule ${className}`} aria-hidden style={{ display: 'flex', alignItems: 'center', gap: 4, ...style }}>
-      <i /><span />
-    </div>
-  )
-}
-
-function LessonGrid({ acts, onOpen }) {
-  const rows = []
-  for (let i = 0; i < acts.length; i += 3) rows.push(acts.slice(i, i + 3))
-  return (
-    <div style={{ display: 'grid', gap: 12 }}>
-      {rows.map((row, r) => (
-        <React.Fragment key={r}>
-          {r > 0 && <Connector style={{ margin: '2px 6px' }} />}
-          <div className="nook-row" style={{ display: 'flex', alignItems: 'stretch', gap: 0, padding: '4px 4px' }}>
-            {row.map((a, i) => (
-              <React.Fragment key={a.n}>
-                {i > 0 && <Connector className="nook-hconn" style={{ width: 34, flexShrink: 0, alignSelf: 'center', margin: '0 2px' }} />}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <ActivityCard a={a} onOpen={onOpen} />
-                </div>
-              </React.Fragment>
-            ))}
-            {row.length < 3 && Array.from({ length: 3 - row.length }).map((_, k) => <div key={`pad${k}`} className="nook-pad" style={{ flex: 1, marginLeft: 34 }} />)}
-          </div>
-        </React.Fragment>
-      ))}
-    </div>
-  )
-}
-
-/* ---------------- style B: one lesson up front, the rest quiet ---------------- */
-
-// Her "this feels super busy" (2026-09-24): six full paintings at equal weight,
-// gold frames on every card and dots between them all competed. B gives the
-// lesson she is on the one big painting and the gold; the others shrink to
-// small plain tiles in order, with no connectors.
+// Her "this feels super busy" (2026-09-24, she chose this over the old 3 x 2
+// grid of equal paintings with gold frames and connector dots): the lesson the
+// student is on gets the one big painting and the only gold; the others are
+// small plain tiles in order.
 function UpNextLesson({ a, onOpen }) {
   const t = useT()
   const say = useSay()
@@ -291,10 +168,41 @@ function MiniLesson({ a, onOpen }) {
   )
 }
 
-function FocusLessons({ acts, onOpen }) {
+// Style B's side rail: every lesson in order, the current one lit gold.
+function RailLesson({ a, isUp, onOpen }) {
+  const t = useT()
+  const passed = a.status === 'passed'
+  const locked = a.status === 'todo' && !isUp
+  const clickable = passed || isUp
+  return (
+    <div className={`nook-rail-row${isUp ? ' up' : ''}${locked ? ' locked' : ''}`} role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
+      onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
+      aria-current={isUp ? 'step' : undefined}>
+      <span className="nook-rail-thumb"><img src={LESSON_ART(a.art)} alt="" /></span>
+      <span className="nook-rail-words">
+        <span className="nook-mini-kicker">{a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</span>
+        <span className="nook-mini-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}><Glossed text={t(a.title)} /></span>
+      </span>
+      {isUp ? <span className="nook-rail-now">{t('Now')}</span>
+        : passed ? <span aria-label={t('Passed')} className="nook-mini-check">✓</span>
+        : <span aria-hidden className="nook-rail-lock">🔒</span>}
+    </div>
+  )
+}
+
+function FocusLessons({ acts, onOpen, rail }) {
   const t = useT()
   const up = acts.find((a) => a.status === 'in_progress') || acts.find((a) => a.status === 'todo') || acts[acts.length - 1]
   const rest = acts.filter((a) => a !== up)
+  if (rail) return (
+    <div className="nook-railwrap">
+      <nav className="nook-rail" aria-label={t('All lessons')}>
+        <div className="nook-rest-label">{t('All lessons')}</div>
+        {acts.map((a) => <RailLesson key={a.n} a={a} isUp={a === up} onOpen={onOpen} />)}
+      </nav>
+      <UpNextLesson a={up} onOpen={onOpen} />
+    </div>
+  )
   return (
     <div style={{ display: 'grid', gap: 18 }}>
       <UpNextLesson a={up} onOpen={onOpen} />
@@ -318,20 +226,12 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   const done = acts.filter((a) => a.status === 'passed').length
   const left = acts.length - done
   const pct = done / acts.length
-  const starsEarned = acts.reduce((s, a) => s + a.stars, 0)
-  const starsMax = acts.length * 3
-  const streak = Number(state.growthSummary?.streakDays) || 0
-  const coins = me?.coins ?? 0
-  const level = Math.floor(coins / 300) + 1
-  const levelPct = (coins % 300) / 300
-  const earned = ['m1', 'm5', 'm4']
   // English label: LessonPage translates it on render, so switching language
   // mid-lesson does not leave a snapshot of the old one on screen.
   const open = (a) => onOpenLesson?.(a, `Module ${currentIdx + 1}: ${current.label}`)
-  // Temporary A/B (2026-09-24): A = the 3 x 2 painting grid, B = one lesson up front.
-  const [nookStyle, setNookStyleState] = useState(() => { try { return localStorage.getItem('lscr.nookStyle') === 'A' ? 'A' : 'B' } catch { return 'B' } })
-  const setNookStyle = (v) => { setNookStyleState(v); try { localStorage.setItem('lscr.nookStyle', v) } catch { /* fine */ } }
-  const calm = nookStyle === 'B'
+  // Temporary A/B (2026-09-24): A = Up next card + lesson tiles below, B = lessons in a side rail.
+  const [nookStyle, setNookStyleState] = useState(() => { try { return localStorage.getItem('lscr.nookLayout') === 'A' ? 'A' : 'B' } catch { return 'B' } })
+  const setNookStyle = (v) => { setNookStyleState(v); try { localStorage.setItem('lscr.nookLayout', v) } catch { /* fine */ } }
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
@@ -360,8 +260,8 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
 
         <JourneyAll modules={modules} currentId={current.id} />
 
-        <div className="nook-main" style={{ display: 'grid', gap: 16, alignItems: 'start' }}>
-          {/* ===== main column ===== */}
+        {/* The Writer Profile sidebar is gone (2026-09-24, "we don't need this"): the lessons get the full width. */}
+        <div>
           <div>
             {/* mission panel: header + lessons together */}
             <White style={{ padding: '16px 20px 20px', color: 'var(--ink)' }}>
@@ -379,73 +279,8 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                   </div>
                 </div>
               </div>
-              {calm ? <FocusLessons acts={acts} onOpen={open} /> : <LessonGrid acts={acts} onOpen={open} />}
+              <FocusLessons acts={acts} onOpen={open} rail={nookStyle === 'B'} />
             </White>
-          </div>
-
-          {/* ===== writer profile ===== */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, color: 'var(--ink)' }}>
-            <White style={{ overflow: 'hidden' }}>
-              <div style={{ background: `linear-gradient(120deg, ${NAVY}, #02384d)`, color: '#fff', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontSize: 19 }}>⭐</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 15.5, lineHeight: 1.1 }}>{t('My Writer Profile')}</div>
-                  <div style={{ fontSize: 11.5, color: 'rgba(255,255,255,.8)', fontWeight: 600 }}>{t('A brighter writer is you!')} <span style={{ color: '#ffd44d' }}>✦</span></div>
-                </div>
-                <span style={{ fontSize: 18, opacity: .85 }}>⚙️</span>
-              </div>
-
-              <div style={{ padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #e6eef3' }}>
-                <div style={{ width: 50, height: 50, borderRadius: '50%', background: 'radial-gradient(circle at 50% 40%, #bfe8ff, #7fd0f5 70%)', display: 'grid', placeItems: 'center', boxShadow: '0 0 0 3px #f5b400', flexShrink: 0 }}>
-                  <img src={BRAND.luna} alt="" style={{ height: 38 }} />
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14, color: NAVY }}>{t('Rising Writer · Level {n}', { n: level })}</div>
-                  <div style={{ height: 8, background: '#e6eef3', borderRadius: 6, margin: '5px 0 4px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.max(6, levelPct * 100)}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 6 }} />
-                  </div>
-                  <div style={{ fontSize: 11, color: '#5c7285', fontWeight: 600 }}>{say("Keep going! You're making great progress!")}</div>
-                </div>
-              </div>
-
-              <Stat icon="⭐" label={t('Stars Earned')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ fontSize: 19, fontWeight: 800, color: NAVY }}>{starsEarned} <span style={{ fontSize: 13, color: '#5c7285', fontWeight: 700 }}>/ {starsMax}</span></div>
-                  <span style={{ fontSize: 15, letterSpacing: 1 }}>{[1, 2, 3, 4, 5, 6].map((i) => <span key={i} style={{ color: i <= Math.round(starsEarned / starsMax * 6) ? '#f5b400' : '#d7dfe6' }}>★</span>)}</span>
-                </div>
-              </Stat>
-
-              <Stat icon="🔥" label={t('Current Streak')}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <div style={{ fontSize: 19, fontWeight: 800, color: NAVY }}>{streak} <span style={{ fontSize: 13, color: '#5c7285', fontWeight: 700 }}>{t('days in a row!')}</span></div>
-                  <span style={{ marginLeft: 'auto', fontSize: 22 }}>📅</span>
-                </div>
-              </Stat>
-
-              {!calm && <div style={{ padding: '9px 14px', display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid #e6eef3' }}>
-                <ProgressRing pct={pct} />
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285' }}>{t('Module Progress')}</div>
-                  <div style={{ fontSize: 12.5, fontWeight: 700, lineHeight: 1.4, color: NAVY }}>{pct >= .5 ? say("Great work! You're more than halfway there!") : say('Every activity gets you closer!')}</div>
-                </div>
-              </div>}
-
-              <div style={{ padding: '9px 14px 12px' }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: '#5c7285', marginBottom: 6 }}>{t('Badges Earned')}</div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  {earned.map((id) => <ModuleBadge key={id} id={id} size={36} />)}
-                  {['x1', 'x2'].map((k) => <span key={k} style={{ width: 36, height: 36, borderRadius: '50%', background: '#e2e8ee', display: 'grid', placeItems: 'center', color: '#b4c0cb', fontSize: 18 }}>★</span>)}
-                </div>
-              </div>
-
-            </White>
-
-            {!calm && <White style={{ padding: '10px 14px', display: 'flex', gap: 12, alignItems: 'center' }}>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 15.5, color: NAVY }}>{say("You're doing amazing, writer!")}</div>
-                <div style={{ fontSize: 12.5, color: '#5c7285', lineHeight: 1.4, fontWeight: 600 }}>{say('Keep up the great work and finish strong!')} <span style={{ color: '#f5b400' }}>✦</span></div>
-              </div>
-            </White>}
           </div>
         </div>
 

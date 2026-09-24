@@ -392,7 +392,6 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
 /* ---- Layout B: the Quick Write block that fills the old tile column ---- */
 function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
   const t = useT()
-  const say = useSay()
   const BASE = import.meta.env.BASE_URL || '/'
   const pick = todaysQuickPrompt(state)
   const done = !!completedQuickWrite(state, me.id, pick)
@@ -409,7 +408,7 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
           <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
           <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700 }}>
             🔥 {t('{n} day streak', { n: streak.days })}
           </span>
@@ -417,9 +416,9 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
             🪙 +10 {t('coins')}
           </span>
         </div>
-        <div style={{ fontSize: 12.5, color: '#c9d8f4', lineHeight: 1.4, textAlign: 'center', textWrap: 'balance' }}>
-          {done ? t('Done for today. A new prompt comes tomorrow.') : <Glossed text={say('Quick writes are about showing up — words over perfection.')} />}
-        </div>
+        {done && (
+          <div style={{ fontSize: 12.5, color: '#c9d8f4', lineHeight: 1.4 }}>{t('Done for today. A new prompt comes tomorrow.')}</div>
+        )}
         <span style={{ flex: 1 }} />
         <button onClick={onQuickWrite} disabled={busy}
           style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? '#1e2a6b' : '#fff',

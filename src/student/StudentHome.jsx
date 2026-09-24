@@ -69,9 +69,9 @@ function LunaNook({ modules, onLuna }) {
     <div className="luna-bar lg journey">
       <div className="journey-row">
         <div className="journey-who">
-          <span className="journey-emblem"><img src={BRAND.luna} alt="Luna" /></span>
           <div style={{ minWidth: 0 }}>
-            <div className="journey-title">{t("Luna's Writing Nook")}</div>
+            {/* her Luna's Writing Adventure lockup, lettering turned white for the navy bar */}
+            <img className="journey-logo" src={BRAND.lunaAdventureLight} alt={t("Luna's Writing Adventure")} />
             {/* the only allowed break is after "Module 1:", never inside the module name */}
             <div className="journey-sub">{t('Module {n}', { n: idx + 1 })}: <span className="journey-modname">{current.label}</span></div>
           </div>

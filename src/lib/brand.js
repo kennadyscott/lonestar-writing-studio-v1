@@ -6,6 +6,7 @@ export const BRAND = {
   luna: BASE + 'luna.png',
   lunaWordmark: BASE + 'luna-wordmark.png', // "LUNA'S WRITING NOOK" lockup, navy on transparent
   lunaAdventure: BASE + 'luna-adventure-2.png', // "LUNA'S WRITING ADVENTURE" crystal lockup, tagline cropped off (2026-09-24)
+  lunaAdventureLight: BASE + 'luna-adventure-light.png', // same lockup, white lettering for dark bars
   rocket: BASE + 'rocket.png',
   launchBg: BASE + 'launch-bg.jpg',
   trophy: BASE + 'trophy.png',

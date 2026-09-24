@@ -271,8 +271,9 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
         {stage === 'intro' && (
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px,0.95fr) 1.1fr', gap: 34, padding: '26px 30px 22px', alignItems: 'center' }}>
-              <img src={`${import.meta.env.BASE_URL || '/'}qw-hero.jpg`} alt=""
-                style={{ width: '100%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,80,.25)' }} />
+              {/* her forest writing-desk scene (2026-09-24); qw-hero.jpg was the old night-sky one */}
+              <img src={`${import.meta.env.BASE_URL || '/'}qw-hero-forest.jpg`} alt=""
+                style={{ width: '100%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>

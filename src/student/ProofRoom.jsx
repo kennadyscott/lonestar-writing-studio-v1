@@ -307,8 +307,8 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
             <div className="proof-dir"><ScaffoldDirections text="Pick a topic and walk its path. Clear each skill and the next one opens. The last stop proves the whole topic." /></div>
             {raw && (
               <div className="proof-stats">
-                <span>{t('{n} topics', { n: topics.length })}</span>
-                <span>{t('{n} skills', { n: skills })}</span>
+                <span>{topics.length === 1 ? t('1 topic') : t('{n} topics', { n: topics.length })}</span>
+                <span>{skills === 1 ? t('1 skill') : t('{n} skills', { n: skills })}</span>
               </div>
             )}
           </div>

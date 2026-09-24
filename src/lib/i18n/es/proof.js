@@ -121,6 +121,8 @@ export const proof = {
   // ---- the Proof Room page (2026-09-24) ----
   '{n} topics': '{n} temas',
   '{n} skills': '{n} destrezas',
+  '1 topic': '1 tema',
+  '1 skill': '1 destreza',
   'Pick up where you left off': 'Sigue donde te quedaste',
   'Next stop: {title}': 'Próxima parada: {title}',
   'Topics': 'Temas',

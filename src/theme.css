@@ -473,10 +473,11 @@ a { color: var(--link); }
 .daily-cta { position: relative; flex-shrink: 0; white-space: nowrap; font-weight: 800; font-size: 17px; border-radius: 16px; padding: 15px 26px; cursor: pointer; }
 
 
-.practice-view .daily-banner { padding: 22px 26px 22px 24%; min-height: 170px; color: #fff; background: linear-gradient(120deg, #151a52, #111540);
+.practice-view .daily-banner { padding: 22px 26px 22px 36%; min-height: 190px; color: #fff; background: linear-gradient(120deg, #151a52, #111540);
   box-shadow: 0 6px 20px rgba(8,16,50,.28); }
-.practice-view .daily-art { position: absolute; left: 0; top: 0; bottom: 0; width: 30%;
-  background: linear-gradient(90deg, rgba(21,26,82,0) 45%, #151a52 100%), linear-gradient(rgba(10,14,46,.28), rgba(10,14,46,.28)), var(--daily-img) 0% center / cover no-repeat; }
+/* Pip stays bright (no dark wash); only the right edge fades into the navy. */
+.practice-view .daily-art { position: absolute; left: 0; top: 0; bottom: 0; width: 38%;
+  background: linear-gradient(90deg, rgba(21,26,82,0) 62%, #151a52 100%), var(--daily-img) center 40% / cover no-repeat; }
 .practice-view .daily-kicker { color: #e8f1ff; }
 .practice-view .daily-dot { color: #5aa8ff; }
 .practice-view .daily-dir { color: #cdd9ee; }

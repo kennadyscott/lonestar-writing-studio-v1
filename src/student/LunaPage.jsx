@@ -292,7 +292,6 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
             <White style={{ padding: '16px 20px 20px', color: 'var(--ink)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 14, marginBottom: 18, borderBottom: '1px solid #e6eef3' }}>
                 <div style={{ flex: 1, minWidth: 260 }}>
-                  <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.1, color: 'var(--link)', marginBottom: 4 }}>{t('MISSION {n}', { n: String(currentIdx + 1).padStart(2, '0') })}</div>
                   <div style={{ fontFamily: SERIF, fontSize: 'clamp(22px, 2vw, 30px)', fontWeight: 700, color: NAVY, lineHeight: 1.15 }}>{t('Master the {label}', { label: t(current.label) })}</div>
                   {/* The mission blurb is the page's directions — the one Listen on this page. */}
                   <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}><Directions text={MISSION_BLURB[current.id]} /></div>

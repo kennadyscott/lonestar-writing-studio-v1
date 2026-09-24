@@ -282,7 +282,7 @@ export const SIMPLE = {
   'You fixed {n} criterion the draft was missing.': 'You fixed {n} thing the writing was missing.',
   'You fixed {n} criteria the draft was missing.': 'You fixed {n} things the writing was missing.',
   'None of the missing criteria are fixed yet — the ✗ items below are where to go next.': 'Nothing is fixed yet. Start with the ✗ items below.',
-  'you matched the rubric on {a} of {b} criteria when you scored the robot’s draft.': 'you agreed with the list on {a} of {b} when you scored the robot.',
+  'you matched the rubric on {a} of {b} criteria when you scored Pip’s draft.': 'you agreed with the list on {a} of {b} when you scored Pip.',
   'You matched the rubric on {a} of {b}.': 'You agreed with the list on {a} of {b}.',
   'You read this draft exactly like a grader would.': 'You scored this just like a teacher would.',
   'The ✗ marks below are the rubric’s own scoring — fix those as you revise.': 'The ✗ marks below are what is missing. Fix those.',

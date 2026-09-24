@@ -383,10 +383,10 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
 function DailyBanner({ dc, busy, onGo }) {
   const t = useT()
   const say = useSay()
-  // The painting (Blip reading by the water, the rough draft on the right) is
-  // the whole background now; the text sits over a fade beside Blip.
+  // Pip the squirrel reading in the crystal forest (her mockup, 2026-09-24) sits
+  // on the left; the words sit on the navy beside Pip. daily-bg.jpg was the robot.
   return (
-    <div className="nova-banner daily-banner" style={{ '--daily-img': `url(${import.meta.env.BASE_URL || '/'}daily-bg.jpg)` }}>
+    <div className="nova-banner daily-banner" style={{ '--daily-img': `url(${import.meta.env.BASE_URL || '/'}daily-pip.jpg)` }}>
       <span aria-hidden className="daily-art" />
       <div className="daily-words">
         <div className="daily-kicker">
@@ -398,7 +398,7 @@ function DailyBanner({ dc, busy, onGo }) {
         <div className="daily-title">
           {dc?.done
             ? t("Today's challenge is done — nice work! ✓")
-            : <Glossed text={say('{author} wrote something rough — can you fix it up?', { author: dc?.author || t('A robot') })} />}
+            : <Glossed text={say('{author} wrote something rough — can you fix it up?', { author: dc?.author || t('A friend') })} />}
         </div>
         <div className="daily-dir">
           <Directions text={dc?.done

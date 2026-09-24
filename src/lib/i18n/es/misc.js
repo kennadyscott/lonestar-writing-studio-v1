@@ -74,8 +74,8 @@ export const misc = {
     'Todavía no has corregido ningún criterio que falta: los puntos con ✗ de abajo son tu siguiente paso.',
   'you fixed this': 'corregiste esto',
   'Your grader eye:': 'Tu ojo de calificador:',
-  'you matched the rubric on {a} of {b} criteria when you scored the robot’s draft.':
-    'coincidiste con la rúbrica en {a} de {b} criterios cuando calificaste el borrador del robot.',
+  'you matched the rubric on {a} of {b} criteria when you scored Pip’s draft.':
+    'coincidiste con la rúbrica en {a} de {b} criterios cuando calificaste el borrador de Pip.',
   'Back to my dashboard': 'Volver a mi panel',
 
   // ---- RevisionStudio: rubric panel ----
@@ -109,8 +109,8 @@ export const misc = {
   'read only': 'solo lectura',
   '✍️ Your revision': '✍️ Tu revisión',
   '{n} words · autosaves': '{n} palabras · se guarda solo',
-  'Rewrite it here — make it the response the robot WISHES it wrote…':
-    'Reescríbelo aquí: haz la respuesta que el robot HUBIERA QUERIDO escribir…',
+  'Rewrite it here — make it the response Pip WISHES they wrote…':
+    'Reescríbelo aquí: haz la respuesta que Pip HUBIERA QUERIDO escribir…',
   '✓ Submitted': '✓ Enviado',
   "✓ You're changing it — keep going": '✓ Lo estás cambiando — sigue así',
   'Start reshaping the original above': 'Empieza a transformar el original de arriba',

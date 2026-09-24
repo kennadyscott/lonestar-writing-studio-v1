@@ -5,7 +5,7 @@ import { useSay, Glossed, Directions } from './Scaffold.jsx'
 
 /*
  * Daily Revision Challenge — three parts:
- *   1 (evaluate): score the robot's draft against the RUBRIC (focused layout, no tabs).
+ *   1 (evaluate): score Pip's draft against the RUBRIC (focused layout, no tabs).
  *   2 (rewrite):  revise directly beneath the original, working from the REVISION
  *                 CHECKLIST (their rubric judgments) beside the draft.
  *   3 (done):     submit for feedback (coach headline + next steps + coins).
@@ -92,7 +92,7 @@ function FeedbackModal({ result, onClose }) {
         {agree && (
           <div style={{ background: '#eef6f9', borderRadius: 12, padding: '12px 14px', fontSize: 13.5, lineHeight: 1.45, marginBottom: 12 }}>
             <b>{t('Your grader eye:')}</b>{' '}
-            <Glossed text={say('you matched the rubric on {a} of {b} criteria when you scored the robot\u2019s draft.', { a: agree.matched, b: agree.total })} />
+            <Glossed text={say('you matched the rubric on {a} of {b} criteria when you scored Pip\u2019s draft.', { a: agree.matched, b: agree.total })} />
           </div>
         )}
 
@@ -306,7 +306,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
                 <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('{n} words · autosaves', { n: wc })}</span>
               </div>
               <textarea value={content} onChange={(e) => edit(e.target.value)} disabled={phase === 'done'}
-                placeholder={t('Rewrite it here — make it the response the robot WISHES it wrote…')}
+                placeholder={t('Rewrite it here — make it the response Pip WISHES they wrote…')}
                 style={{ flex: 1, minHeight: 260, border: 'none', outline: 'none', resize: 'vertical', padding: 16, fontSize: 15.5, lineHeight: 1.65, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)', background: '#fff' }} />
               <div style={{ borderTop: '1px solid var(--line)', padding: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: 12, color: changed ? 'var(--good)' : 'var(--muted)', fontWeight: 600 }}>

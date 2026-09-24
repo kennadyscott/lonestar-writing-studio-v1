@@ -278,26 +278,14 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                 style={{ width: '100%', height: 'clamp(240px, calc(100vh - 250px), 420px)', objectFit: 'cover', objectPosition: 'center 55%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <span style={{ width: 44, height: 44, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 20 }}>🪶</span>
-                  <span style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>{t('Writing Topic')}</span>
+                  <span style={{ width: 50, height: 50, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 23 }}>🪶</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>{t('Writing Topic')}</span>
                 </div>
-                <div style={{ fontSize: 'clamp(30px, 5.5vh, 42px)', fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '8px 0 8px' }}>{pick.title}</div>
+                <div style={{ fontSize: 'clamp(38px, 7.5vh, 56px)', fontWeight: 800, color: '#0d2440', lineHeight: 1.08, margin: '10px 0 10px' }}>{pick.title}</div>
                 <div className="constellation-rule" aria-hidden><i /><i /><i /><span /></div>
-                <div style={{ fontSize: 13, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 6 }}>{t('Writing Prompt')}</div>
-                <div style={{ fontSize: 'clamp(19px, 3.4vh, 24px)', fontWeight: 700, color: '#10294a', lineHeight: 1.35, marginBottom: 14, textWrap: 'pretty' }}>{pick.prompt}</div>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', background: '#e9f5fb', borderRadius: 14, padding: '11px 14px', marginBottom: 16 }}>
-                  <span style={{ width: 34, height: 34, borderRadius: '50%', background: '#fff', display: 'grid', placeItems: 'center', fontSize: 16, flexShrink: 0 }}>💡</span>
-                  <div style={{ fontSize: 14, color: '#28506b', lineHeight: 1.45 }}>
-                    <b style={{ color: '#0f97c2' }}>{t('Think about:')}</b> <Glossed text={pick.hint || say('What details and examples will make your idea clear to a reader?')} />
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-                  <button className="btn lg" onClick={() => setStage('writing')}>{t('Start writing')}</button>
-                  <span style={{ fontSize: 12.5, fontWeight: 650, color: 'var(--muted)' }}>
-                    {t('The {time} timer starts right away', { time: `${Math.floor(GOAL_SECONDS / 60)}:${String(GOAL_SECONDS % 60).padStart(2, '0')}` })}
-                    {setBy ? ` · ${t('goal set by {who}', { who: setBy })}` : ''}
-                  </span>
-                </div>
+                <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>{t('Writing Prompt')}</div>
+                <div style={{ fontSize: 'clamp(24px, 4.6vh, 32px)', fontWeight: 700, color: '#10294a', lineHeight: 1.3, marginBottom: 26, textWrap: 'pretty' }}>{pick.prompt}</div>
+                <button className="btn lg" style={{ fontSize: 19, padding: '15px 30px', borderRadius: 16 }} onClick={() => setStage('writing')}>{t('Start writing')}</button>
               </div>
             </div>
             {/* benefits strip */}

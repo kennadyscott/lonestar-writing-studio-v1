@@ -177,7 +177,7 @@ export const simple = {
   'You fixed {n} thing the writing was missing.': 'Arreglaste {n} cosa que le faltaba a la escritura.',
   'You fixed {n} things the writing was missing.': 'Arreglaste {n} cosas que le faltaban a la escritura.',
   'Nothing is fixed yet. Start with the ✗ items below.': 'Todavía no has arreglado nada. Empieza con los ✗ de abajo.',
-  'you agreed with the list on {a} of {b} when you scored the robot.': 'coincidiste con la lista en {a} de {b} cuando le diste puntos al robot.',
+  'you agreed with the list on {a} of {b} when you scored Pip.': 'coincidiste con la lista en {a} de {b} cuando le diste puntos a Pip.',
   'You agreed with the list on {a} of {b}.': 'Coincidiste con la lista en {a} de {b}.',
   'You scored this just like a teacher would.': 'Le diste puntos igual que lo haría una maestra.',
   'The ✗ marks below are what is missing. Fix those.': 'Los ✗ de abajo son lo que falta. Arréglalos.',

@@ -264,9 +264,10 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
-  const [query, setQuery] = useState('')
-  const [strand, setStrand] = useState('all')
   const [sampleNote, setSampleNote] = useState(null)   // title of the sample card just tapped
+  const [layout, setLayoutState] = useState(() => { try { const v = localStorage.getItem('lscr.proofLayout'); return ['A', 'B', 'C'].includes(v) ? v : 'A' } catch { return 'A' } })
+  const setLayout = (v) => { setLayoutState(v); try { localStorage.setItem('lscr.proofLayout', v) } catch { /* fine */ } }
+  const openTopic = (tp) => (tp.sample ? setSampleNote(tp.short || tp.title) : setTopicId(tp.id))
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
@@ -316,10 +317,6 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
     body = <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={() => setTopicId(null)} />
   } else {
     const topics = withSamples(raw || []).map((tp) => ({ tp, st: topicStatus(tp, progress) }))
-    const strands = Array.from(new Set(topics.map(({ tp }) => tp.domain).filter(Boolean)))
-    const q = query.trim().toLowerCase()
-    const shown = topics.filter(({ tp }) => (strand === 'all' || tp.domain === strand)
-      && (!q || [tp.title, tp.short, tp.blurb, ...(tp.core || []).map((w) => w.title)].join(' ').toLowerCase().includes(q)))
     const resume = topics.find(({ tp, st }) => !tp.sample && st.started && !st.finished)
     const skills = topics.reduce((n, { tp }) => n + (tp.core || []).length, 0)
     body = (
@@ -357,30 +354,18 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
         )}
 
         {raw && (
-          <div className="card proof-shelf">
-            <div className="proof-shelf-head">
-              <div>
-                <div className="proof-section-kicker">{t('Topics')}</div>
-                <div className="proof-shelf-title">{t('Choose a path')}</div>
-              </div>
-              {topics.length > 4 && (
-                <input className="proof-search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('Search topics and skills…')} aria-label={t('Search topics and skills…')} />
-              )}
+          <>
+            {/* Temporary A/B/C (2026-09-24): three ways to hold many topics */}
+            <div className="style-pick" role="group" aria-label={t('Proof Room layout')} style={{ alignSelf: 'flex-start' }}>
+              <span className="lbl">{t('Layout')}</span>
+              {['A', 'B', 'C'].map((v) => (
+                <button key={v} className={layout === v ? 'on' : ''} aria-pressed={layout === v} onClick={() => setLayout(v)}>{v}</button>
+              ))}
             </div>
-            {strands.length > 1 && (
-              <div className="proof-chips" role="group" aria-label={t('Writing strand')}>
-                {['all', ...strands].map((d) => (
-                  <button key={d} className={strand === d ? 'on' : ''} aria-pressed={strand === d} onClick={() => setStrand(d)}>{d === 'all' ? t('All') : t(d)}</button>
-                ))}
-              </div>
-            )}
-            <div className="proof-grid">
-              {shown.map(({ tp, st }) => <TopicCard key={tp.id} tp={tp} st={st} grade={grade}
-                onOpen={() => (tp.sample ? setSampleNote(tp.short || tp.title) : setTopicId(tp.id))} />)}
-              {!shown.length && <div className="proof-empty">{t('No topics match that search.')}</div>}
-            </div>
-            <div className="proof-more">{t('More topics arrive as your teacher loads them.')}</div>
-          </div>
+            {layout === 'A' ? <ShelfRows topics={topics} onOpen={openTopic} />
+              : layout === 'B' ? <ShelfList topics={topics} onOpen={openTopic} />
+              : <ShelfByGrade topics={topics} grade={grade} onOpen={openTopic} />}
+          </>
         )}
         {sampleNote && (
           <div className="proof-sample-note" role="status">
@@ -404,6 +389,158 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
         {body}
       </div>
     </PageMode.Provider>
+  )
+}
+
+/* ---------------- three shelf layouts (temporary A/B/C, 2026-09-24) ---------------- */
+
+const matches = (tp, q) => !q || [tp.title, tp.short, tp.blurb, tp.domain, ...(tp.core || []).map((w) => w.title)].join(' ').toLowerCase().includes(q)
+const strandsOf = (topics) => {
+  const n = {}
+  topics.forEach(({ tp }) => { const d = tp.domain || 'Other'; n[d] = (n[d] || 0) + 1 })
+  return Object.entries(n).sort((a, b) => b[1] - a[1]).map(([d]) => d)
+}
+function ShelfSearch({ value, onChange }) {
+  const t = useT()
+  return <input className="proof-search" value={value} onChange={(e) => onChange(e.target.value)} placeholder={t('Search topics and skills…')} aria-label={t('Search topics and skills…')} />
+}
+
+// A: one row per strand, cards scroll sideways. Short page; browse by strand.
+function ShelfRows({ topics, onOpen }) {
+  const t = useT()
+  const [query, setQuery] = useState('')
+  const q = query.trim().toLowerCase()
+  const shown = topics.filter(({ tp }) => matches(tp, q))
+  const strands = strandsOf(shown)
+  return (
+    <div className="card proof-shelf">
+      <div className="proof-shelf-head">
+        <div><div className="proof-section-kicker">{t('Topics')}</div><div className="proof-shelf-title">{t('Choose a path')}</div></div>
+        <ShelfSearch value={query} onChange={setQuery} />
+      </div>
+      {strands.map((d) => {
+        const row = shown.filter(({ tp }) => (tp.domain || 'Other') === d)
+        return (
+          <section key={d} className="pr-row">
+            <div className="pr-row-head"><h3>{t(d)}</h3><span>{row.length === 1 ? t('1 topic') : t('{n} topics', { n: row.length })}</span></div>
+            <div className="pr-row-track">
+              {row.map(({ tp, st }) => <MiniTopic key={tp.id} tp={tp} st={st} onOpen={() => onOpen(tp)} />)}
+            </div>
+          </section>
+        )
+      })}
+      {!shown.length && <div className="proof-empty">{t('No topics match that search.')}</div>}
+    </div>
+  )
+}
+
+function MiniTopic({ tp, st, onOpen }) {
+  const t = useT()
+  return (
+    <button className="pr-mini" onClick={onOpen}>
+      <span className="pr-mini-top">
+        {tp.sample && <span className="proof-card-sample">{t('Sample')}</span>}
+        <span className="pr-mini-icon" aria-hidden>{tp.icon}</span>
+      </span>
+      <span className="pr-mini-body">
+        <span className="proof-card-kicker">{t('GRADE {n}', { n: tp.grade })}</span>
+        <span className="pr-mini-title">{tp.short || tp.title}</span>
+        {st.finished ? <span className="pill green" style={{ alignSelf: 'flex-start' }}>{t('✓ Path complete')}</span> : <ProofBar st={st} />}
+      </span>
+    </button>
+  )
+}
+
+// B: filters on the left, a compact list on the right. Densest; holds 100+.
+function ShelfList({ topics, onOpen }) {
+  const t = useT()
+  const [query, setQuery] = useState('')
+  const [grade, setGrade] = useState('all')
+  const [strand, setStrand] = useState('all')
+  const [status, setStatus] = useState('all')
+  const q = query.trim().toLowerCase()
+  const grades = Array.from(new Set(topics.map(({ tp }) => tp.grade))).sort((a, b) => a - b)
+  const strands = strandsOf(topics)
+  const stat = (st) => (st.finished ? 'done' : st.started ? 'going' : 'new')
+  const shown = topics.filter(({ tp, st }) => matches(tp, q) && (grade === 'all' || tp.grade === grade)
+    && (strand === 'all' || (tp.domain || 'Other') === strand) && (status === 'all' || stat(st) === status))
+  const count = (fn) => topics.filter(fn).length
+  return (
+    <div className="card proof-shelf pr-list-wrap">
+      <aside className="pr-filters" aria-label={t('Filters')}>
+        <ShelfSearch value={query} onChange={setQuery} />
+        <div className="pr-f-group">
+          <div className="pr-f-label">{t('Grade')}</div>
+          <div className="pr-f-chips">
+            {['all', ...grades].map((g) => <button key={g} className={grade === g ? 'on' : ''} onClick={() => setGrade(g)}>{g === 'all' ? t('All') : g}</button>)}
+          </div>
+        </div>
+        <div className="pr-f-group">
+          <div className="pr-f-label">{t('Strand')}</div>
+          {['all', ...strands].map((d) => (
+            <button key={d} className={`pr-f-row${strand === d ? ' on' : ''}`} onClick={() => setStrand(d)}>
+              <span>{d === 'all' ? t('All strands') : t(d)}</span><b>{d === 'all' ? topics.length : count(({ tp }) => (tp.domain || 'Other') === d)}</b>
+            </button>
+          ))}
+        </div>
+        <div className="pr-f-group">
+          <div className="pr-f-label">{t('Status')}</div>
+          {[['all', 'Everything'], ['new', 'Not started'], ['going', 'In progress'], ['done', 'Complete']].map(([k, label]) => (
+            <button key={k} className={`pr-f-row${status === k ? ' on' : ''}`} onClick={() => setStatus(k)}>
+              <span>{t(label)}</span><b>{k === 'all' ? topics.length : count(({ st }) => stat(st) === k)}</b>
+            </button>
+          ))}
+        </div>
+      </aside>
+      <div className="pr-list">
+        <div className="pr-list-head">
+          <div className="proof-shelf-title">{t('Choose a path')}</div>
+          <span>{shown.length === 1 ? t('1 topic') : t('{n} topics', { n: shown.length })}</span>
+        </div>
+        {shown.map(({ tp, st }) => (
+          <button key={tp.id} className="pr-line" onClick={() => onOpen(tp)}>
+            <span className="pr-line-icon" aria-hidden>{tp.icon}</span>
+            <span className="pr-line-words">
+              <span className="pr-line-title">{tp.short || tp.title}{tp.sample && <span className="proof-card-sample pr-inline">{t('Sample')}</span>}</span>
+              <span className="pr-line-meta">{t(tp.domain || 'Other')} · {t('Grade {n}', { n: tp.grade })} · {(tp.core || []).map((w) => w.title).join(' · ')}</span>
+            </span>
+            <span className="pr-line-prog">{st.finished ? <span className="pill green">{t('✓ Path complete')}</span> : <ProofBar st={st} />}</span>
+            <span className="pr-line-go">{st.finished ? t('Review →') : st.started ? t('Keep going →') : t('Open →')}</span>
+          </button>
+        ))}
+        {!shown.length && <div className="proof-empty">{t('No topics match those filters.')}</div>}
+      </div>
+    </div>
+  )
+}
+
+// C: the student's own grade up front as big cards; other grades fold away below.
+function ShelfByGrade({ topics, grade, onOpen }) {
+  const t = useT()
+  const mine = topics.filter(({ tp }) => Number(tp.grade) === Number(grade))
+  const others = Array.from(new Set(topics.map(({ tp }) => tp.grade).filter((g) => Number(g) !== Number(grade)))).sort((a, b) => a - b)
+  return (
+    <div className="card proof-shelf">
+      <div className="proof-shelf-head">
+        <div><div className="proof-section-kicker">{t('Grade {n}', { n: grade })} · {t('For you')}</div><div className="proof-shelf-title">{t('Choose a path')}</div></div>
+      </div>
+      <div className="proof-grid">
+        {mine.map(({ tp, st }) => <TopicCard key={tp.id} tp={tp} st={st} onOpen={() => onOpen(tp)} />)}
+        {!mine.length && <div className="proof-empty">{t('No topics for your grade yet.')}</div>}
+      </div>
+      <div className="pr-other-label">{t('Other grades')}</div>
+      {others.map((g) => {
+        const list = topics.filter(({ tp }) => tp.grade === g)
+        return (
+          <details key={g} className="pr-grade">
+            <summary><b>{t('Grade {n}', { n: g })}</b><span>{list.length === 1 ? t('1 topic') : t('{n} topics', { n: list.length })}</span></summary>
+            <div className="proof-grid" style={{ marginTop: 12 }}>
+              {list.map(({ tp, st }) => <TopicCard key={tp.id} tp={tp} st={st} onOpen={() => onOpen(tp)} />)}
+            </div>
+          </details>
+        )
+      })}
+    </div>
   )
 }
 

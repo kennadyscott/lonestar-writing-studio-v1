@@ -33,8 +33,16 @@ export const SAMPLE_TOPICS = [
   s('semicolons', 'Semicolons and Colons', 8, 'Composition', '⁏', ['Joining Ideas', 'Introducing Lists']),
 ]
 
-// Pad the real topics up to SAMPLE_TARGET with samples.
+// Pad the real topics up to SAMPLE_TARGET with samples, taking them a grade at a
+// time (3, 4, 5, 6, 7, 8, 3, …) so however few are needed, every grade shows up.
 export function withSamples(real) {
   const room = Math.max(0, SAMPLE_TARGET - real.length)
-  return [...real, ...SAMPLE_TOPICS.slice(0, room)]
+  const byGrade = {}
+  SAMPLE_TOPICS.forEach((tp) => { (byGrade[tp.grade] = byGrade[tp.grade] || []).push(tp) })
+  const grades = Object.keys(byGrade).map(Number).sort((x, y) => x - y)
+  const picked = []
+  for (let round = 0; picked.length < room && grades.some((g) => byGrade[g].length > round); round++) {
+    for (const g of grades) if (picked.length < room && byGrade[g][round]) picked.push(byGrade[g][round])
+  }
+  return [...real, ...picked]
 }

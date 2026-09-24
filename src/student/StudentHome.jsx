@@ -12,18 +12,6 @@ import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
 import { writingStreak } from '../lib/streak.js'
 
-/*
- * Layout B (2026-09-24), a demo toggle so the two dashboards can be shown
- * side by side. A is the dashboard as it was. B splits it into three tabs:
- * Home keeps the assignments, goals and Luna, with a Quick Write block where
- * the practice tiles were; Practice holds the four tiles, the Share Wall and
- * the Daily Challenge. The choice is remembered per browser.
- */
-// B is the default since 2026-09-24. The key was renamed so a browser that
-// had saved A under the old default starts on B too.
-const LAYOUT_KEY = 'lscr.layout.v2'
-const readLayout = () => { try { return localStorage.getItem(LAYOUT_KEY) === 'A' ? 'A' : 'B' } catch { return 'B' } }
-const saveLayout = (v) => { try { localStorage.setItem(LAYOUT_KEY, v) } catch { /* private window: the toggle still works this visit */ } }
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const fmt = (d, locale = 'en-US') => d ? new Date(d + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : '—'
@@ -69,46 +57,39 @@ function WayTile({ icon, title, sub, onClick, busy }) {
 
 const MODULE_SHORT = { m1: 'SCR', m2: 'ECR', m3: 'Stellar', m4: 'Process', m5: 'Revision', m6: 'Editing' }
 
-function LunaNook({ modules, onLuna, large = false }) {
-  const L = large // layout B: Home has room now that practice moved to its own tab
+function LunaNook({ modules, onLuna }) {
   const t = useT()
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
-    <div className={`luna-bar${L ? ' lg' : ''}`} style={{ position: 'relative', borderRadius: L ? 22 : 18, overflow: 'hidden', border: '2px solid rgba(9,26,52,.6)', boxShadow: '0 8px 22px rgba(20,15,70,.3)',
+    <div className="luna-bar lg" style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', border: '2px solid rgba(9,26,52,.6)', boxShadow: '0 8px 22px rgba(20,15,70,.3)',
       background: `linear-gradient(90deg, rgba(13,36,64,.96) 0%, rgba(13,36,64,.9) 46%, rgba(13,36,64,.55) 74%, rgba(13,36,64,.35) 100%), url(${BASE}nook-header.jpg) right center / cover no-repeat` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: L ? 26 : 18, padding: L ? '24px 28px' : '12px 18px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 26, padding: '24px 28px', flexWrap: 'wrap' }}>
 
         {/* who + where you are */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: L ? 16 : 11, flex: L ? '1 1 340px' : '1 1 260px', minWidth: 0 }}>
-          <span style={{ width: L ? 68 : 46, height: L ? 68 : 46, borderRadius: '50%', padding: L ? 3 : 2.5, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 340px', minWidth: 0 }}>
+          <span style={{ width: 68, height: 68, borderRadius: '50%', padding: 3, flexShrink: 0, background: 'conic-gradient(from 200deg,#35c3e8,#a5e6ff,#35c3e8)', display: 'grid', placeItems: 'center' }}>
             <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: '#0d2440', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
-              <img src={BRAND.luna} alt="Luna" style={{ height: L ? 48 : 32 }} />
+              <img src={BRAND.luna} alt="Luna" style={{ height: 48 }} />
             </span>
           </span>
           <div style={{ minWidth: 0 }}>
-            <b style={{ fontSize: L ? 21 : 15, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
-            {L ? (
-              /* two real lines, so the module name never breaks mid-phrase */
-              <div style={{ marginTop: 3, lineHeight: 1.35 }}>
-                <div style={{ fontSize: 14, color: '#a8dff5', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
-                <div style={{ fontSize: 13, color: '#7fc4e3', fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
-              </div>
-            ) : (
-            <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>
-              {t('Module {n}', { n: idx + 1 })}: {current.label} · {t('{done} of {total} activities', { done: 4, total: 6 })}
+            <b style={{ fontSize: 21, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
+            {/* two real lines, so the module name never breaks mid-phrase */}
+            <div style={{ marginTop: 3, lineHeight: 1.35 }}>
+              <div style={{ fontSize: 14, color: '#a8dff5', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
+              <div style={{ fontSize: 13, color: '#7fc4e3', fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
             </div>
-            )}
           </div>
         </div>
 
         {/* progress */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: L ? 12 : 9, flex: '1 1 150px', minWidth: 130, maxWidth: L ? 300 : 240 }}>
-          <div style={{ flex: 1, height: L ? 12 : 8, background: 'rgba(255,255,255,.22)', borderRadius: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 150px', minWidth: 130, maxWidth: 300 }}>
+          <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,.22)', borderRadius: 8 }}>
             <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg,#35c3e8,#a5e6ff)', borderRadius: 6 }} />
           </div>
-          <b style={{ fontSize: L ? 16 : 12.5, color: '#a8dff5' }}>{Math.round(current.progress * 100)}%</b>
+          <b style={{ fontSize: 16, color: '#a8dff5' }}>{Math.round(current.progress * 100)}%</b>
         </div>
 
         {/* the six modules, still readable */}
@@ -118,7 +99,7 @@ function LunaNook({ modules, onLuna, large = false }) {
             return (
               <button key={m.id} className="luna-mod" onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
                 style={{ background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
-                <ModuleBadge id={m.id} size={L ? 52 : 38} dim={m.status === 'not_started'} />
+                <ModuleBadge id={m.id} size={52} dim={m.status === 'not_started'} />
                 <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#7f9bb4' : '#a8dff5' }}>
                   {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                 </span>
@@ -127,7 +108,7 @@ function LunaNook({ modules, onLuna, large = false }) {
           })}
         </div>
 
-        <button className={L ? 'btn lg' : 'btn'} onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
+        <button className={'btn lg'} onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
           {t('Go to my path')}
         </button>
       </div>
@@ -351,26 +332,10 @@ function GoalBanner({ me, classFocus }) {
 const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
 
 /* ---- the studio dashboard: mockup banner cards with art vignettes ---- */
-function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
+function BigTask({ icon, title, sub, grad, art, onClick, busy }) {
   const [c1, c2] = grad
   const BASE = import.meta.env.BASE_URL || '/'
-  if (compact) {
-    return (
-      <button className="big-task" disabled={busy} onClick={onClick}
-        style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, minHeight: 82, padding: '11px 16px 11px 94px', textAlign: 'left',
-          display: 'flex', alignItems: 'center', gap: 10, background: `linear-gradient(120deg,${c1},${c2})`,
-          border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 8px 20px rgba(20,15,70,.28)', color: '#fff', cursor: 'pointer', width: '100%' }}>
-        <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 92,
-          background: `linear-gradient(90deg, transparent 45%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
-        <span aria-hidden style={{ position: 'relative', width: 34, height: 34, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 16,
-          background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
-        <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-          <span style={{ display: 'block', fontSize: 15, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)', whiteSpace: 'nowrap' }}>{title}</span>
-          <span style={{ display: 'block', fontSize: 11, color: 'rgba(255,255,255,.88)', fontWeight: 600, marginTop: 2, lineHeight: 1.3 }}>{sub}</span>
-        </span>
-      </button>
-    )
-  }
+
   return (
     <button className="big-task" disabled={busy} onClick={onClick}
       style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, minHeight: 118, padding: '18px 22px 18px 198px', textAlign: 'left',
@@ -391,7 +356,7 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
   )
 }
 
-/* ---- Layout B: the Quick Write block that fills the old tile column ---- */
+/* ---- Home: the Quick Write block beside the assignments ---- */
 function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
   const t = useT()
   const BASE = import.meta.env.BASE_URL || '/'
@@ -756,8 +721,8 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
 
 
 /* ---- Full assignments list (owns its filter state) ---- */
-function AssignmentsCard({ rows, busy, begin, headerAction, fill = false }) {
-  // fill (layout B): the card stretches to the Quick Write block beside it and
+function AssignmentsCard({ rows, busy, begin, headerAction }) {
+  // The card stretches to the Quick Write block beside it and
   // the list grows into the room instead of leaving a gap under it. The list is
   // absolutely positioned so it never pushes the row taller itself.
   const listRef = React.useRef(null)
@@ -786,7 +751,6 @@ function AssignmentsCard({ rows, busy, begin, headerAction, fill = false }) {
 
   // How many rows actually fit, so "N more" is true however tall the list is.
   useEffect(() => {
-    if (!fill) return
     const el = listRef.current; if (!el) return
     const count = () => {
       const rowsEls = [...el.querySelectorAll('.assign-row')]
@@ -795,8 +759,8 @@ function AssignmentsCard({ rows, busy, begin, headerAction, fill = false }) {
     count()
     const ro = new ResizeObserver(count); ro.observe(el)
     return () => ro.disconnect()
-  }, [fill, filtered.length, tab])
-  const hidden = Math.max(0, filtered.length - (fill ? visible : 3))
+  }, [filtered.length, tab])
+  const hidden = Math.max(0, filtered.length - visible)
 
   const listBody = (
     <>
@@ -831,7 +795,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction, fill = false }) {
   )
 
   return (
-    <div className="card" style={{ overflow: 'hidden', flex: 1, ...(fill ? { display: 'flex', flexDirection: 'column' } : {}) }}>
+    <div className="card" style={{ overflow: 'hidden', flex: 1, display: 'flex', flexDirection: 'column' }}>
       <div className="assign-head">
         <div className="seg">
           {['active', 'completed'].map((k) => (
@@ -860,13 +824,9 @@ function AssignmentsCard({ rows, busy, begin, headerAction, fill = false }) {
           <option value="teacher">{t('Sort: Teacher')}</option>
         </select>
       </div>
-      {fill ? (
-        <div style={{ position: 'relative', flex: 1, minHeight: 246 }}>
-          <div ref={listRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>{listBody}</div>
-        </div>
-      ) : (
-        <div style={{ maxHeight: 246, overflowY: 'auto' }}>{listBody}</div>
-      )}
+      <div style={{ position: 'relative', flex: 1, minHeight: 246 }}>
+        <div ref={listRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>{listBody}</div>
+      </div>
       {hidden > 0 && (
         <div style={{ padding: '8px 16px', borderTop: '1px solid var(--line)', fontSize: 11.5, fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>
           ↕ {t('{n} more — scroll the list', { n: hidden })}
@@ -885,11 +845,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     try { return sessionStorage.getItem('lscr.homeTab') || 'home' } catch { return 'home' }
   })
   const setHomeTab = (v) => { setHomeTabState(v); try { sessionStorage.setItem('lscr.homeTab', v) } catch { /* fine */ } }
-  const [layout, setLayoutState] = useState(readLayout)
-  const setLayout = (v) => { setLayoutState(v); saveLayout(v); if (v === 'A' && homeTab === 'practice') setHomeTab('home') }
-  const isB = layout === 'B'
-  const tab = !isB && homeTab === 'practice' ? 'home' : homeTab
-  const TABS = isB ? [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']] : [['home', 'Home'], ['data', 'Data & Goals']]
+  const tab = ['home', 'practice', 'data'].includes(homeTab) ? homeTab : 'home'
+  const TABS = [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']]
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
   const [lastReveal, setLastReveal] = useState(null)
@@ -997,14 +954,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
-        {/* Demo only: compare the two dashboard layouts. */}
-        <div className="layout-pick" role="group" aria-label={t('Dashboard layout')}>
-          <span className="lbl">{t('Layout')}</span>
-          {['B', 'A'].map((v) => (
-            <button key={v} className={layout === v ? 'on' : ''} aria-pressed={layout === v} onClick={() => setLayout(v)}>{v}</button>
-          ))}
-        </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
         <div className="seg" style={{ position: 'relative', zIndex: 2 }}>
           {TABS.map(([k, label]) => (
             <button key={k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
@@ -1019,30 +969,16 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <BridgeBanner level={me.supportLevel} />
         <GoalBanner me={me} classFocus={state.classFocus} />
-        <div className={`home-main${isB ? ' stretch' : ''}`}>
-          <AssignmentsCard rows={rows} busy={busy} begin={begin} fill={isB}
-            headerAction={isB ? null :
-              <button onClick={onQuickWrite} disabled={busy}
-                style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 999, fontSize: 13, fontWeight: 800, color: '#fff', cursor: 'pointer',
-                  background: 'linear-gradient(120deg,#2f3f96,#1e2a6b)', boxShadow: '0 4px 12px rgba(30,42,107,.35)' }}>
-                ⚡ {t('Quick Write')}
-              </button>
-            } />
-          {isB ? <QuickWriteBlock state={state} me={me} onQuickWrite={onQuickWrite} busy={busy} /> : <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <BigTask compact icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
-            <BigTask compact icon="✒️" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask compact icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
-            <BigTask compact icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
-          </div>}
+        <div className="home-main stretch">
+          <AssignmentsCard rows={rows} busy={busy} begin={begin} />
+          <QuickWriteBlock state={state} me={me} onQuickWrite={onQuickWrite} busy={busy} />
         </div>
-        <LunaNook modules={state.modules} onLuna={onLuna} large={isB} />
-        {!isB && <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />}
-        {!isB && <DailyBanner dc={dc} busy={busy} onGo={peer} />}
+        <LunaNook modules={state.modules} onLuna={onLuna} />
       </div>
       </>)}
 
-      {/* ================= PRACTICE (layout B) ================= */}
-      {isB && tab === 'practice' && (
+      {/* ================= PRACTICE ================= */}
+      {tab === 'practice' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div className="practice-grid">
             <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />

@@ -142,9 +142,7 @@ export const home = {
   'Keep playing': 'Seguir jugando',
   'Leave anyway': 'Salir de todos modos',
 
-  // ---- Layout B (demo toggle) + the Home Quick Write block ----
-  'Layout': 'Diseño',
-  'Dashboard layout': 'Diseño del panel',
+  // ---- the Home Quick Write block ----
   'About {n} min': 'Unos {n} min',
   "Today's prompt": 'La instrucción de hoy',
   'coins': 'monedas',

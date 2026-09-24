@@ -246,8 +246,10 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         </div>
       )}
 
-      {onBack && <button className="backlink" onClick={leave}>{t('← Back to My Writing')}</button>}
+      {onBack && <button className={`backlink${isFree ? ' on-scene' : ''}`} onClick={leave}>{t('← Back to My Writing')}</button>}
 
+      {/* on a free write the title and versions share one frosted panel so they read over the forest */}
+      <div className={isFree ? 'glass-head' : undefined} style={isFree ? { marginBottom: 14 } : undefined}>
       {isFree ? (
         <div style={{ marginBottom: 10 }}>
           <div className="eyebrow">{t('Free Write')}</div>
@@ -309,6 +311,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           </button>
         )}
         {!isCurrent && !compare && <span className="pill" style={{ background: '#fff4d6', color: '#a37400' }}>{t('viewing history — read only')}</span>}
+      </div>
       </div>
 
       {writing ? (

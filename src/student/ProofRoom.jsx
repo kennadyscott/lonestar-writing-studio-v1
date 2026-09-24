@@ -384,7 +384,7 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div className="proof-page">
-        {onBack && <button className="backlink" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
+        {onBack && <button className="backlink on-scene" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
           {running ? t('← Back to the path') : topic ? t('← All topics') : t('← Back to Practice')}
         </button>}
         {body}

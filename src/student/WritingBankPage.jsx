@@ -126,10 +126,10 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div style={{ maxWidth: 1120, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-      {onBack && <button className="backlink" onClick={onBack}>{t('← Back to Dashboard')}</button>}
+      {onBack && <button className="backlink on-scene" onClick={onBack}>{t('← Back to Dashboard')}</button>}
 
-      {/* title */}
-      <div style={{ marginBottom: 16 }}>
+      {/* title — on a frosted panel so it reads over the forest (2026-09-24) */}
+      <div className="glass-head" style={{ marginBottom: 16 }}>
         <div className="eyebrow">{t('The Writing Studio')}</div>
         <h1 className="page" style={{ margin: '2px 0' }}>{t('🗂️ My Writing Bank')}</h1>
         <p className="page-sub" style={{ margin: 0 }}>

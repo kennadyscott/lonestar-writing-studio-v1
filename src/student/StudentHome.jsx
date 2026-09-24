@@ -476,8 +476,8 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
 }
 
 /* ---- Fluency Zone: one tile per category; play one, reveal the coins; clear the grid for a bonus ---- */
-// Tile art: her enchanted-forest Fluency Zone cards (public/zone/<id>-forest2.webp, 2026-09-24:
-// the cooler second set; the first -forest set came out too gold). Replaced the space-theme set.
+// Tile art: her enchanted-forest Fluency Zone cards (public/zone/<id>-forest3.webp, 2026-09-24:
+// her third set; -forest came out too gold and -forest2 was not right either). Replaced the space-theme set.
 const maxCoinsFor = () => 20
 
 // A small gold coin, so we do not depend on the platform's coin emoji.
@@ -584,7 +584,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                 background: done ? '#f4f6f8' : miss ? '#fff8f6' : '#fff', border: `1px solid ${done ? '#cbd8e2' : miss ? '#e08a2b' : 'var(--gold-line)'}`,
                 boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: soon ? 'default' : 'pointer' }}>
                 {/* art panel cropped from her card render; the crops are ~2.2:1 so cover shows them whole */}
-                <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${tile.id}-forest2.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 40%', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
+                <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${tile.id}-forest3.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 40%', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
                 {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
                 {miss && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#e08a2b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 800 }}>!</span>}
                 {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}

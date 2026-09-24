@@ -9,6 +9,19 @@ import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
+import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
+import { writingStreak } from '../lib/streak.js'
+
+/*
+ * Layout B (2026-09-24), a demo toggle so the two dashboards can be shown
+ * side by side. A is the dashboard as it was. B splits it into three tabs:
+ * Home keeps the assignments, goals and Luna, with a Quick Write block where
+ * the practice tiles were; Practice holds the four tiles, the Share Wall and
+ * the Daily Challenge. The choice is remembered per browser.
+ */
+const LAYOUT_KEY = 'lscr.layout'
+const readLayout = () => { try { return localStorage.getItem(LAYOUT_KEY) === 'B' ? 'B' : 'A' } catch { return 'A' } }
+const saveLayout = (v) => { try { localStorage.setItem(LAYOUT_KEY, v) } catch { /* private window: the toggle still works this visit */ } }
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const fmt = (d, locale = 'en-US') => d ? new Date(d + 'T00:00:00').toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : '—'
@@ -364,6 +377,53 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy, compact }) {
         <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.9)', fontWeight: 600, marginTop: 3 }}>{sub}</span>
       </span>
     </button>
+  )
+}
+
+/* ---- Layout B: the Quick Write block that fills the old tile column ---- */
+function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
+  const t = useT()
+  const say = useSay()
+  const BASE = import.meta.env.BASE_URL || '/'
+  const pick = todaysQuickPrompt(state)
+  const done = !!completedQuickWrite(state, me.id, pick)
+  const streak = writingStreak(state.growthSummary)
+  const minutes = Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))
+  return (
+    <div className="qw-block">
+      {/* the laptop scene, cropped to its middle so the baked-in labels fall outside */}
+      <div aria-hidden className="qw-art" style={{ backgroundImage: `url(${BASE}qw-hero.jpg)` }} />
+      <div className="qw-body">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, fontWeight: 800, letterSpacing: 1.6, textTransform: 'uppercase', color: '#cfe0ff' }}>
+          <span aria-hidden>⚡</span>{t('Quick Write')}
+          <span style={{ color: '#7fa6ff', fontSize: 9 }}>●</span>
+          <span>{t('About {n} min', { n: minutes })}</span>
+        </div>
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: '#9fb6e8', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>
+          <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
+          <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>
+        </div>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700 }}>
+            🔥 {t('{n} day streak', { n: streak.days })}
+          </span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,180,0,.18)', border: '1px solid rgba(245,197,66,.55)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700, color: '#ffe6a3' }}>
+            🪙 +10 {t('coins')}
+          </span>
+        </div>
+        <div style={{ fontSize: 12.5, color: '#c9d8f4', lineHeight: 1.4 }}>
+          {done ? t('Done for today. A new prompt comes tomorrow.') : <Glossed text={say('Quick writes are about showing up — words over perfection.')} />}
+        </div>
+        <span style={{ flex: 1 }} />
+        <button onClick={onQuickWrite} disabled={busy}
+          style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? '#1e2a6b' : '#fff',
+            background: done ? '#e8eeff' : 'linear-gradient(120deg,#1d3a8f,#2a4dab)', border: done ? '1.5px solid #fff' : '2px solid #55d7ff',
+            boxShadow: done ? 'none' : '0 0 20px rgba(85,215,255,.45), inset 0 0 14px rgba(85,215,255,.2)' }}>
+          {done ? t('✓ See what I wrote →') : t('Start writing →')}
+        </button>
+      </div>
+    </div>
   )
 }
 
@@ -784,7 +844,17 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
 export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onChange }) {
   const t = useT()
   const say = useSay()
-  const [homeTab, setHomeTab] = useState('home')
+  // The tab survives a trip away and back (Writing Bank, Free Write, the Daily
+  // Challenge all leave the dashboard), so Practice returns to Practice.
+  const [homeTab, setHomeTabState] = useState(() => {
+    try { return sessionStorage.getItem('lscr.homeTab') || 'home' } catch { return 'home' }
+  })
+  const setHomeTab = (v) => { setHomeTabState(v); try { sessionStorage.setItem('lscr.homeTab', v) } catch { /* fine */ } }
+  const [layout, setLayoutState] = useState(readLayout)
+  const setLayout = (v) => { setLayoutState(v); saveLayout(v); if (v === 'A' && homeTab === 'practice') setHomeTab('home') }
+  const isB = layout === 'B'
+  const tab = !isB && homeTab === 'practice' ? 'home' : homeTab
+  const TABS = isB ? [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']] : [['home', 'Home'], ['data', 'Data & Goals']]
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
   const [lastReveal, setLastReveal] = useState(null)
@@ -892,10 +962,17 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+        {/* Demo only: compare the two dashboard layouts. */}
+        <div className="layout-pick" role="group" aria-label={t('Dashboard layout')}>
+          <span className="lbl">{t('Layout')}</span>
+          {['A', 'B'].map((v) => (
+            <button key={v} className={layout === v ? 'on' : ''} aria-pressed={layout === v} onClick={() => setLayout(v)}>{v}</button>
+          ))}
+        </div>
         <div className="seg" style={{ position: 'relative', zIndex: 2 }}>
-          {[['home', 'Home'], ['data', 'Data & Goals']].map(([k, label]) => (
-            <button key={k} className={homeTab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
+          {TABS.map(([k, label]) => (
+            <button key={k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
               {t(label)}
             </button>
           ))}
@@ -903,34 +980,48 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       </div>
 
       {/* ================= HOME ================= */}
-      {homeTab === 'home' && (<>
+      {tab === 'home' && (<>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <BridgeBanner level={me.supportLevel} />
         <GoalBanner me={me} classFocus={state.classFocus} />
         <div className="home-main">
           <AssignmentsCard rows={rows} busy={busy} begin={begin}
-            headerAction={
+            headerAction={isB ? null :
               <button onClick={onQuickWrite} disabled={busy}
                 style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '9px 16px', borderRadius: 999, fontSize: 13, fontWeight: 800, color: '#fff', cursor: 'pointer',
                   background: 'linear-gradient(120deg,#2f3f96,#1e2a6b)', boxShadow: '0 4px 12px rgba(30,42,107,.35)' }}>
                 ⚡ {t('Quick Write')}
               </button>
             } />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {isB ? <QuickWriteBlock state={state} me={me} onQuickWrite={onQuickWrite} busy={busy} /> : <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <BigTask compact icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
             <BigTask compact icon="✒️" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
             <BigTask compact icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
             <BigTask compact icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
-          </div>
+          </div>}
         </div>
         <LunaNook modules={state.modules} onLuna={onLuna} />
-        <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />
-        <DailyBanner dc={dc} busy={busy} onGo={peer} />
+        {!isB && <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />}
+        {!isB && <DailyBanner dc={dc} busy={busy} onGo={peer} />}
       </div>
       </>)}
 
+      {/* ================= PRACTICE (layout B) ================= */}
+      {isB && tab === 'practice' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div className="practice-grid">
+            <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
+            <BigTask icon="✒️" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
+            <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
+            <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
+          </div>
+          <DailyBanner dc={dc} busy={busy} onGo={peer} />
+          <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />
+        </div>
+      )}
+
       {/* ================= DATA & GOALS ================= */}
-      {homeTab === 'data' && (
+      {tab === 'data' && (
         <div style={{ position: 'relative', zIndex: 1 }}>
           <DataGoalsTab state={state} me={me} onChange={onChange} onReview={onReview} />
         </div>

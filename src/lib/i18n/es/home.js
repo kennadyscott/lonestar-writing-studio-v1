@@ -141,4 +141,14 @@ export const home = {
   "This round won't count. To clear the tile you'll need to start the game over and finish it.": 'Esta ronda no va a contar. Para completar la tarjeta tendrás que empezar el juego de nuevo y terminarlo.',
   'Keep playing': 'Seguir jugando',
   'Leave anyway': 'Salir de todos modos',
+
+  // ---- Layout B (demo toggle) + the Home Quick Write block ----
+  'Layout': 'Diseño',
+  'Dashboard layout': 'Diseño del panel',
+  'About {n} min': 'Unos {n} min',
+  "Today's prompt": 'La instrucción de hoy',
+  'coins': 'monedas',
+  'Done for today. A new prompt comes tomorrow.': 'Listo por hoy. Mañana llega una instrucción nueva.',
+  '✓ See what I wrote →': '✓ Ver lo que escribí →',
+  'Start writing →': 'Empezar a escribir →',
 }

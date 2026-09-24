@@ -318,3 +318,27 @@ a { color: var(--link); }
 .lang-toggle button { border-radius: 999px; padding: 5px 10px; font-size: 12px; font-weight: 800; color: var(--muted); line-height: 1; display: inline-flex; align-items: center; gap: 4px; }
 .lang-toggle button:hover { background: #eef6fa; color: var(--ink); }
 .lang-toggle button.on { background: var(--navy); color: #fff; }
+
+/* ---- Layout B (demo) ---- */
+.layout-pick { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px;
+  background: rgba(255,255,255,.85); border: 1px dashed #b9c7d6; box-shadow: 0 2px 8px rgba(13,47,85,.08); }
+.layout-pick .lbl { font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding: 0 8px 0 10px; }
+.layout-pick button { min-width: 34px; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 800; color: var(--muted); background: transparent; }
+.layout-pick button.on { background: #1e2a6b; color: #fff; }
+.layout-pick button:focus-visible { outline: 2px solid #55d7ff; outline-offset: 2px; }
+.practice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 760px) { .practice-grid { grid-template-columns: 1fr; } }
+
+/* The Home Quick Write block (layout B). Tall in the side column; sideways when
+   the home grid drops to one column, so it never becomes a wide empty strip. */
+.qw-block { position: relative; overflow: hidden; border-radius: 20px; color: #fff; display: flex; flex-direction: column;
+  background: linear-gradient(160deg, #2f3f96 0%, #1e2a6b 70%); border: 1.5px solid rgba(245,180,0,.45); box-shadow: 0 10px 26px rgba(20,15,70,.32); }
+.qw-art { height: 150px; flex-shrink: 0; background-position: center 48%; background-size: cover; background-repeat: no-repeat; position: relative; }
+.qw-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, #2c3b8f); }
+.qw-body { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+@media (max-width: 1120px) and (min-width: 700px) {
+  .qw-block { flex-direction: row; }
+  .qw-art { height: auto; width: 38%; min-height: 230px; }
+  .qw-art::after { background: linear-gradient(90deg, transparent 55%, #283888); }
+  .qw-body { padding: 20px 22px; }
+}

@@ -58,7 +58,14 @@ function readDraft(studentId, title, prompt, goalSeconds) {
 
 // A finished quick write for this exact prompt, newest first. Re-entry uses
 // this so the same prompt does not look like a blank assignment.
-function completedQuickWrite(state, studentId, pick) {
+/* Today's prompt. Rotates at local midnight. The B-layout Home block reads
+ * this too, so the block and the page always show the same prompt. */
+export function todaysQuickPrompt(state) {
+  const bank = state?.quickPrompts || []
+  return bank.length ? bank[dayNumber() % bank.length] : { title: 'Quick Write', prompt: 'Write!' }
+}
+
+export function completedQuickWrite(state, studentId, pick) {
   let best = null
   for (const sub of state?.submissions || []) {
     if (sub.studentId !== studentId || !sub.completedAt) continue
@@ -105,8 +112,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
   const GOAL_SECONDS = state.settings?.quickWriteSeconds ?? 180
   const setBy = state.settings?.quickWriteSetBy
   // rotate the static prompt bank daily
-  const bank = state.quickPrompts || []
-  const pick = bank.length ? bank[dayNumber() % bank.length] : { title: 'Quick Write', prompt: 'Write!' }
+  const pick = todaysQuickPrompt(state)
 
   // One Quick Write a day. A finished piece for today's prompt wins over a
   // leftover draft, so there is no second try.

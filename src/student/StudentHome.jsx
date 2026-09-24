@@ -62,46 +62,69 @@ function LunaNook({ modules, onLuna }) {
   const current = modules.find((m) => m.status === 'in_progress') || modules[0]
   const idx = modules.indexOf(current)
   const done = 4, total = 6 // demo figures, as the bar has always shown
+  // Temporary A/B (2026-09-24): both keep Go to my path in the same lane.
+  // A = progress bar tucked under the module name; B = progress as a glowing
+  // line along the bar's bottom edge, with the count beside the module name.
+  const [barStyle, setBarStyleState] = useState(() => { try { return localStorage.getItem('lscr.lunaBar') === 'B' ? 'B' : 'A' } catch { return 'A' } })
+  const setBarStyle = (v) => { setBarStyleState(v); try { localStorage.setItem('lscr.lunaBar', v) } catch { /* fine */ } }
+  const edge = barStyle === 'B'
+  const track = (
+    <div className="journey-progress" title={t('{done} of {total} activities', { done, total })}>
+      <div className="journey-track"><div className="journey-fill" style={{ width: `${current.progress * 100}%` }} /></div>
+      <b>{done} / {total}</b>
+    </div>
+  )
   // Her "Writing Journey" mockup: deep navy, a glowing crystal-blue edge, the
-  // module name in crystal blue, the count beside the progress bar, and a
-  // glowing button. The current module keeps its gold.
+  // module name in crystal blue, and a glowing button. The current module keeps its gold.
   return (
-    <div className="luna-bar lg journey">
-      <div className="journey-row">
-        <div className="journey-who">
-          <div style={{ minWidth: 0 }}>
-            {/* her Luna's Writing Adventure lockup, lettering turned white for the navy bar */}
-            <img className="journey-logo" src={BRAND.lunaAdventureLight} alt={t("Luna's Writing Adventure")} />
-            {/* the only allowed break is after "Module 1:", never inside the module name */}
-            <div className="journey-sub">{t('Module {n}', { n: idx + 1 })}: <span className="journey-modname">{current.label}</span></div>
+    <div>
+      <div className="style-pick" role="group" aria-label={t('Luna bar style')} style={{ marginBottom: 8 }}>
+        <span className="lbl">{t('Style')}</span>
+        {['A', 'B'].map((v) => (
+          <button key={v} className={barStyle === v ? 'on' : ''} aria-pressed={barStyle === v} onClick={() => setBarStyle(v)}>{v}</button>
+        ))}
+      </div>
+      <div className={`luna-bar lg journey one-lane${edge ? ' edge' : ''}`}>
+        <div className="journey-row">
+          <div className="journey-who">
+            <div style={{ minWidth: 0 }}>
+              {/* her Luna's Writing Adventure lockup, lettering turned white for the navy bar */}
+              <img className="journey-logo" src={BRAND.lunaAdventureLight} alt={t("Luna's Writing Adventure")} />
+              {/* the only allowed break is after "Module 1:", never inside the module name */}
+              <div className="journey-sub">
+                {t('Module {n}', { n: idx + 1 })}: <span className="journey-modname">{current.label}</span>
+                {edge && <span className="journey-count"> · {done} / {total}</span>}
+              </div>
+              {!edge && track}
+            </div>
           </div>
-        </div>
 
-        <div className="journey-progress" title={t('{done} of {total} activities', { done, total })}>
-          <div className="journey-track"><div className="journey-fill" style={{ width: `${current.progress * 100}%` }} /></div>
-          <b>{done} / {total}</b>
-        </div>
+          {/* the six modules, still readable */}
+          <div className="luna-bar-mods">
+            {modules.map((m, mi) => {
+              const cur = m.status === 'in_progress'
+              return (
+                <button key={m.id} className={`luna-mod${cur ? ' on' : ''}`} onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
+                  aria-current={cur ? 'step' : undefined}>
+                  <ModuleBadge id={m.id} size={52} dim={m.status === 'not_started'} />
+                  <span className="luna-mod-label" style={cur ? undefined : { color: m.status === 'not_started' ? '#8fb3c8' : 'var(--scene-sky)' }}>
+                    {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
 
-        {/* the six modules, still readable */}
-        <div className="luna-bar-mods">
-          {modules.map((m, mi) => {
-            const cur = m.status === 'in_progress'
-            return (
-              <button key={m.id} className={`luna-mod${cur ? ' on' : ''}`} onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
-                aria-current={cur ? 'step' : undefined}>
-                <ModuleBadge id={m.id} size={52} dim={m.status === 'not_started'} />
-                <span className="luna-mod-label" style={cur ? undefined : { color: m.status === 'not_started' ? '#8fb3c8' : 'var(--scene-sky)' }}>
-                  {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
-                </span>
-              </button>
-            )
-          })}
+          <span className="journey-divider" aria-hidden />
+          <button className="journey-btn" onClick={onLuna}>
+            {t('Go to my path')} <span aria-hidden>→</span>
+          </button>
         </div>
-
-        <span className="journey-divider" aria-hidden />
-        <button className="journey-btn" onClick={onLuna}>
-          {t('Go to my path')} <span aria-hidden>→</span>
-        </button>
+        {edge && (
+          <div className="journey-edge" title={t('{done} of {total} activities', { done, total })} aria-hidden>
+            <div style={{ width: `${current.progress * 100}%` }} />
+          </div>
+        )}
       </div>
     </div>
   )

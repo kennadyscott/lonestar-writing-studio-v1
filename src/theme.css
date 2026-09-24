@@ -336,6 +336,12 @@ a { color: var(--link); }
 .qw-art { height: 150px; flex-shrink: 0; background-position: center 48%; background-size: cover; background-repeat: no-repeat; position: relative; }
 .qw-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, #2c3b8f); }
 .qw-body { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.qw-label { align-self: center; display: inline-flex; align-items: center; gap: 7px; padding: 6px 16px; border-radius: 999px;
+  font-size: 13px; font-weight: 800; letter-spacing: 1.8px; text-transform: uppercase; color: #ffe08a;
+  background: rgba(245,197,66,.16); border: 1.5px solid rgba(245,197,66,.7); box-shadow: 0 0 14px rgba(245,180,0,.3);
+  margin-top: -14px; position: relative; z-index: 1; }
+.qw-prompt { text-align: center; }
+.qw-prompt > div { text-wrap: balance; }
 @media (max-width: 1120px) and (min-width: 700px) {
   .qw-block { flex-direction: row; }
   .qw-art { height: auto; width: 38%; min-height: 230px; }

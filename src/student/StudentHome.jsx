@@ -397,23 +397,19 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
   const pick = todaysQuickPrompt(state)
   const done = !!completedQuickWrite(state, me.id, pick)
   const streak = writingStreak(state.growthSummary)
-  const minutes = Math.max(1, Math.round((state.settings?.quickWriteSeconds ?? 180) / 60))
   return (
     <div className="qw-block">
       {/* the laptop scene, cropped to its middle so the baked-in labels fall outside */}
       <div aria-hidden className="qw-art" style={{ backgroundImage: `url(${BASE}qw-hero.jpg)` }} />
       <div className="qw-body">
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11.5, fontWeight: 800, letterSpacing: 1.6, textTransform: 'uppercase', color: '#cfe0ff' }}>
-          <span aria-hidden>⚡</span>{t('Quick Write')}
-          <span style={{ color: '#7fa6ff', fontSize: 9 }}>●</span>
-          <span>{t('About {n} min', { n: minutes })}</span>
-        </div>
-        <div>
+        {/* the label, as a badge: it is the one thing that says what this block is */}
+        <div className="qw-label"><span aria-hidden>⚡</span>{t('Quick Write')}</div>
+        <div className="qw-prompt">
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: '#9fb6e8', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>
           <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
           <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700 }}>
             🔥 {t('{n} day streak', { n: streak.days })}
           </span>
@@ -421,7 +417,7 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
             🪙 +10 {t('coins')}
           </span>
         </div>
-        <div style={{ fontSize: 12.5, color: '#c9d8f4', lineHeight: 1.4 }}>
+        <div style={{ fontSize: 12.5, color: '#c9d8f4', lineHeight: 1.4, textAlign: 'center', textWrap: 'balance' }}>
           {done ? t('Done for today. A new prompt comes tomorrow.') : <Glossed text={say('Quick writes are about showing up — words over perfection.')} />}
         </div>
         <span style={{ flex: 1 }} />

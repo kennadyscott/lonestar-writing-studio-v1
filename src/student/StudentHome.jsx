@@ -344,12 +344,12 @@ function BigTask({ icon, title, sub, grad, art, onClick, busy }) {
       style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, minHeight: 118, padding: '18px 22px 18px 198px', textAlign: 'left',
         display: 'flex', alignItems: 'center', gap: 16, background: `linear-gradient(120deg,${c1},${c2})`,
         border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 10px 26px rgba(20,15,70,.32)', color: '#fff', cursor: 'pointer' }}>
-      <span aria-hidden style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 195,
+      <span aria-hidden className="big-task-art" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 195,
         background: `linear-gradient(90deg, transparent 55%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
       <span aria-hidden style={{ position: 'absolute', top: 12, right: 22, color: 'rgba(255,255,255,.65)', fontSize: 12 }}>✦</span>
       <span aria-hidden style={{ position: 'absolute', bottom: 13, right: 48, color: 'rgba(255,255,255,.4)', fontSize: 9 }}>✦</span>
       <span aria-hidden style={{ position: 'absolute', top: 22, right: 80, color: 'rgba(255,255,255,.5)', fontSize: 8 }}>✦</span>
-      <span aria-hidden style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 27,
+      <span aria-hidden className="big-task-icon" style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 27,
         background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
       <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
         <span style={{ display: 'block', fontSize: 20, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)' }}>{title}</span>
@@ -958,9 +958,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
-        <div className="seg" style={{ position: 'relative', zIndex: 2 }}>
+        <div className="seg nav-tabs" role="tablist" aria-label={t('Dashboard sections')} style={{ position: 'relative', zIndex: 2 }}>
           {TABS.map(([k, label]) => (
-            <button key={k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
+            <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
               {t(label)}
             </button>
           ))}

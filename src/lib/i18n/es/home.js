@@ -149,4 +149,5 @@ export const home = {
   'Done for today. A new prompt comes tomorrow.': 'Listo por hoy. Mañana llega una instrucción nueva.',
   '✓ See what I wrote →': '✓ Ver lo que escribí →',
   'Start writing →': 'Empezar a escribir →',
+  'Dashboard sections': 'Secciones del panel',
 }

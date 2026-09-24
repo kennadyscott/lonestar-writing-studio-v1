@@ -183,6 +183,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .seg button { padding: 8px 16px; border-radius: 10px; font-size: 13.5px; font-weight: 600; color: var(--muted); letter-spacing: -.01em; }
 .seg button:hover { color: var(--ink); }
 .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(2,56,77,.12); }
+/* The dashboard's main tabs: a solid white track with a lake-blue pill on the
+   active tab, so where you are is obvious at a glance. The Active/Completed
+   switch inside the assignments card keeps the quieter .seg look. */
+.seg.nav-tabs { background: #fff; padding: 4px; gap: 4px; border-radius: 14px;
+  border: 1px solid #cfe3ee; box-shadow: 0 4px 14px rgba(13,47,85,.12); }
+.seg.nav-tabs button { padding: 9px 20px; border-radius: 10px; font-size: 14.5px; font-weight: 700; color: #2c5f7c; }
+.seg.nav-tabs button:hover { background: #e8f4fa; color: #1b4f6b; }
+.seg.nav-tabs button.on { background: linear-gradient(120deg, #3a9fca, #2a7fa8); color: #fff;
+  box-shadow: 0 3px 10px rgba(42,127,168,.35); }
+.seg.nav-tabs button:focus-visible { outline: 2px solid #2a7fa8; outline-offset: 2px; }
 
 .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 999px; }
 .pill.blue { background: #e5f1fb; color: var(--ecr); }
@@ -338,6 +348,14 @@ a { color: var(--link); }
 /* ---- Practice tab ---- */
 .practice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 760px) { .practice-grid { grid-template-columns: 1fr; } }
+/* On a phone the Practice tiles give the words the room: a narrower picture
+   and no icon disc, so "The Proof Room" stays on one line. The tile's inline
+   layout sets the desktop sizes, hence !important. */
+@media (max-width: 560px) {
+  .practice-grid .big-task { padding-left: 128px !important; min-height: 104px !important; }
+  .practice-grid .big-task-art { width: 124px !important; }
+  .practice-grid .big-task-icon { display: none !important; }
+}
 
 /* The Home Quick Write block. Tall in the side column; sideways when
    the home grid drops to one column, so it never becomes a wide empty strip. */

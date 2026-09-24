@@ -61,13 +61,22 @@ export function DemoTools({ onResetDemo, onPublisher, settings, onSettings }) {
   // designation — a student never picks them.
   const pick = (patch) => onSettings && onSettings(patch)
 
-  // The Language Bridge picker is hidden from the demo for now (2026-09-22):
-  // the whole product is built and deployed, but the CEO is about to explore
-  // the site and this is one more thing to explain. Add ?bridge=1 to the URL
-  // to bring the picker back. Nothing else about the feature is touched.
-  const showBridge = (() => {
-    try { return new URLSearchParams(window.location.search).has('bridge') } catch { return false }
+  // By default the only demo control on screen is Reset demo data (2026-09-24):
+  // the full panel sat over the page and got in the way. Add ?tools=1 to the
+  // URL for the whole panel back: interface language, the Language Bridge
+  // picker and the Publisher console. ?bridge=1 still works for the same thing.
+  const showTools = (() => {
+    try { const q = new URLSearchParams(window.location.search); return q.has('tools') || q.has('bridge') } catch { return false }
   })()
+  const showBridge = showTools
+
+  if (!showTools) {
+    return onResetDemo ? (
+      <button className="demo-reset" onClick={onResetDemo} title={t('Reset demo data')}>
+        ↺ {t('Reset demo data')}
+      </button>
+    ) : null
+  }
 
   return (
     <div className="rolepick" style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 210 }}>

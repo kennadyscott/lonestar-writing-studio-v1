@@ -799,9 +799,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const setHomeTab = (v) => { setHomeTabState(v); try { sessionStorage.setItem('lscr.homeTab', v) } catch { /* fine */ } }
   const tab = ['home', 'practice', 'data'].includes(homeTab) ? homeTab : 'home'
   const TABS = [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']]
-  // Temporary A/B for the Practice look: A = light cards, B = calmer dark tiles.
-  const [pracStyle, setPracStyleState] = useState(() => { try { return localStorage.getItem('lscr.pracStyle') === 'B' ? 'B' : 'A' } catch { return 'A' } })
-  const setPracStyle = (v) => { setPracStyleState(v); try { localStorage.setItem('lscr.pracStyle', v) } catch { /* fine */ } }
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
   const [lastReveal, setLastReveal] = useState(null)
@@ -936,14 +933,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
 
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
-        <div className={`practice-view style-${pracStyle.toLowerCase()}`} style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          {/* Temporary: compare two calmer Practice looks (2026-09-24). */}
-          <div className="style-pick" role="group" aria-label={t('Practice style')}>
-            <span className="lbl">{t('Style')}</span>
-            {['A', 'B'].map((v) => (
-              <button key={v} className={pracStyle === v ? 'on' : ''} aria-pressed={pracStyle === v} onClick={() => setPracStyle(v)}>{v}</button>
-            ))}
-          </div>
+        <div className="practice-view" style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div className="practice-grid">
             <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} bg="prac-proof.jpg" tint="#0b2a44" busy={busy} onClick={() => setProofRoom(true)} />
             <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />

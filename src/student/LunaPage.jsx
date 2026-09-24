@@ -12,28 +12,30 @@ import { Directions, Glossed, useSay } from './Scaffold.jsx'
  * Lesson data is prototype content until the decks are converted.
  */
 
-// Backdrop is the dashboard's: canvas colour + bg-enchanted.jpg (enchanted forest) at 22%.
+// Backdrop: canvas colour + bg-nook.jpg (her enchanted-forest clearing) at 22%.
 
 const BASE = import.meta.env.BASE_URL || '/'
 const NAVY = '#0d2f55'
 const GLASS = 'rgba(9, 32, 68, .82)'
+const SERIF = "Georgia, 'Times New Roman', serif" // storybook titles, per her Nook mockup
 const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .22)'
 
 
 
 // Module 1 activity path (prototype data — mirrors the live product's lessons).
-// Art panels are cropped from the Luna V2 lesson-card renders (public/lessons/).
+// Art panels are her enchanted-forest lesson paintings (public/lessons/f1-f6.jpg).
 // Titles and blurbs stay English here (module scope, no hook) — every render
 // site runs them through t(); the Spanish lives in i18n/es/luna.js.
 const M1_ACTIVITIES = [
-  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: 'l1' },
-  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: 'l2' },
-  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: 'l3' },
-  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: 'l4' },
-  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'l5' },
-  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'l6', final: true },
+  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: 'f1' },
+  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: 'f2' },
+  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: 'f3' },
+  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: 'f4' },
+  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'f5' },
+  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'f6', final: true },
 ]
-const LESSON_ART = (key) => `${BASE}lessons/${key}.webp`
+// f1-f6: her enchanted-forest lesson paintings (2026-09-24). l1-l6.webp are the old space set.
+const LESSON_ART = (key) => `${BASE}lessons/${key}.jpg`
 const GOLD_FRAME = '#e9b93a'
 
 const MISSION_BLURB = {
@@ -92,7 +94,7 @@ function ActivityCard({ a, onOpen }) {
         boxShadow: frame, opacity: locked && !a.final ? .72 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
       {/* art panel */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '720 / 246', background: '#0d2f55', overflow: 'hidden', borderRadius: '18px 18px 0 0' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '1916 / 821' /* the paintings' own shape: nothing is cropped */, background: '#0d2f55', overflow: 'hidden', borderRadius: '18px 18px 0 0' }}>
         <img src={LESSON_ART(a.art)} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: locked ? 'saturate(.7) brightness(.85)' : 'none' }} />
         {locked && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,.85)', display: 'grid', placeItems: 'center', fontSize: 12 }}>🔒</span>}
         <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: GOLD_FRAME, opacity: .9 }} />
@@ -105,7 +107,7 @@ function ActivityCard({ a, onOpen }) {
             RACE, Module — so they are tappable. The whole card is a click
             target, so a tap on a glossed word must not also open the lesson;
             with no level set there is no button here and nothing changes. */}
-        <div style={{ fontWeight: 800, fontSize: 15.5, lineHeight: 1.15, color: NAVY, letterSpacing: '-.01em' }}
+        <div style={{ fontFamily: SERIF, fontWeight: 700, fontSize: 17, lineHeight: 1.15, color: NAVY }}
           onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}>
           <Glossed text={t(a.title)} />
         </div>
@@ -130,14 +132,15 @@ function ActivityCard({ a, onOpen }) {
 
 /* ---------------- journey band ---------------- */
 
-const BAND = { background: 'rgba(255,255,255,.9)', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1px solid var(--gold-line)', borderRadius: 16, boxShadow: 'var(--shadow)' }
+const BAND = { background: 'linear-gradient(180deg, rgba(11,49,80,.94), rgba(7,38,64,.94))', backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)', border: '1.5px solid rgba(92,192,230,.55)', borderRadius: 16,
+  boxShadow: 'inset 0 0 22px rgba(92,192,230,.12), 0 0 14px rgba(92,192,230,.14), 0 6px 20px rgba(1,23,45,.25)' }
 
 function BandHead({ modules, right }) {
   const t = useT()
   return (
     <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: 5 }}>
-      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.1, color: 'var(--link)' }}>{t('YOUR WRITING JOURNEY')}</div>
-      <div style={{ fontSize: 11, fontWeight: 700, color: '#5c7285' }}>{right || <>{t('{n} Modules · A Brighter You', { n: modules.length })} <span style={{ color: '#f5b400' }}>✦</span></>}</div>
+      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.6, color: 'var(--scene-sky)' }}>{t('YOUR WRITING JOURNEY')}</div>
+      <div style={{ fontSize: 11, fontWeight: 700, color: '#bcd6e6' }}>{right || <>{t('{n} Modules · A Brighter You', { n: modules.length })} <span style={{ color: '#f5b400' }}>✦</span></>}</div>
     </div>
   )
 }
@@ -156,14 +159,14 @@ function JourneyAll({ modules, currentId }) {
           return (
             <React.Fragment key={m.id}>
               {i > 0 && <div className="constellation-rule" style={{ flex: '0 0 auto', width: 22, marginTop: 15, display: 'flex', alignItems: 'center', gap: 3 }}><i /><span /></div>}
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', background: cur ? '#eaf6fd' : 'transparent', borderRadius: 10, padding: '3px 6px' }}>
-                <div style={{ position: 'relative', width: 32, height: 32, borderRadius: '50%', display: 'grid', placeItems: 'center', boxShadow: cur ? '0 0 0 2.5px #f5b400, 0 0 16px rgba(245,180,0,.5)' : 'none', background: cur ? '#fff' : 'transparent' }}>
+              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', background: cur ? 'rgba(245,197,66,.14)' : 'transparent', border: cur ? '1px solid rgba(240,180,41,.55)' : '1px solid transparent', borderRadius: 10, padding: '3px 6px' }}>
+                <div style={{ position: 'relative', width: 32, height: 32, borderRadius: '50%', display: 'grid', placeItems: 'center', boxShadow: cur ? '0 0 0 2.5px #f5b400, 0 0 16px rgba(245,180,0,.5)' : '0 0 0 1px rgba(92,192,230,.35)', background: cur ? 'rgba(4,18,40,.7)' : 'rgba(4,18,40,.45)' }}>
                   <ModuleBadge id={m.id} size={cur ? 27 : 23} dim={locked} />
                   {done && <span style={{ position: 'absolute', top: -3, right: -4, width: 14, height: 14, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 8.5, fontWeight: 800 }}>✓</span>}
                   {locked && <span style={{ position: 'absolute', top: -5, right: -5, fontSize: 10 }}>🔒</span>}
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.2, color: cur ? NAVY : locked ? '#8aa0b2' : '#2f5573', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
-                  <span style={{ color: cur ? '#0a7dba' : 'inherit' }}>M{i + 1}</span> · {t(m.label)}
+                <div style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.2, color: cur ? '#fff' : locked ? '#8fb3c8' : '#cfe7f3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+                  <span style={{ color: cur ? '#f5c542' : 'inherit' }}>M{i + 1}</span> · {t(m.label)}
                 </div>
               </div>
             </React.Fragment>
@@ -205,9 +208,9 @@ function ProgressRing({ pct }) {
 // Rows of three. Between cards, the homepage's gold constellation rule
 // carries the eye from one lesson to the next; between rows a full-width
 // rule does the same, so the order reads 1 → 2 → 3, then 4 → 5 → 6.
-function Connector({ style }) {
+function Connector({ style, className = '' }) {
   return (
-    <div className="constellation-rule" aria-hidden style={{ display: 'flex', alignItems: 'center', gap: 4, ...style }}>
+    <div className={`constellation-rule ${className}`} aria-hidden style={{ display: 'flex', alignItems: 'center', gap: 4, ...style }}>
       <i /><span />
     </div>
   )
@@ -221,16 +224,16 @@ function LessonGrid({ acts, onOpen }) {
       {rows.map((row, r) => (
         <React.Fragment key={r}>
           {r > 0 && <Connector style={{ margin: '2px 6px' }} />}
-          <div style={{ display: 'flex', alignItems: 'stretch', gap: 0, padding: '4px 4px' }}>
+          <div className="nook-row" style={{ display: 'flex', alignItems: 'stretch', gap: 0, padding: '4px 4px' }}>
             {row.map((a, i) => (
               <React.Fragment key={a.n}>
-                {i > 0 && <Connector style={{ width: 34, flexShrink: 0, alignSelf: 'center', margin: '0 2px' }} />}
+                {i > 0 && <Connector className="nook-hconn" style={{ width: 34, flexShrink: 0, alignSelf: 'center', margin: '0 2px' }} />}
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <ActivityCard a={a} onOpen={onOpen} />
                 </div>
               </React.Fragment>
             ))}
-            {row.length < 3 && Array.from({ length: 3 - row.length }).map((_, k) => <div key={`pad${k}`} style={{ flex: 1, marginLeft: 34 }} />)}
+            {row.length < 3 && Array.from({ length: 3 - row.length }).map((_, k) => <div key={`pad${k}`} className="nook-pad" style={{ flex: 1, marginLeft: 34 }} />)}
           </div>
         </React.Fragment>
       ))}
@@ -264,17 +267,17 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
       background: 'var(--canvas)' }}>
-      {/* same backdrop as the dashboard */}
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
+      {/* her forest-clearing painting, kept soft (22%) so the white panels stay calm */}
+      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-nook.jpg) center / cover no-repeat`, opacity: .22 }} />
 
       <div style={{ position: 'relative', maxWidth: 1500, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
         {/* header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12 }}>
-          <img src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
+        <div className="nook-head" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
+          <img className="nook-luna" src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
           <img src={BRAND.lunaWordmark} alt={t("Luna's Writing Nook")} style={{ height: 'clamp(54px, 5vw, 74px)', width: 'auto', display: 'block', marginTop: 2 }} />
           <div style={{ flex: 1 }} />
           {onBack && (
-            <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)' }}>
+            <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)', whiteSpace: 'nowrap' }}>
               {t('← Back to Previous Page')}
             </button>
           )}
@@ -282,7 +285,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
 
         <JourneyAll modules={modules} currentId={current.id} />
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 270px', gap: 16, alignItems: 'start' }}>
+        <div className="nook-main" style={{ display: 'grid', gap: 16, alignItems: 'start' }}>
           {/* ===== main column ===== */}
           <div>
             {/* mission panel: header + lessons together */}
@@ -290,7 +293,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 14, marginBottom: 18, borderBottom: '1px solid #e6eef3' }}>
                 <div style={{ flex: 1, minWidth: 260 }}>
                   <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1.1, color: 'var(--link)', marginBottom: 4 }}>{t('MISSION {n}', { n: String(currentIdx + 1).padStart(2, '0') })}</div>
-                  <div style={{ fontSize: 'clamp(19px, 1.7vw, 24px)', fontWeight: 800, color: NAVY, lineHeight: 1.15 }}>{t('Master the {label}', { label: t(current.label) })}</div>
+                  <div style={{ fontFamily: SERIF, fontSize: 'clamp(22px, 2vw, 30px)', fontWeight: 700, color: NAVY, lineHeight: 1.15 }}>{t('Master the {label}', { label: t(current.label) })}</div>
                   {/* The mission blurb is the page's directions — the one Listen on this page. */}
                   <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}><Directions text={MISSION_BLURB[current.id]} /></div>
                 </div>

@@ -462,3 +462,12 @@ a { color: var(--link); }
   .daily-banner { padding: 24px 20px; background: linear-gradient(0deg, rgba(10,14,46,.82), rgba(10,14,46,.55)), var(--daily-img) left center / cover no-repeat, #151040; }
   .daily-cta { width: 100%; }
 }
+
+/* ---- Luna's Writing Nook: layout that holds up on smaller screens ---- */
+.nook-main { grid-template-columns: minmax(0, 1fr) 270px; }
+@media (max-width: 980px) { .nook-main { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) {
+  .nook-row { flex-direction: column; gap: 14px; }
+  .nook-hconn, .nook-pad { display: none !important; }
+  .nook-luna { height: 56px !important; }
+}

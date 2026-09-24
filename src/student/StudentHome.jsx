@@ -207,7 +207,7 @@ function UpNextCard({ row, busy, begin, onAll }) {
           </div>
           <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginTop: 10, flexWrap: 'wrap' }}>
             <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
-            <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>{row.a.teacher.name}</span>
+            <span style={{ fontSize: 13, color: 'var(--muted)', fontWeight: 600 }}>{row.a.teacher.display || row.a.teacher.name}</span>
             <DueChip dueDate={row.a.dueDate} status={row.status} />
           </div>
         </div>
@@ -283,10 +283,7 @@ function GoalBanner({ me, classFocus }) {
         {me.goal ? (
           <div style={{ minWidth: 0 }}>
             <div className="eyebrow">{t('My goal')}</div>
-            <div style={{ fontSize: 15.5, fontWeight: 800 }}>{me.goal.text}</div>
-            {me.goal.trait && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-              <Glossed text={say('Trait: {trait} · your coach keeps this in mind when you confer', { trait: t(TRAIT_LABELS[me.goal.trait]) })} />
-            </div>}
+            <div className="goal-text">{me.goal.text}</div>
           </div>
         ) : (
           <div style={{ minWidth: 0 }}>
@@ -305,12 +302,7 @@ function GoalBanner({ me, classFocus }) {
         <div style={{ minWidth: 0 }}>
           <div className="eyebrow" style={{ color: CYAN_TEXT }}>{t('Class focus')}</div>
           {classFocus ? (
-            <>
-              <div style={{ fontSize: 15.5, fontWeight: 800 }}>{classFocus.text}</div>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>
-                {classFocus.note ? `${classFocus.note} · ` : ''}{t('what the whole class is working on')}{classFocus.setBy ? t(' — set by {name}', { name: classFocus.setBy }) : ''}
-              </div>
-            </>
+            <div className="goal-text">{classFocus.text}</div>
           ) : (
             <div style={{ fontSize: 15, fontWeight: 700 }}>{say('Your class focus shows up here when your teacher sets one.')}</div>
           )}
@@ -726,10 +718,8 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
                 <div className="assign-meta">
                   <FormatBadge format={row.a.format} />
                   <span className="pill" style={{ background: s.c, color: s.t }}>{row.a.type}</span>
-                  <span style={{ fontSize: 12, color: 'var(--muted)', display: 'inline-flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-                    <span style={{ width: 21, height: 21, borderRadius: '50%', background: '#e2eef5', color: 'var(--teal)', display: 'grid', placeItems: 'center', fontSize: 9.5, fontWeight: 800 }}>{row.a.teacher.initials}</span>
-                    {row.a.teacher.name}
-                  </span>
+                  {/* just the teacher's name as a student says it: no initials chip */}
+                  <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{row.a.teacher.display || row.a.teacher.name}</span>
                 </div>
               </div>
               <div className="assign-actions">

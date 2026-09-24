@@ -2,10 +2,12 @@
 // Kayla (the "me" student) has a spread of assignments in different states so the
 // sort/filter controls on My Writing are demonstrable.
 
+// `display` is how a student sees the teacher (title + last name). Demo data:
+// change the title here if a teacher goes by Mrs., Ms. or another name.
 const T = {
-  dirk: { name: 'Dirk Nowitski', initials: 'DN' },
-  jeremy: { name: 'Jeremy Verret', initials: 'JV' },
-  dak: { name: 'Dak Prescott', initials: 'DP' },
+  dirk: { name: 'Dirk Nowitski', initials: 'DN', display: 'Mr. Nowitski' },
+  jeremy: { name: 'Jeremy Verret', initials: 'JV', display: 'Mr. Verret' },
+  dak: { name: 'Dak Prescott', initials: 'DP', display: 'Mr. Prescott' },
 }
 
 export function seedState() {

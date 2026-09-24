@@ -64,6 +64,11 @@ function loadState() {
   for (const s of fresh.students) {
     if (!saved.students.some((x) => x.id === s.id)) saved.students.push(s)
   }
+  // Teacher details come from the seed, so a renamed teacher shows up without a reset.
+  saved.assignments = saved.assignments.map((a) => {
+    const base = fresh.assignments.find((x) => x.id === a.id)
+    return base ? { ...a, teacher: base.teacher } : a
+  })
   return saved
 }
 

@@ -496,3 +496,7 @@ a { color: var(--link); }
   .nook-hconn, .nook-pad { display: none !important; }
   .nook-luna { height: 56px !important; }
 }
+
+/* Home goal banner: the goal and the class focus are the headline, one size, no sub-lines. */
+.goal-text { font-size: 20px; font-weight: 800; line-height: 1.25; margin-top: 2px; text-wrap: balance; }
+@media (max-width: 720px) { .goal-text { font-size: 17px; } }

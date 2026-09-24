@@ -12,6 +12,7 @@ import LunaPage from './student/LunaPage.jsx'
 import LessonPage from './student/LessonPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
+import ProofRoom from './student/ProofRoom.jsx'
 import FeedbackReview from './student/FeedbackReview.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
 import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
@@ -78,7 +79,7 @@ export default function App() {
       ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
       : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
   } else if (view === 'home') {
-    body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onChange={refresh} />
+    body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onProofRoom={() => setView('proof')} onChange={refresh} />
   } else if (view === 'luna') {
     body = <LunaPage state={state} me={me} onBack={goHome} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />
   } else if (view === 'lesson' && lesson) {
@@ -92,6 +93,8 @@ export default function App() {
         <ShareWallTab state={state} me={me} onChange={refresh} />
       </div>
     )
+  } else if (view === 'proof') {
+    body = <ProofRoom grade={me.gradeLevel ?? 5} onBack={goHome} onChange={refresh} />
   } else if (view === 'bank') {
     body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onWall={() => setView('wall')} onChange={refresh} />
   } else {

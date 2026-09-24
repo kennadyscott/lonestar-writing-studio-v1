@@ -3,7 +3,6 @@ import { api, TRAIT_LABELS } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
 import TypingGame from './TypingGame.jsx'
-import ProofRoom from './ProofRoom.jsx'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 import { DataGoalsTab, ShareWallTab, ReactionBar } from './GrowthPage.jsx'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
@@ -785,7 +784,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
   )
 }
 
-export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onChange }) {
+export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onProofRoom, onChange }) {
   const t = useT()
   const say = useSay()
   // The tab survives a trip away and back (Writing Bank, Free Write, the Daily
@@ -818,7 +817,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     setGridBusy(true)
     try { const r = await api.fluencyFinish(payload); setLastReveal(r?.passed ? game.category : null); await onChange?.() } catch {} finally { setGridBusy(false) }
   }
-  const [proofRoom, setProofRoom] = useState(false)
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
     return state.assignments
@@ -892,7 +890,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           </div>
         </div>
       )}
-      {proofRoom && <ProofRoom grade={me.gradeLevel ?? 5} onClose={() => setProofRoom(false)} onChange={onChange} />}
       {gamePicker && (
         <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal}
           onPlay={(tile) => { const pick = tile.options[Math.floor(Math.random() * tile.options.length)]; setLastReveal(null); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
@@ -933,7 +930,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {tab === 'practice' && (
         <div className="practice-view" style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div className="practice-grid">
-            <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} bg="prac-proof.jpg" tint="#0b2a44" busy={busy} onClick={() => setProofRoom(true)} />
+            <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} bg="prac-proof.jpg" tint="#0b2a44" busy={busy} onClick={onProofRoom} />
             <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />
             <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />
             <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} bg="prac-bank.jpg" tint="#4a3010" onClick={onBank} />

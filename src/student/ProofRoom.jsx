@@ -16,6 +16,10 @@ import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.js
  * full-topic proof.
  */
 
+// Inside the student's Proof Room page every screen renders in place; the
+// publisher's previews still open as a popup over the console.
+const PageMode = React.createContext(false)
+
 const NAVY = '#16386b'
 const CYAN = '#0f97c2'
 const GOLD = '#f0b429'
@@ -220,13 +224,34 @@ export function PathPreview({ topic: raw, onClose }) {
   return <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={onClose} onClose={onClose} />
 }
 
-export default function ProofRoom({ grade = 5, onClose, onChange }) {
+// What a student has done on one topic, read from the progress map.
+function topicStatus(tp, progress) {
+  const core = tp.core || []
+  const cleared = core.filter((w) => (progress[w.id] || {}).passed).length
+  const ids = [...core.map((w) => w.id), tp.full?.id, ...Object.values(tp.skillBuilders || {}).map((w) => w.id)].filter(Boolean)
+  const started = ids.some((id) => (progress[id] || {}).best > 0)
+  const finished = cleared === core.length && !!(progress[tp.full?.id] || {}).passed
+  const next = finished ? null : core.find((w) => !(progress[w.id] || {}).passed) || tp.full
+  return { cleared, total: core.length, started, finished, next }
+}
+
+/*
+ * The Proof Room, as its own page (2026-09-24: "open up to a new page, not just
+ * a popup — we will end up with a lot of topics and learning paths"). The
+ * landing is a shelf of topics: one "pick up where you left off" card when a
+ * path is under way, then every topic as a card. Search and strand filters come
+ * in on their own once there are enough topics to need them. Opening a topic
+ * walks its path on this same page, and a worksheet runs here too.
+ */
+export default function ProofRoom({ grade = 5, onBack, onChange }) {
   const t = useT()
   const say = useSay()
   const [topicId, setTopicId] = useState(null)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
+  const [query, setQuery] = useState('')
+  const [strand, setStrand] = useState('all')
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
@@ -237,10 +262,6 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
       .catch(() => api.proofContent().then((r) => live && setRaw(r.topics || [])).catch(() => live && setRaw([])))
     return () => { live = false }
   }, [])
-  const topics = useMemo(() => (raw || []).map((tp) => ({
-    id: tp.id, title: tp.title, grade: tp.grade, standards: tp.standards, blurb: tp.blurb, icon: tp.icon,
-    stops: (tp.core || []).length + 1,
-  })), [raw])
   const topic = useMemo(() => {
     if (!topicId || !raw) return null
     return prepareTopic(raw.find((tp) => tp.id === topicId))
@@ -249,6 +270,8 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
   useEffect(() => {
     try { setProgress(JSON.parse(localStorage.getItem('proofProgress') || '{}')) } catch { setProgress({}) }
   }, [])
+  // every screen change starts at the top of the page
+  useEffect(() => { window.scrollTo(0, 0) }, [topicId, running])
   function record(wsId, pct) {
     setProgress((p) => {
       const prev = p[wsId] || { best: 0, passed: false }
@@ -258,55 +281,129 @@ export default function ProofRoom({ grade = 5, onClose, onChange }) {
     })
   }
 
+  let body
   if (running) {
-    return <Worksheet ws={running} onQuit={() => setRunning(null)}
+    body = <Worksheet ws={running} onQuit={() => setRunning(null)}
       onDone={(pct) => { record(running.id, pct); onChange && onChange() }}
-      onClose={onClose} topic={topic} progress={progress} onNext={(ws) => setRunning(ws)} />
-  }
-  if (topic) {
-    return <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={onClose} />
-  }
+      onClose={() => setRunning(null)} topic={topic} progress={progress} onNext={(ws) => setRunning(ws)} />
+  } else if (topic) {
+    body = <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={() => setTopicId(null)} />
+  } else {
+    const topics = (raw || []).map((tp) => ({ tp, st: topicStatus(tp, progress) }))
+    const strands = Array.from(new Set(topics.map(({ tp }) => tp.domain).filter(Boolean)))
+    const q = query.trim().toLowerCase()
+    const shown = topics.filter(({ tp }) => (strand === 'all' || tp.domain === strand)
+      && (!q || [tp.title, tp.short, tp.blurb, ...(tp.core || []).map((w) => w.title)].join(' ').toLowerCase().includes(q)))
+    const resume = topics.find(({ st }) => st.started && !st.finished)
+    const skills = topics.reduce((n, { tp }) => n + (tp.core || []).length, 0)
+    body = (
+      <>
+        {/* hero: her Proof Room painting, words on the navy */}
+        <div className="proof-hero" style={{ '--proof-img': `url(${import.meta.env.BASE_URL || '/'}prac-proof.jpg)` }}>
+          <div className="proof-hero-words">
+            <div className="proof-kicker">{t('Practice')}</div>
+            <h1 className="proof-title">{t('The Proof Room')}</h1>
+            <div className="proof-tag"><Glossed text={say("Find what's broken. Make it right.")} /></div>
+            <div className="proof-dir"><ScaffoldDirections text="Pick a topic and walk its path. Clear each skill and the next one opens. The last stop proves the whole topic." /></div>
+            {raw && (
+              <div className="proof-stats">
+                <span>{t('{n} topics', { n: topics.length })}</span>
+                <span>{t('{n} skills', { n: skills })}</span>
+              </div>
+            )}
+          </div>
+        </div>
 
-  if (!raw) {
-    return <Shell onClose={onClose} sub={say('Bring writing in broken, take it out clean')}>
-      <div style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>
-    </Shell>
+        {!raw && <div className="card" style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>}
+
+        {/* one thing to do next, only once a path is under way */}
+        {resume && (
+          <div className="proof-resume">
+            <span className="proof-resume-icon" aria-hidden>{resume.tp.icon}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div className="proof-section-kicker">{t('Pick up where you left off')}</div>
+              <div className="proof-resume-title">{resume.tp.short || resume.tp.title}</div>
+              <div className="proof-resume-next">{t('Next stop: {title}', { title: resume.st.next?.title || '' })}</div>
+            </div>
+            <ProofBar st={resume.st} />
+            <button className="btn" onClick={() => setTopicId(resume.tp.id)}>{t('Keep going →')}</button>
+          </div>
+        )}
+
+        {raw && (
+          <div className="card proof-shelf">
+            <div className="proof-shelf-head">
+              <div>
+                <div className="proof-section-kicker">{t('Topics')}</div>
+                <div className="proof-shelf-title">{t('Choose a path')}</div>
+              </div>
+              {topics.length > 4 && (
+                <input className="proof-search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('Search topics and skills…')} aria-label={t('Search topics and skills…')} />
+              )}
+            </div>
+            {strands.length > 1 && (
+              <div className="proof-chips" role="group" aria-label={t('Writing strand')}>
+                {['all', ...strands].map((d) => (
+                  <button key={d} className={strand === d ? 'on' : ''} aria-pressed={strand === d} onClick={() => setStrand(d)}>{d === 'all' ? t('All') : t(d)}</button>
+                ))}
+              </div>
+            )}
+            <div className="proof-grid">
+              {shown.map(({ tp, st }) => <TopicCard key={tp.id} tp={tp} st={st} grade={grade} onOpen={() => setTopicId(tp.id)} />)}
+              {!shown.length && <div className="proof-empty">{t('No topics match that search.')}</div>}
+            </div>
+            <div className="proof-more">{t('More topics arrive as your teacher loads them.')}</div>
+          </div>
+        )}
+      </>
+    )
   }
 
   return (
-    <Shell onClose={onClose} sub={say('Bring writing in broken, take it out clean')}>
-      <div style={{ marginBottom: 14 }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: NAVY, lineHeight: 1.25 }}>
-          <Glossed text={say('Pick a topic and start the path.')} />
-        </div>
-        <p style={{ fontSize: 13, color: '#3f5f76', lineHeight: 1.5, margin: '5px 0 0' }}>
-          <ScaffoldDirections text="Work the skills one at a time. Clear each one and the next opens — the last stop proves the whole topic." />
-        </p>
+    <PageMode.Provider value={true}>
+      <div className="proof-page">
+        {onBack && <button className="backlink" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
+          {running ? t('← Back to the path') : topic ? t('← All topics') : t('← Back to Practice')}
+        </button>}
+        {body}
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {topics.map((tp) => {
-          const done = tp.stops // placeholder count for display
-          return (
-            <button key={tp.id} onClick={() => setTopicId(tp.id)}
-              style={{ textAlign: 'left', display: 'flex', alignItems: 'center', gap: 14, border: '1.5px solid var(--line)',
-                borderRadius: 16, padding: '15px 17px', background: '#fff', cursor: 'pointer' }}>
-              <span style={{ width: 46, height: 46, borderRadius: 13, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 22, background: '#eef6f9' }}>{tp.icon}</span>
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: 16, fontWeight: 800, color: NAVY }}>{tp.title}</span>
-                <span style={{ display: 'block', fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}>{tp.blurb}</span>
-                <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: .5, color: CYAN, marginTop: 6 }}>
-                  {joinStandards(tp.standards)} · {t('GRADE {n}', { n: tp.grade })} · {t('{n} STOPS', { n: done })}
-                </span>
-              </span>
-              <span className="btn" style={{ flexShrink: 0, padding: '9px 17px', fontSize: 13 }}>{t('Open path →')}</span>
-            </button>
-          )
-        })}
-        <div style={{ border: '1.5px dashed var(--line)', borderRadius: 16, padding: '15px 17px', fontSize: 13, color: 'var(--muted)', textAlign: 'center' }}>
-          {t('More topics arrive as your teacher loads them.')}
-        </div>
-      </div>
-    </Shell>
+    </PageMode.Provider>
+  )
+}
+
+function ProofBar({ st }) {
+  const t = useT()
+  const pct = st.total ? Math.round((st.cleared / st.total) * 100) : 0
+  return (
+    <div className="proof-bar" title={t('{n} of {total} skills cleared', { n: st.cleared, total: st.total })}>
+      <div className="proof-bar-track"><div style={{ width: `${pct}%` }} /></div>
+      <b>{st.cleared} / {st.total}</b>
+    </div>
+  )
+}
+
+function TopicCard({ tp, st, onOpen }) {
+  const t = useT()
+  const core = tp.core || []
+  // The worksheet art belongs to its own passages, so a topic only shows a
+  // character when one of its own activities has one; otherwise its icon.
+  const coverId = core.flatMap((w) => w.activities || []).map((x) => x.art).find((id) => ART_SRC[id])
+  return (
+    <button className="proof-card" onClick={onOpen}>
+      <span className={`proof-card-art${coverId ? '' : ' icon-only'}`}>
+        <span className="proof-card-icon" aria-hidden>{tp.icon}</span>
+        {coverId && <img src={ART_SRC[coverId]} alt="" />}
+      </span>
+      <span className="proof-card-body">
+        <span className="proof-card-kicker">{tp.domain ? t(tp.domain) : t('Proof Room')} · {t('GRADE {n}', { n: tp.grade })}</span>
+        <span className="proof-card-title">{tp.short || tp.title}</span>
+        <span className="proof-card-skills">{core.map((w) => w.title).join(' · ')}</span>
+        <span className="proof-card-foot">
+          {st.finished ? <span className="pill green">{t('✓ Path complete')}</span> : <ProofBar st={st} />}
+          <span className="proof-card-go">{st.finished ? t('Review →') : st.started ? t('Keep going →') : t('Open path →')}</span>
+        </span>
+      </span>
+    </button>
   )
 }
 
@@ -1239,6 +1336,22 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
 
 function Shell({ children, onClose, sub, onBack }) {
   const t = useT()
+  const page = React.useContext(PageMode)
+  if (page) {
+    // On the page: same navy title strip, no overlay and no close button (the page's back link does that).
+    return (
+      <div className="card proof-panel">
+        <div className="proof-panel-head">
+          <span style={{ fontSize: 22 }}>🧾</span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <b style={{ fontSize: 17 }}>{t('The Proof Room')}</b>
+            <div style={{ fontSize: 12.5, color: '#a8dff5', fontWeight: 700 }}>{sub}</div>
+          </div>
+        </div>
+        <div className="proof-panel-body">{children}</div>
+      </div>
+    )
+  }
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 80, padding: 16 }} onClick={onClose}>
       <div className="card" style={{ width: 760, maxWidth: '96vw', maxHeight: '94vh', overflowY: 'auto', padding: 0 }} onClick={(e) => e.stopPropagation()}>

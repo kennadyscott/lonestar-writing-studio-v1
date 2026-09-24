@@ -365,8 +365,8 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
   const streak = writingStreak(state.growthSummary)
   return (
     <div className="qw-block">
-      {/* a crop of the woodland lake backdrop, so the block belongs to the same scene */}
-      <div aria-hidden className="qw-art" style={{ backgroundImage: `url(${BASE}bg-woodland.jpg)` }} />
+      {/* a girl writing under a tree by the lake: the same woodland world as the backdrop */}
+      <div aria-hidden className="qw-art" style={{ backgroundImage: `url(${BASE}qw-girl.jpg)` }} />
       <div className="qw-body">
         {/* the label, as a badge: it is the one thing that says what this block is */}
         <div className="qw-label"><span aria-hidden>⚡</span>{t('Quick Write')}</div>

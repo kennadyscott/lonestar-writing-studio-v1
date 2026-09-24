@@ -19,8 +19,10 @@ import { writingStreak } from '../lib/streak.js'
  * the practice tiles were; Practice holds the four tiles, the Share Wall and
  * the Daily Challenge. The choice is remembered per browser.
  */
-const LAYOUT_KEY = 'lscr.layout'
-const readLayout = () => { try { return localStorage.getItem(LAYOUT_KEY) === 'B' ? 'B' : 'A' } catch { return 'A' } }
+// B is the default since 2026-09-24. The key was renamed so a browser that
+// had saved A under the old default starts on B too.
+const LAYOUT_KEY = 'lscr.layout.v2'
+const readLayout = () => { try { return localStorage.getItem(LAYOUT_KEY) === 'A' ? 'A' : 'B' } catch { return 'B' } }
 const saveLayout = (v) => { try { localStorage.setItem(LAYOUT_KEY, v) } catch { /* private window: the toggle still works this visit */ } }
 
 const TODAY = new Date('2026-07-02T00:00:00')
@@ -999,7 +1001,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
         {/* Demo only: compare the two dashboard layouts. */}
         <div className="layout-pick" role="group" aria-label={t('Dashboard layout')}>
           <span className="lbl">{t('Layout')}</span>
-          {['A', 'B'].map((v) => (
+          {['B', 'A'].map((v) => (
             <button key={v} className={layout === v ? 'on' : ''} aria-pressed={layout === v} onClick={() => setLayout(v)}>{v}</button>
           ))}
         </div>

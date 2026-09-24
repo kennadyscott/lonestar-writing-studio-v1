@@ -63,15 +63,15 @@ function LunaNook({ modules, onLuna }) {
   const idx = modules.indexOf(current)
   const BASE = import.meta.env.BASE_URL || '/'
   return (
-    /* woodland: forest green over the sunlit right edge of the lake painting */
-    <div className="luna-bar lg" style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', border: '1.5px solid rgba(243,213,138,.55)', boxShadow: '0 8px 22px rgba(20,50,35,.26)',
-      background: `linear-gradient(90deg, rgba(28,67,52,.97) 0%, rgba(33,79,62,.92) 46%, rgba(40,96,74,.8) 74%, rgba(45,106,82,.58) 100%), url(${BASE}bg-woodland.jpg) right 40% / cover no-repeat` }}>
+    /* woodland scene in brand navy: navy over the sunlit right edge of the lake painting */
+    <div className="luna-bar lg" style={{ position: 'relative', borderRadius: 22, overflow: 'hidden', border: '1.5px solid rgba(243,213,138,.55)', boxShadow: '0 8px 22px rgba(1,23,45,.28)',
+      background: `linear-gradient(90deg, rgba(1,23,45,.96) 0%, rgba(2,44,64,.9) 46%, rgba(2,56,77,.78) 74%, rgba(3,72,98,.58) 100%), url(${BASE}bg-woodland.jpg) right 40% / cover no-repeat` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 26, padding: '24px 28px', flexWrap: 'wrap' }}>
 
         {/* who + where you are */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, flex: '1 1 340px', minWidth: 0 }}>
-          <span style={{ width: 68, height: 68, borderRadius: '50%', padding: 3, flexShrink: 0, background: 'conic-gradient(from 200deg, var(--wood-leaf), var(--wood-mint), var(--wood-leaf))', display: 'grid', placeItems: 'center' }}>
-            <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--wood-deep)', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
+          <span style={{ width: 68, height: 68, borderRadius: '50%', padding: 3, flexShrink: 0, background: 'conic-gradient(from 200deg, var(--scene-blue), var(--scene-sky), var(--scene-blue))', display: 'grid', placeItems: 'center' }}>
+            <span style={{ width: '100%', height: '100%', borderRadius: '50%', background: 'var(--scene-deep)', display: 'grid', placeItems: 'center', overflow: 'hidden' }}>
               <img src={BRAND.luna} alt="Luna" style={{ height: 48 }} />
             </span>
           </span>
@@ -79,8 +79,8 @@ function LunaNook({ modules, onLuna }) {
             <b style={{ fontSize: 21, color: '#fff' }}>{t("Luna's Writing Nook")}</b>
             {/* two real lines, so the module name never breaks mid-phrase */}
             <div style={{ marginTop: 3, lineHeight: 1.35 }}>
-              <div style={{ fontSize: 14, color: 'var(--wood-mint)', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
-              <div style={{ fontSize: 13, color: 'var(--wood-mist)', opacity: .8, fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
+              <div style={{ fontSize: 14, color: 'var(--scene-sky)', fontWeight: 700, textWrap: 'balance' }}>{t('Module {n}', { n: idx + 1 })}: {current.label}</div>
+              <div style={{ fontSize: 13, color: 'var(--scene-mist)', opacity: .8, fontWeight: 700 }}>{t('{done} of {total} activities', { done: 4, total: 6 })}</div>
             </div>
           </div>
         </div>
@@ -88,9 +88,9 @@ function LunaNook({ modules, onLuna }) {
         {/* progress */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: '1 1 150px', minWidth: 130, maxWidth: 300 }}>
           <div style={{ flex: 1, height: 12, background: 'rgba(255,255,255,.22)', borderRadius: 8 }}>
-            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg, var(--wood-leaf), var(--wood-mint))', borderRadius: 6 }} />
+            <div style={{ height: '100%', width: `${current.progress * 100}%`, background: 'linear-gradient(90deg, var(--scene-blue), var(--scene-sky))', borderRadius: 6 }} />
           </div>
-          <b style={{ fontSize: 16, color: 'var(--wood-mint)' }}>{Math.round(current.progress * 100)}%</b>
+          <b style={{ fontSize: 16, color: 'var(--scene-sky)' }}>{Math.round(current.progress * 100)}%</b>
         </div>
 
         {/* the six modules, still readable */}
@@ -101,7 +101,7 @@ function LunaNook({ modules, onLuna }) {
               <button key={m.id} className="luna-mod" onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
                 style={{ background: cur ? 'rgba(245,197,66,.16)' : 'transparent', border: cur ? '1.5px solid #f0b429' : '1.5px solid transparent' }}>
                 <ModuleBadge id={m.id} size={52} dim={m.status === 'not_started'} />
-                <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#9dbba8' : 'var(--wood-mint)' }}>
+                <span className="luna-mod-label" style={{ color: cur ? '#f5c542' : m.status === 'not_started' ? '#8fb3c8' : 'var(--scene-sky)' }}>
                   {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                 </span>
               </button>
@@ -110,8 +110,8 @@ function LunaNook({ modules, onLuna }) {
         </div>
 
         <button className="btn lg" onClick={onLuna} style={{ flexShrink: 0, whiteSpace: 'nowrap',
-          background: 'linear-gradient(120deg, var(--wood-leaf), var(--wood-forest))', border: '2px solid var(--wood-mint)',
-          boxShadow: '0 0 16px rgba(191,230,201,.35)' }}>
+          background: 'linear-gradient(120deg, var(--scene-blue), var(--scene-navy))', border: '2px solid var(--scene-sky)',
+          boxShadow: '0 0 16px rgba(168,223,245,.35)' }}>
           {t('Go to my path')}
         </button>
       </div>
@@ -374,7 +374,7 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
         {/* the label, as a badge: it is the one thing that says what this block is */}
         <div className="qw-label"><span aria-hidden>⚡</span>{t('Quick Write')}</div>
         <div className="qw-prompt">
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--wood-mint)', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>
+          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--scene-sky)', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>
           <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
           <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>
         </div>
@@ -387,13 +387,13 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
           </span>
         </div>
         {done && (
-          <div style={{ fontSize: 12.5, color: 'var(--wood-mist)', lineHeight: 1.4 }}>{t('Done for today. A new prompt comes tomorrow.')}</div>
+          <div style={{ fontSize: 12.5, color: 'var(--scene-mist)', lineHeight: 1.4 }}>{t('Done for today. A new prompt comes tomorrow.')}</div>
         )}
         <span style={{ flex: 1 }} />
         <button onClick={onQuickWrite} disabled={busy}
-          style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? 'var(--wood-deep)' : '#fff',
-            background: done ? '#eef7f0' : 'linear-gradient(120deg, var(--wood-leaf), var(--wood-forest))', border: done ? '1.5px solid #fff' : '2px solid var(--wood-mint)',
-            boxShadow: done ? 'none' : '0 0 18px rgba(191,230,201,.4), inset 0 0 12px rgba(191,230,201,.18)' }}>
+          style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? 'var(--scene-deep)' : '#fff',
+            background: done ? '#eaf5fb' : 'linear-gradient(120deg, var(--scene-blue), var(--scene-navy))', border: done ? '1.5px solid #fff' : '2px solid var(--scene-sky)',
+            boxShadow: done ? 'none' : '0 0 18px rgba(168,223,245,.4), inset 0 0 12px rgba(168,223,245,.18)' }}>
           {done ? t('✓ See what I wrote →') : t('Start writing →')}
         </button>
       </div>

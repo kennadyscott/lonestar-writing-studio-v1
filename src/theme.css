@@ -499,5 +499,5 @@ a { color: var(--link); }
 }
 
 /* Home goal banner: the goal and the class focus are the headline, one size, no sub-lines. */
-.goal-text { font-size: 20px; font-weight: 800; line-height: 1.25; margin-top: 2px; text-wrap: balance; }
-@media (max-width: 720px) { .goal-text { font-size: 17px; } }
+.goal-text { font-size: 17px; font-weight: 800; line-height: 1.25; margin-top: 2px; text-wrap: balance; }
+@media (max-width: 720px) { .goal-text { font-size: 15.5px; } }

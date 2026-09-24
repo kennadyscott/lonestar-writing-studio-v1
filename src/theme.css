@@ -279,12 +279,9 @@ a { color: var(--link); }
 @keyframes popIn { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
 /* Nova Daily Challenge banner: shed art before stacking tall */
-@media (max-width: 1420px) { .nova-rubric { display: none; } }
 @media (max-width: 1000px) {
-  .nova-robot { width: 110px !important; }
   .nova-banner { gap: 16px !important; padding: 20px 22px !important; }
 }
-@media (max-width: 780px) { .nova-robot { display: none; } }
 
 /* Studio task cards: the whole card is the button, so keyboard focus has to show on the card. */
 .big-task:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
@@ -349,14 +346,7 @@ a { color: var(--link); }
 /* ---- Practice tab ---- */
 .practice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 760px) { .practice-grid { grid-template-columns: 1fr; } }
-/* On a phone the Practice tiles give the words the room: a narrower picture
-   and no icon disc, so "The Proof Room" stays on one line. The tile's inline
-   layout sets the desktop sizes, hence !important. */
-@media (max-width: 560px) {
-  .practice-grid .big-task { padding-left: 128px !important; min-height: 104px !important; }
-  .practice-grid .big-task-art { width: 124px !important; }
-  .practice-grid .big-task-icon { display: none !important; }
-}
+
 
 /* The Home Quick Write block. Tall in the side column; sideways when
    the home grid drops to one column, so it never becomes a wide empty strip. */
@@ -437,4 +427,38 @@ a { color: var(--link); }
 @media (max-width: 720px) {
   .luna-bar.lg .luna-bar-mods { justify-content: space-between; row-gap: 10px; }
   .luna-bar.lg .luna-mod { width: auto; flex: 0 0 calc(33.333% - 6px); }
+}
+
+/* ---- Practice tiles + Daily Challenge (her enchanted-forest mockup) ---- */
+.prac-tile { position: relative; overflow: hidden; width: 100%; aspect-ratio: 5 / 1; min-height: 118px; cursor: pointer; color: #fff; text-align: left;
+  display: flex; align-items: center; gap: 18px; padding: 16px 22px 16px 34%; border-radius: 20px;
+  background: linear-gradient(90deg, rgba(4,14,32,0) 26%, rgba(4,14,32,.48) 42%, rgba(4,14,32,.32) 100%), var(--tile-img) left center / cover no-repeat, var(--tile-tint);
+  border: 1px solid rgba(255,255,255,.16); box-shadow: 0 10px 26px rgba(8,16,40,.32); transition: transform .15s, box-shadow .15s; }
+.prac-tile:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(8,16,40,.4); }
+.prac-tile:focus-visible { outline: 2px solid #f5c542; outline-offset: 3px; }
+.prac-icon { width: 60px; height: 60px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-size: 26px;
+  background: rgba(4,18,40,.72); border: 2.5px solid #f0b429; box-shadow: 0 0 14px rgba(245,180,0,.3); }
+.prac-words { flex: 1; min-width: 0; }
+.prac-title { display: block; font-size: 22px; font-weight: 800; text-shadow: 0 1px 8px rgba(0,0,0,.5); }
+.prac-sub { display: block; font-size: 13.5px; font-weight: 600; margin-top: 4px; color: rgba(255,255,255,.9); text-shadow: 0 1px 6px rgba(0,0,0,.5); text-wrap: balance; }
+.prac-chev { font-size: 30px; line-height: 1; color: rgba(255,255,255,.85); flex-shrink: 0; }
+@media (max-width: 1280px) { .prac-title { font-size: 19px; } .prac-icon { width: 52px; height: 52px; font-size: 22px; } }
+@media (max-width: 560px) {
+  .prac-tile { aspect-ratio: auto; min-height: 104px; padding-left: 36%; gap: 10px; }
+  .prac-icon { display: none; }
+  .prac-title { font-size: 18px; }
+  .prac-sub { font-size: 12.5px; }
+}
+.daily-banner { position: relative; overflow: hidden; border-radius: 22px; color: #fff; display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+  padding: 28px 30px 28px 19%; min-height: 220px;
+  background: linear-gradient(90deg, rgba(10,14,46,0) 11%, rgba(10,14,46,.6) 21%, rgba(10,14,46,.45) 58%, rgba(10,14,46,.18) 100%), var(--daily-img) center / cover no-repeat, #151040;
+  box-shadow: 0 10px 30px rgba(8,16,50,.45); }
+.daily-words { flex: 1 1 320px; min-width: 0; position: relative; }
+.daily-cta { position: relative; flex-shrink: 0; white-space: nowrap; color: #fff; font-weight: 800; font-size: 19px; border-radius: 20px; padding: 20px 32px; cursor: pointer;
+  background: linear-gradient(120deg, rgba(20,48,130,.92), rgba(32,70,170,.92)); border: 2.5px solid #55d7ff;
+  box-shadow: 0 0 26px rgba(85,215,255,.55), inset 0 0 18px rgba(85,215,255,.22); }
+@media (max-width: 1280px) and (min-width: 781px) { .daily-banner { padding-left: 22%; } }
+@media (max-width: 780px) {
+  .daily-banner { padding: 24px 20px; background: linear-gradient(0deg, rgba(10,14,46,.82), rgba(10,14,46,.55)), var(--daily-img) left center / cover no-repeat, #151040; }
+  .daily-cta { width: 100%; }
 }

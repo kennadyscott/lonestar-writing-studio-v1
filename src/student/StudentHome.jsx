@@ -323,26 +323,20 @@ function GoalBanner({ me, classFocus }) {
 const CYAN_TEXT = '#0f97c2' // cyan dark enough for text on white
 
 /* ---- the studio dashboard: mockup banner cards with art vignettes ---- */
-function BigTask({ icon, title, sub, grad, art, onClick, busy }) {
-  const [c1, c2] = grad
+function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
+  // Her Practice mockup: the painting fills the whole tile, the object sits on
+  // the left, and the words start a third of the way in beside a gold-ringed
+  // icon. `tint` is only the colour behind the painting while it loads.
   const BASE = import.meta.env.BASE_URL || '/'
-
   return (
-    <button className="big-task" disabled={busy} onClick={onClick}
-      style={{ position: 'relative', overflow: 'hidden', borderRadius: 20, minHeight: 118, padding: '18px 22px 18px 198px', textAlign: 'left',
-        display: 'flex', alignItems: 'center', gap: 16, background: `linear-gradient(120deg,${c1},${c2})`,
-        border: '1.5px solid rgba(245,180,0,.45)', boxShadow: '0 10px 26px rgba(20,15,70,.32)', color: '#fff', cursor: 'pointer' }}>
-      <span aria-hidden className="big-task-art" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 195,
-        background: `linear-gradient(90deg, transparent 55%, ${c1}), url(${BASE}${art}) left center / cover no-repeat` }} />
-      <span aria-hidden style={{ position: 'absolute', top: 12, right: 22, color: 'rgba(255,255,255,.65)', fontSize: 12 }}>✦</span>
-      <span aria-hidden style={{ position: 'absolute', bottom: 13, right: 48, color: 'rgba(255,255,255,.4)', fontSize: 9 }}>✦</span>
-      <span aria-hidden style={{ position: 'absolute', top: 22, right: 80, color: 'rgba(255,255,255,.5)', fontSize: 8 }}>✦</span>
-      <span aria-hidden className="big-task-icon" style={{ position: 'relative', width: 58, height: 58, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 27,
-        background: 'rgba(255,255,255,.15)', border: '2px solid #fff', boxShadow: '0 0 0 1.5px #f5b400' }}>{icon}</span>
-      <span style={{ flex: 1, minWidth: 0, position: 'relative' }}>
-        <span style={{ display: 'block', fontSize: 20, fontWeight: 800, textShadow: '0 1px 6px rgba(0,0,0,.3)' }}>{title}</span>
-        <span style={{ display: 'block', fontSize: 13, color: 'rgba(255,255,255,.9)', fontWeight: 600, marginTop: 3 }}>{sub}</span>
+    <button className="big-task prac-tile" disabled={busy} onClick={onClick}
+      style={{ '--tile-img': `url(${BASE}${bg})`, '--tile-tint': tint }}>
+      <span aria-hidden className="big-task-icon prac-icon">{icon}</span>
+      <span className="prac-words">
+        <span className="prac-title">{title}</span>
+        <span className="prac-sub">{sub}</span>
       </span>
+      <span aria-hidden className="prac-chev">›</span>
     </button>
   )
 }
@@ -391,76 +385,40 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
 }
 
 /* ---- Daily Challenge banner: navy space theme (mockup) ---- */
-function Spark({ x, y, c, s: size, glyph = '✦' }) {
-  return <span style={{ position: 'absolute', left: x, top: y, color: c, fontSize: size, pointerEvents: 'none', textShadow: `0 0 8px ${c}` }}>{glyph}</span>
-}
 
-function Comet({ x, y, c, rot = -18, w = 80 }) {
-  return <span style={{ position: 'absolute', left: x, top: y, width: w, height: 3, borderRadius: 3, background: `linear-gradient(90deg, transparent, ${c})`, transform: `rotate(${rot}deg)`, pointerEvents: 'none', boxShadow: `0 0 6px ${c}` }} />
-}
 
 function DailyBanner({ dc, busy, onGo }) {
   const t = useT()
   const say = useSay()
+  // The painting (Blip reading by the water, the rough draft on the right) is
+  // the whole background now; the text sits over a fade beside Blip.
   return (
-    <div className="nova-banner" style={{ position: 'relative', overflow: 'hidden', borderRadius: 22, color: '#fff', padding: '24px 28px', display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap',
-      background: 'radial-gradient(ellipse at 12% 15%, rgba(100,70,210,.4) 0%, transparent 45%), radial-gradient(ellipse at 88% 85%, rgba(80,55,180,.35) 0%, transparent 50%), linear-gradient(110deg,#151040 0%,#1e1656 55%,#151040 100%)',
-      boxShadow: '0 10px 30px rgba(8,16,50,.45)' }}>
-
-      {/* star field + comets */}
-      <Spark x="30%" y={12} c="#ffffff" s={9} />
-      <Spark x="44%" y="72%" c="#8fd8ff" s={13} />
-      <Spark x="56%" y={16} c="#ffd76b" s={11} glyph="⭐" />
-      <Spark x="63%" y="58%" c="#ffffff" s={7} />
-      <Spark x="71%" y={26} c="#5aa8ff" s={18} />
-      <Spark x="80%" y="70%" c="#ffd76b" s={9} />
-      <Spark x="90%" y={14} c="#ffd76b" s={14} glyph="⭐" />
-      <Spark x="95%" y="60%" c="#8fd8ff" s={8} />
-      <Comet x="47%" y="80%" c="#ff8fb0" rot={-14} w={70} />
-      <Comet x="58%" y="34%" c="#ffd76b" rot={-20} w={90} />
-      <Comet x="86%" y="42%" c="#5ad7ff" rot={-16} w={64} />
-
-      {/* Nova robot art */}
-      <div style={{ position: 'relative', flexShrink: 0 }}>
-        <img className="nova-robot" src={`${import.meta.env.BASE_URL || '/'}nova-robot.jpg`} alt="Blip" style={{ width: 148, display: 'block',
-          WebkitMaskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)',
-          maskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, #000 52%, transparent 80%)' }} />
-      </div>
-
-      {/* content */}
-      <div style={{ flex: '1 1 220px', minWidth: 0, position: 'relative' }}>
+    <div className="nova-banner daily-banner" style={{ '--daily-img': `url(${import.meta.env.BASE_URL || '/'}daily-bg.jpg)` }}>
+      <div className="daily-words">
         <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2.2, color: '#e8f1ff', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <span>{t('Daily Challenge')}</span>
           <span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span>
           <span>{t('Revision')}</span>
           {dc?.genre && (<><span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span><span>{dc.genre}</span></>)}
         </div>
-        <div style={{ fontSize: 23, fontWeight: 800, margin: '6px 0 4px', textShadow: '0 1px 8px rgba(0,0,0,.4)', textWrap: 'balance' }}>
+        <div style={{ fontSize: 24, fontWeight: 800, margin: '6px 0 4px', textShadow: '0 1px 10px rgba(0,0,0,.55)', textWrap: 'balance' }}>
           {dc?.done
             ? t("Today's challenge is done — nice work! ✓")
             : <Glossed text={say('{author} wrote something rough — can you fix it up?', { author: dc?.author || t('A robot') })} />}
         </div>
-        <div style={{ fontSize: 14.5, color: '#c9dbf4', marginBottom: 13 }}>
+        <div style={{ fontSize: 14.5, color: '#dbe6f7', marginBottom: 14, textShadow: '0 1px 8px rgba(0,0,0,.5)' }}>
           <Directions text={dc?.done
             ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.'
             : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"} />
         </div>
-        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, padding: '8px 20px', fontSize: 13.5, fontWeight: 800, letterSpacing: .6,
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, borderRadius: 999, padding: '9px 22px', fontSize: 13.5, fontWeight: 800, letterSpacing: .6,
           background: 'linear-gradient(120deg,#f5c542,#e89a00)', color: '#3d2c00', border: '1.5px solid rgba(255,225,140,.9)', boxShadow: '0 0 16px rgba(245,180,0,.55)' }}>
           {t('🪙 EARN 50 COINS!')}
         </span>
       </div>
 
-      {/* rubric tablet vignette */}
-      <img aria-hidden className="nova-rubric" src={`${import.meta.env.BASE_URL || '/'}rubric-vig.jpg`} alt="" style={{ width: 190, flexShrink: 0, alignSelf: 'center', display: 'block',
-        WebkitMaskImage: 'radial-gradient(ellipse 66% 66% at 50% 50%, #000 50%, transparent 80%)',
-        maskImage: 'radial-gradient(ellipse 66% 66% at 50% 50%, #000 50%, transparent 80%)' }} />
-
       {/* glowing CTA */}
-      <button disabled={busy} onClick={onGo}
-        style={{ position: 'relative', flexShrink: 0, whiteSpace: 'nowrap', color: '#fff', fontWeight: 800, fontSize: 19, borderRadius: 20, padding: '20px 32px',
-          background: 'linear-gradient(120deg,#1d3a8f,#2a4dab)', border: '2.5px solid #55d7ff',
-          boxShadow: '0 0 26px rgba(85,215,255,.55), inset 0 0 18px rgba(85,215,255,.22)', cursor: 'pointer' }}>
+      <button disabled={busy} onClick={onGo} className="daily-cta">
         {dc?.done ? t('Review →') : dc?.started ? t('Keep going →') : t('Start Revising →')}
       </button>
     </div>
@@ -973,10 +931,10 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {tab === 'practice' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div className="practice-grid">
-            <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} grad={['#0f5c8c', '#0a3d5f']} art="vig-quickwrite.jpg" busy={busy} onClick={() => setProofRoom(true)} />
-            <BigTask icon="✒️" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} grad={['#1d40ae', '#152f82']} art="vig-freewrite.jpg" busy={busy} onClick={freeWrite} />
-            <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} grad={['#0d5f66', '#08454b']} art="vig-games.jpg" onClick={() => setGamePicker(true)} />
-            <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} grad={['#c8860a', '#a26a04']} art="vig-bank.jpg" onClick={onBank} />
+            <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} bg="prac-proof.jpg" tint="#0b2a44" busy={busy} onClick={() => setProofRoom(true)} />
+            <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />
+            <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />
+            <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} bg="prac-bank.jpg" tint="#4a3010" onClick={onBank} />
           </div>
           <DailyBanner dc={dc} busy={busy} onGo={peer} />
           <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />

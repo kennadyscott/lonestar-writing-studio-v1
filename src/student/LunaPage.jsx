@@ -7,8 +7,8 @@ import { Directions, Glossed, useSay } from './Scaffold.jsx'
 /*
  * Luna's Writing Nook — the student's module page.
  * Dashboard backdrop, wordmark header, slim Writing Journey band, then one
- * white panel: mission header, an "Up next" card for the current lesson, then
- * every other lesson as a small tile. Profile sidebar on the right.
+ * white panel: mission header, then every lesson in a side rail beside a big
+ * "Up next" card for the current one. No profile sidebar.
  * Lesson data is prototype content until the decks are converted.
  */
 
@@ -147,28 +147,7 @@ function UpNextLesson({ a, onOpen }) {
   )
 }
 
-function MiniLesson({ a, onOpen }) {
-  const t = useT()
-  const passed = a.status === 'passed'
-  const locked = a.status === 'todo'
-  return (
-    <div className={`nook-mini${locked ? ' locked' : ''}`} role={passed ? 'button' : undefined} tabIndex={passed ? 0 : -1}
-      onClick={() => passed && onOpen?.(a)} onKeyDown={(e) => passed && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
-      title={passed ? t('View summary →') : a.final ? t('Unlocks after lesson 5') : undefined}>
-      <div className="nook-mini-art"><img src={LESSON_ART(a.art)} alt="" />{locked && <span aria-hidden className="nook-mini-lock">🔒</span>}</div>
-      <div className="nook-mini-words">
-        <div className="nook-mini-kicker">{a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
-        <div className="nook-mini-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}><Glossed text={t(a.title)} /></div>
-        <div className="nook-mini-foot">
-          <Stars n={a.stars} size={14} dimColor="#d3dbe3" />
-          {passed && <span aria-label={t('Passed')} className="nook-mini-check">✓</span>}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Style B's side rail: every lesson in order, the current one lit gold.
+// The side rail (she chose it over tiles-below, 2026-09-24): every lesson in order, the current one lit gold.
 function RailLesson({ a, isUp, onOpen }) {
   const t = useT()
   const passed = a.status === 'passed'
@@ -190,26 +169,16 @@ function RailLesson({ a, isUp, onOpen }) {
   )
 }
 
-function FocusLessons({ acts, onOpen, rail }) {
+function FocusLessons({ acts, onOpen }) {
   const t = useT()
   const up = acts.find((a) => a.status === 'in_progress') || acts.find((a) => a.status === 'todo') || acts[acts.length - 1]
-  const rest = acts.filter((a) => a !== up)
-  if (rail) return (
+  return (
     <div className="nook-railwrap">
       <nav className="nook-rail" aria-label={t('All lessons')}>
         <div className="nook-rest-label">{t('All lessons')}</div>
         {acts.map((a) => <RailLesson key={a.n} a={a} isUp={a === up} onOpen={onOpen} />)}
       </nav>
       <UpNextLesson a={up} onOpen={onOpen} />
-    </div>
-  )
-  return (
-    <div style={{ display: 'grid', gap: 18 }}>
-      <UpNextLesson a={up} onOpen={onOpen} />
-      <div>
-        <div className="nook-rest-label">{t('All lessons')}</div>
-        <div className="nook-rest">{rest.map((a) => <MiniLesson key={a.n} a={a} onOpen={onOpen} />)}</div>
-      </div>
     </div>
   )
 }
@@ -229,9 +198,6 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
   // English label: LessonPage translates it on render, so switching language
   // mid-lesson does not leave a snapshot of the old one on screen.
   const open = (a) => onOpenLesson?.(a, `Module ${currentIdx + 1}: ${current.label}`)
-  // Temporary A/B (2026-09-24): A = Up next card + lesson tiles below, B = lessons in a side rail.
-  const [nookStyle, setNookStyleState] = useState(() => { try { return localStorage.getItem('lscr.nookLayout') === 'A' ? 'A' : 'B' } catch { return 'B' } })
-  const setNookStyle = (v) => { setNookStyleState(v); try { localStorage.setItem('lscr.nookLayout', v) } catch { /* fine */ } }
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
@@ -245,12 +211,6 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
           <img className="nook-luna" src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
           <img src={BRAND.lunaWordmark} alt={t("Luna's Writing Nook")} style={{ height: 'clamp(54px, 5vw, 74px)', width: 'auto', display: 'block', marginTop: 2 }} />
           <div style={{ flex: 1 }} />
-          <div className="style-pick" role="group" aria-label={t('Nook style')}>
-            <span className="lbl">{t('Style')}</span>
-            {['A', 'B'].map((v) => (
-              <button key={v} className={nookStyle === v ? 'on' : ''} aria-pressed={nookStyle === v} onClick={() => setNookStyle(v)}>{v}</button>
-            ))}
-          </div>
           {onBack && (
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)', whiteSpace: 'nowrap' }}>
               {t('← Back to Previous Page')}
@@ -279,7 +239,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                   </div>
                 </div>
               </div>
-              <FocusLessons acts={acts} onOpen={open} rail={nookStyle === 'B'} />
+              <FocusLessons acts={acts} onOpen={open} />
             </White>
           </div>
         </div>

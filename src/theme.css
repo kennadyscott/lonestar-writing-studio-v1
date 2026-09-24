@@ -498,7 +498,7 @@ a { color: var(--link); }
 .goal-text { font-size: 17px; font-weight: 800; line-height: 1.25; margin-top: 2px; text-wrap: balance; }
 @media (max-width: 720px) { .goal-text { font-size: 15.5px; } }
 
-/* ---- Nook lessons: the current one up front, the rest as quiet tiles ---- */
+/* ---- Nook lessons: shared bits of the Up next card and the rail ---- */
 .nook-upnext { display: grid; grid-template-columns: minmax(0, 440px) minmax(0, 1fr); gap: 32px; align-items: center; cursor: pointer;
   padding: 14px; border-radius: 20px; background: #fff; box-shadow: 0 0 0 2px #e9b93a, 0 0 22px rgba(245,180,0,.28), 0 8px 22px rgba(2,20,50,.12); }
 .nook-upnext-art { aspect-ratio: 1672 / 941; border-radius: 14px; overflow: hidden; background: #0d2f55; }
@@ -509,33 +509,14 @@ a { color: var(--link); }
 .nook-upnext-btn { margin-top: 6px; padding: 12px 26px; border-radius: 12px; font-weight: 800; font-size: 16px; color: #0d2f55;
   background: linear-gradient(180deg,#ffd44d 0%,#f5b400 100%); box-shadow: 0 3px 0 #c98f00; }
 .nook-rest-label { font-size: 11.5px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: #5c7285; margin: 0 2px 8px; }
-.nook-rest { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
-.nook-mini { background: #fff; border: 1px solid #e3ebf1; border-radius: 14px; overflow: hidden; transition: transform .15s, box-shadow .15s; }
-.nook-mini[role=button] { cursor: pointer; }
-.nook-mini[role=button]:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(2,20,50,.12); }
-.nook-mini-art { position: relative; aspect-ratio: 2 / 1; background: #0d2f55; }
-.nook-mini-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.nook-mini.locked .nook-mini-art img { filter: grayscale(.6) brightness(.8); }
-.nook-mini-lock { position: absolute; top: 6px; right: 7px; width: 20px; height: 20px; border-radius: 6px; background: rgba(255,255,255,.88); display: grid; place-items: center; font-size: 11px; }
-.nook-mini-words { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 3px; }
 .nook-mini-kicker { font-size: 9.5px; font-weight: 800; letter-spacing: 1.3px; color: #6f879b; }
 .nook-mini-title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 14px; line-height: 1.2; color: #0d2f55; }
-.nook-mini-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 2px; }
 .nook-mini-check { width: 18px; height: 18px; border-radius: 50%; background: #2e9e6b; color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 800; }
-@media (max-width: 1100px) { .nook-rest { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 @media (max-width: 720px) {
   .nook-upnext { grid-template-columns: 1fr; gap: 14px; }
-  .nook-rest { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* ---- temporary A/B switch (Nook layout, 2026-09-24) ---- */
-.style-pick { display: inline-flex; align-items: center; gap: 2px; padding: 3px; border-radius: 999px;
-  background: rgba(255,255,255,.9); border: 1px dashed #b9c7d6; box-shadow: 0 2px 8px rgba(13,47,85,.08); }
-.style-pick .lbl { font-size: 10px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); padding: 0 8px 0 10px; }
-.style-pick button { min-width: 34px; padding: 6px 12px; border-radius: 999px; font-size: 12.5px; font-weight: 800; color: var(--muted); background: transparent; }
-.style-pick button.on { background: #1e2a6b; color: #fff; }
-
-/* ---- Nook style B: lessons in a side rail, Up next takes the rest ---- */
+/* ---- Nook lessons: side rail + Up next filling the rest ---- */
 .nook-railwrap { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 18px; align-items: stretch; }
 .nook-rail { display: flex; flex-direction: column; gap: 8px; }
 .nook-rail-row { display: flex; align-items: center; gap: 11px; padding: 7px 10px 7px 7px; border-radius: 12px; background: #fff; border: 1px solid #e3ebf1; transition: background .15s; }

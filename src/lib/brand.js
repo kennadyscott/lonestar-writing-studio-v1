@@ -5,6 +5,7 @@ export const BRAND = {
   logo: BASE + 'lonestar-logo.png',
   luna: BASE + 'luna.png',
   lunaWordmark: BASE + 'luna-wordmark.png', // "LUNA'S WRITING NOOK" lockup, navy on transparent
+  lunaAdventure: BASE + 'luna-adventure.png', // "LUNA'S WRITING ADVENTURE" crystal lockup + tagline (trying it, 2026-09-24)
   rocket: BASE + 'rocket.png',
   launchBg: BASE + 'launch-bg.jpg',
   trophy: BASE + 'trophy.png',

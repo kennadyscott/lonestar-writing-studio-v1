@@ -209,7 +209,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
         {/* header */}
         <div className="nook-head" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
           <img className="nook-luna" src={BRAND.luna} alt="Luna" style={{ height: 78, filter: 'drop-shadow(0 6px 14px rgba(2,20,50,.25))' }} />
-          <img src={BRAND.lunaWordmark} alt={t("Luna's Writing Nook")} style={{ height: 'clamp(54px, 5vw, 74px)', width: 'auto', display: 'block', marginTop: 2 }} />
+          <img src={BRAND.lunaAdventure} alt={t("Luna's Writing Adventure")} style={{ height: 'clamp(80px, 8vw, 118px)', width: 'auto', display: 'block', marginTop: 2 }} />
           <div style={{ flex: 1 }} />
           {onBack && (
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)', whiteSpace: 'nowrap' }}>

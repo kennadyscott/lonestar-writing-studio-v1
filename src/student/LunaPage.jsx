@@ -23,18 +23,18 @@ const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .22)'
 
 
 // Module 1 activity path (prototype data — mirrors the live product's lessons).
-// Art panels are her enchanted-forest lesson paintings (public/lessons/f1-f6.jpg).
+// Art panels are her enchanted-forest lesson paintings (public/lessons/g1-g6.jpg).
 // Titles and blurbs stay English here (module scope, no hook) — every render
 // site runs them through t(); the Spanish lives in i18n/es/luna.js.
 const M1_ACTIVITIES = [
-  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: 'f1' },
-  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: 'f2' },
-  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: 'f3' },
-  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: 'f4' },
-  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'f5' },
-  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'f6', final: true },
+  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: 'g1' },
+  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: 'g2' },
+  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: 'g3' },
+  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: 'g4' },
+  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'g5' },
+  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'g6', final: true },
 ]
-// f1-f6: her enchanted-forest lesson paintings (2026-09-24). l1-l6.webp are the old space set.
+// g1-g6: her 16:9 lesson cards (2026-09-24), replacing the f1-f6 strips. l1-l6.webp are the old space set.
 const LESSON_ART = (key) => `${BASE}lessons/${key}.jpg`
 const GOLD_FRAME = '#e9b93a'
 
@@ -94,7 +94,7 @@ function ActivityCard({ a, onOpen }) {
         boxShadow: frame, opacity: locked && !a.final ? .72 : 1, transform: hover && clickable ? 'translateY(-2px)' : 'none', transition: 'transform .15s, box-shadow .15s' }}>
 
       {/* art panel */}
-      <div style={{ position: 'relative', width: '100%', aspectRatio: '1916 / 821' /* the paintings' own shape: nothing is cropped */, background: '#0d2f55', overflow: 'hidden', borderRadius: '18px 18px 0 0' }}>
+      <div style={{ position: 'relative', width: '100%', aspectRatio: '1672 / 941' /* the paintings' own shape: nothing is cropped */, background: '#0d2f55', overflow: 'hidden', borderRadius: '18px 18px 0 0' }}>
         <img src={LESSON_ART(a.art)} alt="" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block', filter: locked ? 'saturate(.7) brightness(.85)' : 'none' }} />
         {locked && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, width: 22, height: 22, borderRadius: 6, background: 'rgba(255,255,255,.85)', display: 'grid', placeItems: 'center', fontSize: 12 }}>🔒</span>}
         <div aria-hidden style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: 2, background: GOLD_FRAME, opacity: .9 }} />

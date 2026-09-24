@@ -331,6 +331,7 @@ function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
   return (
     <button className="big-task prac-tile" disabled={busy} onClick={onClick}
       style={{ '--tile-img': `url(${BASE}${bg})`, '--tile-tint': tint }}>
+      <span aria-hidden className="prac-art" />
       <span aria-hidden className="big-task-icon prac-icon">{icon}</span>
       <span className="prac-words">
         <span className="prac-title">{title}</span>
@@ -394,19 +395,20 @@ function DailyBanner({ dc, busy, onGo }) {
   // the whole background now; the text sits over a fade beside Blip.
   return (
     <div className="nova-banner daily-banner" style={{ '--daily-img': `url(${import.meta.env.BASE_URL || '/'}daily-bg.jpg)` }}>
+      <span aria-hidden className="daily-art" />
       <div className="daily-words">
-        <div style={{ fontSize: 12.5, fontWeight: 800, letterSpacing: 2.2, color: '#e8f1ff', textTransform: 'uppercase', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+        <div className="daily-kicker">
           <span>{t('Daily Challenge')}</span>
-          <span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span>
+          <span className="daily-dot">●</span>
           <span>{t('Revision')}</span>
-          {dc?.genre && (<><span style={{ color: '#5aa8ff', fontSize: 10 }}>●</span><span>{dc.genre}</span></>)}
+          {dc?.genre && (<><span className="daily-dot">●</span><span>{dc.genre}</span></>)}
         </div>
-        <div style={{ fontSize: 24, fontWeight: 800, margin: '6px 0 4px', textShadow: '0 1px 10px rgba(0,0,0,.55)', textWrap: 'balance' }}>
+        <div className="daily-title">
           {dc?.done
             ? t("Today's challenge is done — nice work! ✓")
             : <Glossed text={say('{author} wrote something rough — can you fix it up?', { author: dc?.author || t('A robot') })} />}
         </div>
-        <div style={{ fontSize: 14.5, color: '#dbe6f7', marginBottom: 14, textShadow: '0 1px 8px rgba(0,0,0,.5)' }}>
+        <div className="daily-dir">
           <Directions text={dc?.done
             ? 'A brand-new challenge lands tomorrow. You can still look back at your revision.'
             : "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!"} />
@@ -797,6 +799,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const setHomeTab = (v) => { setHomeTabState(v); try { sessionStorage.setItem('lscr.homeTab', v) } catch { /* fine */ } }
   const tab = ['home', 'practice', 'data'].includes(homeTab) ? homeTab : 'home'
   const TABS = [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']]
+  // Temporary A/B for the Practice look: A = light cards, B = calmer dark tiles.
+  const [pracStyle, setPracStyleState] = useState(() => { try { return localStorage.getItem('lscr.pracStyle') === 'B' ? 'B' : 'A' } catch { return 'A' } })
+  const setPracStyle = (v) => { setPracStyleState(v); try { localStorage.setItem('lscr.pracStyle', v) } catch { /* fine */ } }
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
   const [lastReveal, setLastReveal] = useState(null)
@@ -871,7 +876,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   return (
     <div>
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
+        background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`,
+        // Practice already carries five paintings, so the forest behind it steps back.
+        opacity: tab === 'practice' ? .1 : .22, transition: 'opacity .3s' }} />
       {game?.key === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} payHere={!game?.category} />
         : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}
@@ -929,7 +936,14 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
 
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div className={`practice-view style-${pracStyle.toLowerCase()}`} style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          {/* Temporary: compare two calmer Practice looks (2026-09-24). */}
+          <div className="style-pick" role="group" aria-label={t('Practice style')}>
+            <span className="lbl">{t('Style')}</span>
+            {['A', 'B'].map((v) => (
+              <button key={v} className={pracStyle === v ? 'on' : ''} aria-pressed={pracStyle === v} onClick={() => setPracStyle(v)}>{v}</button>
+            ))}
+          </div>
           <div className="practice-grid">
             <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} bg="prac-proof.jpg" tint="#0b2a44" busy={busy} onClick={() => setProofRoom(true)} />
             <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />

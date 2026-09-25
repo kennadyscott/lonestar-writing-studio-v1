@@ -13,6 +13,7 @@ import LessonPage from './student/LessonPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
 import ProofRoom from './student/ProofRoom.jsx'
+const PROOF_DEMO_GRADE = 5
 import FeedbackReview from './student/FeedbackReview.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
 import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
@@ -89,7 +90,9 @@ export default function App() {
   } else if (view === 'wall') {
     body = <ShareWallTab state={state} me={me} onChange={refresh} onBack={goHome} />
   } else if (view === 'proof') {
-    body = <ProofRoom grade={me.gradeLevel ?? 5} onBack={goHome} onChange={refresh} />
+    // Students see only their own grade. The demo student is Grade 6 but every
+    // playable path is Grade 5, so the Proof Room demo runs at Grade 5 (her call, 2026-09-24).
+    body = <ProofRoom grade={PROOF_DEMO_GRADE} onBack={goHome} onChange={refresh} />
   } else if (view === 'bank') {
     body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onWall={() => setView('wall')} onChange={refresh} />
   } else {

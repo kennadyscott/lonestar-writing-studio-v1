@@ -704,3 +704,16 @@ a { color: var(--link); }
 .pr-mini-body { display: flex; flex-direction: column; gap: 5px; padding: 10px 12px 12px; }
 .pr-mini-title { font-size: 15px; font-weight: 800; color: #16386b; line-height: 1.25; min-height: 2.5em; }
 
+/* a topic's uploaded cover fills the card top */
+.pr-mini-top.has-cover { background: var(--cover) center / cover no-repeat, #0d2f55; height: 110px; }
+/* Proof Room path + worksheets: a forest banner instead of the plain navy strip (2026-09-29) */
+.proof-panel-head.forest { min-height: 104px; padding: 18px 26px; align-items: center; justify-content: flex-end; gap: 16px;
+  background: linear-gradient(90deg, rgba(1,23,45,0) 16%, rgba(2,40,62,.85) 42%, #02283e 64%), var(--proof-img) left center / cover no-repeat, #02283e; }
+.proof-panel-head.forest > div { flex: 0 1 60%; max-width: 640px; }
+.proof-panel-icon { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,.95); display: grid; place-items: center; font-size: 26px;
+  box-shadow: 0 0 0 2px rgba(233,185,58,.6), 0 4px 12px rgba(0,0,0,.25); flex-shrink: 0; }
+.proof-panel-title { font-size: clamp(20px, 2.2vw, 28px); font-weight: 800; line-height: 1.15; color: #fff; margin-top: 2px; text-wrap: balance; }
+@media (max-width: 720px) {
+  .proof-panel-head.forest { justify-content: flex-start; background: linear-gradient(0deg, rgba(2,40,62,.94), rgba(2,40,62,.8)), var(--proof-img) left center / cover no-repeat, #02283e; }
+  .proof-panel-head.forest > div { flex: 1; }
+}

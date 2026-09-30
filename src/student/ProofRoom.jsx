@@ -106,6 +106,15 @@ const MEDIA_BASE = import.meta.env.VITE_MEDIA_BASE || ((import.meta.env.BASE_URL
 const KNOWN_MEDIA = {}
 export function registerMedia(map) { Object.assign(KNOWN_MEDIA, map || {}) }
 const SOLUTION = (id) => KNOWN_MEDIA[id] || (MEDIA_BASE.replace(/\/?$/, '/') + id + '.mp4')
+// A topic's cover picture. The CMS stores it as a media id (topic.cover, an "art"
+// row in CRProofRoomMedia); a full URL (topic.coverUrl) or a path's own media map
+// also works. No cover: the card keeps its icon.
+export function coverOf(tp) {
+  if (!tp) return null
+  if (tp.coverUrl) return tp.coverUrl
+  if (!tp.cover) return null
+  return KNOWN_MEDIA[tp.cover] || tp.media?.[tp.cover] || ART(tp.cover)
+}
 
 function WatchButton({ id, onPlay, label = 'Watch the solution' }) {
   const t = useT()
@@ -409,7 +418,9 @@ function ShelfRows({ topics, onOpen }) {
         <ShelfSearch value={query} onChange={setQuery} />
       </div>
       {strands.map((d) => {
-        const row = shown.filter(({ tp }) => (tp.domain || 'Other') === d)
+        // In progress first, then new, then finished; real topics ahead of samples.
+        const rank = ({ tp, st }) => (st.finished ? 2 : st.started ? 0 : 1) * 2 + (tp.sample ? 1 : 0)
+        const row = shown.filter(({ tp }) => (tp.domain || 'Other') === d).sort((a, b) => rank(a) - rank(b))
         return (
           <section key={d} className="pr-row">
             <div className="pr-row-head"><h3>{t(d)}</h3><span>{row.length === 1 ? t('1 topic') : t('{n} topics', { n: row.length })}</span></div>
@@ -428,9 +439,9 @@ function MiniTopic({ tp, st, onOpen }) {
   const t = useT()
   return (
     <button className="pr-mini" onClick={onOpen}>
-      <span className="pr-mini-top">
+      <span className={`pr-mini-top${coverOf(tp) ? ' has-cover' : ''}`} style={coverOf(tp) ? { '--cover': `url(${coverOf(tp)})` } : undefined}>
         {tp.sample && <span className="proof-card-sample">{t('Sample')}</span>}
-        <span className="pr-mini-icon" aria-hidden>{tp.icon}</span>
+        {!coverOf(tp) && <span className="pr-mini-icon" aria-hidden>{tp.icon}</span>}
       </span>
       <span className="pr-mini-body">
         <span className="proof-card-kicker">{(tp.core || []).length === 1 ? t('1 skill') : t('{n} skills', { n: (tp.core || []).length })}</span>
@@ -479,7 +490,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   const pct = Math.round((cleared / topic.core.length) * 100)
 
   return (
-    <Shell onClose={onClose} sub={topic.title} onBack={onBack}>
+    <Shell onClose={onClose} sub={topic.title} onBack={onBack} topic={topic} kicker={`${t('The Proof Room')} · ${t(topic.domain || 'Path')}`}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 22 }}>{topic.icon}</span>
         <div style={{ flex: 1, minWidth: 170 }}>
@@ -512,24 +523,26 @@ function Stop({ stop, onPlay }) {
   const capstone = stop.capstone
 
   const tone = passed ? 'var(--good)' : isSb ? '#a37400' : locked ? '#9fb3c2' : capstone ? GOLD : CYAN
-  const bg = passed ? '#f1faf4' : isSb ? '#fff8ec' : locked ? '#f7f9fb' : '#fff'
+  const bg = passed ? '#f1faf4' : isSb ? '#fff8ec' : locked ? '#f7f9fb' : '#fffdf6'
+  const here = !passed && !locked && !isSb   // the stop to do next
+  // gold is "you are here" across the studio: the open stop wears it
   const border = passed ? '1.5px solid #b8e6cd' : isSb ? '2px solid #f0b429' : locked ? '1.5px solid var(--line)'
-    : capstone ? '2px solid #f0b429' : '2px solid #9fd9ef'
+    : capstone ? '2px solid #f0b429' : '2px solid #e9b93a'
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 13, position: 'relative', zIndex: 1 }}>
       <span style={{ width: 56, flexShrink: 0, display: 'grid', placeItems: 'center' }}>
         <span style={{ width: 40, height: 40, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 18, fontWeight: 800,
           background: passed ? 'var(--good)' : isSb ? GOLD : locked ? '#e3ecf2' : capstone ? GOLD : '#fff',
-          color: passed || isSb || capstone ? '#fff' : locked ? '#9fb3c2' : CYAN,
-          border: passed || isSb || capstone ? '3px solid #fff' : '3px solid #9fd9ef',
+          color: passed || isSb || capstone ? '#fff' : locked ? '#9fb3c2' : '#a37400',
+          border: passed || isSb || capstone ? '3px solid #fff' : locked ? '3px solid #dbe5ec' : '3px solid #e9b93a',
           boxShadow: passed || isSb || capstone ? '0 3px 10px rgba(20,60,90,.25)' : 'none' }}>
           {passed ? '✓' : locked ? '🔒' : capstone ? '🏆' : isSb ? '🛠' : '📄'}
         </span>
       </span>
 
       <div style={{ flex: 1, minWidth: 0, background: bg, border, borderRadius: 14, padding: '12px 15px',
-        display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', boxShadow: here ? '0 0 18px rgba(245,180,0,.22)' : 'none' }}>
         <div style={{ flex: 1, minWidth: 150 }}>
           {isSb && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('SKILL BUILDER · REQUIRED FIRST')}</div>}
           {capstone && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('FULL TOPIC · THE FINISH LINE')}</div>}
@@ -586,7 +599,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
     const coreIdx = topic ? topic.core.findIndex((w) => w.id === ws.id) : -1
     const nextCore = coreIdx >= 0 && coreIdx + 1 < (topic?.core.length || 0) ? topic.core[coreIdx + 1] : null
     return (
-      <Shell onClose={onClose} sub={ws.title}>
+      <Shell onClose={onClose} sub={ws.title} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Proof Room')}>
         <div style={{ textAlign: 'center' }}>
           <img src={passed ? KID_READER : KID_CLIPBOARD} alt=""
             style={{ height: 150, display: 'block', margin: '0 auto -6px' }} />
@@ -644,7 +657,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
   }
 
   return (
-    <Shell onClose={onClose} sub={ws.title} onBack={onQuit}>
+    <Shell onClose={onClose} sub={ws.title} onBack={onQuit} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Proof Room')}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14, flexWrap: 'wrap' }}>
         {ws.activities.map((a, i) => (
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
@@ -1391,18 +1404,21 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
   )
 }
 
-function Shell({ children, onClose, sub, onBack }) {
+function Shell({ children, onClose, sub, onBack, topic, kicker }) {
   const t = useT()
   const page = React.useContext(PageMode)
   if (page) {
-    // On the page: same navy title strip, no overlay and no close button (the page's back link does that).
+    // On the page: a forest banner like the shelf's hero (the topic's own cover
+    // when the CMS has one), no overlay and no close button — the page's back
+    // link does that.
+    const art = coverOf(topic) || `${import.meta.env.BASE_URL || '/'}prac-proof.jpg`
     return (
       <div className="card proof-panel">
-        <div className="proof-panel-head">
-          <span style={{ fontSize: 22 }}>🧾</span>
+        <div className="proof-panel-head forest" style={{ '--proof-img': `url(${art})` }}>
+          {topic?.icon && <span className="proof-panel-icon" aria-hidden>{topic.icon}</span>}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <b style={{ fontSize: 17 }}>{t('The Proof Room')}</b>
-            <div style={{ fontSize: 12.5, color: '#a8dff5', fontWeight: 700 }}>{sub}</div>
+            <div className="proof-kicker">{kicker || t('The Proof Room')}</div>
+            <div className="proof-panel-title">{sub}</div>
           </div>
         </div>
         <div className="proof-panel-body">{children}</div>

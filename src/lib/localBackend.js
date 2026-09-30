@@ -5,6 +5,7 @@ import { seedState } from '../../server/seed.mjs'
 import { fallbackConference, fallbackTraits, isBegging } from '../../server/fallback.mjs'
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from '../../server/peerTasks.mjs'
 import { rawTopics } from '../../server/proofRoom.mjs'
+import { SHIPPED } from '../../data/topics.mjs'
 import { localDay } from '../../server/day.mjs'
 
 const ME = 'stu_kscott'
@@ -348,6 +349,11 @@ export const localApi = {
     state.shareWall.unshift(entry)
     return entry
   },
+  // The student Proof Room page: every shipped path (Parts of Speech + the five
+  // converted decks), as the local server's /api/proof/studio serves them. Kept
+  // apart from proofContent, whose copy is saved in the browser and edited by
+  // the publisher console.
+  proofStudio: async () => ({ topics: [...rawTopics(), ...clone(SHIPPED)] }),
   proofContent: async () => {
     if (!state.proofTopics) state.proofTopics = rawTopics()
     return { topics: clone(state.proofTopics) }

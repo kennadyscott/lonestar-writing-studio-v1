@@ -755,3 +755,12 @@ a { color: var(--link); }
   .prf-row { grid-template-columns: 38px minmax(0, 1fr); }
   .prf-row-prog { grid-column: 2; }
 }
+/* the path under way leads the Proof Room card, one click back in */
+.prf-resume { display: grid; grid-template-columns: 42px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 14px; text-align: left; cursor: pointer;
+  background: #fffaf0; border: 2px solid #e9b93a; box-shadow: 0 0 16px rgba(245,180,0,.2); }
+.prf-resume:hover { background: #fff6e0; }
+.prf-resume-kicker { font-size: 10.5px; font-weight: 800; letter-spacing: 1.3px; text-transform: uppercase; color: #a37400; }
+.prf-resume-go { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; min-width: 150px; }
+.prf-resume-go .proof-bar { width: 150px; }
+.prf-resume-go b { font-size: 14px; color: #16386b; white-space: nowrap; }
+@media (max-width: 560px) { .prf-resume { grid-template-columns: 38px minmax(0, 1fr); } .prf-resume-go { grid-column: 2; align-items: flex-start; } }

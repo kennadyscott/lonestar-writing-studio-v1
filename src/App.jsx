@@ -25,6 +25,8 @@ export default function App() {
   const [health, setHealth] = useState({ hasKey: false })
   const [view, setView] = useState('home')
   const [lesson, setLesson] = useState(null)
+  // a Proof Room path opened straight from the Practice tab (null = the whole room)
+  const [proofTopic, setProofTopic] = useState(null)
   const [openSub, setOpenSub] = useState(null) // submission id for the studio
   const [reviewSub, setReviewSub] = useState(null) // completed submission being reviewed
   const [publisher, setPublisher] = useState(false)
@@ -80,7 +82,7 @@ export default function App() {
       ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
       : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
   } else if (view === 'home') {
-    body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onProofRoom={() => setView('proof')} onChange={refresh} />
+    body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={() => setView('luna')} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onProofRoom={(topicId) => { setProofTopic(topicId || null); setView('proof') }} onChange={refresh} />
   } else if (view === 'luna') {
     body = <LunaPage state={state} me={me} onBack={goHome} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />
   } else if (view === 'lesson' && lesson) {
@@ -92,7 +94,7 @@ export default function App() {
   } else if (view === 'proof') {
     // Students see only their own grade. The demo student is Grade 6 but every
     // playable path is Grade 5, so the Proof Room demo runs at Grade 5 (her call, 2026-09-24).
-    body = <ProofRoom grade={PROOF_DEMO_GRADE} onBack={goHome} onChange={refresh} />
+    body = <ProofRoom key={proofTopic || 'room'} grade={PROOF_DEMO_GRADE} initialTopicId={proofTopic} onBack={goHome} onChange={refresh} />
   } else if (view === 'bank') {
     body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onWall={() => setView('wall')} onChange={refresh} />
   } else {

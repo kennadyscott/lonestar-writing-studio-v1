@@ -361,11 +361,14 @@ function ProofRoomFeature({ onOpen }) {
   const mine = (topics || []).filter((tp) => Number(tp.grade) === PROOF_DEMO_GRADE)
     .map((tp) => ({ tp, st: topicStatus(tp, progress) }))
     .sort((a, b) => (a.st.finished ? 2 : a.st.started ? 0 : 1) - (b.st.finished ? 2 : b.st.started ? 0 : 1))
-  const shown = mine.slice(0, 5)
+  // The path under way leads the card; the list holds the rest.
+  const resume = mine.find(({ st }) => st.started && !st.finished)
+  const rest = mine.filter((x) => x !== resume)
+  const shown = rest.slice(0, resume ? 4 : 5)
   const skills = mine.reduce((n, { tp }) => n + (tp.core || []).length, 0)
   return (
     <div className="prf-card">
-      <button className="prf-hero" onClick={onOpen} style={{ '--prf-img': `url(${BASE}prac-proof.jpg)` }}>
+      <button className="prf-hero" onClick={() => onOpen()} style={{ '--prf-img': `url(${BASE}prac-proof.jpg)` }}>
         <span className="prf-hero-words">
           <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: PROOF_DEMO_GRADE })}</span>
           <span className="prf-title">{t('The Proof Room')}</span>
@@ -379,9 +382,20 @@ function ProofRoomFeature({ onOpen }) {
         </div>
         {!topics && <div className="prf-empty">{t('Loading…')}</div>}
         {topics && !mine.length && <div className="prf-empty">{t('No topics for your grade yet.')}</div>}
+        {resume && (
+          <button className="prf-resume" onClick={() => onOpen(resume.tp.id)}>
+            <span className="prf-row-icon" aria-hidden>{resume.tp.icon}</span>
+            <span className="prf-row-words">
+              <span className="prf-resume-kicker">{t('Pick up where you left off')}</span>
+              <span className="prf-row-title">{resume.tp.short || resume.tp.title}</span>
+              <span className="prf-row-meta">{t('Next stop: {title}', { title: resume.st.next?.title || '' })}</span>
+            </span>
+            <span className="prf-resume-go"><ProofBar st={resume.st} /><b>{t('Keep going →')}</b></span>
+          </button>
+        )}
         <div className="prf-list">
           {shown.map(({ tp, st }) => (
-            <button key={tp.id} className="prf-row" onClick={onOpen}>
+            <button key={tp.id} className="prf-row" onClick={() => onOpen(tp.id)}>
               <span className="prf-row-icon" aria-hidden>{tp.icon}</span>
               <span className="prf-row-words">
                 <span className="prf-row-title">{tp.short || tp.title}</span>
@@ -391,8 +405,8 @@ function ProofRoomFeature({ onOpen }) {
             </button>
           ))}
         </div>
-        {mine.length > shown.length && <div className="prf-more">{mine.length - shown.length === 1 ? t('+ 1 more topic') : t('+ {n} more topics', { n: mine.length - shown.length })}</div>}
-        <button className="btn prf-cta" onClick={onOpen}>{t('Open the Proof Room →')}</button>
+        {rest.length > shown.length && <div className="prf-more">{rest.length - shown.length === 1 ? t('+ 1 more topic') : t('+ {n} more topics', { n: rest.length - shown.length })}</div>}
+        <button className="btn prf-cta" onClick={() => onOpen()}>{t('Open the Proof Room →')}</button>
       </div>
     </div>
   )

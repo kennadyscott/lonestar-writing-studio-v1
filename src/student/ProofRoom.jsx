@@ -272,10 +272,11 @@ export function topicStatus(tp, progress) {
  * in on their own once there are enough topics to need them. Opening a topic
  * walks its path on this same page, and a worksheet runs here too.
  */
-export default function ProofRoom({ grade = 5, onBack, onChange }) {
+export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, onChange }) {
   const t = useT()
   const say = useSay()
-  const [topicId, setTopicId] = useState(null)
+  // Opened from the Practice tab on one path, the page starts on that path.
+  const [topicId, setTopicId] = useState(initialTopicId)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
   const [raw, setRaw] = useState(null)      // whatever the publisher has published

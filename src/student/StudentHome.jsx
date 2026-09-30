@@ -9,6 +9,8 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
+import { topicStatus, ProofBar } from './ProofRoom.jsx'
+import { PROOF_DEMO_GRADE } from '../lib/proofDemo.js'
 import { writingStreak } from '../lib/streak.js'
 
 
@@ -337,6 +339,62 @@ function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
       </span>
       <span aria-hidden className="prac-chev">›</span>
     </button>
+  )
+}
+
+/* ---- Practice: the Proof Room gets the whole left side (2026-09-30) ---- */
+// Her painting across the top, then the student's own topics with their
+// progress, so the big space shows what is inside rather than a big picture.
+function ProofRoomFeature({ onOpen }) {
+  const t = useT()
+  const say = useSay()
+  const BASE = import.meta.env.BASE_URL || '/'
+  const [topics, setTopics] = useState(null)
+  useEffect(() => {
+    let live = true
+    const load = api.proofStudio ? api.proofStudio() : api.proofContent()
+    load.then((r) => live && setTopics(r.topics || [])).catch(() => api.proofContent().then((r) => live && setTopics(r.topics || [])).catch(() => live && setTopics([])))
+    return () => { live = false }
+  }, [])
+  let progress = {}
+  try { progress = JSON.parse(localStorage.getItem('proofProgress') || '{}') } catch { /* fine */ }
+  const mine = (topics || []).filter((tp) => Number(tp.grade) === PROOF_DEMO_GRADE)
+    .map((tp) => ({ tp, st: topicStatus(tp, progress) }))
+    .sort((a, b) => (a.st.finished ? 2 : a.st.started ? 0 : 1) - (b.st.finished ? 2 : b.st.started ? 0 : 1))
+  const shown = mine.slice(0, 5)
+  const skills = mine.reduce((n, { tp }) => n + (tp.core || []).length, 0)
+  return (
+    <div className="prf-card">
+      <button className="prf-hero" onClick={onOpen} style={{ '--prf-img': `url(${BASE}prac-proof.jpg)` }}>
+        <span className="prf-hero-words">
+          <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: PROOF_DEMO_GRADE })}</span>
+          <span className="prf-title">{t('The Proof Room')}</span>
+          <span className="prf-tag"><Glossed text={say("Find what's broken. Make it right.")} /></span>
+        </span>
+      </button>
+      <div className="prf-body">
+        <div className="prf-head">
+          <span className="proof-section-kicker">{t('Your topics')}</span>
+          {topics && <span className="prf-count">{mine.length === 1 ? t('1 topic') : t('{n} topics', { n: mine.length })} · {skills === 1 ? t('1 skill') : t('{n} skills', { n: skills })}</span>}
+        </div>
+        {!topics && <div className="prf-empty">{t('Loading…')}</div>}
+        {topics && !mine.length && <div className="prf-empty">{t('No topics for your grade yet.')}</div>}
+        <div className="prf-list">
+          {shown.map(({ tp, st }) => (
+            <button key={tp.id} className="prf-row" onClick={onOpen}>
+              <span className="prf-row-icon" aria-hidden>{tp.icon}</span>
+              <span className="prf-row-words">
+                <span className="prf-row-title">{tp.short || tp.title}</span>
+                <span className="prf-row-meta">{t(tp.domain || 'Proof Room')}</span>
+              </span>
+              <span className="prf-row-prog">{st.finished ? <span className="pill green">{t('✓ Path complete')}</span> : <ProofBar st={st} />}</span>
+            </button>
+          ))}
+        </div>
+        {mine.length > shown.length && <div className="prf-more">{mine.length - shown.length === 1 ? t('+ 1 more topic') : t('+ {n} more topics', { n: mine.length - shown.length })}</div>}
+        <button className="btn prf-cta" onClick={onOpen}>{t('Open the Proof Room →')}</button>
+      </div>
+    </div>
   )
 }
 
@@ -930,13 +988,16 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
         <div className="practice-view" style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div className="practice-grid">
-            <BigTask icon="🧾" title={t('The Proof Room')} sub={<Glossed text={say("Find what's broken. Make it right.")} />} bg="prac-proof.jpg" tint="#0b2a44" busy={busy} onClick={onProofRoom} />
-            <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />
-            <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />
-            <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} bg="prac-bank.jpg" tint="#4a3010" onClick={onBank} />
+          {/* The Proof Room takes the whole left side; the rest stack beside it (2026-09-30). */}
+          <div className="practice-split">
+            <ProofRoomFeature onOpen={onProofRoom} />
+            <div className="practice-side">
+              <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />
+              <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />
+              <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} bg="prac-bank.jpg" tint="#4a3010" onClick={onBank} />
+              <DailyBanner dc={dc} busy={busy} onGo={peer} />
+            </div>
           </div>
-          <DailyBanner dc={dc} busy={busy} onGo={peer} />
           <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />
         </div>
       )}

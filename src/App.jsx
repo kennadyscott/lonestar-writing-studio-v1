@@ -13,7 +13,7 @@ import LessonPage from './student/LessonPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
 import ProofRoom from './student/ProofRoom.jsx'
-const PROOF_DEMO_GRADE = 5
+import { PROOF_DEMO_GRADE } from './lib/proofDemo.js'
 import FeedbackReview from './student/FeedbackReview.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
 import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'

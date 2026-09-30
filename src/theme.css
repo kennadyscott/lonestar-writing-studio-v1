@@ -717,3 +717,41 @@ a { color: var(--link); }
   .proof-panel-head.forest { justify-content: flex-start; background: linear-gradient(0deg, rgba(2,40,62,.94), rgba(2,40,62,.8)), var(--proof-img) left center / cover no-repeat, #02283e; }
   .proof-panel-head.forest > div { flex: 1; }
 }
+
+/* ---- Practice: the Proof Room owns the left side, the rest stack on the right (2026-09-30) ---- */
+.practice-split { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; align-items: stretch; }
+.practice-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.practice-side .prac-tile { flex: 1; min-height: 104px; }
+.prf-card { display: flex; flex-direction: column; border-radius: 22px; overflow: hidden; background: #fff;
+  border: 1.5px solid rgba(233,185,58,.55); box-shadow: 0 0 22px rgba(245,180,0,.14), 0 8px 24px rgba(1,23,45,.18); min-width: 0; }
+.prf-hero { position: relative; display: flex; align-items: center; justify-content: flex-end; min-height: 190px; padding: 0; text-align: left; cursor: pointer; color: #fff;
+  background: linear-gradient(90deg, rgba(1,23,45,0) 18%, rgba(2,40,62,.85) 44%, #02283e 64%), var(--prf-img) left center / cover no-repeat, #02283e; border: 0; }
+.prf-hero-words { display: flex; flex-direction: column; gap: 4px; width: 56%; padding: 22px 26px 22px 0; }
+.prf-title { font-size: clamp(28px, 2.8vw, 38px); font-weight: 800; line-height: 1.05; }
+.prf-tag { font-size: 17px; font-weight: 700; color: #f5c542; }
+.prf-body { display: flex; flex-direction: column; gap: 10px; padding: 18px 20px 20px; flex: 1; }
+.prf-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.prf-count { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.prf-list { display: flex; flex-direction: column; gap: 8px; }
+.prf-row { display: grid; grid-template-columns: 42px minmax(0, 1fr) 150px; align-items: center; gap: 12px; padding: 9px 12px; border-radius: 12px; text-align: left;
+  background: #fbfdfe; border: 1.5px solid var(--line); cursor: pointer; transition: border-color .15s, background .15s; }
+.prf-row:hover { border-color: #9fd9ef; background: #fff; }
+.prf-row-icon { width: 42px; height: 42px; border-radius: 11px; background: #eef6f9; display: grid; place-items: center; font-size: 21px; }
+.prf-row-words { display: flex; flex-direction: column; min-width: 0; }
+.prf-row-title { font-size: 15px; font-weight: 800; color: #16386b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.prf-row-meta { font-size: 12px; color: var(--muted); font-weight: 600; }
+.prf-more { font-size: 13px; font-weight: 700; color: var(--muted); padding-left: 4px; }
+.prf-empty { padding: 18px; text-align: center; color: var(--muted); font-weight: 700; }
+.prf-cta { margin-top: auto; justify-content: center; padding: 13px 20px; font-size: 16px; border-radius: 14px; }
+/* the Daily Challenge in the narrower side column */
+.practice-side .daily-banner { min-height: 0; padding: 18px 18px 18px 36%; gap: 12px; }
+.practice-side .daily-title { font-size: 18px; }
+.practice-side .daily-dir { font-size: 13px; margin-bottom: 8px; }
+.practice-side .daily-cta { font-size: 15px; padding: 11px 18px; }
+@media (max-width: 1100px) { .practice-split { grid-template-columns: 1fr; } }
+@media (max-width: 560px) {
+  .prf-hero { background: linear-gradient(0deg, rgba(2,40,62,.94), rgba(2,40,62,.78)), var(--prf-img) left center / cover no-repeat, #02283e; min-height: 0; }
+  .prf-hero-words { width: 100%; padding: 20px; }
+  .prf-row { grid-template-columns: 38px minmax(0, 1fr); }
+  .prf-row-prog { grid-column: 2; }
+}

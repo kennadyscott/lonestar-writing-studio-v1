@@ -249,7 +249,7 @@ export function PathPreview({ topic: raw, onClose }) {
 }
 
 // What a student has done on one topic, read from the progress map.
-function topicStatus(tp, progress) {
+export function topicStatus(tp, progress) {
   const core = tp.core || []
   if (tp.sample) {
     // sample cards carry a made-up state so the shelf shows every kind of card
@@ -459,7 +459,7 @@ function MiniTopic({ tp, st, onOpen }) {
   )
 }
 
-function ProofBar({ st }) {
+export function ProofBar({ st }) {
   const t = useT()
   const pct = st.total ? Math.round((st.cleared / st.total) * 100) : 0
   return (

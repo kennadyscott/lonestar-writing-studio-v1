@@ -164,4 +164,9 @@ export const proof = {
   'For you': 'Para ti',
   'Other grades': 'Otros grados',
   'No topics for your grade yet.': 'Todavía no hay temas para tu grado.',
+  // Practice: Proof Room feature card
+  'Your topics': 'Tus temas',
+  '+ {n} more topics': '+ {n} temas más',
+  '+ 1 more topic': '+ 1 tema más',
+  'Open the Proof Room →': 'Abrir la Sala de Corrección →',
 }

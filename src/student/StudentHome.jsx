@@ -371,8 +371,8 @@ function ProofRoomFeature({ onOpen }) {
       <button className="prf-hero" onClick={() => onOpen()} style={{ '--prf-img': `url(${BASE}prac-proof.jpg)` }}>
         <span className="prf-hero-words">
           <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: PROOF_DEMO_GRADE })}</span>
-          <span className="prf-title">{t('The Proof Room')}</span>
-          <span className="prf-tag"><Glossed text={say("Find what's broken. Make it right.")} /></span>
+          <span className="prf-title">{t('The Lit Labyrinth')}</span>
+          <span className="prf-tag"><Glossed text={say('Master the Skill. Unlock the Path.')} /></span>
         </span>
       </button>
       <div className="prf-body">
@@ -386,7 +386,7 @@ function ProofRoomFeature({ onOpen }) {
           <button className="prf-resume" onClick={() => onOpen(resume.tp.id)}>
             <span className="prf-row-icon" aria-hidden>{resume.tp.icon}</span>
             <span className="prf-row-words">
-              <span className="prf-resume-kicker">{t('Pick up where you left off')}</span>
+              <span className="prf-resume-kicker">{t('Continue Your Path')}</span>
               <span className="prf-row-title">{resume.tp.short || resume.tp.title}</span>
               <span className="prf-row-meta">{t('Next stop: {title}', { title: resume.st.next?.title || '' })}</span>
             </span>
@@ -399,14 +399,14 @@ function ProofRoomFeature({ onOpen }) {
               <span className="prf-row-icon" aria-hidden>{tp.icon}</span>
               <span className="prf-row-words">
                 <span className="prf-row-title">{tp.short || tp.title}</span>
-                <span className="prf-row-meta">{t(tp.domain || 'Proof Room')}</span>
+                <span className="prf-row-meta">{t(tp.domain || 'The Lit Labyrinth')}</span>
               </span>
               <span className="prf-row-prog">{st.finished ? <span className="pill green">{t('✓ Path complete')}</span> : <ProofBar st={st} />}</span>
             </button>
           ))}
         </div>
         {rest.length > shown.length && <div className="prf-more">{rest.length - shown.length === 1 ? t('+ 1 more topic') : t('+ {n} more topics', { n: rest.length - shown.length })}</div>}
-        <button className="btn prf-cta" onClick={() => onOpen()}>{t('Open the Proof Room →')}</button>
+        <button className="btn prf-cta" onClick={() => onOpen()}>{t('Enter the Lit Labyrinth →')}</button>
       </div>
     </div>
   )

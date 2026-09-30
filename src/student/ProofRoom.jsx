@@ -341,9 +341,9 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
         {/* hero: her Proof Room painting, words on the navy */}
         <div className="proof-hero" style={{ '--proof-img': `url(${import.meta.env.BASE_URL || '/'}prac-proof.jpg)` }}>
           <div className="proof-hero-words">
-            <div className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: grade })}</div>
-            <h1 className="proof-title">{t('The Proof Room')}</h1>
-            <div className="proof-tag"><Glossed text={say("Find what's broken. Make it right.")} /></div>
+            <div className="proof-kicker">{t('Your Path Through ELA')} · {t('Grade {n}', { n: grade })}</div>
+            <h1 className="proof-title">{t('The Lit Labyrinth')}</h1>
+            <div className="proof-tag"><Glossed text={say('Master the Skill. Unlock the Path.')} /></div>
             <div className="proof-dir"><ScaffoldDirections text="Pick a topic and walk its path. Clear each skill and the next one opens. The last stop proves the whole topic." /></div>
             {raw && (
               <div className="proof-stats">
@@ -361,7 +361,7 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
           <div className="proof-resume">
             <span className="proof-resume-icon" aria-hidden>{resume.tp.icon}</span>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="proof-section-kicker">{t('Pick up where you left off')}</div>
+              <div className="proof-section-kicker">{t('Continue Your Path')}</div>
               <div className="proof-resume-title">{resume.tp.short || resume.tp.title}</div>
               <div className="proof-resume-next">{t('Next stop: {title}', { title: resume.st.next?.title || '' })}</div>
             </div>
@@ -422,7 +422,7 @@ function ShelfRows({ topics, onOpen }) {
   return (
     <div className="card proof-shelf">
       <div className="proof-shelf-head">
-        <div><div className="proof-section-kicker">{t('Topics')}</div><div className="proof-shelf-title">{t('Choose a path')}</div></div>
+        <div><div className="proof-section-kicker">{t('Topics')}</div><div className="proof-shelf-title">{t('Choose Your Next Route')}</div></div>
         <ShelfSearch value={query} onChange={setQuery} />
       </div>
       {strands.map((d) => {
@@ -498,7 +498,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   const pct = Math.round((cleared / topic.core.length) * 100)
 
   return (
-    <Shell onClose={onClose} sub={topic.title} onBack={onBack} topic={topic} kicker={`${t('The Proof Room')} · ${t(topic.domain || 'Path')}`}>
+    <Shell onClose={onClose} sub={topic.title} onBack={onBack} topic={topic} kicker={`${t('The Lit Labyrinth')} · ${t(topic.domain || 'Path')}`}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 22 }}>{topic.icon}</span>
         <div style={{ flex: 1, minWidth: 170 }}>
@@ -607,7 +607,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
     const coreIdx = topic ? topic.core.findIndex((w) => w.id === ws.id) : -1
     const nextCore = coreIdx >= 0 && coreIdx + 1 < (topic?.core.length || 0) ? topic.core[coreIdx + 1] : null
     return (
-      <Shell onClose={onClose} sub={ws.title} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Proof Room')}>
+      <Shell onClose={onClose} sub={ws.title} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Lit Labyrinth')}>
         <div style={{ textAlign: 'center' }}>
           <img src={passed ? KID_READER : KID_CLIPBOARD} alt=""
             style={{ height: 150, display: 'block', margin: '0 auto -6px' }} />
@@ -665,7 +665,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
   }
 
   return (
-    <Shell onClose={onClose} sub={ws.title} onBack={onQuit} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Proof Room')}>
+    <Shell onClose={onClose} sub={ws.title} onBack={onQuit} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Lit Labyrinth')}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14, flexWrap: 'wrap' }}>
         {ws.activities.map((a, i) => (
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
@@ -1425,7 +1425,7 @@ function Shell({ children, onClose, sub, onBack, topic, kicker }) {
         <div className="proof-panel-head forest" style={{ '--proof-img': `url(${art})` }}>
           {topic?.icon && <span className="proof-panel-icon" aria-hidden>{topic.icon}</span>}
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div className="proof-kicker">{kicker || t('The Proof Room')}</div>
+            <div className="proof-kicker">{kicker || t('The Lit Labyrinth')}</div>
             <div className="proof-panel-title">{sub}</div>
           </div>
         </div>
@@ -1439,7 +1439,7 @@ function Shell({ children, onClose, sub, onBack, topic, kicker }) {
         <div style={{ padding: '14px 20px', background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 62%,#0e2748 100%)', color: '#fff', display: 'flex', alignItems: 'center', gap: 11 }}>
           <span style={{ fontSize: 22 }}>🧾</span>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <b style={{ fontSize: 17 }}>{t('The Proof Room')}</b>
+            <b style={{ fontSize: 17 }}>{t('The Lit Labyrinth')}</b>
             <div style={{ fontSize: 12, color: '#a8dff5', fontWeight: 700 }}>{sub}</div>
           </div>
           {onBack && (

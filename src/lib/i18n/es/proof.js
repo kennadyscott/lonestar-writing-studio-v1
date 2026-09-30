@@ -169,4 +169,11 @@ export const proof = {
   '+ {n} more topics': '+ {n} temas más',
   '+ 1 more topic': '+ 1 tema más',
   'Open the Proof Room →': 'Abrir la Sala de Corrección →',
+  // The Proof Room is now The Lit Labyrinth (2026-09-30)
+  'The Lit Labyrinth': 'El Laberinto Literario',
+  'Master the Skill. Unlock the Path.': 'Domina la destreza. Desbloquea el camino.',
+  'Enter the Lit Labyrinth →': 'Entra al Laberinto Literario →',
+  'Continue Your Path': 'Continúa tu camino',
+  'Choose Your Next Route': 'Elige tu próxima ruta',
+  'Your Path Through ELA': 'Tu camino por ELA',
 }

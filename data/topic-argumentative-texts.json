@@ -122,7 +122,9 @@
        "model": "The author claims that schools should schedule outdoor learning days as part of the school year.",
        "video": "arg_claim-3"
       }
-     ]
+     ],
+     "art": "art-arg_claim-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -162,7 +164,9 @@
        ],
        "video": "arg_claim-5"
       }
-     ]
+     ],
+     "art": "art-arg_claim-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -335,7 +339,9 @@
        ],
        "video": "arg_audience-2"
       }
-     ]
+     ],
+     "art": "art-arg_audience-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -416,7 +422,9 @@
        "model": "Community leaders would most likely support it, because they are the ones asked to back the initiative.",
        "video": "arg_audience-4"
       }
-     ]
+     ],
+     "art": "art-arg_audience-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -635,7 +643,9 @@
        "model": "The author answers it by saying many organizers think esports give students another fun way to stay active and involved.",
        "video": "arg_facts-2"
       }
-     ]
+     ],
+     "art": "art-arg_facts-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -676,7 +686,9 @@
        ],
        "video": "arg_facts-4"
       }
-     ]
+     ],
+     "art": "art-arg_facts-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -870,7 +882,9 @@
        ],
        "video": "arg_sb_claim-2"
       }
-     ]
+     ],
+     "art": "art-arg_sb_claim-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -897,7 +911,9 @@
        ],
        "video": "arg_sb_claim-3"
       }
-     ]
+     ],
+     "art": "art-arg_sb_claim-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -1015,7 +1031,9 @@
        "answer": "potion makers",
        "video": "arg_sb_audience-5"
       }
-     ]
+     ],
+     "art": "art-arg_sb_audience-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -1191,7 +1209,9 @@
        ],
        "video": "arg_sb_facts-3"
       }
-     ]
+     ],
+     "art": "art-arg_sb_facts-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -1243,7 +1263,9 @@
        ],
        "video": "arg_sb_facts-6"
       }
-     ]
+     ],
+     "art": "art-arg_sb_facts-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -1323,7 +1345,9 @@
       ],
       "video": "arg_full-2"
      }
-    ]
+    ],
+    "art": "art-arg_full-1",
+    "artSide": "right"
    },
    {
     "kind": "passage",
@@ -1390,7 +1414,9 @@
       "model": "The intended audience is parents, because the passage speaks to them directly from the first word.",
       "video": "arg_full-5"
      }
-    ]
+    ],
+    "art": "art-arg_full-2",
+    "artSide": "left"
    },
    {
     "kind": "passage",

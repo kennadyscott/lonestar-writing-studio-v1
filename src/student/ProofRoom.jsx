@@ -6,6 +6,7 @@ import { prepareTopic, PASS_MARK, checkCompose, tokenize, parseHunt } from '../.
 import { useT } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.jsx'
 import { withSamples } from '../lib/proofSamples.js'
+import SHEET_ART from '../lib/sheetArt.json'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -81,6 +82,11 @@ export const ART_CHOICES = [
   { id: 'full-falconer', label: 'Falconer with a falcon' },
   { id: 'full-robot', label: 'Waving robot' },
 ]
+// The characters pulled from the other Grade 5 worksheets' PDFs (ClearSheets
+// EnglishPdf, 2026-09-29): art-<worksheet id>-<n>, each placed beside its own
+// worksheet's activities. Listed here so activities can show them and the
+// publisher's picture picker offers them.
+for (const c of SHEET_ART) ART_CHOICES.push(c)
 const ART_SRC = Object.fromEntries(ART_CHOICES.filter((c) => c.id).map((c) => [c.id, ART(c.id)]))
 const KID_CLIPBOARD = ART('verbs-clipboard')
 const KID_READER = ART('verbs-reader')
@@ -278,16 +284,17 @@ export default function ProofRoom({ grade = 5, onBack, onChange }) {
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
-  // On the local server the page also shows every path the ClearK12 Studio holds,
-  // with a published version standing in for its draft wherever one exists.
+  // On the local server the page also shows every path the ClearK12 Studio holds.
+  // Those win over the old publisher console's published copies (September
+  // snapshots that predate the worksheet pictures); the CMS is the backend now.
   useEffect(() => {
     let live = true
     const published = () => library.live().then((r) => r.topics || []).catch(() => [])
     const studio = () => (api.proofStudio ? api.proofStudio().then((r) => r.topics || []).catch(() => []) : Promise.resolve([]))
     Promise.all([published(), studio()])
       .then(([pub, all]) => {
-        const byId = new Map(all.map((tp) => [tp.id, tp]))
-        pub.forEach((tp) => byId.set(tp.id, tp))
+        const byId = new Map(pub.map((tp) => [tp.id, tp]))
+        all.forEach((tp) => byId.set(tp.id, tp))
         const merged = all.length ? [...byId.values()] : pub
         merged.forEach((tp) => registerMedia(tp.media))
         if (merged.length) return live && setRaw(merged)

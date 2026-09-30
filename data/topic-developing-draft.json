@@ -1173,7 +1173,9 @@
        "model": "As you can see, requiring every student to join a club would give them skills, friends and a place to belong.",
        "video": "dd_struct-org1"
       }
-     ]
+     ],
+     "art": "art-dd_struct-1",
+     "artSide": "right"
     },
     {
      "kind": "compose",
@@ -1484,7 +1486,9 @@
       "flag": "The video for this page fills in topic and audience and leaves purpose blank. The model answer is mine.",
       "video": "dd_full-org1"
      }
-    ]
+    ],
+    "art": "art-dd_full-1",
+    "artSide": "right"
    },
    {
     "kind": "compose",

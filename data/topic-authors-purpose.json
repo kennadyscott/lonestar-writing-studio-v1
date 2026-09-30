@@ -165,7 +165,9 @@
        "model": "show that hobbies can help young people grow and help others.",
        "video": "apx_apm-2"
       }
-     ]
+     ],
+     "art": "art-apx_apm-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -296,7 +298,9 @@
        "flag": "The video for question 4 leaves the answer blank — every other answer in this topic is written in. The model here is mine.",
        "video": "apx_apm-4"
       }
-     ]
+     ],
+     "art": "art-apx_apm-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -781,7 +785,9 @@
        ],
        "video": "apx_ts-4"
       }
-     ]
+     ],
+     "art": "art-apx_ts-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -967,7 +973,9 @@
        "model": "explain how food trucks changed and became more popular over time.",
        "video": "apx_ts-8"
       }
-     ]
+     ],
+     "art": "art-apx_ts-2",
+     "artSide": "left"
     }
    ]
   },
@@ -1183,7 +1191,9 @@
        ],
        "video": "apx_pgf-4"
       }
-     ]
+     ],
+     "art": "art-apx_pgf-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -1428,7 +1438,9 @@
        ],
        "video": "apx_sb_apm-2"
       }
-     ]
+     ],
+     "art": "art-apx_sb_apm-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -1555,7 +1567,9 @@
        "model": "It shows Benji choosing to laugh instead of hiding, which is exactly what the message says — a mistake became enjoyable because of his attitude.",
        "video": "apx_sb_apm-4"
       }
-     ]
+     ],
+     "art": "art-apx_sb_apm-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -2405,7 +2419,9 @@
       "model": "To help readers identify what each section of the passage is mainly about.",
       "video": "apx_full-3"
      }
-    ]
+    ],
+    "art": "art-apx_full-1",
+    "artSide": "right"
    },
    {
     "kind": "passage",
@@ -2576,7 +2592,9 @@
       "model": "To explain how restaurants solved the ketchup shortage.",
       "video": "apx_full-6"
      }
-    ]
+    ],
+    "art": "art-apx_full-2",
+    "artSide": "left"
    },
    {
     "kind": "passage",

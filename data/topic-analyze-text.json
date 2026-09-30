@@ -954,7 +954,9 @@
        ],
        "video": "at_rel-2"
       }
-     ]
+     ],
+     "art": "art-at_rel-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -1632,7 +1634,9 @@
        "answer": "beginning",
        "video": "at_sb_plot-4"
       }
-     ]
+     ],
+     "art": "art-at_sb_plot-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -2058,7 +2062,9 @@
        ],
        "video": "at_sb_rel-3"
       }
-     ]
+     ],
+     "art": "art-at_sb_rel-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -2175,7 +2181,9 @@
        ],
        "video": "at_sb_rel-6"
       }
-     ]
+     ],
+     "art": "art-at_sb_rel-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -2269,7 +2277,9 @@
       ],
       "video": "at_full-2"
      }
-    ]
+    ],
+    "art": "art-at_full-1",
+    "artSide": "right"
    },
    {
     "kind": "passage",
@@ -2376,7 +2386,9 @@
       ],
       "video": "at_full-4"
      }
-    ]
+    ],
+    "art": "art-at_full-2",
+    "artSide": "left"
    },
    {
     "kind": "passage",

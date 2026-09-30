@@ -239,7 +239,9 @@
        "model": "encourage Mina to focus on fixing the problem instead of feeling upset",
        "video": "ap_adages-3"
       }
-     ]
+     ],
+     "art": "art-ap_adages-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -340,7 +342,9 @@
        "model": "It means being too curious about something that is not yours can get you into trouble.",
        "video": "ap_adages-4"
       }
-     ]
+     ],
+     "art": "art-ap_adages-2",
+     "artSide": "left"
     },
     {
      "kind": "fix",
@@ -385,7 +389,9 @@
        ],
        "video": "ap_adages-8"
       }
-     ]
+     ],
+     "art": "art-ap_adages-3",
+     "artSide": "right"
     },
     {
      "kind": "fix",
@@ -405,7 +411,9 @@
        ],
        "video": "ap_adages-9"
       }
-     ]
+     ],
+     "art": "art-ap_adages-4",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -446,7 +454,9 @@
        ],
        "video": "ap_adages-11"
       }
-     ]
+     ],
+     "art": "art-ap_adages-5",
+     "artSide": "right"
     }
    ]
   },
@@ -677,7 +687,9 @@
        ],
        "video": "ap_puns-5"
       }
-     ]
+     ],
+     "art": "art-ap_puns-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -938,7 +950,9 @@
        ],
        "video": "ap_sb_adages-4"
       }
-     ]
+     ],
+     "art": "art-ap_sb_adages-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -978,7 +992,9 @@
        ],
        "video": "ap_sb_adages-6"
       }
-     ]
+     ],
+     "art": "art-ap_sb_adages-2",
+     "artSide": "left"
     },
     {
      "kind": "passage",
@@ -1181,7 +1197,9 @@
        ],
        "video": "ap_sb_puns-6"
       }
-     ]
+     ],
+     "art": "art-ap_sb_puns-1",
+     "artSide": "right"
     },
     {
      "kind": "passage",
@@ -1385,7 +1403,9 @@
        "model": "Baked goods leave crumbs, and crumby sounds like crummy, which means bad — so it is a joke about business being both.",
        "video": "ap_sb_puns-10"
       }
-     ]
+     ],
+     "art": "art-ap_sb_puns-2",
+     "artSide": "left"
     }
    ]
   }
@@ -1628,7 +1648,9 @@
       "answer": "nice",
       "video": "ap_full-5"
      }
-    ]
+    ],
+    "art": "art-ap_full-1",
+    "artSide": "right"
    },
    {
     "kind": "passage",
@@ -1769,7 +1791,9 @@
       "model": "It means that when something bad happens you should make the best of it and find something good in it.",
       "video": "ap_full-9"
      }
-    ]
+    ],
+    "art": "art-ap_full-2",
+    "artSide": "left"
    },
    {
     "kind": "passage",

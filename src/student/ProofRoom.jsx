@@ -249,6 +249,10 @@ export function PathPreview({ topic: raw, onClose }) {
 }
 
 // What a student has done on one topic, read from the progress map.
+// A branch or final-milestone worksheet is titled "SB: …" / "Full Topic: …" in
+// the content; its label already says what it is, so students see the plain name.
+export const clearingTitle = (ws) => String(ws?.title || '').replace(/^(SB|Skill Builder)\s*:\s*/i, '').replace(/^Full Topic\s*:\s*/i, '')
+
 export function topicStatus(tp, progress) {
   const core = tp.core || []
   if (tp.sample) {
@@ -344,11 +348,11 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
             <div className="proof-kicker">{t('Your Path Through ELA')} · {t('Grade {n}', { n: grade })}</div>
             <h1 className="proof-title">{t('The Lit Labyrinth')}</h1>
             <div className="proof-tag"><Glossed text={say('Master the Skill. Unlock the Path.')} /></div>
-            <div className="proof-dir"><ScaffoldDirections text="Pick a topic and walk its path. Clear each skill and the next one opens. The last stop proves the whole topic." /></div>
+            <div className="proof-dir"><ScaffoldDirections text="Pick a path and follow it. Reach each clearing and the next one opens. The final milestone proves the whole path." /></div>
             {raw && (
               <div className="proof-stats">
-                <span>{topics.length === 1 ? t('1 topic') : t('{n} topics', { n: topics.length })}</span>
-                <span>{skills === 1 ? t('1 skill') : t('{n} skills', { n: skills })}</span>
+                <span>{topics.length === 1 ? t('1 path') : t('{n} paths', { n: topics.length })}</span>
+                <span>{skills === 1 ? t('1 clearing') : t('{n} clearings', { n: skills })}</span>
               </div>
             )}
           </div>
@@ -363,7 +367,7 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
             <div style={{ flex: 1, minWidth: 0 }}>
               <div className="proof-section-kicker">{t('Continue Your Path')}</div>
               <div className="proof-resume-title">{resume.tp.short || resume.tp.title}</div>
-              <div className="proof-resume-next">{t('Next stop: {title}', { title: resume.st.next?.title || '' })}</div>
+              <div className="proof-resume-next">{t('Next clearing: {title}', { title: clearingTitle(resume.st.next) })}</div>
             </div>
             <ProofBar st={resume.st} />
             <button className="btn" onClick={() => setTopicId(resume.tp.id)}>{t('Keep going →')}</button>
@@ -375,7 +379,7 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
         )}
         {sampleNote && (
           <div className="proof-sample-note" role="status">
-            <span><b>{sampleNote}</b> — {t('this is a sample card, here to show how the shelf looks with 20 topics. It has no worksheets yet.')}</span>
+            <span><b>{sampleNote}</b> — {t('this is a sample card, here to show how the Labyrinth looks with 20 paths. It has no clearings yet.')}</span>
             <button className="btn ghost" onClick={() => setSampleNote(null)}>{t('Got it')}</button>
           </div>
         )}
@@ -390,7 +394,7 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
         background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
       <div className="proof-page">
         {onBack && <button className="backlink on-scene" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
-          {running ? t('← Back to the path') : topic ? t('← All topics') : t('← Back to Practice')}
+          {running ? t('← Back to the path') : topic ? t('← All paths') : t('← Back to Practice')}
         </button>}
         {body}
       </div>
@@ -408,7 +412,7 @@ const strandsOf = (topics) => {
 }
 function ShelfSearch({ value, onChange }) {
   const t = useT()
-  return <input className="proof-search" value={value} onChange={(e) => onChange(e.target.value)} placeholder={t('Search topics and skills…')} aria-label={t('Search topics and skills…')} />
+  return <input className="proof-search" value={value} onChange={(e) => onChange(e.target.value)} placeholder={t('Search paths and skills…')} aria-label={t('Search paths and skills…')} />
 }
 
 // One row per strand, cards scroll sideways; the fullest strand leads. Chosen over a
@@ -422,7 +426,7 @@ function ShelfRows({ topics, onOpen }) {
   return (
     <div className="card proof-shelf">
       <div className="proof-shelf-head">
-        <div><div className="proof-section-kicker">{t('Topics')}</div><div className="proof-shelf-title">{t('Choose Your Next Route')}</div></div>
+        <div><div className="proof-section-kicker">{t('Paths')}</div><div className="proof-shelf-title">{t('Choose Your Next Route')}</div></div>
         <ShelfSearch value={query} onChange={setQuery} />
       </div>
       {strands.map((d) => {
@@ -431,14 +435,14 @@ function ShelfRows({ topics, onOpen }) {
         const row = shown.filter(({ tp }) => (tp.domain || 'Other') === d).sort((a, b) => rank(a) - rank(b))
         return (
           <section key={d} className="pr-row">
-            <div className="pr-row-head"><h3>{t(d)}</h3><span>{row.length === 1 ? t('1 topic') : t('{n} topics', { n: row.length })}</span></div>
+            <div className="pr-row-head"><h3>{t(d)}</h3><span>{row.length === 1 ? t('1 path') : t('{n} paths', { n: row.length })}</span></div>
             <div className="pr-row-track">
               {row.map(({ tp, st }) => <MiniTopic key={tp.id} tp={tp} st={st} onOpen={() => onOpen(tp)} />)}
             </div>
           </section>
         )
       })}
-      {!shown.length && <div className="proof-empty">{t('No topics match that search.')}</div>}
+      {!shown.length && <div className="proof-empty">{t('No paths match that search.')}</div>}
     </div>
   )
 }
@@ -452,7 +456,7 @@ function MiniTopic({ tp, st, onOpen }) {
         {!coverOf(tp) && <span className="pr-mini-icon" aria-hidden>{tp.icon}</span>}
       </span>
       <span className="pr-mini-body">
-        <span className="proof-card-kicker">{(tp.core || []).length === 1 ? t('1 skill') : t('{n} skills', { n: (tp.core || []).length })}</span>
+        <span className="proof-card-kicker">{(tp.core || []).length === 1 ? t('1 clearing') : t('{n} clearings', { n: (tp.core || []).length })}</span>
         <span className="pr-mini-title">{tp.short || tp.title}</span>
         {st.finished ? <span className="pill green" style={{ alignSelf: 'flex-start' }}>{t('✓ Path complete')}</span> : <ProofBar st={st} />}
       </span>
@@ -464,7 +468,7 @@ export function ProofBar({ st }) {
   const t = useT()
   const pct = st.total ? Math.round((st.cleared / st.total) * 100) : 0
   return (
-    <div className="proof-bar" title={t('{n} of {total} skills cleared', { n: st.cleared, total: st.total })}>
+    <div className="proof-bar" title={t('{n} of {total} clearings reached', { n: st.cleared, total: st.total })}>
       <div className="proof-bar-track"><div style={{ width: `${pct}%` }} /></div>
       <b>{st.cleared} / {st.total}</b>
     </div>
@@ -503,7 +507,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
         <span style={{ fontSize: 22 }}>{topic.icon}</span>
         <div style={{ flex: 1, minWidth: 170 }}>
           <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .7, color: CYAN }}>{joinStandards(topic.standards)} · {t('GRADE {n}', { n: topic.grade })}</div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{t('{n} of {total} skills cleared', { n: cleared, total: topic.core.length })}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: NAVY }}>{t('{n} of {total} clearings reached', { n: cleared, total: topic.core.length })}</div>
         </div>
         <div style={{ flex: '1 1 140px', minWidth: 120, height: 9, background: '#e3ecf2', borderRadius: 6 }}>
           <div style={{ height: '100%', width: `${pct}%`, borderRadius: 6, background: 'linear-gradient(90deg,#35c3e8,#0f97c2)' }} />
@@ -545,16 +549,16 @@ function Stop({ stop, onPlay }) {
           color: passed || isSb || capstone ? '#fff' : locked ? '#9fb3c2' : '#a37400',
           border: passed || isSb || capstone ? '3px solid #fff' : locked ? '3px solid #dbe5ec' : '3px solid #e9b93a',
           boxShadow: passed || isSb || capstone ? '0 3px 10px rgba(20,60,90,.25)' : 'none' }}>
-          {passed ? '✓' : locked ? '🔒' : capstone ? '🏆' : isSb ? '🛠' : '📄'}
+          {passed ? '✓' : locked ? '🔒' : capstone ? '🏆' : isSb ? '🌿' : '📄'}
         </span>
       </span>
 
       <div style={{ flex: 1, minWidth: 0, background: bg, border, borderRadius: 14, padding: '12px 15px',
         display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', boxShadow: here ? '0 0 18px rgba(245,180,0,.22)' : 'none' }}>
         <div style={{ flex: 1, minWidth: 150 }}>
-          {isSb && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('SKILL BUILDER · REQUIRED FIRST')}</div>}
-          {capstone && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('FULL TOPIC · THE FINISH LINE')}</div>}
-          <div style={{ fontSize: 14.5, fontWeight: 800, color: locked ? '#8fa5b8' : NAVY, lineHeight: 1.25 }}>{ws.title}</div>
+          {isSb && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('BRANCH · TAKE THIS FIRST')}</div>}
+          {capstone && <div style={{ fontSize: 10, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('FINAL MILESTONE')}</div>}
+          <div style={{ fontSize: 14.5, fontWeight: 800, color: locked ? '#8fa5b8' : NAVY, lineHeight: 1.25 }}>{clearingTitle(ws)}</div>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{ws.skill}</div>
         </div>
 
@@ -568,11 +572,11 @@ function Stop({ stop, onPlay }) {
         </span>
 
         {locked ? (
-          <span style={{ fontSize: 12, fontWeight: 800, color: '#9fb3c2', whiteSpace: 'nowrap' }}>{t('Clear the stop above')}</span>
+          <span style={{ fontSize: 12, fontWeight: 800, color: '#9fb3c2', whiteSpace: 'nowrap' }}>{t('Reach the clearing above')}</span>
         ) : (
           <button className={passed ? 'btn ghost' : 'btn'} style={{ padding: '9px 18px', fontSize: 13, whiteSpace: 'nowrap' }}
             onClick={() => onPlay(ws)}>
-            {passed ? t('Run it again') : isSb ? t('Build it up →') : best > 0 ? t('Try again →') : t('Start →')}
+            {passed ? t('Run it again') : isSb ? t('Take the branch →') : best > 0 ? t('Try again →') : t('Start →')}
           </button>
         )}
       </div>
@@ -607,11 +611,11 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
     const coreIdx = topic ? topic.core.findIndex((w) => w.id === ws.id) : -1
     const nextCore = coreIdx >= 0 && coreIdx + 1 < (topic?.core.length || 0) ? topic.core[coreIdx + 1] : null
     return (
-      <Shell onClose={onClose} sub={ws.title} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Lit Labyrinth')}>
+      <Shell onClose={onClose} sub={clearingTitle(ws)} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Lit Labyrinth')}>
         <div style={{ textAlign: 'center' }}>
           <img src={passed ? KID_READER : KID_CLIPBOARD} alt=""
             style={{ height: 150, display: 'block', margin: '0 auto -6px' }} />
-          <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? t('Stop cleared!') : t('Not clean enough yet')}</h2>
+          <h2 style={{ margin: '4px 0 2px', fontSize: 24 }}>{passed ? t('Milestone reached!') : t('Not there yet')}</h2>
           <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 14px' }}>
             {t('{got} of {total} points · {n} activities', { got: result.got, total: ws.points, n: ws.activities.length })}
           </p>
@@ -623,7 +627,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
             <div style={{ position: 'absolute', left: `${PASS_MARK}%`, top: -5, bottom: -5, width: 2, background: NAVY }} />
           </div>
           <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700, maxWidth: 420, margin: '0 auto 16px', textAlign: 'right' }}>
-            {t('↑ {n}% clears the stop', { n: PASS_MARK })}
+            {t('↑ {n}% reaches the clearing', { n: PASS_MARK })}
           </div>
 
           {result.coins > 0 && (
@@ -634,9 +638,9 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
 
           {!passed && sb && (
             <div style={{ background: '#fff8ec', border: '1.5px solid #f0d9a8', borderRadius: 12, padding: '13px 16px', maxWidth: 440, margin: '0 auto', textAlign: 'left' }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('SKILL BUILDER UNLOCKED')}</div>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: '#a37400' }}>{t('BRANCH UNLOCKED')}</div>
               <div style={{ fontSize: 13.5, marginTop: 3, lineHeight: 1.5 }}>
-                <b>{sb.title}</b>{' '}{t('just dropped onto your path. Build the skill back up there, then come take this stop again.')}
+                <b>{clearingTitle(sb)}</b>{' '}{t('just opened on your path. Build the skill there, then come back to this clearing.')}
               </div>
             </div>
           )}
@@ -649,12 +653,12 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
             {passed && nextCore && (
               <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(nextCore) }}>
-                {t('Next stop: {title} →', { title: nextCore.title })}
+                {t('Next clearing: {title} →', { title: clearingTitle(nextCore) })}
               </button>
             )}
             {!passed && sb && (
               <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(sb) }}>
-                {t('🛠 Build it up: {title} →', { title: sb.title.replace('SB: ', '') })}
+                {t('🌿 Take the branch: {title} →', { title: clearingTitle(sb) })}
               </button>
             )}
             <button className={passed && nextCore ? 'btn ghost' : !passed && sb ? 'btn ghost' : 'btn'} onClick={onQuit}>{t('Back to the path')}</button>
@@ -665,7 +669,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
   }
 
   return (
-    <Shell onClose={onClose} sub={ws.title} onBack={onQuit} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Lit Labyrinth')}>
+    <Shell onClose={onClose} sub={clearingTitle(ws)} onBack={onQuit} topic={topic} kicker={topic ? (topic.short || topic.title) : t('The Lit Labyrinth')}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 14, flexWrap: 'wrap' }}>
         {ws.activities.map((a, i) => (
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
@@ -676,7 +680,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
           </span>
         ))}
         <span style={{ flex: 1 }} />
-        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{t('one worksheet · scored together')}</span>
+        <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{t('one clearing · scored together')}</span>
       </div>
 
       <SolutionPlayer id={video} onClose={() => setVideo(null)} />

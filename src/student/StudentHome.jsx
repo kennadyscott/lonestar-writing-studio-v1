@@ -9,7 +9,7 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
-import { topicStatus, ProofBar } from './ProofRoom.jsx'
+import { topicStatus, ProofBar, clearingTitle } from './ProofRoom.jsx'
 import { PROOF_DEMO_GRADE } from '../lib/proofDemo.js'
 import { writingStreak } from '../lib/streak.js'
 
@@ -377,18 +377,18 @@ function ProofRoomFeature({ onOpen }) {
       </button>
       <div className="prf-body">
         <div className="prf-head">
-          <span className="proof-section-kicker">{t('Your topics')}</span>
-          {topics && <span className="prf-count">{mine.length === 1 ? t('1 topic') : t('{n} topics', { n: mine.length })} · {skills === 1 ? t('1 skill') : t('{n} skills', { n: skills })}</span>}
+          <span className="proof-section-kicker">{t('Your paths')}</span>
+          {topics && <span className="prf-count">{mine.length === 1 ? t('1 path') : t('{n} paths', { n: mine.length })} · {skills === 1 ? t('1 clearing') : t('{n} clearings', { n: skills })}</span>}
         </div>
         {!topics && <div className="prf-empty">{t('Loading…')}</div>}
-        {topics && !mine.length && <div className="prf-empty">{t('No topics for your grade yet.')}</div>}
+        {topics && !mine.length && <div className="prf-empty">{t('No paths for your grade yet.')}</div>}
         {resume && (
           <button className="prf-resume" onClick={() => onOpen(resume.tp.id)}>
             <span className="prf-row-icon" aria-hidden>{resume.tp.icon}</span>
             <span className="prf-row-words">
               <span className="prf-resume-kicker">{t('Continue Your Path')}</span>
               <span className="prf-row-title">{resume.tp.short || resume.tp.title}</span>
-              <span className="prf-row-meta">{t('Next stop: {title}', { title: resume.st.next?.title || '' })}</span>
+              <span className="prf-row-meta">{t('Next clearing: {title}', { title: clearingTitle(resume.st.next) })}</span>
             </span>
             <span className="prf-resume-go"><ProofBar st={resume.st} /><b>{t('Keep going →')}</b></span>
           </button>
@@ -405,7 +405,7 @@ function ProofRoomFeature({ onOpen }) {
             </button>
           ))}
         </div>
-        {rest.length > shown.length && <div className="prf-more">{rest.length - shown.length === 1 ? t('+ 1 more topic') : t('+ {n} more topics', { n: rest.length - shown.length })}</div>}
+        {rest.length > shown.length && <div className="prf-more">{rest.length - shown.length === 1 ? t('+ 1 more path') : t('+ {n} more paths', { n: rest.length - shown.length })}</div>}
         <button className="btn prf-cta" onClick={() => onOpen()}>{t('Enter the Lit Labyrinth →')}</button>
       </div>
     </div>

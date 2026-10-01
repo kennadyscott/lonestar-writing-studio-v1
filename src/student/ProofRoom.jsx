@@ -814,6 +814,11 @@ function Stop({ stop, onPlay }) {
 }
 
 /* ---------------- one worksheet, start to finish ---------------- */
+// What each activity kind is called on the worksheet's step chips (and the Practice peek).
+export const kindLabel = (kind, t) => kind === 'hunt' ? t('Error hunt') : kind === 'maze' ? t('Verb maze') : kind === 'compose' ? t('Write it')
+  : kind === 'passage' ? t('Read & answer') : kind === 'quiz' ? t('Quiz') : kind === 'order' ? t('Put in order') : kind === 'match' ? t('Match')
+  : kind === 'sort' ? t('Sort') : t('Fill it in')
+
 export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext, preview }) {
   const t = useT()
   const [step, setStep] = useState(0)
@@ -904,8 +909,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
           <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 999, fontSize: 11.5, fontWeight: 800,
             background: i < step ? '#e6f6ee' : i === step ? '#e9f5fb' : '#eef3f6',
             color: i < step ? 'var(--good)' : i === step ? CYAN : 'var(--muted)' }}>
-            {i < step ? '✓' : i + 1} {a.kind === 'hunt' ? t('Error hunt') : a.kind === 'maze' ? t('Verb maze') : a.kind === 'compose' ? t('Write it') : a.kind === 'passage' ? t('Read & answer')
-              : a.kind === 'quiz' ? t('Quiz') : a.kind === 'order' ? t('Put in order') : a.kind === 'match' ? t('Match') : a.kind === 'sort' ? t('Sort') : t('Fill it in')}
+            {i < step ? '✓' : i + 1} {kindLabel(a.kind, t)}
           </span>
         ))}
         <span style={{ flex: 1 }} />

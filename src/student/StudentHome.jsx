@@ -9,7 +9,7 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
-import { topicStatus, clearingTitle, PathMap, buildStops } from './ProofRoom.jsx'
+import { topicStatus, clearingTitle, PathMap, buildStops, ActivityPreview, kindLabel } from './ProofRoom.jsx'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
@@ -346,6 +346,39 @@ function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
 /* ---- Practice: the Proof Room gets the whole left side (2026-09-30) ---- */
 // Her painting across the top, then the student's own topics with their
 // progress, so the big space shows what is inside rather than a big picture.
+/* PROTOTYPE A/B (2026-09-30): the activity a student does next, from the Practice map.
+ * A peeks at it on the map; B plays it right in the card. */
+const plainPassage = (text) => String(text || '').replace(/\[\[([^|\]]*)\|[^\]]*\]\]/g, '$1')
+function NextPeek({ ws, act, look, onStart }) {
+  const t = useT()
+  return (
+    <div className="prf-peek">
+      <div className="prf-peek-kicker">{t('Up next')} · {clearingTitle(ws)}</div>
+      <div className="prf-peek-steps">
+        {ws.activities.map((a, i) => <span key={i} className={i === 0 ? 'on' : ''}>{i + 1} {kindLabel(a.kind, t)}</span>)}
+      </div>
+      {act.brief && <div className="prf-peek-brief">{act.brief}</div>}
+      {act.text && <div className="prf-peek-text"><span>{plainPassage(act.text)}</span></div>}
+      <button className="btn prf-peek-go" onClick={onStart}>{look === 'B' ? t('Try it here →') : t('Start this clearing →')}</button>
+    </div>
+  )
+}
+function NextPlay({ ws, act, onMap, onDone }) {
+  const t = useT()
+  return (
+    <div className="prf-play">
+      <div className="prf-play-head">
+        <span className="prf-peek-kicker">{clearingTitle(ws)} · 1 {kindLabel(act.kind, t)}</span>
+        <span style={{ flex: 1 }} />
+        <button className="prf-play-map" onClick={onMap}>{t('← Back to the map')}</button>
+      </div>
+      <div className="prf-play-body">
+        <ActivityPreview act={act} onDone={onDone} doneLabel={t('Keep going in the Lit Labyrinth →')} />
+      </div>
+    </div>
+  )
+}
+
 function ProofRoomFeature({ onOpen }) {
   const t = useT()
   const say = useSay()
@@ -368,6 +401,10 @@ function ProofRoomFeature({ onOpen }) {
   // The path under way leads the card; the list holds the rest.
   const resume = mine.find(({ st }) => st.started && !st.finished)
   const lead = resume || mine[0]
+  const nextAct = lead?.st.next?.activities?.[0]
+  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.practiceNext') || 'A' } catch { return 'A' } })
+  const [playing, setPlaying] = useState(false)
+  const pickLook = (k) => { setLook(k); setPlaying(false); try { localStorage.setItem('lscr.practiceNext', k) } catch {} }
 
   // The path you are on, as its own little trail of clearings (her pick of three,
   // 2026-09-30). The other-path rows came out so the section fits above the fold.
@@ -389,8 +426,22 @@ function ProofRoomFeature({ onOpen }) {
               <div className="prf-c-line">
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
+                <span style={{ flex: 1 }} />
+                {/* PROTOTYPE: two ways to show the next activity (2026-09-30) */}
+                <div className="style-pick" role="group" aria-label="Next activity look">
+                  <span className="lbl">Next activity</span>
+                  {['A', 'B'].map((k) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => pickLook(k)}>{k}</button>)}
+                </div>
               </div>
-              <div className="prf-mini"><PathMap stops={buildStops(lead.tp, progress)} onPlay={() => onOpen(lead.tp.id)} /></div>
+              {look === 'B' && playing && nextAct
+                ? <NextPlay ws={lead.st.next} act={nextAct} onMap={() => setPlaying(false)} onDone={() => onOpen(lead.tp.id)} />
+                : (
+                  <div className="prf-mini">
+                    <PathMap stops={buildStops(lead.tp, progress)} onPlay={() => onOpen(lead.tp.id)}>
+                      {nextAct && <NextPeek ws={lead.st.next} act={nextAct} look={look} onStart={() => (look === 'B' ? setPlaying(true) : onOpen(lead.tp.id))} />}
+                    </PathMap>
+                  </div>
+                )}
               <div className="prf-c-foot">
                 {lead.st.next && <span>{t('Next clearing: {title}', { title: clearingTitle(lead.st.next) })}</span>}
                 <button className="btn" onClick={() => onOpen(lead.tp.id)}>{resume ? t('Keep going →') : t('Begin →')}</button>

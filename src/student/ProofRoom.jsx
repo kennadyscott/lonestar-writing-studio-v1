@@ -5,7 +5,6 @@ import { joinStandards } from '../../lib/content/taxonomy.mjs'
 import { prepareTopic, PASS_MARK, checkCompose, tokenize, parseHunt } from '../../server/proofRoom.mjs'
 import { useT } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.jsx'
-import { withSamples } from '../lib/proofSamples.js'
 import SHEET_ART from '../lib/sheetArt.json'
 
 /*
@@ -255,11 +254,6 @@ export const clearingTitle = (ws) => String(ws?.title || '').replace(/^(SB|Skill
 
 export function topicStatus(tp, progress) {
   const core = tp.core || []
-  if (tp.sample) {
-    // sample cards carry a made-up state so the shelf shows every kind of card
-    const cleared = Math.min(tp.sampleCleared || 0, core.length)
-    return { cleared, total: core.length, started: cleared > 0, finished: cleared > 0 && cleared === core.length, next: core[cleared] || null }
-  }
   const cleared = core.filter((w) => (progress[w.id] || {}).passed).length
   const ids = [...core.map((w) => w.id), tp.full?.id, ...Object.values(tp.skillBuilders || {}).map((w) => w.id)].filter(Boolean)
   const started = ids.some((id) => (progress[id] || {}).best > 0)
@@ -284,8 +278,7 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
-  const [sampleNote, setSampleNote] = useState(null)   // title of the sample card just tapped
-  const openTopic = (tp) => (tp.sample ? setSampleNote(tp.short || tp.title) : setTopicId(tp.id))
+  const openTopic = (tp) => setTopicId(tp.id)
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
@@ -337,20 +330,14 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
   } else {
     // Students only ever see topics at their own grade level.
     const mineOnly = (raw || []).filter((tp) => Number(tp.grade) === Number(grade))
-    const topics = withSamples(mineOnly, grade).map((tp) => ({ tp, st: topicStatus(tp, progress) }))
-    const resume = topics.find(({ tp, st }) => !tp.sample && st.started && !st.finished)
+    const topics = mineOnly.map((tp) => ({ tp, st: topicStatus(tp, progress) }))
+    const resume = topics.find(({ st }) => st.started && !st.finished)
     const skills = topics.reduce((n, { tp }) => n + (tp.core || []).length, 0)
     body = (
       <>
         {!raw && <div className="card" style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>}
         {/* the strand map: the page is the valley (her pick of three, 2026-09-30) */}
         {raw && <HomeStrands grade={grade} topics={topics} resume={resume} onOpen={openTopic} />}
-        {sampleNote && (
-          <div className="proof-sample-note" role="status">
-            <span><b>{sampleNote}</b> — {t('this is a sample card, here to show how the Labyrinth looks with 20 paths. It has no clearings yet.')}</span>
-            <button className="btn ghost" onClick={() => setSampleNote(null)}>{t('Got it')}</button>
-          </div>
-        )}
       </>
     )
   }
@@ -379,7 +366,7 @@ const STRAND_ICON = { Composition: '✍️', 'Foundational Language': '🔤', 'M
 
 function ContinueCard({ resume, topics, onOpen }) {
   const t = useT()
-  const first = resume || topics.find(({ tp }) => !tp.sample)
+  const first = resume || topics[0]
   if (!first) return null
   return (
     <div className="pm-card pm-next">
@@ -493,7 +480,6 @@ function MiniTopic({ tp, st, onOpen }) {
   return (
     <button className="pr-mini" onClick={onOpen}>
       <span className={`pr-mini-top${coverOf(tp) ? ' has-cover' : ''}`} style={coverOf(tp) ? { '--cover': `url(${coverOf(tp)})` } : undefined}>
-        {tp.sample && <span className="proof-card-sample">{t('Sample')}</span>}
         {!coverOf(tp) && <span className="pr-mini-icon" aria-hidden>{tp.icon}</span>}
       </span>
       <span className="pr-mini-body">

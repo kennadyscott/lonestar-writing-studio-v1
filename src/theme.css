@@ -719,9 +719,13 @@ a { color: var(--link); }
 }
 
 /* ---- Practice: the Proof Room owns the left side, the rest stack on the right (2026-09-30) ---- */
-.practice-split { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; align-items: stretch; }
-.practice-side { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.practice-side .prac-tile { flex: 1; min-height: 104px; }
+.practice-split { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.practice-side { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+/* the side cards, a size down (2026-09-30) */
+.practice-side .prac-tile { min-height: 84px; padding: 12px 16px 12px 38%; gap: 12px; }
+.practice-side .prac-title { font-size: 17px; }
+.practice-side .prac-sub { font-size: 12.5px; margin-top: 2px; }
+.practice-side .prac-icon { width: 42px; height: 42px; font-size: 18px; }
 .prf-card { display: flex; flex-direction: column; border-radius: 22px; overflow: hidden; background: #fff;
   border: 1.5px solid rgba(233,185,58,.55); box-shadow: 0 0 22px rgba(245,180,0,.14), 0 8px 24px rgba(1,23,45,.18); min-width: 0; }
 .prf-hero { position: relative; display: flex; align-items: center; justify-content: flex-end; min-height: 190px; padding: 0; text-align: left; cursor: pointer; color: #fff;
@@ -744,10 +748,11 @@ a { color: var(--link); }
 .prf-empty { padding: 18px; text-align: center; color: var(--muted); font-weight: 700; }
 .prf-cta { margin-top: auto; justify-content: center; padding: 13px 20px; font-size: 16px; border-radius: 14px; }
 /* the Daily Challenge in the narrower side column */
-.practice-side .daily-banner { min-height: 0; padding: 18px 18px 18px 36%; gap: 12px; }
-.practice-side .daily-title { font-size: 18px; }
-.practice-side .daily-dir { font-size: 13px; margin-bottom: 8px; }
-.practice-side .daily-cta { font-size: 15px; padding: 11px 18px; }
+.practice-side .daily-banner { min-height: 0; padding: 14px 14px 14px 36%; gap: 10px; }
+.practice-side .daily-title { font-size: 16px; }
+.practice-side .daily-dir { font-size: 12px; margin-bottom: 6px; }
+.practice-side .daily-cta { font-size: 13.5px; padding: 9px 14px; }
+.practice-side .daily-kicker { font-size: 10.5px; letter-spacing: 1.6px; }
 @media (max-width: 1100px) { .practice-split { grid-template-columns: 1fr; } }
 @media (max-width: 560px) {
   .prf-hero { background: linear-gradient(0deg, rgba(2,40,62,.94), rgba(2,40,62,.78)), var(--prf-img) left center / cover no-repeat, #02283e; min-height: 0; }
@@ -818,7 +823,8 @@ a { color: var(--link); }
 
 /* ---- the open path is the whole page: you are in the valley (2026-09-30) ---- */
 .pm-immersive { margin: 0 calc(50% - 50vw); position: relative; container-type: inline-size; }
-.pm-immersive .pm-map { border-radius: 0; box-shadow: none; max-width: none; }
+/* the whole valley fits above the fold; on a short screen it narrows and centers */
+.pm-immersive .pm-map { border-radius: 0; box-shadow: none; max-width: none; width: min(100%, calc((100vh - 168px) * 1.786)); margin: 0 auto; }
 .pm-immersive .pm-list { display: none; position: relative; margin: 0 16px; padding: 16px; }
 .pm-hud { position: absolute; left: 3.5%; top: 4.5%; max-width: 44%; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
 .pm-hud-title { margin: 4px 0 6px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(26px, 3.4cqw, 48px); line-height: 1.05; color: #fff; text-wrap: balance; }
@@ -826,7 +832,10 @@ a { color: var(--link); }
 .pm-hud-bar { margin-top: 8px; width: min(320px, 70%); height: 8px; border-radius: 999px; background: rgba(255,255,255,.25); overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,.4); }
 .pm-hud-bar > div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffd56b, #f5b400); }
 /* the cards stay over the sky: no taller than the top ~half of the scene */
-.pm-immersive .pm-side { position: absolute; right: 2.5cqw; top: 2.5cqw; width: clamp(240px, 24cqw, 320px); max-height: 29cqw; display: flex; flex-direction: column; }
+/* sized to the scene, not the page: the scene can be narrower than the screen */
+.pm-immersive { --scene-w: min(100cqw, (100vh - 168px) * 1.786); }
+.pm-immersive .pm-side { position: absolute; right: max(2.5cqw, calc((100cqw - var(--scene-w)) / 2 + 24px)); top: calc(var(--scene-w) * .025);
+  width: clamp(210px, calc(var(--scene-w) * .24), 320px); max-height: calc(var(--scene-w) * .29); display: flex; flex-direction: column; }
 .pm-immersive .pm-side .pm-next { flex-shrink: 0; }
 .pm-immersive .pm-card { background: rgba(255,255,255,.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-color: rgba(255,255,255,.7); box-shadow: 0 10px 28px rgba(1,23,45,.3); }
 .pm-immersive .pm-next { border: 2px solid #e9b93a; }
@@ -861,12 +870,13 @@ a { color: var(--link); }
 
 /* ---- Practice: the Lit Labyrinth card leads with the path you're on (2026-09-30) ---- */
 .prf-card { position: relative; }
-.prf-c-head { display: flex; flex-direction: column; gap: 2px; padding: 22px 22px 18px; color: #fff;
+.prf-c-head { display: flex; flex-direction: column; gap: 2px; padding: 14px 20px 12px; color: #fff;
   background: linear-gradient(90deg, rgba(2,40,62,.92), rgba(2,40,62,.55)), var(--prf-img) center 55% / cover no-repeat, #02283e; }
-.prf-c-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(26px, 2.6vw, 36px); font-weight: 700; line-height: 1.05; }
+.prf-c-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(22px, 2.1vw, 30px); font-weight: 700; line-height: 1.05; }
 .prf-c-lead { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 16px; background: #fffaf0; border: 2px solid #e9b93a; box-shadow: 0 0 16px rgba(245,180,0,.18); }
 .prf-c-path { font-family: Georgia, 'Times New Roman', serif; font-size: 22px; font-weight: 700; color: #10294a; }
-.prf-mini { container-type: inline-size; }
+/* the whole map fits above the fold: its width follows the screen's height */
+.prf-mini { container-type: inline-size; width: min(100%, calc((100vh - 360px) * 1.786)); margin: 0 auto; }
 .prf-mini .pm-map { border-radius: 12px; }
 .prf-mini .pm-pill { display: none; }
 .prf-c-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; font-weight: 700; color: #4a6074; }

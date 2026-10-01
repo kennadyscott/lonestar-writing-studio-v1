@@ -918,3 +918,17 @@ a { color: var(--link); }
   .prf-c-lead { padding: 10px 12px; gap: 6px; }
   .prf-c-head { padding-top: 10px; padding-bottom: 9px; }
 }
+
+/* her tweak: the side Share Wall post a size up, the Daily Challenge (Revision) a size down */
+.wall-side .wall-strip > div { padding: 13px 16px !important; }
+.wall-side .wall-post-av { width: 42px !important; height: 42px !important; font-size: 21px !important; }
+.wall-side .wall-post-name { font-size: 15.5px !important; }
+.wall-side .wall-post-meta { font-size: 12.5px !important; }
+.wall-side .wall-post-title { font-size: 17px !important; margin: 10px 0 4px !important; }
+.wall-side .wall-react { margin-top: 9px !important; }
+.practice-side .daily-banner { padding: 11px 12px 11px 34%; }
+.practice-side .daily-kicker { font-size: 9.5px; letter-spacing: 1.4px; gap: 7px; }
+.practice-side .daily-title { font-size: 14.5px; margin: 3px 0 2px; }
+.practice-side .daily-dir { font-size: 11.5px; margin-bottom: 6px; }
+.practice-side .daily-words > span:last-child { padding: 6px 12px !important; font-size: 11.5px !important; }
+.practice-side .daily-cta { font-size: 12.5px; padding: 7px 12px; border-radius: 12px; }

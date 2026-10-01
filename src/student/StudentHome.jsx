@@ -9,7 +9,7 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
-import { topicStatus, ProofBar, clearingTitle, StrandTrail, PathMap, buildStops } from './ProofRoom.jsx'
+import { topicStatus, ProofBar, clearingTitle, PathMap, buildStops } from './ProofRoom.jsx'
 import { PROOF_DEMO_GRADE } from '../lib/proofDemo.js'
 import { writingStreak } from '../lib/streak.js'
 
@@ -363,60 +363,13 @@ function ProofRoomFeature({ onOpen }) {
     .sort((a, b) => (a.st.finished ? 2 : a.st.started ? 0 : 1) - (b.st.finished ? 2 : b.st.started ? 0 : 1))
   // The path under way leads the card; the list holds the rest.
   const resume = mine.find(({ st }) => st.started && !st.finished)
-  const rest = mine.filter((x) => x !== resume)
-  const shown = rest.slice(0, resume ? 4 : 5)
-  const skills = mine.reduce((n, { tp }) => n + (tp.core || []).length, 0)
-  // Temporary A/B/C (2026-09-30): three looks for this card.
-  const [look, setLookState] = useState(() => { try { const v = localStorage.getItem('lscr.practiceLit'); return ['A', 'B', 'C'].includes(v) ? v : 'A' } catch { return 'A' } })
-  const setLook = (v) => { setLookState(v); try { localStorage.setItem('lscr.practiceLit', v) } catch { /* fine */ } }
-  const picker = (
-    <div className="style-pick prf-pick" role="group" aria-label={t('Lit Labyrinth card look')}>
-      <span className="lbl">{t('Look')}</span>
-      {['A', 'B', 'C'].map((v) => <button key={v} className={look === v ? 'on' : ''} aria-pressed={look === v} onClick={() => setLook(v)}>{v}</button>)}
-    </div>
-  )
   const lead = resume || mine[0]
-  const continueBlock = lead && (
-    <button className="prf-resume" onClick={() => onOpen(lead.tp.id)}>
-      <span className="prf-row-icon" aria-hidden>{lead.tp.icon}</span>
-      <span className="prf-row-words">
-        <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
-        <span className="prf-row-title">{lead.tp.short || lead.tp.title}</span>
-        {lead.st.next && <span className="prf-row-meta">{t('Next clearing: {title}', { title: clearingTitle(lead.st.next) })}</span>}
-      </span>
-      <span className="prf-resume-go"><ProofBar st={lead.st} /><b>{resume ? t('Keep going →') : t('Begin →')}</b></span>
-    </button>
-  )
 
-  // B: a window into the valley - one medallion per strand on the trail.
-  if (look === 'B') {
-    return (
-      <div className="prf-card prf-b">
-        {picker}
-        <div className="prf-scene">
-          <StrandTrail topics={mine} onPick={() => onOpen()}>
-            <div className="pm-hud prf-hud">
-              <div className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: PROOF_DEMO_GRADE })}</div>
-              <div className="pm-hud-title">{t('The Lit Labyrinth')}</div>
-              <div className="pm-hud-sub"><Glossed text={say('Master the Skill. Unlock the Path.')} /></div>
-            </div>
-          </StrandTrail>
-        </div>
-        <div className="prf-body">
-          {!topics && <div className="prf-empty">{t('Loading…')}</div>}
-          {continueBlock}
-          <button className="btn prf-cta" onClick={() => onOpen()}>{t('Enter the Lit Labyrinth →')}</button>
-        </div>
-      </div>
-    )
-  }
-
-  // C: the path you are on comes first, as its own little trail of clearings.
-  if (look === 'C') {
-    const others = mine.filter((x) => x !== lead).slice(0, 2)
-    return (
+  // The path you are on comes first, as its own little trail of clearings (her
+  // pick of three, 2026-09-30, over the painting-and-list card and a strand-map window).
+  const others = mine.filter((x) => x !== lead).slice(0, 2)
+  return (
       <div className="prf-card prf-c">
-        {picker}
         <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
           <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: PROOF_DEMO_GRADE })}</span>
           <span className="prf-c-title">{t('The Lit Labyrinth')}</span>
@@ -446,54 +399,6 @@ function ProofRoomFeature({ onOpen }) {
           <button className="btn ghost prf-cta" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>
       </div>
-    )
-  }
-
-  // A: her painting across the top, then the paths list.
-  return (
-    <div className="prf-card">
-      {picker}
-      <button className="prf-hero" onClick={() => onOpen()} style={{ '--prf-img': `url(${BASE}prac-proof.jpg)` }}>
-        <span className="prf-hero-words">
-          <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: PROOF_DEMO_GRADE })}</span>
-          <span className="prf-title">{t('The Lit Labyrinth')}</span>
-          <span className="prf-tag"><Glossed text={say('Master the Skill. Unlock the Path.')} /></span>
-        </span>
-      </button>
-      <div className="prf-body">
-        <div className="prf-head">
-          <span className="proof-section-kicker">{t('Your paths')}</span>
-          {topics && <span className="prf-count">{mine.length === 1 ? t('1 path') : t('{n} paths', { n: mine.length })} · {skills === 1 ? t('1 clearing') : t('{n} clearings', { n: skills })}</span>}
-        </div>
-        {!topics && <div className="prf-empty">{t('Loading…')}</div>}
-        {topics && !mine.length && <div className="prf-empty">{t('No paths for your grade yet.')}</div>}
-        {resume && (
-          <button className="prf-resume" onClick={() => onOpen(resume.tp.id)}>
-            <span className="prf-row-icon" aria-hidden>{resume.tp.icon}</span>
-            <span className="prf-row-words">
-              <span className="prf-resume-kicker">{t('Continue Your Path')}</span>
-              <span className="prf-row-title">{resume.tp.short || resume.tp.title}</span>
-              <span className="prf-row-meta">{t('Next clearing: {title}', { title: clearingTitle(resume.st.next) })}</span>
-            </span>
-            <span className="prf-resume-go"><ProofBar st={resume.st} /><b>{t('Keep going →')}</b></span>
-          </button>
-        )}
-        <div className="prf-list">
-          {shown.map(({ tp, st }) => (
-            <button key={tp.id} className="prf-row" onClick={() => onOpen(tp.id)}>
-              <span className="prf-row-icon" aria-hidden>{tp.icon}</span>
-              <span className="prf-row-words">
-                <span className="prf-row-title">{tp.short || tp.title}</span>
-                <span className="prf-row-meta">{t(tp.domain || 'The Lit Labyrinth')}</span>
-              </span>
-              <span className="prf-row-prog">{st.finished ? <span className="pill green">{t('✓ Path complete')}</span> : <ProofBar st={st} />}</span>
-            </button>
-          ))}
-        </div>
-        {rest.length > shown.length && <div className="prf-more">{rest.length - shown.length === 1 ? t('+ 1 more path') : t('+ {n} more paths', { n: rest.length - shown.length })}</div>}
-        <button className="btn prf-cta" onClick={() => onOpen()}>{t('Enter the Lit Labyrinth →')}</button>
-      </div>
-    </div>
   )
 }
 

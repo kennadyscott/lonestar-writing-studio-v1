@@ -859,16 +859,8 @@ a { color: var(--link); }
 .lh-wrap { flex-wrap: wrap; overflow: visible; }
 @media (max-width: 680px) { .lh-strands .pm-map { display: block; } }
 
-/* ---- Practice: Lit Labyrinth card, three looks (temporary A/B/C, 2026-09-30) ---- */
+/* ---- Practice: the Lit Labyrinth card leads with the path you're on (2026-09-30) ---- */
 .prf-card { position: relative; }
-.prf-pick { position: absolute; top: 10px; right: 10px; z-index: 5; }
-/* B: a window into the valley */
-.prf-scene { container-type: inline-size; }
-.prf-scene .pm-map { border-radius: 0; }
-.prf-hud { max-width: 46%; }
-.prf-hud .pm-hud-title { font-size: clamp(24px, 4.6cqw, 40px); }
-.prf-b .prf-body { gap: 12px; }
-/* C: the path you're on first */
 .prf-c-head { display: flex; flex-direction: column; gap: 2px; padding: 22px 22px 18px; color: #fff;
   background: linear-gradient(90deg, rgba(2,40,62,.92), rgba(2,40,62,.55)), var(--prf-img) center 55% / cover no-repeat, #02283e; }
 .prf-c-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(26px, 2.6vw, 36px); font-weight: 700; line-height: 1.05; }

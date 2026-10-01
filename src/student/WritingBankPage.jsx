@@ -6,8 +6,8 @@ import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
 /*
  * Writing Bank — every piece a student has written in one place: their free
  * writes and quick writes (revise, publish, share to the Writing Wall, or
- * discard) and, since 2026-10-01, the teacher's assignments they have started
- * (keep writing, or see the feedback once turned in — never publish/discard).
+ * discard) and, since 2026-10-01, the teacher's assignments once they are
+ * turned in (see the feedback — never publish/discard).
  */
 
 const BK = (import.meta.env.BASE_URL || '/') + 'bank/'
@@ -62,7 +62,8 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
   const pieces = state.submissions
     .filter((s) => s.studentId === me.id && !s.isPeerRevision)
     .map((sub) => ({ sub, a: state.assignments.find((a) => a.id === sub.assignmentId) }))
-    .filter(({ a }) => a)
+    // teacher assignments land here once turned in (her call, 2026-10-01); drafts stay on Home
+    .filter(({ sub, a }) => a && (['free', 'quick'].includes(a.genre) || sub.completedAt))
     .map(({ sub, a }) => {
       const kind = ['free', 'quick'].includes(a.genre) ? a.genre : 'assign'
       const last = sub.drafts[sub.drafts.length - 1]
@@ -207,7 +208,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
               : pieces.length === 0
                 ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
                 : type === 'assign'
-                  ? 'No assignments started yet. Open one from your Home page and it shows up here.'
+                  ? 'No assignments turned in yet. Finish one from your Home page and it shows up here.'
                   : type === 'quick'
                   ? 'No Quick Writes yet. Finish one and it shows up here.'
                   : type === 'free'

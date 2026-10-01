@@ -878,9 +878,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   })
   const setHomeTab = (v) => { setHomeTabState(v); try { sessionStorage.setItem('lscr.homeTab', v) } catch { /* fine */ } }
   const tab = ['home', 'practice', 'data'].includes(homeTab) ? homeTab : 'home'
-  // PROTOTYPE A/B/C (2026-09-30): how far to quiet the Practice page so the Lit Labyrinth leads.
-  const [clean, setCleanState] = useState(() => { try { return localStorage.getItem('lscr.practiceClean') || 'A' } catch { return 'A' } })
-  const setClean = (k) => { setCleanState(k); try { localStorage.setItem('lscr.practiceClean', k) } catch { /* fine */ } }
   const TABS = [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']]
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
@@ -958,7 +955,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`,
         // Practice already carries five paintings, so the forest behind it steps back.
-        opacity: tab === 'practice' ? (clean === 'A' ? .1 : 0) : .22, transition: 'opacity .3s' }} />
+        opacity: tab === 'practice' ? .1 : .22, transition: 'opacity .3s' }} />
       {game?.key === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} payHere={!game?.category} />
         : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}
@@ -1015,11 +1012,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
 
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
-        <div className="practice-view" data-clean={clean} style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div className="style-pick clean-pick" role="group" aria-label="Clean-up option">
-            <span className="lbl">Clean up</span>
-            {['A', 'B', 'C'].map((k) => <button key={k} className={clean === k ? 'on' : ''} aria-pressed={clean === k} onClick={() => setClean(k)}>{k}</button>)}
-          </div>
+        // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
+        <div className="practice-view" data-clean="" style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
           <div className="practice-split">
             <ProofRoomFeature onOpen={onProofRoom} />

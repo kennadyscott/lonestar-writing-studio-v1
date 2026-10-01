@@ -947,25 +947,21 @@ a { color: var(--link); }
   background: #fbfdfe; border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; }
 .prf-peek-go { align-self: flex-start; padding: 8px 14px; font-size: 13px; }
 
-/* ---- PROTOTYPE A/B/C: quiet the Practice page so the Lit Labyrinth leads (2026-09-30) ----
-   A  white side cards, no paintings; the forest stays faint behind
-   B  one white panel for everything else; plain banner; no gold frame; no forest
-   C  navy side cards, no paintings; the Lit Labyrinth unchanged; no forest */
-.clean-pick { position: absolute; left: 0; top: -54px; z-index: 2; }
-
-/* A + B: white cards */
-.practice-view:is([data-clean="A"], [data-clean="B"]) .prac-tile { padding: 12px 16px; color: #10294a; background: #fff;
+/* ---- The quiet Practice page (her pick 2026-10-01: A's white side cards + B's clean
+   Lit Labyrinth block). No paintings on the side cards; Pip is a small avatar; the
+   forest stays faint behind; the Lit Labyrinth card has a plain navy banner and no
+   gold frame round the map, so the map is the one picture that leads. ---- */
+.practice-view[data-clean] .prac-tile { padding: 12px 16px; color: #10294a; background: #fff;
   border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .prac-title { text-shadow: none; }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .prac-sub { color: var(--muted); }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .prac-chev { color: #9db0c0; }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .prac-icon { background: #eef6f9; border: none; }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .practice-side .daily-banner { color: #10294a; background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .daily-kicker { color: #0f97c2; }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .daily-dir { color: var(--muted); }
-.practice-view:is([data-clean="A"], [data-clean="B"]) .daily-cta { background: var(--navy); border: none; box-shadow: none; }
+.practice-view[data-clean] .prac-title { text-shadow: none; }
+.practice-view[data-clean] .prac-sub { color: var(--muted); }
+.practice-view[data-clean] .prac-chev { color: #9db0c0; }
+.practice-view[data-clean] .prac-icon { background: #eef6f9; border: none; }
+.practice-view[data-clean] .practice-side .daily-banner { color: #10294a; background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
+.practice-view[data-clean] .daily-kicker { color: #0f97c2; }
+.practice-view[data-clean] .daily-dir { color: var(--muted); }
+.practice-view[data-clean] .daily-cta { background: var(--navy); border: none; box-shadow: none; }
 
-/* every option: no paintings on the side cards; Pip shrinks to an avatar */
 .practice-view[data-clean] .prac-art { display: none; }
 .practice-view[data-clean] .practice-side .prac-tile { padding: 12px 16px; min-height: 0; }
 .practice-view[data-clean] .practice-side .prac-icon { width: 40px; height: 40px; font-size: 17px; }
@@ -974,21 +970,10 @@ a { color: var(--link); }
   background: var(--daily-img) 18% 22% / 300% auto no-repeat, #1a2a5a; box-shadow: 0 0 0 2px #f0b429; }
 .practice-view[data-clean] .practice-side .daily-words > span:last-child { box-shadow: none !important; }
 
-/* C: navy cards, flat */
-.practice-view[data-clean="C"] .prac-tile { background: #0d2e49; box-shadow: none; }
-.practice-view[data-clean="C"] .practice-side .daily-banner { background: #111a4a; }
-.practice-view[data-clean="C"] .daily-cta { box-shadow: none; }
+.practice-view[data-clean] .prf-c-head { background: #02283e; }
+.practice-view[data-clean] .prf-c-lead { background: transparent; border: none; box-shadow: none; padding: 4px 0 0; }
 
-/* B: one panel; only the map carries a picture */
-.practice-view[data-clean="B"] .practice-side { gap: 0; background: #fff; border: 1px solid var(--line); border-radius: 20px; overflow: hidden;
-  box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view[data-clean="B"] .practice-side > * { border: none !important; border-radius: 0 !important; box-shadow: none !important; }
-.practice-view[data-clean="B"] .practice-side > * + * { border-top: 1px solid var(--line) !important; }
-.practice-view[data-clean="B"] .practice-side .prac-tile:hover { transform: none; background: #f6fafc; }
-.practice-view[data-clean="B"] .prf-c-head { background: #02283e; }
-.practice-view[data-clean="B"] .prf-c-lead { background: transparent; border: none; box-shadow: none; padding: 4px 0 0; }
-
-/* her ask (2026-09-30): the side Share Wall bigger in every clean-up option —
+/* her ask (2026-09-30): the side Share Wall bigger —
    it fills the rest of the column so both columns end together */
 .practice-view[data-clean] .practice-split { align-items: stretch; }
 .practice-view[data-clean] .practice-side .wall-side { flex: 1; display: flex; flex-direction: column; padding: 16px 18px !important; }
@@ -1011,6 +996,7 @@ a { color: var(--link); }
   .practice-view[data-clean] .wall-side .wall-post-title { font-size: 17px !important; margin: 8px 0 2px !important; }
   .practice-view[data-clean] .wall-side .wall-react { margin-top: 6px !important; }
 }
+/* 720px-tall screens: the side Share Wall keeps just its header + View all */
 @media (min-width: 1101px) and (max-height: 730px) {
-  .practice-view:is([data-clean="A"], [data-clean="C"]) .wall-side .wall-strip { display: none; }
+  .practice-view[data-clean] .wall-side .wall-strip { display: none; }
 }

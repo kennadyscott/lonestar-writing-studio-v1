@@ -9,7 +9,7 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
-import { topicStatus, ProofBar, clearingTitle, PathMap, buildStops } from './ProofRoom.jsx'
+import { topicStatus, clearingTitle, PathMap, buildStops } from './ProofRoom.jsx'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
@@ -369,22 +369,27 @@ function ProofRoomFeature({ onOpen }) {
   const resume = mine.find(({ st }) => st.started && !st.finished)
   const lead = resume || mine[0]
 
-  // The path you are on comes first, as its own little trail of clearings (her
-  // pick of three, 2026-09-30, over the painting-and-list card and a strand-map window).
-  const others = mine.filter((x) => x !== lead).slice(0, 2)
+  // The path you are on, as its own little trail of clearings (her pick of three,
+  // 2026-09-30). The other-path rows came out so the section fits above the fold.
   return (
       <div className="prf-card prf-c">
         <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
+          <div className="prf-c-words">
           <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</span>
           <span className="prf-c-title">{t('The Lit Labyrinth')}</span>
+          </div>
+          {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
+          <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>
         <div className="prf-body">
           {!topics && <div className="prf-empty">{t('Loading…')}</div>}
           {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
           {lead && (
             <div className="prf-c-lead">
-              <div className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</div>
-              <div className="prf-c-path">{lead.tp.short || lead.tp.title}</div>
+              <div className="prf-c-line">
+                <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
+                <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
+              </div>
               <div className="prf-mini"><PathMap stops={buildStops(lead.tp, progress)} onPlay={() => onOpen(lead.tp.id)} /></div>
               <div className="prf-c-foot">
                 {lead.st.next && <span>{t('Next clearing: {title}', { title: clearingTitle(lead.st.next) })}</span>}
@@ -392,16 +397,6 @@ function ProofRoomFeature({ onOpen }) {
               </div>
             </div>
           )}
-          <div className="prf-list">
-            {others.map(({ tp, st }) => (
-              <button key={tp.id} className="prf-row" onClick={() => onOpen(tp.id)}>
-                <span className="prf-row-icon" aria-hidden>{tp.icon}</span>
-                <span className="prf-row-words"><span className="prf-row-title">{tp.short || tp.title}</span><span className="prf-row-meta">{t(tp.domain || 'The Lit Labyrinth')}</span></span>
-                <span className="prf-row-prog">{st.finished ? <span className="pill green">{t('✓ Path complete')}</span> : <ProofBar st={st} />}</span>
-              </button>
-            ))}
-          </div>
-          <button className="btn ghost prf-cta" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>
       </div>
   )
@@ -501,18 +496,18 @@ function relTime(d, t) {
   return t('{n}w ago', { n: Math.floor(days / 7) })
 }
 
-function ShareWallStrip({ state, onChange, onViewAll }) {
+function ShareWallStrip({ state, onChange, onViewAll, side = false }) {
   const t = useT()
-  const wall = (state.shareWall || []).slice(0, 3)
+  const wall = (state.shareWall || []).slice(0, side ? 1 : 3)
   async function react(id, type) { await api.react(id, type); onChange && onChange() }
   if (!wall.length) return null
   return (
-    <div className="card" style={{ padding: '16px 18px' }}>
+    <div className={'card' + (side ? ' wall-side' : '')} style={{ padding: '16px 18px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 12 }}>
         <span style={{ fontSize: 20 }}>🌟</span>
-        <div style={{ flex: 1, minWidth: 200 }}>
+        <div style={{ flex: 1, minWidth: side ? 140 : 200 }}>
           <b style={{ fontSize: 16 }}>{t('Share Wall')}</b>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)' }}>
+          <div className="wall-dir-line" style={{ fontSize: 12.5, color: 'var(--muted)' }}>
             <Directions text="See what other students are writing — cheer them on with 👍 ❤️ 🎉" />
           </div>
         </div>
@@ -529,10 +524,10 @@ function ShareWallStrip({ state, onChange, onViewAll }) {
               </div>
             </div>
             <div style={{ fontSize: 14.5, fontWeight: 800, margin: '9px 0 5px', color: '#0d2f55' }}>{e.title}</div>
-            <div style={{ fontSize: 12.5, color: '#41586b', lineHeight: 1.5, flex: 1 }}>
+            <div className="wall-ex" style={{ fontSize: 12.5, color: '#41586b', lineHeight: 1.5, flex: 1 }}>
               {e.excerpt.slice(0, 120)}{e.excerpt.length > 120 ? '…' : ''}
             </div>
-            <div style={{ marginTop: 11 }}>
+            <div className="wall-react" style={{ marginTop: 11 }}>
               <ReactionBar entry={e} onReact={react} size="sm" />
             </div>
           </div>
@@ -997,7 +992,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
         <div className="practice-view" style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          {/* The Proof Room takes the whole left side; the rest stack beside it (2026-09-30). */}
+          {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
           <div className="practice-split">
             <ProofRoomFeature onOpen={onProofRoom} />
             <div className="practice-side">
@@ -1005,9 +1000,10 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
               <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />
               <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} bg="prac-bank.jpg" tint="#4a3010" onClick={onBank} />
               <DailyBanner dc={dc} busy={busy} onGo={peer} />
+              {/* the Share Wall fills the space under the side cards (her call, 2026-09-30) */}
+              <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} side />
             </div>
           </div>
-          <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} />
         </div>
       )}
 

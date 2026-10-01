@@ -867,7 +867,7 @@ a { color: var(--link); }
 
 /* ---- Practice: the Lit Labyrinth card leads with the path you're on (2026-09-30) ---- */
 .prf-card { position: relative; }
-.prf-c-head { display: flex; flex-direction: column; gap: 2px; padding: 14px 20px 12px; color: #fff;
+.prf-c-head { display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 20px 12px; color: #fff;
   background: linear-gradient(90deg, rgba(2,40,62,.92), rgba(2,40,62,.55)), var(--prf-img) center 55% / cover no-repeat, #02283e; }
 .prf-c-title { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(22px, 2.1vw, 30px); font-weight: 700; line-height: 1.05; }
 .prf-c-lead { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 16px; background: #fffaf0; border: 2px solid #e9b93a; box-shadow: 0 0 16px rgba(245,180,0,.18); }
@@ -884,3 +884,27 @@ a { color: var(--link); }
 
 .band-borrow { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.16);
   border: 1px dashed rgba(255,255,255,.5); font-size: 10px; letter-spacing: .4px; text-transform: none; color: #fff; vertical-align: 1px; }
+
+/* Share Wall in the Practice side column: posts stack in one column */
+.wall-side .wall-strip { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.wall-side .wall-strip > div { padding: 10px 13px !important; }
+.wall-side :is(.wall-ex, .wall-dir-line) { display: none; }
+.wall-side .wall-react { margin-top: 7px !important; }
+
+/* Practice card trimmed to fit above the fold (2026-09-30) */
+.prf-c-words { display: flex; flex-direction: column; gap: 2px; min-width: 0; position: relative; }
+.prf-c-all { position: relative; flex-shrink: 0; color: #fff; font-weight: 800; font-size: 14px; padding: 8px 14px; border-radius: 999px;
+  background: rgba(8,30,26,.55); border: 1px solid rgba(255,255,255,.45); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.prf-c-all:hover { background: rgba(8,30,26,.75); }
+.prf-c-all:focus-visible { outline: 3px solid #ffd56b; outline-offset: 2px; }
+.prf-c-line { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.wall-side { padding: 12px 14px !important; }
+.wall-side > div:first-child { margin-bottom: 8px !important; }
+/* side column: the coin badge and the Start button share one row */
+.practice-side .daily-banner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 10px; row-gap: 0; }
+.practice-side .daily-words { display: contents; }
+.practice-side :is(.daily-kicker, .daily-title, .daily-dir) { grid-column: 1 / -1; position: relative; }
+.practice-side .daily-words > span:last-child { position: relative; padding: 8px 14px !important; font-size: 12.5px !important; }
+.practice-side .daily-cta { justify-self: start; }
+.practice-side { gap: 8px; }
+.practice-side .prac-tile { min-height: 78px; padding-top: 10px; padding-bottom: 10px; }

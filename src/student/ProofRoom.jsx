@@ -6,6 +6,7 @@ import { prepareTopic, PASS_MARK, checkCompose, tokenize, parseHunt } from '../.
 import { useT } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.jsx'
 import SHEET_ART from '../lib/sheetArt.json'
+import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -270,7 +271,7 @@ export function topicStatus(tp, progress) {
  * in on their own once there are enough topics to need them. Opening a topic
  * walks its path on this same page, and a worksheet runs here too.
  */
-export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, onChange }) {
+export default function ProofRoom({ band = '5-7', initialTopicId = null, onBack, onChange }) {
   const t = useT()
   const say = useSay()
   // Opened from the Practice tab on one path, the page starts on that path.
@@ -329,7 +330,9 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
     body = <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={() => setTopicId(null)} />
   } else {
     // Students only ever see topics at their own grade level.
-    const mineOnly = (raw || []).filter((tp) => Number(tp.grade) === Number(grade))
+    const grade = bandGrade(band, raw)
+    const shown = pathsGrade(band, raw)
+    const mineOnly = (raw || []).filter((tp) => Number(tp.grade) === shown)
     const topics = mineOnly.map((tp) => ({ tp, st: topicStatus(tp, progress) }))
     const resume = topics.find(({ st }) => st.started && !st.finished)
     const skills = topics.reduce((n, { tp }) => n + (tp.core || []).length, 0)
@@ -337,7 +340,7 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
       <>
         {!raw && <div className="card" style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>}
         {/* the strand map: the page is the valley (her pick of three, 2026-09-30) */}
-        {raw && <HomeStrands grade={grade} topics={topics} resume={resume} onOpen={openTopic} />}
+        {raw && <HomeStrands grade={grade} shown={shown} topics={topics} resume={resume} onOpen={openTopic} />}
       </>
     )
   }
@@ -380,12 +383,12 @@ function ContinueCard({ resume, topics, onOpen }) {
   )
 }
 
-function LabyrinthTitle({ grade, topics, skills }) {
+function LabyrinthTitle({ grade, shown, topics, skills }) {
   const t = useT()
   const say = useSay()
   return (
     <div className="pm-hud">
-      <div className="proof-kicker">{t('Your Path Through ELA')} · {t('Grade {n}', { n: grade })}</div>
+      <div className="proof-kicker">{t('Your Path Through ELA')} · {t('Grade {n}', { n: grade })}{shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</div>
       <h1 className="pm-hud-title">{t('The Lit Labyrinth')}</h1>
       <div className="pm-hud-sub"><Glossed text={say('Master the Skill. Unlock the Path.')} /></div>
       <div className="proof-stats">
@@ -442,7 +445,7 @@ export function StrandTrail({ topics, picked, onPick, children }) {
   )
 }
 
-function HomeStrands({ grade, topics, resume, onOpen }) {
+function HomeStrands({ grade, shown, topics, resume, onOpen }) {
   const t = useT()
   const info = strandInfo(topics)
   const [pick, setPick] = useState(() => (info.find((x) => x.cls === 'here') || info[0])?.d)
@@ -451,9 +454,12 @@ function HomeStrands({ grade, topics, resume, onOpen }) {
     <div className="lh-strands">
       <div className="pm-immersive">
         <StrandTrail topics={topics} picked={chosen?.d} onPick={setPick}>
-          <LabyrinthTitle grade={grade} topics={topics} skills={topics.reduce((m, { tp }) => m + (tp.core || []).length, 0)} />
+          <LabyrinthTitle grade={grade} shown={shown} topics={topics} skills={topics.reduce((m, { tp }) => m + (tp.core || []).length, 0)} />
         </StrandTrail>
-        <div className="pm-side"><ContinueCard resume={resume} topics={topics} onOpen={onOpen} /></div>
+        <div className="pm-side">
+          {topics.length ? <ContinueCard resume={resume} topics={topics} onOpen={onOpen} />
+            : <div className="pm-card"><div className="pm-card-head">{t('New paths are on the way')}</div><div className="pm-next-skill">{t('No Grade {n} paths are published yet.', { n: grade })}</div></div>}
+        </div>
       </div>
       {chosen && (
         <div className="card proof-shelf">

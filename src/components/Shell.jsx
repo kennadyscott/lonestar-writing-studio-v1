@@ -2,8 +2,9 @@ import React, { useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import { useLang, useT, LANGS } from '../lib/i18n/index.jsx'
 import { LEVELS } from '../lib/languageBridge.js'
+import { BANDS } from '../lib/gradeBand.js'
 
-export function TopBar({ who, onArcade, onLogo }) {
+export function TopBar({ who, onArcade, onLogo, band, onBand }) {
   const t = useT()
   const [menu, setMenu] = useState(false)
   return (
@@ -11,6 +12,17 @@ export function TopBar({ who, onArcade, onLogo }) {
       <button className="logo-chip" onClick={onLogo} title={t('Home')}>
         <img src={BRAND.logo} alt="LoneStar CR" />
       </button>
+
+      <div style={{ flex: 1, minWidth: 0 }} />
+
+      {onBand && (
+        <div className="style-pick band-pick" role="group" aria-label="Prototype grade band">
+          <span className="lbl">Prototype</span>
+          {BANDS.map((b) => (
+            <button key={b} className={b === band ? 'on' : ''} aria-pressed={b === band} onClick={() => onBand(b)}>{b}</button>
+          ))}
+        </div>
+      )}
 
       <div style={{ flex: 1, minWidth: 0 }} />
 

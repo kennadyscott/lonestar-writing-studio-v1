@@ -10,7 +10,8 @@ import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
 import { topicStatus, ProofBar, clearingTitle, PathMap, buildStops } from './ProofRoom.jsx'
-import { PROOF_DEMO_GRADE } from '../lib/proofDemo.js'
+import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
+import { useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
 
 
@@ -358,7 +359,10 @@ function ProofRoomFeature({ onOpen }) {
   }, [])
   let progress = {}
   try { progress = JSON.parse(localStorage.getItem('proofProgress') || '{}') } catch { /* fine */ }
-  const mine = (topics || []).filter((tp) => Number(tp.grade) === PROOF_DEMO_GRADE)
+  const band = useBandValue()
+  const grade = bandGrade(band, topics)
+  const shown = pathsGrade(band, topics)
+  const mine = (topics || []).filter((tp) => Number(tp.grade) === shown)
     .map((tp) => ({ tp, st: topicStatus(tp, progress) }))
     .sort((a, b) => (a.st.finished ? 2 : a.st.started ? 0 : 1) - (b.st.finished ? 2 : b.st.started ? 0 : 1))
   // The path under way leads the card; the list holds the rest.
@@ -371,11 +375,12 @@ function ProofRoomFeature({ onOpen }) {
   return (
       <div className="prf-card prf-c">
         <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
-          <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: PROOF_DEMO_GRADE })}</span>
+          <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</span>
           <span className="prf-c-title">{t('The Lit Labyrinth')}</span>
         </div>
         <div className="prf-body">
           {!topics && <div className="prf-empty">{t('Loading…')}</div>}
+          {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
           {lead && (
             <div className="prf-c-lead">
               <div className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</div>

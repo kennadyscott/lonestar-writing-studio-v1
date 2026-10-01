@@ -880,3 +880,52 @@ a { color: var(--link); }
 .prf-mini .pm-map { border-radius: 12px; }
 .prf-mini .pm-pill { display: none; }
 .prf-c-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 13.5px; font-weight: 700; color: #4a6074; }
+
+/* Prototype grade-band switch in the top bar (2026-09-30) */
+.band-pick button { min-width: 48px; font-variant-numeric: tabular-nums; }
+@media (max-width: 760px) { .band-pick .lbl { display: none; } }
+
+/* ---- Grade-band looks (prototype switch, 2026-09-30) ----
+   5-7 is the house look above. 2-4 goes bigger, rounder and brighter, with the
+   kid-game faces (Lilita One titles, Baloo 2 text). 8-12 goes quieter: a
+   literary serif, a dusk-toned valley, smaller medallions, tighter corners. */
+:root { --lab-title-font: Georgia, 'Times New Roman', serif; }
+
+[data-band="2-4"] body,
+[data-band="2-4"] button { font-family: 'Baloo 2', 'Manrope', system-ui, sans-serif; }
+[data-band="2-4"] :is(.pm-hud-title, .prf-c-title, .prf-c-path, .pm-card-head, .pm-next-title, .pm-name,
+  .proof-shelf-title, .prac-title, .daily-title, .prf-row-title, .proof-card-title) {
+  font-family: 'Lilita One', 'Baloo 2', system-ui, sans-serif; font-weight: 400; letter-spacing: .2px; }
+[data-band="2-4"] .pm-hud-title { font-size: clamp(30px, 4cqw, 56px); }
+[data-band="2-4"] .pm-name { font-size: clamp(12px, 1.7cqw, 17px); }
+[data-band="2-4"] .pm-node { --orb: clamp(40px, 7.4cqw, 74px); }
+[data-band="2-4"] .pm-node.branch { --orb: clamp(36px, 6.2cqw, 62px); }
+[data-band="2-4"] .pm-node.cap { --orb: clamp(46px, 8.4cqw, 84px); }
+[data-band="2-4"] .pm-trail-glow { stroke-width: 20; opacity: .7; }
+[data-band="2-4"] .pm-map { background: linear-gradient(180deg, rgba(255,240,200,.06), rgba(4,20,28,.12)), var(--pm-img) center / cover no-repeat, #0b2a22; }
+[data-band="2-4"] :is(.proof-kicker, .prf-resume-kicker, .pm-kicker, .daily-kicker, .proof-section-kicker) {
+  text-transform: none; letter-spacing: .3px; font-size: 14px; }
+[data-band="2-4"] :is(.prf-card, .daily-banner, .prac-tile) { border-radius: 28px; }
+[data-band="2-4"] .pm-card { border-radius: 22px; }
+[data-band="2-4"] .btn { border-radius: 999px; padding: 11px 20px; font-size: 15px; font-weight: 800; }
+[data-band="2-4"] .prf-c-lead { border-width: 3px; border-radius: 22px; }
+
+[data-band="8-12"] { --lab-title-font: 'Fraunces', Georgia, serif; }
+[data-band="8-12"] :is(.pm-hud-title, .prf-c-title, .prf-c-path, .pm-card-head, .pm-next-title, .pm-name, .proof-shelf-title) {
+  font-family: var(--lab-title-font); font-weight: 600; letter-spacing: -.01em; font-optical-sizing: auto; }
+[data-band="8-12"] .pm-name { font-size: clamp(10.5px, 1.3cqw, 13.5px); }
+[data-band="8-12"] .pm-node { --orb: clamp(30px, 5.4cqw, 54px); }
+[data-band="8-12"] .pm-node.branch { --orb: clamp(26px, 4.6cqw, 46px); }
+[data-band="8-12"] .pm-node.cap { --orb: clamp(36px, 6.4cqw, 64px); }
+[data-band="8-12"] .pm-trail-glow { stroke: #f2deb0; stroke-width: 10; opacity: .45; }
+[data-band="8-12"] .pm-map { background: linear-gradient(180deg, rgba(14,22,48,.38), rgba(6,10,26,.58)), var(--pm-img) center / cover no-repeat, #0b1626; }
+[data-band="8-12"] .pm-pill { background: rgba(8,14,30,.78); }
+[data-band="8-12"] :is(.proof-kicker, .prf-resume-kicker, .pm-kicker, .daily-kicker) { letter-spacing: 2.6px; font-size: 10.5px; }
+[data-band="8-12"] :is(.prf-card, .daily-banner, .prac-tile) { border-radius: 12px; }
+[data-band="8-12"] :is(.pm-card, .prf-c-lead, .prf-mini .pm-map) { border-radius: 8px; }
+[data-band="8-12"] .pm-map:not(.pm-immersive .pm-map) { border-radius: 10px; }
+[data-band="8-12"] .btn { border-radius: 6px; }
+[data-band="8-12"] .prf-c-lead { background: #f7f8fb; border: 1px solid #c9d2e0; box-shadow: none; }
+[data-band="8-12"] .prf-resume-kicker, [data-band="8-12"] .pm-kicker { color: #6b5a2e; }
+.band-borrow { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.16);
+  border: 1px dashed rgba(255,255,255,.5); font-size: 10px; letter-spacing: .4px; text-transform: none; color: #fff; vertical-align: 1px; }

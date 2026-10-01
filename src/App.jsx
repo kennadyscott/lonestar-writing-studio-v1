@@ -13,7 +13,7 @@ import LessonPage from './student/LessonPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
 import ProofRoom from './student/ProofRoom.jsx'
-import { PROOF_DEMO_GRADE } from './lib/proofDemo.js'
+import { useBand, BandContext } from './lib/gradeBand.js'
 import FeedbackReview from './student/FeedbackReview.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
 import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
@@ -32,6 +32,7 @@ export default function App() {
   const [publisher, setPublisher] = useState(false)
 
   const { setLang } = useLang()
+  const [band, setBand] = useBand()
   // A slower state fetch must not paint an older streak over one that just landed.
   const refreshGen = useRef(0)
   const refresh = useCallback(async () => {
@@ -92,9 +93,8 @@ export default function App() {
   } else if (view === 'wall') {
     body = <ShareWallTab state={state} me={me} onChange={refresh} onBack={goHome} />
   } else if (view === 'proof') {
-    // Students see only their own grade. The demo student is Grade 6 but every
-    // playable path is Grade 5, so the Proof Room demo runs at Grade 5 (her call, 2026-09-24).
-    body = <ProofRoom key={proofTopic || 'room'} grade={PROOF_DEMO_GRADE} initialTopicId={proofTopic} onBack={goHome} onChange={refresh} />
+    // Students see only their own grade; the prototype band switch picks it.
+    body = <ProofRoom key={(proofTopic || 'room') + band} band={band} initialTopicId={proofTopic} onBack={goHome} onChange={refresh} />
   } else if (view === 'bank') {
     body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onWall={() => setView('wall')} onChange={refresh} />
   } else {
@@ -102,12 +102,15 @@ export default function App() {
   }
 
   return (
+    <BandContext.Provider value={band}>
     <BridgeProvider level={me.supportLevel}>
     <div className="app">
       <TopBar
         who={who}
         onArcade={() => { setView('arcade'); setOpenSub(null) }}
         onLogo={goHome}
+        band={band}
+        onBand={setBand}
       />
       <div className="content">{body}</div>
       <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)}
@@ -115,5 +118,6 @@ export default function App() {
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
     </div>
     </BridgeProvider>
+    </BandContext.Provider>
   )
 }

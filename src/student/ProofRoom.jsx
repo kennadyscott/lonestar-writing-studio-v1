@@ -286,9 +286,6 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
   const [sampleNote, setSampleNote] = useState(null)   // title of the sample card just tapped
   const openTopic = (tp) => (tp.sample ? setSampleNote(tp.short || tp.title) : setTopicId(tp.id))
-  // Temporary A/B/C (2026-09-30): what the Lit Labyrinth's front page looks like.
-  const [home, setHomeState] = useState(() => { try { const v = localStorage.getItem('lscr.litHome'); return ['A', 'B', 'C'].includes(v) ? v : 'A' } catch { return 'A' } })
-  const setHome = (v) => { setHomeState(v); try { localStorage.setItem('lscr.litHome', v) } catch { /* fine */ } }
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
@@ -345,23 +342,9 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
     const skills = topics.reduce((n, { tp }) => n + (tp.core || []).length, 0)
     body = (
       <>
-        {raw && (
-          <div className="style-pick" role="group" aria-label={t('Front page layout')} style={{ alignSelf: 'flex-start' }}>
-            <span className="lbl">{t('Layout')}</span>
-            {['A', 'B', 'C'].map((v) => (
-              <button key={v} className={home === v ? 'on' : ''} aria-pressed={home === v} onClick={() => setHome(v)}>{v}</button>
-            ))}
-          </div>
-        )}
         {!raw && <div className="card" style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>}
-        {raw && home === 'A' && (
-          <>
-            <HomeGate grade={grade} topics={topics} skills={skills} resume={resume} onOpen={openTopic} />
-            <ShelfRows topics={topics} onOpen={openTopic} />
-          </>
-        )}
-        {raw && home === 'B' && <HomeStrands grade={grade} topics={topics} resume={resume} onOpen={openTopic} />}
-        {raw && home === 'C' && <HomeJournal grade={grade} topics={topics} skills={skills} resume={resume} progress={progress} onOpen={openTopic} />}
+        {/* the strand map: the page is the valley (her pick of three, 2026-09-30) */}
+        {raw && <HomeStrands grade={grade} topics={topics} resume={resume} onOpen={openTopic} />}
         {sampleNote && (
           <div className="proof-sample-note" role="status">
             <span><b>{sampleNote}</b> — {t('this is a sample card, here to show how the Labyrinth looks with 20 paths. It has no clearings yet.')}</span>
@@ -376,7 +359,7 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
     <PageMode.Provider value={true}>
       {/* the dashboard's enchanted-forest painting, just as soft (22%) */}
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        ...((topic && !running) || (!topic && !running && raw && home !== 'C')
+        ...((topic && !running) || (!topic && !running && raw)
           ? { background: `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg) center / cover no-repeat, #0b2a22`, filter: 'blur(8px) brightness(.55)', transform: 'scale(1.06)' }
           : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
       <div className="proof-page">
@@ -389,9 +372,8 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
   )
 }
 
-/* ---------------- the shelf: a row per strand (layout A, her pick 2026-09-24) ---------------- */
 
-/* ---------------- the front page: three takes (temporary A/B/C, 2026-09-30) ---------------- */
+/* ---------------- the front page: the strand map (chosen 2026-09-30 over a valley gate and a trail journal) ---------------- */
 
 const STRAND_ICON = { Composition: '✍️', 'Foundational Language': '🔤', 'Multiple Genres': '📚', "Author's Purpose": '🎯', Comprehension: '🧠', 'Response Skills': '💬', 'Inquiry and Research': '🔎' }
 
@@ -427,60 +409,63 @@ function LabyrinthTitle({ grade, topics, skills }) {
   )
 }
 
-// A: the valley as a gate across the top, Continue floating over the sky, the paths below.
-function HomeGate({ grade, topics, skills, resume, onOpen }) {
-  const BASE = import.meta.env.BASE_URL || '/'
-  return (
-    <div className="pm-immersive lh-gate">
-      <div className="pm-map lh-scene" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
-        <LabyrinthTitle grade={grade} topics={topics} skills={skills} />
-      </div>
-      <div className="pm-side lh-float"><ContinueCard resume={resume} topics={topics} onOpen={onOpen} /></div>
-    </div>
-  )
-}
-
-// B: the whole page is the valley; each strand is a medallion on the trail.
-function HomeStrands({ grade, topics, resume, onOpen }) {
-  const t = useT()
-  const BASE = import.meta.env.BASE_URL || '/'
-  const strands = strandsOf(topics)
-  const info = strands.map((d) => {
+// The whole page is the valley; each strand is a medallion on the trail.
+// Each strand's paths and how far the student has got in them.
+export function strandInfo(topics) {
+  return strandsOf(topics).map((d) => {
     const list = topics.filter(({ tp }) => (tp.domain || 'Other') === d)
     const done = list.filter(({ st }) => st.finished).length
     const going = list.some(({ st }) => st.started && !st.finished)
     return { d, list, done, cls: done === list.length && done > 0 ? 'done' : going ? 'here' : 'fresh' }
   })
-  const [pick, setPick] = useState(() => (info.find((x) => x.cls === 'here') || info[0])?.d)
+}
+
+// The valley with one medallion per strand on the trail, lit as far as the
+// student has gone. Used by the front page and the Practice card.
+export function StrandTrail({ topics, picked, onPick, children }) {
+  const t = useT()
+  const BASE = import.meta.env.BASE_URL || '/'
+  const info = strandInfo(topics)
   const n = info.length
   const slots = slotsFor(n)
   const at = (i) => (slots ? SLOTS[slots[i]].at : pointAt(0.04 + (0.92 * i) / Math.max(1, n - 1)))
   const lastLit = info.map((x) => x.cls !== 'fresh').lastIndexOf(true)
   const glow = lastLit < 0 ? 0 : slots ? SLOT_F[slots[lastLit]] : 0.04 + (0.92 * lastLit) / Math.max(1, n - 1)
+  return (
+    <div className="pm-map" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+      <svg className="pm-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden>
+        <defs><filter id="lh-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter></defs>
+        <path d={TRAIL_D} className="pm-trail-base" />
+        <path d={TRAIL_D} pathLength="1" className="pm-trail-glow" filter="url(#lh-glow)" style={{ strokeDasharray: `${glow} 1` }} />
+        <path d={TRAIL_D} pathLength="1" className="pm-trail-lit" style={{ strokeDasharray: `${glow} 1` }} />
+      </svg>
+      {info.map((x, i) => {
+        const [px, py] = at(i)
+        return (
+          <button key={x.d} className={`pm-node ${x.cls}${x.d === picked ? ' picked' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
+            onClick={() => onPick(x.d)} aria-pressed={picked ? x.d === picked : undefined}>
+            <span className="pm-orb" aria-hidden>{STRAND_ICON[x.d] || '✦'}</span>
+            <span className="pm-name">{t(x.d)}</span>
+            <span className="pm-pill">{x.list.length === 1 ? t('{a} of 1 path', { a: x.done }) : t('{a} of {b} paths', { a: x.done, b: x.list.length })}</span>
+          </button>
+        )
+      })}
+      {children}
+    </div>
+  )
+}
+
+function HomeStrands({ grade, topics, resume, onOpen }) {
+  const t = useT()
+  const info = strandInfo(topics)
+  const [pick, setPick] = useState(() => (info.find((x) => x.cls === 'here') || info[0])?.d)
   const chosen = info.find((x) => x.d === pick) || info[0]
   return (
     <div className="lh-strands">
       <div className="pm-immersive">
-        <div className="pm-map" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
-          <svg className="pm-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden>
-            <defs><filter id="lh-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter></defs>
-            <path d={TRAIL_D} className="pm-trail-base" />
-            <path d={TRAIL_D} pathLength="1" className="pm-trail-glow" filter="url(#lh-glow)" style={{ strokeDasharray: `${glow} 1` }} />
-            <path d={TRAIL_D} pathLength="1" className="pm-trail-lit" style={{ strokeDasharray: `${glow} 1` }} />
-          </svg>
-          {info.map((x, i) => {
-            const [px, py] = at(i)
-            return (
-              <button key={x.d} className={`pm-node ${x.cls}${x.d === chosen?.d ? ' picked' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
-                onClick={() => setPick(x.d)} aria-pressed={x.d === chosen?.d}>
-                <span className="pm-orb" aria-hidden>{STRAND_ICON[x.d] || '✦'}</span>
-                <span className="pm-name">{t(x.d)}</span>
-                <span className="pm-pill">{x.list.length === 1 ? t('{a} of 1 path', { a: x.done }) : t('{a} of {b} paths', { a: x.done, b: x.list.length })}</span>
-              </button>
-            )
-          })}
+        <StrandTrail topics={topics} picked={chosen?.d} onPick={setPick}>
           <LabyrinthTitle grade={grade} topics={topics} skills={topics.reduce((m, { tp }) => m + (tp.core || []).length, 0)} />
-        </div>
+        </StrandTrail>
         <div className="pm-side"><ContinueCard resume={resume} topics={topics} onOpen={onOpen} /></div>
       </div>
       {chosen && (
@@ -498,102 +483,11 @@ function HomeStrands({ grade, topics, resume, onOpen }) {
   )
 }
 
-// C: a dashboard - the path under way as a little trail on the left, every path on the right.
-function HomeJournal({ grade, topics, skills, resume, progress, onOpen }) {
-  const t = useT()
-  const BASE = import.meta.env.BASE_URL || '/'
-  const lead = resume || topics.find(({ tp }) => !tp.sample)
-  const strands = strandsOf(topics)
-  return (
-    <>
-      <div className="proof-hero" style={{ '--proof-img': `url(${BASE}prac-proof.jpg)` }}>
-        <div className="proof-hero-words">
-          <div className="proof-kicker">{t('Your Path Through ELA')} · {t('Grade {n}', { n: grade })}</div>
-          <h1 className="proof-title">{t('The Lit Labyrinth')}</h1>
-          <div className="proof-stats">
-            <span>{topics.length === 1 ? t('1 path') : t('{n} paths', { n: topics.length })}</span>
-            <span>{skills === 1 ? t('1 clearing') : t('{n} clearings', { n: skills })}</span>
-          </div>
-        </div>
-      </div>
-      <div className="lh-journal">
-        {lead && (
-          <div className="card lh-lead">
-            <div className="proof-section-kicker">{resume ? t('Continue Your Path') : t('Start here')}</div>
-            <div className="lh-lead-title">{lead.tp.short || lead.tp.title}</div>
-            <div className="lh-mini"><PathMap stops={buildStops(lead.tp, progress)} onPlay={() => onOpen(lead.tp)} /></div>
-            <div className="lh-lead-foot">
-              {lead.st.next && <span>{t('Next clearing: {title}', { title: clearingTitle(lead.st.next) })}</span>}
-              <button className="btn" onClick={() => onOpen(lead.tp)}>{resume ? t('Keep going →') : t('Begin this path →')}</button>
-            </div>
-          </div>
-        )}
-        <div className="card lh-all">
-          <div className="lh-all-head">{t('Your paths')}</div>
-          {strands.map((d) => (
-            <div key={d} className="lh-group">
-              <div className="lh-group-head">{STRAND_ICON[d] || '✦'} {t(d)}</div>
-              {topics.filter(({ tp }) => (tp.domain || 'Other') === d).map(({ tp, st }) => (
-                <button key={tp.id} className="prf-row" onClick={() => onOpen(tp)}>
-                  <span className="prf-row-icon" aria-hidden>{tp.icon}</span>
-                  <span className="prf-row-words">
-                    <span className="prf-row-title">{tp.short || tp.title}{tp.sample && <span className="proof-card-sample pr-inline">{t('Sample')}</span>}</span>
-                    <span className="prf-row-meta">{(tp.core || []).length === 1 ? t('1 clearing') : t('{n} clearings', { n: (tp.core || []).length })}</span>
-                  </span>
-                  <span className="prf-row-prog">{st.finished ? <span className="pill green">{t('✓ Path complete')}</span> : <ProofBar st={st} />}</span>
-                </button>
-              ))}
-            </div>
-          ))}
-        </div>
-      </div>
-    </>
-  )
-}
-
-const matches = (tp, q) => !q || [tp.title, tp.short, tp.blurb, tp.domain, ...(tp.core || []).map((w) => w.title)].join(' ').toLowerCase().includes(q)
 const strandsOf = (topics) => {
   const n = {}
   topics.forEach(({ tp }) => { const d = tp.domain || 'Other'; n[d] = (n[d] || 0) + 1 })
   return Object.entries(n).sort((a, b) => b[1] - a[1]).map(([d]) => d)
 }
-function ShelfSearch({ value, onChange }) {
-  const t = useT()
-  return <input className="proof-search" value={value} onChange={(e) => onChange(e.target.value)} placeholder={t('Search paths and skills…')} aria-label={t('Search paths and skills…')} />
-}
-
-// One row per strand, cards scroll sideways; the fullest strand leads. Chosen over a
-// filter-rail list and a grade-first grid.
-function ShelfRows({ topics, onOpen }) {
-  const t = useT()
-  const [query, setQuery] = useState('')
-  const q = query.trim().toLowerCase()
-  const shown = topics.filter(({ tp }) => matches(tp, q))
-  const strands = strandsOf(shown)
-  return (
-    <div className="card proof-shelf">
-      <div className="proof-shelf-head">
-        <div><div className="proof-section-kicker">{t('Paths')}</div><div className="proof-shelf-title">{t('Choose Your Next Route')}</div></div>
-        <ShelfSearch value={query} onChange={setQuery} />
-      </div>
-      {strands.map((d) => {
-        // In progress first, then new, then finished; real topics ahead of samples.
-        const rank = ({ tp, st }) => (st.finished ? 2 : st.started ? 0 : 1) * 2 + (tp.sample ? 1 : 0)
-        const row = shown.filter(({ tp }) => (tp.domain || 'Other') === d).sort((a, b) => rank(a) - rank(b))
-        return (
-          <section key={d} className="pr-row">
-            <div className="pr-row-head"><h3>{t(d)}</h3><span>{row.length === 1 ? t('1 path') : t('{n} paths', { n: row.length })}</span></div>
-            <div className="pr-row-track">
-              {row.map(({ tp, st }) => <MiniTopic key={tp.id} tp={tp} st={st} onOpen={() => onOpen(tp)} />)}
-            </div>
-          </section>
-        )
-      })}
-      {!shown.length && <div className="proof-empty">{t('No paths match that search.')}</div>}
-    </div>
-  )
-}
-
 function MiniTopic({ tp, st, onOpen }) {
   const t = useT()
   return (
@@ -772,7 +666,7 @@ const NODE_STATE = {
   locked: { cls: 'locked', pill: 'Locked', glyph: '🔒' },
 }
 
-function PathMap({ stops, onPlay, children }) {
+export function PathMap({ stops, onPlay, children }) {
   const t = useT()
   const BASE = import.meta.env.BASE_URL || '/'
   const main = stops.filter((s) => s.state !== 'sb')

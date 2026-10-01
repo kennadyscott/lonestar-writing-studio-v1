@@ -514,7 +514,14 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
         </div>
       </div>
 
-      <div style={{ position: 'relative' }}>
+      {/* Her Lit Labyrinth mockup (2026-09-30): the path as a glowing trail through
+          the forest, one medallion per clearing, branches off the trail, the final
+          milestone at the end; Up Next beside it. Small screens keep the list. */}
+      <div className="pm-wrap">
+        <PathMap stops={stops} onPlay={onPlay} />
+        <PathSide stops={stops} onPlay={onPlay} />
+      </div>
+      <div className="pm-list" style={{ position: 'relative' }}>
         {/* the road */}
         <span aria-hidden style={{ position: 'absolute', left: 27, top: 18, bottom: 18, width: 4, borderRadius: 3,
           background: 'repeating-linear-gradient(180deg,#d5e2ec 0 10px,transparent 10px 18px)' }} />
@@ -523,6 +530,136 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
         </div>
       </div>
     </Shell>
+  )
+}
+
+/* ---------------- the path map ---------------- */
+
+// The trail, in a 1000 x 560 box: low on the left, winding up toward the
+// mountains on the right. Clearings are spaced evenly along it.
+const TRAIL = [
+  [[90, 410], [200, 470], [300, 300], [430, 320]],
+  [[430, 320], [560, 340], [580, 400], [630, 380]],
+  [[630, 380], [680, 360], [700, 240], [790, 230]],
+  [[790, 230], [870, 222], [880, 130], [930, 110]],
+]
+const TRAIL_D = 'M ' + TRAIL[0][0].join(' ') + TRAIL.map((g) => ' C ' + g.slice(1).map((p) => p.join(' ')).join(', ')).join('')
+function trailSamples() {
+  const pts = []
+  for (const [a, b, c, d] of TRAIL) {
+    for (let i = 0; i <= 60; i++) {
+      const u = i / 60, v = 1 - u
+      pts.push([v * v * v * a[0] + 3 * v * v * u * b[0] + 3 * v * u * u * c[0] + u * u * u * d[0],
+        v * v * v * a[1] + 3 * v * v * u * b[1] + 3 * v * u * u * c[1] + u * u * u * d[1]])
+    }
+  }
+  const len = [0]
+  for (let i = 1; i < pts.length; i++) len.push(len[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]))
+  return { pts, len, total: len[len.length - 1] }
+}
+const SAMPLES = trailSamples()
+function pointAt(f) {
+  const target = f * SAMPLES.total
+  const i = Math.max(1, SAMPLES.len.findIndex((l) => l >= target))
+  return SAMPLES.pts[i] || SAMPLES.pts[SAMPLES.pts.length - 1]
+}
+
+const NODE_STATE = {
+  passed: { cls: 'done', pill: 'Complete', glyph: '✓' },
+  open: { cls: 'here', pill: 'Up next', glyph: null },
+  retry: { cls: 'here', pill: 'Try again', glyph: null },
+  sb: { cls: 'branch', pill: 'Branch', glyph: '🌿' },
+  locked: { cls: 'locked', pill: 'Locked', glyph: '🔒' },
+}
+
+function PathMap({ stops, onPlay }) {
+  const t = useT()
+  const BASE = import.meta.env.BASE_URL || '/'
+  const main = stops.filter((s) => s.state !== 'sb')
+  const n = main.length
+  const at = (i) => pointAt(n === 1 ? 0.5 : 0.06 + (0.88 * i) / (n - 1))
+  // how far the glow reaches: up to the first clearing not yet reached
+  const reached = main.findIndex((s) => s.state !== 'passed')
+  const glow = reached < 0 ? 1 : n === 1 ? 0.5 : 0.06 + (0.88 * reached) / (n - 1)
+  let k = 0
+  const nodes = []
+  stops.forEach((s) => {
+    if (s.state === 'sb') {
+      // a branch grows off the clearing it belongs to, just below the trail
+      const parent = nodes[nodes.length - 1]
+      // grows up from a low clearing, down from a high one, so it stays on the map
+      if (parent) nodes.push({ s, x: Math.min(930, parent.x + 85), y: parent.y > 300 ? parent.y - 125 : parent.y + 125, branchOf: parent })
+      return
+    }
+    const [x, y] = at(k)
+    nodes.push({ s, x, y, n: s.capstone ? null : k + 1 })
+    k++
+  })
+  return (
+    <div className="pm-map" style={{ '--pm-img': `url(${BASE}bg-enchanted.jpg)` }}>
+      <svg className="pm-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden>
+        <defs>
+          <filter id="pm-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter>
+        </defs>
+        <path d={TRAIL_D} className="pm-trail-base" />
+        <path d={TRAIL_D} pathLength="1" className="pm-trail-glow" filter="url(#pm-glow)" style={{ strokeDasharray: `${glow} 1` }} />
+        <path d={TRAIL_D} pathLength="1" className="pm-trail-lit" style={{ strokeDasharray: `${glow} 1` }} />
+        {nodes.filter((d) => d.branchOf).map((d) => (
+          <path key={'b' + d.s.ws.id} d={`M ${d.branchOf.x} ${d.branchOf.y} Q ${d.branchOf.x + 10} ${(d.y + d.branchOf.y) / 2} ${d.x} ${d.y}`} className="pm-branch-line" />
+        ))}
+      </svg>
+      {nodes.map((d) => {
+        const st = d.s.capstone && d.s.state !== 'passed' && d.s.state !== 'locked' ? { cls: 'here', pill: 'Final milestone', glyph: '🏆' } : NODE_STATE[d.s.state] || NODE_STATE.open
+        const glyph = d.s.capstone ? (d.s.state === 'passed' ? '✓' : d.s.state === 'locked' ? '🔒' : '🏆') : st.glyph || d.n
+        const locked = d.s.state === 'locked'
+        return (
+          <button key={d.s.ws.id} className={`pm-node ${st.cls}${d.s.capstone ? ' cap' : ''}`} disabled={locked}
+            style={{ left: `${d.x / 10}%`, top: `${(d.y / 560) * 100}%` }}
+            onClick={() => !locked && onPlay(d.s.ws)} title={locked ? t('Reach the clearing above') : clearingTitle(d.s.ws)}>
+            <span className="pm-orb" aria-hidden>{glyph}</span>
+            <span className="pm-name">{clearingTitle(d.s.ws)}</span>
+            <span className="pm-pill">{d.s.capstone && d.s.state === 'locked' ? t('Final milestone') : t(st.pill)}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// Beside the map: what to do next, and every clearing with its best score.
+function PathSide({ stops, onPlay }) {
+  const t = useT()
+  const next = stops.find((s) => s.state === 'sb') || stops.find((s) => s.state === 'open' || s.state === 'retry')
+  const label = (s) => (s.state === 'sb' ? t('Branch · take this first') : s.capstone ? t('Final milestone') : t('Clearing {n}', { n: stops.filter((x) => x.state !== 'sb' && !x.capstone).indexOf(s) + 1 }))
+  return (
+    <div className="pm-side">
+      <div className="pm-card pm-next">
+        <div className="pm-card-head">{t('Up Next')}</div>
+        {next ? (
+          <>
+            <div className="pm-kicker">{label(next)}</div>
+            <div className="pm-next-title">{clearingTitle(next.ws)}</div>
+            <div className="pm-next-skill">{next.ws.skill}</div>
+            <div className="pm-next-meta">{t('{n} activities · {p} pts', { n: next.ws.activities.length, p: next.ws.points })}{next.best > 0 ? ` · ${t('best {n}%', { n: next.best })}` : ''}</div>
+            <button className="btn pm-go" onClick={() => onPlay(next.ws)}>
+              {next.state === 'sb' ? t('Take the branch →') : next.best > 0 ? t('Try again →') : t('Start →')}
+            </button>
+          </>
+        ) : (
+          <div className="pm-next-title">{t('✓ Path complete')}</div>
+        )}
+      </div>
+      <div className="pm-card">
+        <div className="pm-card-head">{t('Clearings')}</div>
+        {stops.map((s, i) => (
+          <button key={s.ws.id} className={`pm-row ${s.state}`} disabled={s.state === 'locked'} onClick={() => onPlay(s.ws)}>
+            <span className="pm-row-dot" aria-hidden>{s.state === 'passed' ? '✓' : s.state === 'locked' ? '🔒' : s.state === 'sb' ? '🌿' : s.capstone ? '🏆' : '•'}</span>
+            <span className="pm-row-title">{clearingTitle(s.ws)}</span>
+            <span className="pm-row-best">{s.best > 0 ? `${s.best}%` : s.state === 'locked' ? '' : '—'}</span>
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 

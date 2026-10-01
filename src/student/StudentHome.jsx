@@ -346,10 +346,9 @@ function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
 /* ---- Practice: the Proof Room gets the whole left side (2026-09-30) ---- */
 // Her painting across the top, then the student's own topics with their
 // progress, so the big space shows what is inside rather than a big picture.
-/* PROTOTYPE A/B (2026-10-01): the Practice card shows the path as a clean learning
- * path (the map waits inside the Lit Labyrinth) so a demo shows what students DO.
- * A: the clearings as steps across, the next activity underneath.
- * B: every clearing as a checklist row with its activities; the next one opens up. */
+/* The Practice card shows the path as a clean learning path — every clearing as a
+ * checklist row with the activities inside it; the next one opens up (her pick, B
+ * of A/B, 2026-10-01). The map waits one step in, inside the Lit Labyrinth. */
 const plainPassage = (text) => String(text || '').replace(/\[\[([^|\]]*)\|[^\]]*\]\]/g, '$1')
 const STOP_GLYPH = { passed: '✓', locked: '🔒', sb: '🌿' }
 function stopLabel(stop, t) {
@@ -374,23 +373,6 @@ function UpNext({ stop, onStart, onMap, compact }) {
         <button className="btn" onClick={onStart}>{stop.state === 'retry' ? t('Try it again →') : t('Start this clearing →')}</button>
         {onMap && <button className="btn ghost" onClick={onMap}>{t('See the map →')}</button>}
       </div>
-    </div>
-  )
-}
-function PathSteps({ stops, next, onStart, onMap }) {
-  const t = useT()
-  return (
-    <div className="lp lp-a">
-      <ol className="lp-steps">
-        {stops.map((s, i) => (
-          <li key={s.ws.id + i} className={'lp-step ' + s.state + (s === next ? ' next' : '') + (s.capstone ? ' cap' : '')}>
-            <span className="lp-dot">{s === next ? (s.state === 'sb' ? '🌿' : i + 1) : STOP_GLYPH[s.state] || (s.capstone ? '★' : i + 1)}</span>
-            <span className="lp-step-name">{clearingTitle(s.ws)}</span>
-            {stopLabel(s, t) && <span className="lp-step-tag">{stopLabel(s, t)}</span>}
-          </li>
-        ))}
-      </ol>
-      {next && <UpNext stop={next} onStart={onStart} onMap={onMap} />}
     </div>
   )
 }
@@ -442,8 +424,6 @@ function ProofRoomFeature({ onOpen }) {
   const lead = resume || mine[0]
   const stops = lead ? buildStops(lead.tp, progress) : []
   const next = nextStopOf(stops)
-  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.practicePath') || 'A' } catch { return 'A' } })
-  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.practicePath', k) } catch { /* fine */ } }
   const start = () => (next ? onOpen(lead.tp.id, next.ws.id) : onOpen(lead.tp.id))
 
   // The path you are on, as its own little trail of clearings (her pick of three,
@@ -466,15 +446,8 @@ function ProofRoomFeature({ onOpen }) {
               <div className="prf-c-line">
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
-                <span style={{ flex: 1 }} />
-                <div className="style-pick lp-pick" role="group" aria-label="Learning path look">
-                  <span className="lbl">Path</span>
-                  {['A', 'B'].map((k) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => pickLook(k)}>{k}</button>)}
-                </div>
               </div>
-              {look === 'B'
-                ? <PathChecklist stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
-                : <PathSteps stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />}
+              <PathChecklist stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
             </div>
           )}
         </div>

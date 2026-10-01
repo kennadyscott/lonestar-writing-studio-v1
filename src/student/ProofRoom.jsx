@@ -308,6 +308,9 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
   }, [topicId, raw])
   // Started from the Practice page on one clearing: open it straight away, once.
   // Quitting it lands on the path map, so the map is one step in.
+  const [gate, setGate] = useState(() => !initialWsId && gateWanted())
+  const [gateClip, setGateClip] = useState(() => { try { return localStorage.getItem('lscr.gateClip') || 'flux' } catch { return 'flux' } })
+  const replayGate = (k) => { setGateClip(k); try { localStorage.setItem('lscr.gateClip', k) } catch { /* fine */ } ; setGate(false); setTimeout(() => setGate(true), 30) }
   const startedWs = React.useRef(false)
   useEffect(() => {
     if (startedWs.current || !initialWsId || !topic) return
@@ -363,15 +366,76 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
           ? { background: `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg) center / cover no-repeat, #0b2a22`, filter: 'blur(8px) brightness(.55)', transform: 'scale(1.06)' }
           : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
       <div className="proof-page">
+        {!running && (
+          <div className="style-pick gate-pick" role="group" aria-label="Entrance clip">
+            <span className="lbl">Entrance</span>
+            {GATE_CLIPS.map(([k, label]) => <button key={k} className={gateClip === k ? 'on' : ''} aria-pressed={gateClip === k} onClick={() => replayGate(k)}>{label} ↻</button>)}
+          </div>
+        )}
         {onBack && <button className="backlink on-scene" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
           {running ? t('← Back to the path') : topic ? t('← All paths') : t('← Back to Practice')}
         </button>}
         {body}
       </div>
+      {gate && <LabyrinthGate key={gateClip} src={gateSrc(gateClip)} onDone={() => setGate(false)} />}
     </PageMode.Provider>
   )
 }
 
+
+/* ---------------- the way in: the lantern-lit gate (2026-10-01) ----------------
+ * Her ask: "a fun animation that helps them enter into the labyrinth". A Higgsfield
+ * clip (public/gate/lit-gate.mp4): the carved gate swings open and the camera glides
+ * through, ending on the very valley painting the map is drawn over, so the clip
+ * fades straight into the live map. Once per visit (sessionStorage); ?gate=1 plays
+ * it every time for demos; skipped for reduced motion; Skip / Esc / Enter end it. */
+// PROTOTYPE (2026-10-01): two Higgsfield takes of the same gate — she picks one.
+const GATE_CLIPS = [
+  ['flux', 'Clip 1', 'gate/lit-gate-flux.mp4'],       // FLUX 3 Video, 1080p source
+  ['minimax', 'Clip 2', 'gate/lit-gate-minimax.mp4'], // MiniMax H3 Max, 768p source
+]
+const gateSrc = (k) => (import.meta.env.BASE_URL || '/') + (GATE_CLIPS.find((g) => g[0] === k) || GATE_CLIPS[0])[2]
+const GATE_POSTER = (import.meta.env.BASE_URL || '/') + 'gate/lit-gate.jpg'
+function gateWanted() {
+  try {
+    if (new URLSearchParams(location.search).has('gate')) return true
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+    if (sessionStorage.getItem('lscr.gateSeen')) return false
+    sessionStorage.setItem('lscr.gateSeen', '1')
+    return true
+  } catch { return false }
+}
+function LabyrinthGate({ src, onDone }) {
+  const t = useT()
+  const say = useSay()
+  const [leaving, setLeaving] = useState(false)
+  const done = React.useRef(false)
+  const finish = React.useCallback(() => {
+    if (done.current) return
+    done.current = true
+    setLeaving(true)
+    setTimeout(onDone, 700)
+  }, [onDone])
+  useEffect(() => {
+    const onKey = (e) => { if (['Escape', 'Enter', ' '].includes(e.key)) { e.preventDefault(); finish() } }
+    window.addEventListener('keydown', onKey)
+    const safety = setTimeout(finish, 9000)   // a clip that never starts must not trap the page
+    return () => { window.removeEventListener('keydown', onKey); clearTimeout(safety) }
+  }, [finish])
+  return (
+    <div className={'lab-gate' + (leaving ? ' leaving' : '')} role="dialog" aria-modal="true" aria-label={t('Entering the Lit Labyrinth')}>
+      {/* the browser can pause a muted autoplay clip while the map loads behind it; pick it back up */}
+      <video className="lab-gate-video" src={src} poster={GATE_POSTER} autoPlay muted playsInline onEnded={finish} onError={finish}
+        onPause={(e) => { const v = e.currentTarget; if (!done.current && !v.ended) v.play().catch(() => {}) }} />
+      <div className="lab-gate-words" aria-hidden="true">
+        <div className="lab-gate-kicker">{t('Your Path Through ELA')}</div>
+        <div className="lab-gate-title">{t('The Lit Labyrinth')}</div>
+        <div className="lab-gate-sub">{say('Master the Skill. Unlock the Path.')}</div>
+      </div>
+      <button className="lab-gate-skip" onClick={finish}>{t('Skip ›')}</button>
+    </div>
+  )
+}
 
 /* ---------------- the front page: the strand map (chosen 2026-09-30 over a valley gate and a trail journal) ---------------- */
 

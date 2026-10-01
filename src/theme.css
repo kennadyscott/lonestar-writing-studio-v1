@@ -968,10 +968,7 @@ a { color: var(--link); }
   .practice-view[data-clean] .wall-side .wall-strip { display: none; }
 }
 
-/* ---- PROTOTYPE A/B (2026-10-01): a clean learning path on the Practice card ---- */
-.lp-pick { padding: 2px; }
-.lp-pick button { padding: 3px 10px; font-size: 11.5px; min-width: 28px; }
-.lp-pick .lbl { font-size: 9.5px; }
+/* ---- The clean learning path on the Practice card (her pick B, 2026-10-01) ---- */
 .lp { --lp-done: #1e7a4a; --lp-next: #e9b93a; --lp-line: #d8e3ea; list-style: none; margin: 0; padding: 0; }
 .lp-dot { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 800;
   background: #eef3f6; color: #6b7f90; border: 2px solid #d8e3ea; font-variant-numeric: tabular-nums; }
@@ -979,18 +976,7 @@ a { color: var(--link); }
 .next > .lp-dot, .next .lp-dot { background: #fff5d6; color: #8a6400; border-color: var(--lp-next); box-shadow: 0 0 0 4px rgba(233,185,58,.22); }
 .sb .lp-dot { background: #eaf6ee; border-color: #8fd0a6; }
 .locked .lp-dot { font-size: 12px; }
-.lp-step-tag { display: inline-block; margin-left: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #a37400; vertical-align: 1px; }
 
-/* A: steps across, the next activity under them */
-.lp-a { display: flex; flex-direction: column; gap: 14px; }
-.lp-steps { list-style: none; margin: 0; padding: 4px 0 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
-.lp-step { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 0 4px; }
-.lp-step::before { content: ''; position: absolute; top: 17px; left: calc(-50% + 20px); right: calc(50% + 20px); height: 3px; border-radius: 3px; background: var(--lp-line); }
-.lp-step:first-child::before { display: none; }
-.lp-step.passed::before, .lp-step.next::before { background: var(--lp-done); }
-.lp-step-name { font-size: 12.5px; font-weight: 800; color: #16386b; line-height: 1.2; text-wrap: balance; }
-.lp-step.locked .lp-step-name { color: #8496a6; }
-.lp-step .lp-step-tag { margin: 0; }
 
 .lp-next { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border-radius: 14px; background: #fffaf0; border: 1.5px solid #f0d9a8; }
 .lp-next.compact { padding: 2px 0 4px 46px; background: none; border: none; }
@@ -1005,7 +991,7 @@ a { color: var(--link); }
 .lp-passage > span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .lp-next-foot { display: flex; gap: 10px; align-items: center; }
 
-/* B: a checklist of clearings */
+/* a checklist of clearings */
 .lp-b { display: flex; flex-direction: column; }
 .lp-row { border-bottom: 1px solid var(--line); padding: 9px 0; }
 .lp-row:last-child { border-bottom: none; }
@@ -1020,13 +1006,10 @@ a { color: var(--link); }
 .lp-row.next .lp-passage > span { -webkit-line-clamp: 2; }
 @media (max-width: 760px) { .lp-row-acts { display: none; } .lp-next.compact { padding-left: 0; } }
 /* fit above the fold */
-.lp-a { gap: 10px; }
 .lp-dot { width: 30px; height: 30px; font-size: 13px; }
-.lp-step::before { top: 15px; }
 .lp-next { padding: 12px 16px; gap: 6px; }
 .lp-next-title { font-size: 21px; }
 .lp-passage { padding: 8px 12px; font-size: 13.5px; }
-.lp-a .lp-passage > span { -webkit-line-clamp: 2; }
 .lp-row { padding: 6px 0; }
 .lp-row-head { grid-template-columns: 30px minmax(0, 1fr) auto auto; }
 .lp-row.next { padding: 8px 12px; }
@@ -1035,10 +1018,25 @@ a { color: var(--link); }
 .practice-side .prac-tile { min-height: 70px; padding-top: 7px; padding-bottom: 7px; }
 .prf-c .prf-body, .prf-c .prf-c-lead { flex: 1; }
 .prf-c .prf-c-lead { display: flex; flex-direction: column; }
-.lp-a { flex: 1; }
-.lp-a .lp-next { flex: 1; }
-.lp-a .lp-passage > span { -webkit-line-clamp: 4; }
 .lp-next-foot { margin-top: auto; padding-top: 4px; }
 .lp-row.next .lp-passage { display: block; }
 .lp-row.next .lp-passage > span { -webkit-line-clamp: 2; }
 .practice-view[data-clean] .wall-side .wall-ex { display: none; }
+.lp-step-tag { display: inline-block; margin-left: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #a37400; vertical-align: 1px; }
+
+/* ---- the way into the Lit Labyrinth: the lantern-lit gate clip (2026-10-01) ---- */
+.lab-gate { position: fixed; inset: 0; z-index: 90; background: #0b2a22; opacity: 1; transition: opacity .7s ease; }
+.lab-gate.leaving { opacity: 0; pointer-events: none; }
+.lab-gate-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lab-gate-words { position: absolute; left: clamp(20px, 5vw, 72px); bottom: clamp(24px, 8vh, 90px); color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.75);
+  opacity: 0; animation: lab-gate-words 4.6s ease forwards; }
+@keyframes lab-gate-words { 0%, 18% { opacity: 0; transform: translateY(10px); } 34%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.lab-gate-kicker { font-size: clamp(11px, 1vw, 14px); font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #ffe08a; }
+.lab-gate-title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(34px, 5vw, 72px); line-height: 1.02; margin: 4px 0 6px; }
+.lab-gate-sub { font-size: clamp(14px, 1.5vw, 20px); font-weight: 700; color: #f3ead2; }
+.lab-gate-skip { position: absolute; right: clamp(16px, 3vw, 40px); bottom: clamp(16px, 4vh, 40px); padding: 9px 18px; border-radius: 999px; font-size: 14px; font-weight: 800;
+  color: #fff; background: rgba(8,30,26,.55); border: 1px solid rgba(255,255,255,.5); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+.lab-gate-skip:hover { background: rgba(8,30,26,.8); }
+.lab-gate-skip:focus-visible { outline: 3px solid #ffd56b; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .lab-gate-words { animation: none; opacity: 1; } }
+.gate-pick { position: absolute; right: 0; top: 0; z-index: 5; }

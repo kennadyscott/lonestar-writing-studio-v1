@@ -271,7 +271,7 @@ export function topicStatus(tp, progress) {
  * in on their own once there are enough topics to need them. Opening a topic
  * walks its path on this same page, and a worksheet runs here too.
  */
-export default function ProofRoom({ band = '5-7', initialTopicId = null, onBack, onChange }) {
+export default function ProofRoom({ band = '5-7', initialTopicId = null, initialWsId = null, onBack, onChange }) {
   const t = useT()
   const say = useSay()
   // Opened from the Practice tab on one path, the page starts on that path.
@@ -306,6 +306,16 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, onBack,
     if (!topicId || !raw) return null
     return prepareTopic(raw.find((tp) => tp.id === topicId))
   }, [topicId, raw])
+  // Started from the Practice page on one clearing: open it straight away, once.
+  // Quitting it lands on the path map, so the map is one step in.
+  const startedWs = React.useRef(false)
+  useEffect(() => {
+    if (startedWs.current || !initialWsId || !topic) return
+    startedWs.current = true
+    const all = [...(topic.core || []), topic.full, ...Object.values(topic.skillBuilders || {})].filter(Boolean)
+    const ws = all.find((w) => w.id === initialWsId)
+    if (ws) setRunning(ws)
+  }, [topic, initialWsId])
 
   useEffect(() => {
     try { setProgress(JSON.parse(localStorage.getItem('proofProgress') || '{}')) } catch { setProgress({}) }
@@ -510,6 +520,9 @@ export function ProofBar({ st }) {
 
 /* ---------------- the path ---------------- */
 // Walk a path's clearings in order; a missed clearing drops its Branch in as a detour.
+// The clearing a student does next: a branch that opened comes first.
+export const nextStopOf = (stops) => stops.find((s) => s.state === 'sb') || stops.find((s) => s.state === 'open' || s.state === 'retry')
+
 export function buildStops(topic, progress) {
   const stops = []
   let blocked = false

@@ -933,43 +933,10 @@ a { color: var(--link); }
 .practice-side .daily-words > span:last-child { padding: 6px 12px !important; font-size: 11.5px !important; }
 .practice-side .daily-cta { font-size: 12.5px; padding: 7px 12px; border-radius: 12px; }
 
-/* The next activity peeks from the Practice map (her pick A, 2026-09-30) */
-.prf-peek { position: absolute; right: 2cqw; top: 2.5cqw; width: 32cqw; max-height: 50cqw; overflow: hidden; display: flex; flex-direction: column; gap: 6px;
-  padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.92); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,.7); box-shadow: 0 10px 28px rgba(1,23,45,.35); z-index: 3; }
-.prf-peek-kicker { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #a37400; }
-.prf-peek-steps { display: flex; gap: 5px; flex-wrap: wrap; }
-.prf-peek-steps span { font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; background: #eef3f6; color: var(--muted); white-space: nowrap; }
-.prf-peek-steps span.on { background: #e9f5fb; color: #0f97c2; }
-.prf-peek-brief { font-size: 13px; font-weight: 800; color: #16386b; line-height: 1.3; text-wrap: balance; }
-.prf-peek-text > span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.prf-peek-text { font-size: 12.5px; line-height: 1.5; color: #3a4a58;
-  background: #fbfdfe; border: 1px solid var(--line); border-radius: 9px; padding: 7px 10px; }
-.prf-peek-go { align-self: flex-start; padding: 8px 14px; font-size: 13px; }
 
-/* ---- The quiet Practice page (her pick 2026-10-01: A's white side cards + B's clean
-   Lit Labyrinth block). No paintings on the side cards; Pip is a small avatar; the
-   forest stays faint behind; the Lit Labyrinth card has a plain navy banner and no
-   gold frame round the map, so the map is the one picture that leads. ---- */
-.practice-view[data-clean] .prac-tile { padding: 12px 16px; color: #10294a; background: #fff;
-  border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view[data-clean] .prac-title { text-shadow: none; }
-.practice-view[data-clean] .prac-sub { color: var(--muted); }
-.practice-view[data-clean] .prac-chev { color: #9db0c0; }
-.practice-view[data-clean] .prac-icon { background: #eef6f9; border: none; }
-.practice-view[data-clean] .practice-side .daily-banner { color: #10294a; background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view[data-clean] .daily-kicker { color: #0f97c2; }
-.practice-view[data-clean] .daily-dir { color: var(--muted); }
-.practice-view[data-clean] .daily-cta { background: var(--navy); border: none; box-shadow: none; }
-
-.practice-view[data-clean] .prac-art { display: none; }
-.practice-view[data-clean] .practice-side .prac-tile { padding: 12px 16px; min-height: 0; }
-.practice-view[data-clean] .practice-side .prac-icon { width: 40px; height: 40px; font-size: 17px; }
-.practice-view[data-clean] .practice-side .daily-banner { padding: 12px 14px 12px 76px; }
-.practice-view[data-clean] .practice-side .daily-art { left: 14px; top: 14px; bottom: auto; width: 48px; height: 48px; border-radius: 50%;
-  background: var(--daily-img) 18% 22% / 300% auto no-repeat, #1a2a5a; box-shadow: 0 0 0 2px #f0b429; }
-.practice-view[data-clean] .practice-side .daily-words > span:last-child { box-shadow: none !important; }
-
+/* ---- Practice page (2026-10-01): the Lit Labyrinth card keeps B's clean block — a
+   plain navy banner and no gold frame. The side cards wear their paintings again
+   (her call: "put the side cards back with their cute graphics"). ---- */
 .practice-view[data-clean] .prf-c-head { background: #02283e; }
 .practice-view[data-clean] .prf-c-lead { background: transparent; border: none; box-shadow: none; padding: 4px 0 0; }
 
@@ -1000,3 +967,78 @@ a { color: var(--link); }
 @media (min-width: 1101px) and (max-height: 730px) {
   .practice-view[data-clean] .wall-side .wall-strip { display: none; }
 }
+
+/* ---- PROTOTYPE A/B (2026-10-01): a clean learning path on the Practice card ---- */
+.lp-pick { padding: 2px; }
+.lp-pick button { padding: 3px 10px; font-size: 11.5px; min-width: 28px; }
+.lp-pick .lbl { font-size: 9.5px; }
+.lp { --lp-done: #1e7a4a; --lp-next: #e9b93a; --lp-line: #d8e3ea; list-style: none; margin: 0; padding: 0; }
+.lp-dot { width: 34px; height: 34px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 800;
+  background: #eef3f6; color: #6b7f90; border: 2px solid #d8e3ea; font-variant-numeric: tabular-nums; }
+.passed > .lp-dot, .passed .lp-dot { background: var(--lp-done); color: #fff; border-color: var(--lp-done); }
+.next > .lp-dot, .next .lp-dot { background: #fff5d6; color: #8a6400; border-color: var(--lp-next); box-shadow: 0 0 0 4px rgba(233,185,58,.22); }
+.sb .lp-dot { background: #eaf6ee; border-color: #8fd0a6; }
+.locked .lp-dot { font-size: 12px; }
+.lp-step-tag { display: inline-block; margin-left: 6px; font-size: 9.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #a37400; vertical-align: 1px; }
+
+/* A: steps across, the next activity under them */
+.lp-a { display: flex; flex-direction: column; gap: 14px; }
+.lp-steps { list-style: none; margin: 0; padding: 4px 0 0; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); }
+.lp-step { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 0 4px; }
+.lp-step::before { content: ''; position: absolute; top: 17px; left: calc(-50% + 20px); right: calc(50% + 20px); height: 3px; border-radius: 3px; background: var(--lp-line); }
+.lp-step:first-child::before { display: none; }
+.lp-step.passed::before, .lp-step.next::before { background: var(--lp-done); }
+.lp-step-name { font-size: 12.5px; font-weight: 800; color: #16386b; line-height: 1.2; text-wrap: balance; }
+.lp-step.locked .lp-step-name { color: #8496a6; }
+.lp-step .lp-step-tag { margin: 0; }
+
+.lp-next { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border-radius: 14px; background: #fffaf0; border: 1.5px solid #f0d9a8; }
+.lp-next.compact { padding: 2px 0 4px 46px; background: none; border: none; }
+.lp-next-kicker { font-size: 10.5px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #a37400; }
+.lp-next-title { font-family: Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 700; color: #10294a; line-height: 1.1; }
+.lp-chips { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.lp-chips span { font-size: 11.5px; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #eef3f6; color: var(--muted); white-space: nowrap; }
+.lp-chips span.on { background: #e9f5fb; color: #0f97c2; }
+.lp-chips .lp-chip-meta { background: none; padding-left: 2px; }
+.lp-brief { font-size: 15px; font-weight: 800; color: #16386b; line-height: 1.35; text-wrap: pretty; }
+.lp-passage { font-size: 14px; line-height: 1.6; color: #3a4a58; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px; }
+.lp-passage > span { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.lp-next-foot { display: flex; gap: 10px; align-items: center; }
+
+/* B: a checklist of clearings */
+.lp-b { display: flex; flex-direction: column; }
+.lp-row { border-bottom: 1px solid var(--line); padding: 9px 0; }
+.lp-row:last-child { border-bottom: none; }
+.lp-row-head { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; align-items: center; gap: 12px; }
+.lp-row-name { font-size: 15px; font-weight: 800; color: #16386b; min-width: 0; }
+.lp-row.locked .lp-row-name { color: #8496a6; }
+.lp-row-acts { font-size: 12px; font-weight: 700; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
+.lp-row-state { font-size: 12px; font-weight: 800; color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; min-width: 64px; text-align: right; }
+.lp-row.passed .lp-row-state { color: var(--lp-done); }
+.lp-row.next .lp-row-state { color: #a37400; }
+.lp-row.next { background: #fffaf0; margin: 0 -12px; padding: 10px 12px; border-radius: 12px; border: 1.5px solid #f0d9a8; }
+.lp-row.next .lp-passage > span { -webkit-line-clamp: 2; }
+@media (max-width: 760px) { .lp-row-acts { display: none; } .lp-next.compact { padding-left: 0; } }
+/* fit above the fold */
+.lp-a { gap: 10px; }
+.lp-dot { width: 30px; height: 30px; font-size: 13px; }
+.lp-step::before { top: 15px; }
+.lp-next { padding: 12px 16px; gap: 6px; }
+.lp-next-title { font-size: 21px; }
+.lp-passage { padding: 8px 12px; font-size: 13.5px; }
+.lp-a .lp-passage > span { -webkit-line-clamp: 2; }
+.lp-row { padding: 6px 0; }
+.lp-row-head { grid-template-columns: 30px minmax(0, 1fr) auto auto; }
+.lp-row.next { padding: 8px 12px; }
+.lp-row.next .lp-passage { display: none; }
+/* the two columns end together: the painted tiles a touch slimmer, the path fills the card */
+.practice-side .prac-tile { min-height: 70px; padding-top: 7px; padding-bottom: 7px; }
+.prf-c .prf-body, .prf-c .prf-c-lead { flex: 1; }
+.prf-c .prf-c-lead { display: flex; flex-direction: column; }
+.lp-a { flex: 1; }
+.lp-a .lp-next { flex: 1; }
+.lp-a .lp-passage > span { -webkit-line-clamp: 4; }
+.lp-next-foot { margin-top: auto; padding-top: 4px; }
+.lp-row.next .lp-passage { display: block; }
+.lp-row.next .lp-passage > span { -webkit-line-clamp: 2; }
+.practice-view[data-clean] .wall-side .wall-ex { display: none; }

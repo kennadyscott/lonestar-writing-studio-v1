@@ -9,7 +9,7 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
-import { topicStatus, clearingTitle, PathMap, buildStops, kindLabel } from './ProofRoom.jsx'
+import { topicStatus, clearingTitle, buildStops, nextStopOf, kindLabel } from './ProofRoom.jsx'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
@@ -346,22 +346,78 @@ function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
 /* ---- Practice: the Proof Room gets the whole left side (2026-09-30) ---- */
 // Her painting across the top, then the student's own topics with their
 // progress, so the big space shows what is inside rather than a big picture.
-/* The activity a student does next, peeking from the Practice map (her pick, A of A/B, 2026-09-30). */
+/* PROTOTYPE A/B (2026-10-01): the Practice card shows the path as a clean learning
+ * path (the map waits inside the Lit Labyrinth) so a demo shows what students DO.
+ * A: the clearings as steps across, the next activity underneath.
+ * B: every clearing as a checklist row with its activities; the next one opens up. */
 const plainPassage = (text) => String(text || '').replace(/\[\[([^|\]]*)\|[^\]]*\]\]/g, '$1')
-function NextPeek({ ws, act, onStart }) {
+const STOP_GLYPH = { passed: '✓', locked: '🔒', sb: '🌿' }
+function stopLabel(stop, t) {
+  if (stop.capstone) return t('Final milestone')
+  if (stop.state === 'sb') return t('Branch')
+  return null
+}
+function UpNext({ stop, onStart, onMap, compact }) {
   const t = useT()
+  const ws = stop.ws
+  const act = ws.activities?.[0]
   return (
-    <div className="prf-peek">
-      <div className="prf-peek-kicker">{t('Up next')} · {clearingTitle(ws)}</div>
-      <div className="prf-peek-steps">
+    <div className={'lp-next' + (compact ? ' compact' : '')}>
+      {!compact && <div className="lp-next-kicker">{t('Up next')} · {stop.state === 'sb' ? t('Branch') : stop.capstone ? t('Final milestone') : t('Clearing')}</div>}
+      {!compact && <div className="lp-next-title">{clearingTitle(ws)}</div>}
+      <div className="lp-chips">
         {ws.activities.map((a, i) => <span key={i} className={i === 0 ? 'on' : ''}>{i + 1} {kindLabel(a.kind, t)}</span>)}
       </div>
-      {act.brief && <div className="prf-peek-brief">{act.brief}</div>}
-      {act.text && <div className="prf-peek-text"><span>{plainPassage(act.text)}</span></div>}
-      <button className="btn prf-peek-go" onClick={onStart}>{t('Start this clearing →')}</button>
+      {act?.brief && <div className="lp-brief">{act.brief}</div>}
+      {act?.text && <div className="lp-passage"><span>{plainPassage(act.text)}</span></div>}
+      <div className="lp-next-foot">
+        <button className="btn" onClick={onStart}>{stop.state === 'retry' ? t('Try it again →') : t('Start this clearing →')}</button>
+        {onMap && <button className="btn ghost" onClick={onMap}>{t('See the map →')}</button>}
+      </div>
     </div>
   )
 }
+function PathSteps({ stops, next, onStart, onMap }) {
+  const t = useT()
+  return (
+    <div className="lp lp-a">
+      <ol className="lp-steps">
+        {stops.map((s, i) => (
+          <li key={s.ws.id + i} className={'lp-step ' + s.state + (s === next ? ' next' : '') + (s.capstone ? ' cap' : '')}>
+            <span className="lp-dot">{s === next ? (s.state === 'sb' ? '🌿' : i + 1) : STOP_GLYPH[s.state] || (s.capstone ? '★' : i + 1)}</span>
+            <span className="lp-step-name">{clearingTitle(s.ws)}</span>
+            {stopLabel(s, t) && <span className="lp-step-tag">{stopLabel(s, t)}</span>}
+          </li>
+        ))}
+      </ol>
+      {next && <UpNext stop={next} onStart={onStart} onMap={onMap} />}
+    </div>
+  )
+}
+function PathChecklist({ stops, next, onStart, onMap }) {
+  const t = useT()
+  return (
+    <ol className="lp lp-b">
+      {stops.map((s, i) => (
+        <li key={s.ws.id + i} className={'lp-row ' + s.state + (s === next ? ' next' : '') + (s.capstone ? ' cap' : '')}>
+          <div className="lp-row-head">
+            <span className="lp-dot">{STOP_GLYPH[s.state] || (s.capstone ? '★' : i + 1)}</span>
+            <span className="lp-row-name">
+              {clearingTitle(s.ws)}
+              {stopLabel(s, t) && <span className="lp-step-tag">{stopLabel(s, t)}</span>}
+            </span>
+            {s !== next && <span className="lp-row-acts">{s.ws.activities.map((a) => kindLabel(a.kind, t)).join(' · ')}</span>}
+            <span className="lp-row-state">
+              {s.state === 'passed' ? t('Best {n}%', { n: s.best }) : s.state === 'locked' ? t('Locked') : s === next ? t('Up next') : ''}
+            </span>
+          </div>
+          {s === next && <UpNext stop={s} onStart={onStart} onMap={onMap} compact />}
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 function ProofRoomFeature({ onOpen }) {
   const t = useT()
   const say = useSay()
@@ -384,7 +440,11 @@ function ProofRoomFeature({ onOpen }) {
   // The path under way leads the card; the list holds the rest.
   const resume = mine.find(({ st }) => st.started && !st.finished)
   const lead = resume || mine[0]
-  const nextAct = lead?.st.next?.activities?.[0]
+  const stops = lead ? buildStops(lead.tp, progress) : []
+  const next = nextStopOf(stops)
+  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.practicePath') || 'A' } catch { return 'A' } })
+  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.practicePath', k) } catch { /* fine */ } }
+  const start = () => (next ? onOpen(lead.tp.id, next.ws.id) : onOpen(lead.tp.id))
 
   // The path you are on, as its own little trail of clearings (her pick of three,
   // 2026-09-30). The other-path rows came out so the section fits above the fold.
@@ -406,16 +466,15 @@ function ProofRoomFeature({ onOpen }) {
               <div className="prf-c-line">
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
+                <span style={{ flex: 1 }} />
+                <div className="style-pick lp-pick" role="group" aria-label="Learning path look">
+                  <span className="lbl">Path</span>
+                  {['A', 'B'].map((k) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => pickLook(k)}>{k}</button>)}
+                </div>
               </div>
-              <div className="prf-mini">
-                <PathMap stops={buildStops(lead.tp, progress)} onPlay={() => onOpen(lead.tp.id)}>
-                  {nextAct && <NextPeek ws={lead.st.next} act={nextAct} onStart={() => onOpen(lead.tp.id)} />}
-                </PathMap>
-              </div>
-              <div className="prf-c-foot">
-                {lead.st.next && <span>{t('Next clearing: {title}', { title: clearingTitle(lead.st.next) })}</span>}
-                <button className="btn" onClick={() => onOpen(lead.tp.id)}>{resume ? t('Keep going →') : t('Begin →')}</button>
-              </div>
+              {look === 'B'
+                ? <PathChecklist stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
+                : <PathSteps stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />}
             </div>
           )}
         </div>

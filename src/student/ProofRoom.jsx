@@ -391,7 +391,9 @@ export default function ProofRoom({ grade = 5, initialTopicId = null, onBack, on
     <PageMode.Provider value={true}>
       {/* the dashboard's enchanted-forest painting, just as soft (22%) */}
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
+        ...(topic && !running
+          ? { background: `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg) center / cover no-repeat, #0b2a22`, filter: 'blur(8px) brightness(.55)', transform: 'scale(1.06)' }
+          : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
       <div className="proof-page">
         {onBack && <button className="backlink on-scene" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
           {running ? t('← Back to the path') : topic ? t('← All paths') : t('← Back to Practice')}
@@ -501,6 +503,40 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   const cleared = topic.core.filter((w) => (progress[w.id] || {}).passed).length
   const pct = Math.round((cleared / topic.core.length) * 100)
 
+  // On the student page the path is the whole experience (her call, 2026-09-30:
+  // "that background takes up the space, we are in the land"): the valley fills
+  // the width, the path's name sits on the scene, the cards float over the sky.
+  const page = React.useContext(PageMode)
+  if (page) {
+    return (
+      <div className="pm-immersive">
+        <PathMap stops={stops} onPlay={onPlay}>
+          <div className="pm-hud">
+            <div className="proof-kicker">{t('The Lit Labyrinth')} · {t(topic.domain || 'Path')}</div>
+            <h1 className="pm-hud-title">{topic.short || topic.title}</h1>
+            <div className="pm-hud-sub">{t('{n} of {total} clearings reached', { n: cleared, total: topic.core.length })}</div>
+            <div className="pm-hud-bar"><div style={{ width: `${pct}%` }} /></div>
+          </div>
+        </PathMap>
+        {/* phones have no scene, so the path's name goes here */}
+        <div className="pm-phone-title" style={{ '--pm-img': `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg)` }}>
+          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t(topic.domain || 'Path')}</div>
+          <h1>{topic.short || topic.title}</h1>
+          <div>{t('{n} of {total} clearings reached', { n: cleared, total: topic.core.length })}</div>
+        </div>
+        {/* floats over the sky on wide screens, drops below the scene on narrow ones */}
+        <PathSide stops={stops} onPlay={onPlay} />
+        <div className="pm-list card">
+          <span aria-hidden style={{ position: 'absolute', left: 43, top: 34, bottom: 34, width: 4, borderRadius: 3,
+            background: 'repeating-linear-gradient(180deg,#d5e2ec 0 10px,transparent 10px 18px)' }} />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {stops.map((s, i) => <Stop key={s.ws.id} stop={s} n={i + 1} onPlay={onPlay} />)}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Shell onClose={onClose} sub={topic.title} onBack={onBack} topic={topic} kicker={`${t('The Lit Labyrinth')} · ${t(topic.domain || 'Path')}`}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
@@ -535,15 +571,27 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
 
 /* ---------------- the path map ---------------- */
 
-// The trail, in a 1000 x 560 box: low on the left, winding up toward the
-// mountains on the right. Clearings are spaced evenly along it.
-const TRAIL = [
-  [[90, 410], [200, 470], [300, 300], [430, 320]],
-  [[430, 320], [560, 340], [580, 400], [630, 380]],
-  [[630, 380], [680, 360], [700, 240], [790, 230]],
-  [[790, 230], [870, 222], [880, 130], [930, 110]],
+// The trail, in a 1000 x 560 box, along the lit stone path painted in her
+// "Enchanted Valley of Waterfalls" scene (public/lit-valley.jpg). SLOTS are the
+// spots where a medallion can stand - the stones at the bottom right, by the
+// lanterns, along the ridge, the upper trail, the top of the bridge, past it -
+// spaced so no two medallions overlap and none sits under the cards floating
+// over the sky at the top right. Each slot says which way its branch grows.
+const SLOTS = [
+  { at: [850, 455], branch: [930, 335] },
+  { at: [650, 420], branch: [660, 300] },
+  { at: [480, 335], branch: [450, 475] },
+  { at: [280, 300], branch: [150, 430] },
+  { at: [370, 165], branch: [200, 110] },
+  { at: [560, 125], branch: [220, 70] },
 ]
-const TRAIL_D = 'M ' + TRAIL[0][0].join(' ') + TRAIL.map((g) => ' C ' + g.slice(1).map((p) => p.join(' ')).join(', ')).join('')
+const TRAIL_PTS = SLOTS.map((s) => s.at)
+// Catmull-Rom through the slots, as cubic segments.
+const TRAIL = TRAIL_PTS.slice(0, -1).map((p1, i) => {
+  const p0 = TRAIL_PTS[i - 1] || p1, p2 = TRAIL_PTS[i + 1], p3 = TRAIL_PTS[i + 2] || p2
+  return [p1, [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6], [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6], p2]
+})
+const TRAIL_D = 'M ' + TRAIL[0][0].join(' ') + TRAIL.map((g) => ' C ' + g.slice(1).map((p) => p.map((v) => Math.round(v)).join(' ')).join(', ')).join('')
 function trailSamples() {
   const pts = []
   for (const [a, b, c, d] of TRAIL) {
@@ -558,6 +606,9 @@ function trailSamples() {
   return { pts, len, total: len[len.length - 1] }
 }
 const SAMPLES = trailSamples()
+const SLOT_F = SLOTS.map((_, k) => SAMPLES.len[Math.min(k * 61, SAMPLES.len.length - 1)] / SAMPLES.total)
+// which slots n medallions use: spread across all seven (n > 7 falls back to even spacing)
+const slotsFor = (n) => (n <= 1 ? [3] : n <= SLOTS.length ? Array.from({ length: n }, (_, i) => Math.round((i * (SLOTS.length - 1)) / (n - 1))) : null)
 function pointAt(f) {
   const target = f * SAMPLES.total
   const i = Math.max(1, SAMPLES.len.findIndex((l) => l >= target))
@@ -572,31 +623,36 @@ const NODE_STATE = {
   locked: { cls: 'locked', pill: 'Locked', glyph: '🔒' },
 }
 
-function PathMap({ stops, onPlay }) {
+function PathMap({ stops, onPlay, children }) {
   const t = useT()
   const BASE = import.meta.env.BASE_URL || '/'
   const main = stops.filter((s) => s.state !== 'sb')
   const n = main.length
-  const at = (i) => pointAt(n === 1 ? 0.5 : 0.06 + (0.88 * i) / (n - 1))
+  const slots = slotsFor(n)
+  const fOf = (i) => (slots ? SLOT_F[slots[i]] : 0.04 + (0.92 * i) / Math.max(1, n - 1))
+  const at = (i) => (slots ? SLOTS[slots[i]].at : pointAt(fOf(i)))
   // how far the glow reaches: up to the first clearing not yet reached
   const reached = main.findIndex((s) => s.state !== 'passed')
-  const glow = reached < 0 ? 1 : n === 1 ? 0.5 : 0.06 + (0.88 * reached) / (n - 1)
+  const glow = reached < 0 ? 1 : fOf(reached)
   let k = 0
   const nodes = []
   stops.forEach((s) => {
     if (s.state === 'sb') {
       // a branch grows off the clearing it belongs to, just below the trail
       const parent = nodes[nodes.length - 1]
-      // grows up from a low clearing, down from a high one, so it stays on the map
-      if (parent) nodes.push({ s, x: Math.min(930, parent.x + 85), y: parent.y > 300 ? parent.y - 125 : parent.y + 125, branchOf: parent })
+      // grows the way its clearing's slot says, clear of the other medallions
+      if (parent) {
+        const b = parent.slot != null ? SLOTS[parent.slot].branch : [Math.min(930, parent.x + 85), parent.y > 300 ? parent.y - 125 : parent.y + 125]
+        nodes.push({ s, x: b[0], y: b[1], branchOf: parent })
+      }
       return
     }
     const [x, y] = at(k)
-    nodes.push({ s, x, y, n: s.capstone ? null : k + 1 })
+    nodes.push({ s, x, y, n: s.capstone ? null : k + 1, slot: slots ? slots[k] : null })
     k++
   })
   return (
-    <div className="pm-map" style={{ '--pm-img': `url(${BASE}bg-enchanted.jpg)` }}>
+    <div className="pm-map" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
       <svg className="pm-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden>
         <defs>
           <filter id="pm-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter>
@@ -622,6 +678,7 @@ function PathMap({ stops, onPlay }) {
           </button>
         )
       })}
+      {children}
     </div>
   )
 }

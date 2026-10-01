@@ -766,33 +766,34 @@ a { color: var(--link); }
 @media (max-width: 560px) { .prf-resume { grid-template-columns: 38px minmax(0, 1fr); } .prf-resume-go { grid-column: 2; align-items: flex-start; } }
 
 /* ---- Lit Labyrinth: the path as a glowing trail through the forest (2026-09-30, her mockup) ---- */
-.pm-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; align-items: start; }
+.pm-wrap { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 16px; align-items: start; }
 .pm-list { display: none; }
-.pm-map { position: relative; aspect-ratio: 1000 / 560; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 28px rgba(1,23,45,.28);
-  background: linear-gradient(180deg, rgba(4,20,28,.25), rgba(4,20,28,.45)), var(--pm-img) center 60% / cover no-repeat, #0b2a22; }
+.pm-map { position: relative; container-type: inline-size; aspect-ratio: 1000 / 560; border-radius: 18px; overflow: hidden; box-shadow: 0 10px 28px rgba(1,23,45,.28);
+  background: linear-gradient(180deg, rgba(4,20,28,.05), rgba(4,20,28,.22)), var(--pm-img) center / cover no-repeat, #0b2a22; }
 .pm-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.pm-trail-base { fill: none; stroke: rgba(255,226,160,.55); stroke-width: 6; stroke-linecap: round; stroke-dasharray: 1 13; filter: drop-shadow(0 0 4px rgba(0,0,0,.6)); }
+.pm-trail-base { fill: none; stroke: rgba(255,236,190,.7); stroke-width: 5; stroke-linecap: round; stroke-dasharray: 1 12; filter: drop-shadow(0 0 3px rgba(0,0,0,.7)); }
 .pm-trail-glow { fill: none; stroke: #ffcf5c; stroke-width: 16; stroke-linecap: round; opacity: .55; }
 .pm-trail-lit { fill: none; stroke: #ffe39a; stroke-width: 6; stroke-linecap: round; }
 .pm-branch-line { fill: none; stroke: rgba(160,235,170,.75); stroke-width: 4; stroke-dasharray: 3 9; stroke-linecap: round; }
-.pm-node { position: absolute; transform: translate(-50%, -32px); display: flex; flex-direction: column; align-items: center; gap: 4px; width: 150px;
+.pm-node { position: absolute; transform: translate(-50%, calc(var(--orb) / -2)); --orb: clamp(36px, 6.4cqw, 64px); display: flex; flex-direction: column; align-items: center; gap: clamp(2px, .5cqw, 4px); width: clamp(84px, 13cqw, 128px);
   background: none; border: 0; padding: 0; cursor: pointer; color: #fff; text-align: center; }
 .pm-node:disabled { cursor: default; }
-.pm-orb { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; font-size: 24px; font-weight: 800; color: #fff;
+.pm-orb { width: var(--orb); height: var(--orb); border-radius: 50%; display: grid; place-items: center; font-size: calc(var(--orb) * .38); font-weight: 800; color: #fff;
   border: 3px solid rgba(255,255,255,.75); transition: transform .18s; }
 .pm-node:not(:disabled):hover .pm-orb { transform: translateY(-3px) scale(1.05); }
 .pm-node:focus-visible .pm-orb { outline: 3px solid #fff; outline-offset: 3px; }
-.pm-name { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 15px; line-height: 1.15; text-shadow: 0 2px 8px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9); max-width: 150px; text-wrap: balance; }
-.pm-pill { font-size: 11px; font-weight: 800; letter-spacing: .3px; padding: 3px 10px; border-radius: 999px; background: rgba(8,30,26,.82); border: 1px solid rgba(255,255,255,.28); }
+.pm-name { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(11px, 1.45cqw, 14.5px); line-height: 1.15; text-shadow: 0 2px 8px rgba(0,0,0,.9), 0 0 3px rgba(0,0,0,.95); max-width: 100%; text-wrap: balance; }
+.pm-pill { font-size: clamp(9px, 1.1cqw, 11px); font-weight: 800; letter-spacing: .3px; padding: 2px clamp(6px, 1cqw, 10px); border-radius: 999px; background: rgba(8,30,26,.82); border: 1px solid rgba(255,255,255,.28); }
 .pm-node.done .pm-orb { background: radial-gradient(circle at 40% 35%, #5be39a, #138a4c 70%); border-color: #c8f7da; box-shadow: 0 0 0 6px rgba(91,227,154,.18), 0 0 26px rgba(91,227,154,.6); }
 .pm-node.done .pm-pill { background: rgba(14,98,56,.9); border-color: #8fe6b3; }
 .pm-node.here .pm-orb { background: radial-gradient(circle at 40% 35%, #ffe08a, #c98f00 72%); border-color: #fff1c4; color: #3b2a00; box-shadow: 0 0 0 7px rgba(255,207,92,.22), 0 0 32px rgba(255,200,80,.85); animation: pm-pulse 2.4s ease-in-out infinite; }
 .pm-node.here .pm-pill { background: #f5c542; color: #3b2a00; border-color: #fff1c4; }
-.pm-node.branch .pm-orb { width: 54px; height: 54px; font-size: 22px; background: radial-gradient(circle at 40% 35%, #b8f0a6, #3f8f3a 72%); border-color: #e3ffd8; box-shadow: 0 0 22px rgba(160,235,170,.6); }
+.pm-node.branch { --orb: clamp(32px, 5.4cqw, 54px); }
+.pm-node.branch .pm-orb { background: radial-gradient(circle at 40% 35%, #b8f0a6, #3f8f3a 72%); border-color: #e3ffd8; box-shadow: 0 0 22px rgba(160,235,170,.6); }
 .pm-node.branch .pm-pill { background: #2f7a33; border-color: #bff2b0; }
-.pm-node.locked .pm-orb { background: radial-gradient(circle at 40% 35%, #8b979e, #3a464d 72%); border-color: #b9c4ca; font-size: 20px; }
+.pm-node.locked .pm-orb { background: radial-gradient(circle at 40% 35%, #8b979e, #3a464d 72%); border-color: #b9c4ca; font-size: calc(var(--orb) * .32); }
 .pm-node.locked .pm-name { opacity: .85; }
-.pm-node.cap .pm-orb { width: 74px; height: 74px; font-size: 30px; }
+.pm-node.cap { --orb: clamp(42px, 7.4cqw, 74px); }
 @keyframes pm-pulse { 0%, 100% { box-shadow: 0 0 0 7px rgba(255,207,92,.22), 0 0 30px rgba(255,200,80,.75); } 50% { box-shadow: 0 0 0 11px rgba(255,207,92,.12), 0 0 44px rgba(255,200,80,.95); } }
 @media (prefers-reduced-motion: reduce) { .pm-node.here .pm-orb { animation: none; } }
 .pm-side { display: flex; flex-direction: column; gap: 14px; }
@@ -814,3 +815,31 @@ a { color: var(--link); }
 .pm-row-best { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
 @media (max-width: 1100px) { .pm-wrap { grid-template-columns: 1fr; } .pm-side { display: grid; grid-template-columns: 1fr 1fr; } }
 @media (max-width: 680px) { .pm-wrap { display: none; } .pm-list { display: block; } }
+
+/* ---- the open path is the whole page: you are in the valley (2026-09-30) ---- */
+.pm-immersive { margin: 0 calc(50% - 50vw); position: relative; container-type: inline-size; }
+.pm-immersive .pm-map { border-radius: 0; box-shadow: none; max-width: none; }
+.pm-immersive .pm-list { display: none; position: relative; margin: 0 16px; padding: 16px; }
+.pm-hud { position: absolute; left: 3.5%; top: 4.5%; max-width: 44%; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+.pm-hud-title { margin: 4px 0 6px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(26px, 3.4cqw, 48px); line-height: 1.05; color: #fff; text-wrap: balance; }
+.pm-hud-sub { font-size: clamp(13px, 1.3cqw, 16px); font-weight: 700; color: #f3ead2; }
+.pm-hud-bar { margin-top: 8px; width: min(320px, 70%); height: 8px; border-radius: 999px; background: rgba(255,255,255,.25); overflow: hidden; box-shadow: 0 1px 6px rgba(0,0,0,.4); }
+.pm-hud-bar > div { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ffd56b, #f5b400); }
+/* the cards stay over the sky: no taller than the top ~half of the scene */
+.pm-immersive .pm-side { position: absolute; right: 2.5cqw; top: 2.5cqw; width: clamp(240px, 24cqw, 320px); max-height: 29cqw; display: flex; flex-direction: column; }
+.pm-immersive .pm-side .pm-next { flex-shrink: 0; }
+.pm-immersive .pm-card { background: rgba(255,255,255,.9); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); border-color: rgba(255,255,255,.7); box-shadow: 0 10px 28px rgba(1,23,45,.3); }
+.pm-immersive .pm-next { border: 2px solid #e9b93a; }
+.pm-immersive .pm-card:not(.pm-next) { flex: 1 1 auto; min-height: 0; overflow: auto; }
+@media (max-width: 1100px) {
+  .pm-immersive .pm-side { position: static; width: auto; max-height: none; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 16px 0; }
+  .pm-immersive .pm-card:not(.pm-next) { max-height: none; }
+}
+@media (max-width: 680px) { .pm-immersive .pm-map { display: none; } .pm-immersive .pm-list { display: block; margin-top: 14px; } .pm-immersive .pm-side { grid-template-columns: 1fr; } .pm-immersive .pm-side .pm-card:not(.pm-next) { display: none; } }
+.pm-phone-title { display: none; }
+@media (max-width: 680px) {
+  .pm-phone-title { display: block; margin: 0 16px; padding: 16px 18px; border-radius: 16px; color: #fff;
+    background: linear-gradient(0deg, rgba(2,40,62,.92), rgba(2,40,62,.75)), var(--pm-img) center / cover no-repeat, #02283e; }
+  .pm-phone-title h1 { margin: 4px 0 2px; font-family: Georgia, 'Times New Roman', serif; font-size: 26px; color: #fff; }
+  .pm-phone-title > div:last-child { font-size: 13px; font-weight: 700; color: #f3ead2; }
+}

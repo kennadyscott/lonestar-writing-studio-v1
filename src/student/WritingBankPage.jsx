@@ -4,8 +4,10 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
 
 /*
- * Writing Bank — every self-started piece (free writes + quick writes) in one
- * place: revise, publish, share to the Writing Wall, or discard.
+ * Writing Bank — every piece a student has written in one place: their free
+ * writes and quick writes (revise, publish, share to the Writing Wall, or
+ * discard) and, since 2026-10-01, the teacher's assignments they have started
+ * (keep writing, or see the feedback once turned in — never publish/discard).
  */
 
 const BK = (import.meta.env.BASE_URL || '/') + 'bank/'
@@ -20,6 +22,7 @@ const TYPES = [
   ['all', 'All types'],
   ['free', 'Free Write'],
   ['quick', 'Quick Write'],
+  ['assign', 'Assignments'],
 ]
 const SORTS = [
   ['newest', 'Sort: Newest'],
@@ -33,13 +36,16 @@ const FILTERS = [
   ['published', 'Published'],
 ]
 
-function statusOf(sub) {
+function statusOf(sub, kind) {
+  if (kind === 'assign') return sub.completedAt
+    ? { k: 'completed', label: '✓ Turned in', bg: '#e6f6ee', c: 'var(--good)' }
+    : { k: 'progress', label: '✏️ In progress', bg: '#e5f1fb', c: 'var(--ecr)' }
   if (sub.published) return { k: 'published', label: '🌟 Published', bg: '#fff4d6', c: '#a37400' }
   if (sub.completedAt) return { k: 'completed', label: '✓ Completed', bg: '#e6f6ee', c: 'var(--good)' }
   return { k: 'progress', label: '✏️ In progress', bg: '#e5f1fb', c: 'var(--ecr)' }
 }
 
-export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onChange }) {
+export default function WritingBankPage({ state, me, onBack, onOpen, onReview, onWall, onChange }) {
   const t = useT()
   const say = useSay()
   const locale = useLocale()
@@ -54,14 +60,15 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
   const sharedIds = new Set((state.shareWall || []).map((e) => e.submissionId).filter(Boolean))
 
   const pieces = state.submissions
-    .filter((s) => s.studentId === me.id)
+    .filter((s) => s.studentId === me.id && !s.isPeerRevision)
     .map((sub) => ({ sub, a: state.assignments.find((a) => a.id === sub.assignmentId) }))
-    .filter(({ a }) => a && ['free', 'quick'].includes(a.genre))
+    .filter(({ a }) => a)
     .map(({ sub, a }) => {
+      const kind = ['free', 'quick'].includes(a.genre) ? a.genre : 'assign'
       const last = sub.drafts[sub.drafts.length - 1]
       const words = (last.content || '').trim().split(/\s+/).filter(Boolean)
       const name = (a.title || '').trim() || t('Untitled')
-      return { sub, a, name, st: statusOf(sub), wcount: words.length, excerpt: words.slice(0, 14).join(' '), shared: sharedIds.has(sub.id), at: last.updatedAt || last.createdAt || '' }
+      return { sub, a, kind, name, st: statusOf(sub, kind), wcount: words.length, excerpt: words.slice(0, 14).join(' '), shared: sharedIds.has(sub.id), at: last.updatedAt || last.createdAt || '' }
     })
 
   const pendingDelete = confirmId ? pieces.find((p) => p.sub.id === confirmId) : null
@@ -74,7 +81,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
 
   const visible = pieces
     .filter((p) => (filter === 'all' ? true : filter === 'published' ? p.sub.published : (!p.sub.published && !p.sub.completedAt)))
-    .filter((p) => (type === 'all' ? true : p.a.genre === type))
+    .filter((p) => (type === 'all' ? true : p.kind === type))
     .filter((p) => {
       const needle = q.trim().toLowerCase()
       if (!needle) return true
@@ -84,7 +91,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
 
   const total = pieces.length
   const publishedCount = pieces.filter((p) => p.sub.published).length
-  const progressCount = total - publishedCount
+  const progressCount = pieces.filter((p) => !p.sub.published && !p.sub.completedAt).length
   const relTime = (iso) => {
     if (!iso) return t('today')
     const days = Math.floor((Date.now() - new Date(iso)) / 86400000)
@@ -133,7 +140,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
         <div className="eyebrow">{t('The Writing Studio')}</div>
         <h1 className="page" style={{ margin: '2px 0' }}>{t('🗂️ My Writing Bank')}</h1>
         <p className="page-sub" style={{ margin: 0 }}>
-          <Directions text="Every piece you've started — revise it, publish it, share it, or clear it out." inline />
+          <Directions text="Every piece you've started — free writes, quick writes and assignments, all in one place." inline />
           {onWall && <> · <button onClick={onWall} style={{ color: 'var(--link)', fontWeight: 800, fontSize: 14 }}>{t('🌟 Visit the Writing Wall →')}</button></>}
         </p>
       </div>
@@ -199,7 +206,9 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
               ? 'Nothing matches "{query}".'
               : pieces.length === 0
                 ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
-                : type === 'quick'
+                : type === 'assign'
+                  ? 'No assignments started yet. Open one from your Home page and it shows up here.'
+                  : type === 'quick'
                   ? 'No Quick Writes yet. Finish one and it shows up here.'
                   : type === 'free'
                     ? 'No Free Writes yet. Start one and it shows up here.'
@@ -209,7 +218,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
       )}
 
       {visible.length > 0 && <ul className="bank-pieces" aria-label={t('Your pieces')}>
-        {visible.map(({ sub, a, name, st, wcount, excerpt, shared, at }) => (
+        {visible.map(({ sub, a, kind, name, st, wcount, excerpt, shared, at }) => (
           <li key={sub.id} className="card bank-piece">
             <span aria-hidden style={{ width: 104, height: 70, borderRadius: 12, flexShrink: 0, overflow: 'hidden', border: '1px solid var(--gold-line)',
               backgroundImage: `url(${BK}${thumbFor(sub.id)}.webp)`, backgroundSize: 'cover', backgroundPosition: 'center' }} />
@@ -223,10 +232,19 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                 {excerpt || t('Nothing written yet')}{excerpt ? '…' : ''}
               </div>
               <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3, fontWeight: 600 }}>
-                📄 {t('{n} words', { n: wcount })} · 📚 <Glossed text={t(sub.drafts.length > 1 ? '{n} drafts' : '{n} draft', { n: sub.drafts.length })} /> · 🏷️ {t(a.genre === 'free' ? 'Free Write' : 'Quick Write')} · 🕐 {t('Last updated {when}', { when: relTime(at) })}
+                📄 {t('{n} words', { n: wcount })} · 📚 <Glossed text={t(sub.drafts.length > 1 ? '{n} drafts' : '{n} draft', { n: sub.drafts.length })} /> · 🏷️ {kind === 'assign' ? [t('Assignment'), a.type, a.format].filter(Boolean).join(' · ') : t(a.genre === 'free' ? 'Free Write' : 'Quick Write')} · 🕐 {t('Last updated {when}', { when: relTime(at) })}
               </div>
             </div>
 
+            {kind === 'assign' ? (
+              <div className="bank-row-actions">
+                <div className="bank-row-main">
+                  {sub.completedAt && onReview
+                    ? <button className="btn" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy} onClick={() => onReview(sub.id)}>{t('See feedback →')}</button>
+                    : <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy} onClick={() => onOpen(sub.id)}>{t('Keep writing →')}</button>}
+                </div>
+              </div>
+            ) : (
             <div className="bank-row-actions">
               <div className="bank-row-main">
                 <button className="btn ghost" style={{ padding: '7px 15px', fontSize: 13 }} disabled={busy} onClick={() => onOpen(sub.id)}>
@@ -248,6 +266,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onWall, onC
                 aria-label={t('Delete {title}', { title: name })}
                 onClick={() => setConfirmId(sub.id)}>{t('Delete')}</button>
             </div>
+            )}
           </li>
         ))}
       </ul>}

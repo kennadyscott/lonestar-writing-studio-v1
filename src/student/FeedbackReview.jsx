@@ -58,7 +58,7 @@ function Reveal({ icon = '👁', label, children }) {
   )
 }
 
-export default function FeedbackReview({ state, sub, onBack }) {
+export default function FeedbackReview({ state, sub, onBack, backLabel }) {
   const t = useT()
   const { lang } = useLang()
   const [q, setQ] = useState(0)
@@ -110,7 +110,7 @@ export default function FeedbackReview({ state, sub, onBack }) {
 
   return (
     <div>
-      <button className="backlink" onClick={onBack}>{t('← Back to Dashboard')}</button>
+      <button className="backlink" onClick={onBack}>{backLabel || t('← Back to Dashboard')}</button>
 
       <div style={{ maxWidth: 940, margin: '0 auto', background: '#fff', borderRadius: 20, overflow: 'hidden', border: '1px solid var(--line)', boxShadow: '0 10px 30px rgba(13,47,85,.12)' }}>
 

@@ -76,8 +76,9 @@ export default function App() {
   const reviewing = reviewSub ? state.submissions.find((s) => s.id === reviewSub) : null
   // A piece opened from the Writing Bank keeps view === 'bank', so Back returns there.
   const backFromStudio = view === 'bank' ? () => setOpenSub(null) : goHome
-  if (view === 'home' && reviewing) {
-    body = <FeedbackReview state={state} sub={reviewing} onBack={goHome} />
+  if ((view === 'home' || view === 'bank') && reviewing) {
+    // opened from the Writing Bank, Back returns to the bank
+    body = <FeedbackReview state={state} sub={reviewing} onBack={view === 'bank' ? () => setReviewSub(null) : goHome} backLabel={view === 'bank' ? '← Back to Writing Bank' : undefined} />
   } else if ((view === 'home' || view === 'bank') && sub) {
     body = sub.isPeerRevision
       ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
@@ -96,7 +97,7 @@ export default function App() {
     // Students see only their own grade; the prototype band switch picks it.
     body = <ProofRoom key={(proofTopic || 'room') + band} band={band} initialTopicId={proofTopic} onBack={goHome} onChange={refresh} />
   } else if (view === 'bank') {
-    body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onWall={() => setView('wall')} onChange={refresh} />
+    body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onWall={() => setView('wall')} onChange={refresh} />
   } else {
     body = <ArcadePage me={me} state={state} onBack={goHome} />
   }

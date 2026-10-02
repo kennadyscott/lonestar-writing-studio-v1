@@ -1977,3 +1977,8 @@ body { font-size: 16px; }
 .hs .gr-inline { color: var(--hs-muted); } .hs .gr-inline b { color: var(--hs-ink); } .hs .gr-inline-sep { background: var(--hs-line); }
 .gr-top[hidden] ~ .gr-chart .gr-plot { height: 128px; }
 .gr-top[hidden] ~ .gr-chart { padding-top: 12px; }
+.gre-tile-n em { font-style: normal; float: right; color: #1f7a4d; font-weight: 800; }
+.gre-tile.nopath { cursor: default; }
+.gre-tile.nopath:hover { transform: none; }
+.gre-meter { height: 7px; }
+.hs .gre-tile-n em { color: var(--hs-good); }

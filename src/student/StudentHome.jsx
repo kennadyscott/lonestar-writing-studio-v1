@@ -449,71 +449,9 @@ function upgradeDemoV2(tp, progress, wasSeeded) {
   return next
 }
 
-// (B, the "journey line", was tried and dropped: her pick 2026-10-02 was "I like A and C".)
-function GrowthBadge({ pts, pct }) {
-  const t = useT()
-  if (pts == null) return null
-  return (
-    <div className={'gr-growth' + (pts < 0 ? ' down' : '')}>
-      <b>{pts >= 0 ? '+' : ''}{pts} pts</b>
-      <span>{pct >= 0 ? '+' : ''}{pct}% {t('growth')}</span>
-    </div>
-  )
-}
-// C: "scorecard": a report-card table, one row per skill with its own pre-test,
-// best score, growth bar and status; the Skill Builder sits as a sub-row under
-// the clearing it supports; a mastery ring and pre -> now up top.
-const demoSkillPre = (id) => { let h = 7; for (const c of String(id)) h = (h * 33 + c.charCodeAt(0)) >>> 0; return 28 + (h % 30) }
-function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, full, next, nextLabel, onStart }) {
-  const t = useT()
-  // her note (2026-10-02): "it's so busy". One panel (growth + the flow + one
-  // button), and a table where only rows with something to say carry color.
-  const rows = skillRowsOf(tp, progress, next, t).filter((r) => !r.pretest)
-  return (
-    <div className="gr grc grc2">
-      <div className="grc-panel">
-        <div className="grc2-top">
-          <div className="grc-prenow">
-            <div className="gr-num"><span className="gr-num-l">{t('Pre-test')}</span><span className="gr-num-v pre">{pre}%</span></div>
-            <span className="gr-arrow" aria-hidden>→</span>
-            <div className="gr-num"><span className="gr-num-l">{full?.best > 0 ? t('Post-test') : t('Now')}</span><span className="gr-num-v">{now == null ? '—' : now + '%'}</span></div>
-          </div>
-          <GrowthBadge pts={pts} pct={pct} />
-          <span className="grc2-mastered"><b>{mastered}/{core.length}</b> {t('skills mastered')}</span>
-        </div>
-        <div className="grc-go">
-          <PathFlow next={next} progress={progress} compact />
-          <span style={{ flex: 1 }} />
-          {next && <button className="btn" onClick={onStart}>{next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue') + ': ' + nextLabel + ' →'}</button>}
-        </div>
-      </div>
-      <table className="grc-table">
-        <thead><tr><th>{t('Skill')}</th><th>{t('Pre-test')}</th><th>{t('Best')}</th><th>{t('Growth')}</th><th>{t('Status')}</th></tr></thead>
-        <tbody>
-          {rows.map((r) => {
-            const [cls, lab] = rowStatus(r, t)
-            const quiet = r.best == null && !r.next
-            return (
-              <tr key={r.key} className={(r.sb ? 'sb ' : '') + (r.post ? 'post ' : '') + (r.next ? 'next ' : '') + (quiet ? 'quiet' : '')}>
-                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + (quiet ? '' : cls)}>{r.post ? '★' : r.passed ? '✓' : r.n}</span>}<span>{r.label}</span></td>
-                <td className="grc-num">{r.pre != null && !r.post ? r.pre + '%' : ''}</td>
-                <td className="grc-num"><b>{r.best != null ? r.best + '%' : ''}</b></td>
-                <td>{r.best != null && !r.sb ? <GrowthCell r={r} /> : null}</td>
-                <td>{quiet ? <span className="grc-quiet">{lab}</span> : <span className={'grc-pill ' + cls + (r.sb ? ' sb' : '')}>{lab}</span>}</td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-// D: "mastery overview" (her note, 2026-10-02: "Jeremy also wants to be able to
-// see at a glance like 'topics mastered' 'domains mastered' and what is in those").
-// The C panel with domain / topic / skill counts, then a row per domain (land)
-// with every topic in it. DEMO: one more path in another domain is shown as
-// finished so a domain reads as mastered.
+// DEMO: one more path, in another domain, is shown as finished so the domain
+// strip has a mastered domain to show (Jeremy's "domains mastered" at a glance).
+// Options B, C and D were tried on 2026-10-02; she went with A.
 function seedDemoMastery(mine, leadId, progress) {
   const pick = mine.find(({ tp, st }) => tp.id !== leadId && !st.started && tp.domain !== mine.find((m) => m.tp.id === leadId)?.tp.domain)
   if (!pick) return null
@@ -541,80 +479,33 @@ function skillOutcome(tp, ws, progress) {
 }
 const avgOf = (xs) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null)
 
-// one row per skill (C's table), shared by C and D: the clearing, its Skill
-// Builder as a sub-row, the post-test last; ws kept so D can list activities
-function skillRowsOf(tp, progress, next, t) {
-  const core = tp.core || []
-  const rows = []
-  const isNext = (id) => !!next && next.ws.id === id
-  // the flow (her note, 2026-10-02): Pre-test, lesson, activities, Skill Builder if needed, post-test
-  rows.push({ key: tp.id + ':pre', pretest: true, label: t('Pre-test') + ' · ' + t('every skill on this path'), best: demoPretest(tp.id), passed: true })
-  core.forEach((ws, i) => {
-    const p = progress[ws.id] || {}
-    const o = skillOutcome(tp, ws, progress)
-    rows.push({ key: ws.id, ws, n: i + 1, label: clearingTitle(ws), pre: demoSkillPre(ws.id), best: o.acts, passed: o.mastered, next: isNext(ws.id), locked: !p.best && !isNext(ws.id) && i > 0 && !progress[core[i - 1].id]?.passed })
-    const sb = tp.skillBuilders?.[ws.id]
-    const sp = sb && progress[sb.id]
-    if (sb && (sp?.best > 0 || isNext(sb.id))) rows.push({ key: sb.id, ws: sb, sb: true, label: t('Skill Builder'), best: sp?.best > 0 ? sp.best : null, passed: !!sp?.passed, next: isNext(sb.id) })
-  })
-  if (tp.full) {
-    const f = progress[tp.full.id] || {}
-    rows.push({ key: tp.full.id, ws: tp.full, post: true, label: t('Post-test') + ' · ' + clearingTitle(tp.full), pre: demoPretest(tp.id), best: f.best > 0 ? f.best : null, passed: !!f.passed, next: isNext(tp.full.id), locked: !(f.best > 0) && !isNext(tp.full.id) })
-  }
-  return rows
+// the stats line + domain tiles (her picks, 2026-10-02), on top of the report
+// DEMO (her note, 2026-10-02: "Even though there aren't a bunch of topics - give
+// each domain like 10-15 topics and a status bar"): the tiles count a full
+// year's topics per domain, not just the paths published so far. Swap for real
+// counts when the catalog fills in.
+const DEMO_DOMAIN_TOPICS = {
+  'Foundational Language': { total: 14, done: 14 },
+  "Author's Purpose": { total: 11, done: 4 },
+  Composition: { total: 13, done: 6 },
+  Comprehension: { total: 12, done: 3 },
+  'Multiple Genres': { total: 15, done: 5 },
 }
-const rowStatus = (r, t) => r.pretest ? ['pre', t('Taken')] : r.passed ? ['ok', r.sb ? t('Done') : t('Mastered')] : r.next ? ['next', t('Up next')] : r.best != null ? ['low', t('Below 85%')] : r.locked ? ['off', t('Locked')] : ['off', t('Not started')]
-function GrowthCell({ r }) {
-  const g = r.best != null && r.pre != null ? r.best - r.pre : null
-  return (
-    <span className="grc-growth">
-      {r.pre != null && (
-        <span className="grc-bar" title={r.best != null ? `${r.pre}% → ${r.best}%` : `${r.pre}%`}>
-          <i className="grc-m" style={{ left: MASTERY + '%' }} />
-          {r.best != null && <span className="grc-fill" style={{ left: Math.min(r.pre, r.best) + '%', width: Math.abs(r.best - r.pre) + '%' }} />}
-          <span className="grc-d pre" style={{ left: r.pre + '%' }} />
-          {r.best != null && <span className={'grc-d ' + (r.passed ? 'ok' : 'low')} style={{ left: r.best + '%' }} />}
-        </span>
-      )}
-      {g != null && <em className={g >= 0 ? 'up' : 'down'}>{g >= 0 ? '+' : ''}{g}</em>}
-    </span>
-  )
-}
-// the five stages every path runs (her flow, 2026-10-02), with where the student is
-function PathFlow({ next, progress, compact = false }) {
-  const t = useT()
-  const steps = [['pre', t('Pre-test')], ['lesson', t('Lesson')], ['acts', t('Activities')], ['sb', t('Skill Builder')], ['post', t('Post-test')]]
-  const cur = !next ? 'done' : next.capstone ? 'post' : next.state === 'sb' ? 'sb' : (progress[next.ws.id]?.best > 0 ? 'acts' : 'lesson')
-  const at = steps.findIndex(([k]) => k === cur)
-  return (
-    <ol className={'grf' + (compact ? ' compact' : '')} aria-label={t('How a path works')}>
-      {steps.map(([k, label], i) => (
-        <li key={k} className={(cur === 'done' || i < at ? 'done' : i === at ? 'cur' : '') + (k === 'sb' ? ' opt' : '')}>
-          <span className="grf-n">{cur === 'done' || i < at ? '✓' : i + 1}</span>
-          <span className="grf-l">{label}{k === 'sb' && <small>{t('if needed')}</small>}</span>
-        </li>
-      ))}
-    </ol>
-  )
-}
-const Chevron = ({ open }) => <span className={'gre-chev' + (open ? ' open' : '')} aria-hidden>›</span>
-
-// D: C + the old D in one drill-down (her ask, 2026-10-02: "combine C and D
-// where the skills are drop-downs and we can see the full list of
-// activities"). Domains -> topics -> skills -> activities. The domain and topic
-// the student is working in open on arrival.
-// the stats line + domain tiles (her picks, 2026-10-02), shared by A and D
 const domainsOf = (mine) => LAND_ORDER.map((d) => {
   const list = mine.filter(({ tp }) => tp.domain === d)
-  const done = list.filter(({ st }) => st.finished).length
-  return { d, list, done, mastered: list.length > 0 && done === list.length }
+  const real = list.filter(({ st }) => st.finished).length
+  const demo = DEMO_DOMAIN_TOPICS[d] || { total: list.length, done: real }
+  const total = Math.max(demo.total, list.length)
+  const done = Math.min(total, Math.max(demo.done, real))
+  return { d, list, total, done, mastered: total > 0 && done === total }
 })
 const nextLabelOf = (next, t) => next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
 function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
   const t = useT()
   const doms = domainsOf(mine)
   const domMastered = doms.filter((x) => x.mastered).length
-  const topicsDone = mine.filter(({ st }) => st.finished).length
+  const topicsDone = doms.reduce((n, x) => n + x.done, 0)
+  const topicsAll = doms.reduce((n, x) => n + x.total, 0)
   const nowOf = (tp) => {
     const full = tp.full && progress[tp.full.id]
     const tried = (tp.core || []).map((w) => skillOutcome(tp, w, progress).score).filter((b) => b != null)
@@ -628,7 +519,7 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
       {/* her note: no blue box - "a smaller: 1/5 domains, 1/6 topics, average growth" */}
       <div className="gre-strip">
         <span className="gre-stat"><b>{domMastered}<small>/{doms.length}</small></b>{t('domains mastered')}</span>
-        <span className="gre-stat"><b>{topicsDone}<small>/{mine.length}</small></b>{t('topics mastered')}</span>
+        <span className="gre-stat"><b>{topicsDone}<small>/{topicsAll}</small></b>{t('topics mastered')}</span>
         {avgGrowth != null && <span className={'gre-stat growth' + (avgGrowth < 0 ? ' down' : '')}><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth}</b>{t('pts average growth')}</span>}
         <span style={{ flex: 1 }} />
         {next && <button className="btn gre-go" onClick={onStart} title={t('Up next') + ': ' + nextLabel}>{t('Continue')}: {nextLabel} →</button>}
@@ -636,17 +527,13 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
       {/* "put all the little domain boxes at the top with a little meter" */}
       <div className="gre-tiles" role="tablist" aria-label={t('Domains')}>
         {doms.map((x) => (
-          <button key={x.d} role="tab" aria-selected={selD === x.d} disabled={!x.list.length}
-            className={'gre-tile' + (selD === x.d ? ' on' : '') + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' empty')}
-            onClick={() => x.list.length && onPick(x.d)} title={landName(x.d)}>
+          <button key={x.d} role="tab" aria-selected={selD === x.d}
+            className={'gre-tile' + (selD === x.d ? ' on' : '') + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' nopath')}
+            onClick={() => x.list.length && onPick(x.d)} title={x.list.length ? landName(x.d) : landName(x.d) + ': ' + t('paths for this grade are on the way')}>
             <img src={landImg(x.d)} alt="" />
             <span className="gre-tile-name">{landName(x.d)}</span>
-            {x.list.length ? (
-              <>
-                <span className="gre-meter" aria-hidden><i style={{ width: (x.done / x.list.length) * 100 + '%' }} /></span>
-                <span className="gre-tile-n"><b>{x.done}/{x.list.length}</b> {t('topics')}</span>
-              </>
-            ) : <span className="gre-tile-n">{t('Coming soon')}</span>}
+            <span className="gre-meter" aria-hidden><i style={{ width: (x.done / Math.max(1, x.total)) * 100 + '%' }} /></span>
+            <span className="gre-tile-n"><b>{x.done}/{x.total}</b> {t('topics')} <em>{Math.round((x.done / Math.max(1, x.total)) * 100)}%</em></span>
             {x.mastered && <span className="gre-tile-badge" aria-label={t('Mastered')}>✓</span>}
           </button>
         ))}
@@ -655,110 +542,7 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
   )
 }
 
-function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOpen }) {
-  const t = useT()
-  const doms = domainsOf(mine)
-  const topicsDone = mine.filter(({ st }) => st.finished).length
-  const skillsAll = mine.reduce((n, { tp }) => n + (tp.core || []).length, 0)
-  const skillsDone = mine.reduce((n, { tp }) => n + (tp.core || []).filter((w) => progress[w.id]?.passed).length, 0)
-  const nowOf = (tp) => {
-    const full = tp.full && progress[tp.full.id]
-    const tried = (tp.core || []).map((w) => skillOutcome(tp, w, progress).score).filter((b) => b != null)
-    return full?.best > 0 ? full.best : avgOf(tried)
-  }
-  const growth = mine.filter(({ st }) => st.started).map(({ tp }) => { const n = nowOf(tp); return n == null ? null : n - demoPretest(tp.id) }).filter((g) => g != null)
-  const avgGrowth = growth.length ? Math.round(growth.reduce((a, b) => a + b, 0) / growth.length) : null
-  const nextLabel = next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
-
-  const [open, setOpen] = useState(() => ({ [lead?.tp.domain]: true, [lead?.tp.id]: true }))
-  const [selD, setSelD] = useState(lead?.tp.domain || null)
-  const sel = doms.find((x) => x.d === selD && x.list.length) || doms.find((x) => x.list.length)
-  const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }))
-
-  return (
-    <div className="gr grd gre">
-      <DomainStrip mine={mine} progress={progress} selD={sel?.d} onPick={setSelD} next={next} onStart={onStart} />
-
-      {sel && (
-        <div className={'gre-dom open' + (sel.mastered ? ' mastered' : '')}>
-          <div className="gre-sel-head">
-            <b>{landName(sel.d)}</b>
-            <span>{t('{done} of {n} topics mastered', { done: sel.done, n: sel.list.length })}</span>
-            {sel.mastered && <span className="grd-badge">{t('Mastered')}</span>}
-          </div>
-          <div className="gre-topics">
-            {sel.list.map(({ tp, st }) => {
-              const tOpen = !!open[tp.id]
-              const now = nowOf(tp)
-              const pre = demoPretest(tp.id)
-              const cls = st.finished ? 'ok' : st.started ? 'next' : 'off'
-              const rows = tOpen ? skillRowsOf(tp, progress, lead?.tp.id === tp.id ? next : null, t) : []
-              return (
-                <div key={tp.id} className={'gre-topic' + (tOpen ? ' open' : '')}>
-                  <button className="gre-topic-head" onClick={() => toggle(tp.id)} aria-expanded={tOpen}>
-                    <Chevron open={tOpen} />
-                    <span className="gre-topic-name"><b>{tp.short || tp.title}</b><span>{t('{n} of {m} skills mastered', { n: st.cleared, m: st.total })}</span></span>
-                    <span className="gre-prenow"><span className="pre">{pre}%</span> → <b>{now == null ? '—' : now + '%'}</b>{now != null && <em className={now - pre >= 0 ? 'up' : 'down'}>{now - pre >= 0 ? '+' : ''}{now - pre}</em>}</span>
-                    <span className={'grc-pill ' + cls}>{st.finished ? t('Mastered') : st.started ? t('In progress') : t('Not started')}</span>
-                  </button>
-                  {tOpen && (
-                    <div className="gre-skills">
-                      <div className="gre-skill gre-skill-head" aria-hidden>
-                        <span>{t('Skill')}</span><span>{t('Pre-test')}</span><span>{t('Best')}</span><span>{t('Growth')}</span><span>{t('Status')}</span>
-                      </div>
-                      {rows.map((r) => {
-                        const [scls, lab] = rowStatus(r, t)
-                        const sOpen = !!open[r.key]
-                        return (
-                          <div key={r.key} className={'gre-skill-wrap' + (r.pretest ? ' pretest' : '') + (r.sb ? ' sb' : '') + (r.post ? ' post' : '') + (r.next ? ' next' : '') + (sOpen ? ' open' : '')}>
-                            <button className="gre-skill" onClick={() => !r.pretest && toggle(r.key)} aria-expanded={r.pretest ? undefined : sOpen}>
-                              <span className="grc-skill">
-                                {r.pretest ? <span className="gre-chev" aria-hidden /> : <Chevron open={sOpen} />}
-                                {r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + scls}>{r.pretest ? 'P' : r.post ? '★' : r.passed ? '✓' : r.n}</span>}
-                                <span>{r.label}</span>
-                              </span>
-                              <span className="grc-num">{r.pre != null ? r.pre + '%' : ''}</span>
-                              <span className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></span>
-                              <GrowthCell r={r} />
-                              <span><span className={'grc-pill ' + scls + (r.sb ? ' sb' : '')}>{lab}</span></span>
-                            </button>
-                            {sOpen && !r.pretest && (
-                              <ol className="gre-acts">
-                                {/* the flow: a short lesson first, then the activities (her note, 2026-10-02) */}
-                                {!r.sb && !r.post && (
-                                  <li className={r.best != null ? 'done' : ''}>
-                                    <span className="gre-act-n">{r.best != null ? '✓' : '▶'}</span>
-                                    <span className="gre-act-kind">{t('Lesson')}</span>
-                                    <span className="gre-act-brief">{t('Mini-lesson: watch the model, then try it.')}</span>
-                                  </li>
-                                )}
-                                {(r.ws.activities || []).map((a, i) => (
-                                  <li key={i} className={r.passed ? 'done' : ''}>
-                                    <span className="gre-act-n">{r.passed ? '✓' : i + 1}</span>
-                                    <span className="gre-act-kind">{kindLabel(a.kind, t)}</span>
-                                    <span className="gre-act-brief">{a.brief || ''}</span>
-                                  </li>
-                                ))}
-                                {(!r.ws.activities || !r.ws.activities.length) && <li className="gre-act-none">{t('No activities yet')}</li>}
-                                <li className="gre-act-go"><button className="btn ghost" onClick={() => onOpen(tp.id, r.ws.id)}>{r.passed ? t('Practice again') : t('Open this skill →')}</button></li>
-                              </ol>
-                            )}
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
-function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap, hideFoot = false }) {
+function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = false }) {
   const t = useT()
   const core = tp.core || []
   const pre = demoPretest(tp.id)
@@ -802,9 +586,6 @@ function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap, h
           {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
         </div>
   )
-  const d = { tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, cols, foot, next, nextLabel, onStart, onMap }
-  if (look === 'c') return <ReportScorecard {...d} />
-
   // consecutive columns of one skill (1st try, Skill Builder, retake) share a slot
   const groups = []
   cols.forEach((c) => {
@@ -909,9 +690,6 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   try { progress = JSON.parse(localStorage.getItem('proofProgress') || '{}') } catch { /* fine */ }
   const [seeded, setSeeded] = useState(null)
   if (seeded) progress = seeded
-  // prototype: three ways to present the report (her ask, 2026-10-02: "make 3 different versions ... in an ABC")
-  const [look, setLookState] = useState(() => { try { const v = localStorage.getItem('lscr.reportLook'); return v === 'c' || v === 'd' ? v : 'a' } catch { return 'a' } })
-  const setLook = (v) => { setLookState(v); try { localStorage.setItem('lscr.reportLook', v) } catch { /* fine */ } }
   const band = useBandValue()
   const grade = bandGrade(band, topics)
   const shown = pathsGrade(band, topics)
@@ -949,12 +727,12 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   }, [lead?.tp.id]) // eslint-disable-line react-hooks/exhaustive-deps
   // D needs a finished path in another domain to show a domain mastered (demo, once per grade)
   useEffect(() => {
-    if (look !== 'd' || !lead || !topics) return
+    if (!lead || !topics) return
     let done = []
     try { const v = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]'); done = Array.isArray(v) ? v : [] } catch { /* fine */ }
     if (done.includes('mastery:' + lead.tp.grade) || mine.some(({ st }) => st.finished)) return
     const s = seedDemoMastery(mine, lead.tp.id, progress); if (s) setSeeded(s)
-  }, [look, lead?.tp.id, topics]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [lead?.tp.id, topics]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The path you are on, as its own little trail of clearings (her pick of three,
   // 2026-09-30). The other-path rows came out so the section fits above the fold.
@@ -966,9 +744,6 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           <span className="prf-c-title">{studio ? t('Your growth report') : t('The Lit Labyrinth')}</span>
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
-          <div className="gr-abc" role="group" aria-label="Report layout (prototype)">
-            {[['a', 'A'], ['c', 'C'], ['d', 'D']].map(([k, l]) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{l}</button>)}
-          </div>
           <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>
         <div className="prf-body">
@@ -976,14 +751,14 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
           {lead && (
             <div className="prf-c-lead">
-{look === 'a' && <DomainStrip mine={mine} progress={progress} selD={lead.tp.domain} onPick={pickDomain} next={next} onStart={start} />}
-{look === 'a' && (
+{<DomainStrip mine={mine} progress={progress} selD={lead.tp.domain} onPick={pickDomain} next={next} onStart={start} />}
+{(
               <div className="prf-c-line">
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
               </div>
               )}
-              {look === 'd' ? <ReportMastery mine={mine} progress={progress} grade={grade} lead={lead} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} onOpen={(id, wsId) => onOpen(id, wsId)} /> : <GrowthReport look={look} hideFoot={look === 'a'} tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />}
+              <GrowthReport hideFoot tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
             </div>
           )}
         </div>

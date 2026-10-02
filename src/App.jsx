@@ -126,7 +126,7 @@ export default function App() {
     body = (
       <HSLayout view={view} onNav={nav} me={me} grade={band === '8' ? 8 : 10} theme={hsTheme} setTheme={setHsTheme} palette={hsPalette} setPalette={setHsPalette}>
         {view === 'home'
-          ? <HSHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onNav={nav} />
+          ? <HSHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onNav={nav} onProofRoom={(topicId, wsId) => { setProofTopic(topicId || null); setProofWs(wsId || null); setView('proof') }} />
           : <HSCourse state={state} grade={band === '8' ? 8 : 10} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />}
       </HSLayout>
     )

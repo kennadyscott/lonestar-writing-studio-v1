@@ -9,6 +9,7 @@
 import React, { useMemo, useState } from 'react'
 import { api } from '../lib/api.js'
 import { MODULE_LESSONS } from './LunaPage.jsx'
+import { ProofRoomFeature } from './StudentHome.jsx'
 
 const TODAY = new Date('2026-07-02T00:00:00')
 const daysTo = (d) => (d ? Math.round((new Date(d + 'T00:00:00') - TODAY) / 86400000) : Infinity)
@@ -182,7 +183,7 @@ export function HSLayout({ view, onNav, me, grade = 10, theme, setTheme, palette
 }
 
 /* ---------------- home ---------------- */
-export function HSHome({ state, me, onOpen, onReview, onNav }) {
+export function HSHome({ state, me, onOpen, onReview, onNav, onProofRoom }) {
   const [busy, setBusy] = useState(false)
   const rows = useMemo(() => state.assignments
     .filter((a) => !a.isPeerRevision && !['free', 'quick'].includes(a.genre))
@@ -295,6 +296,11 @@ export function HSHome({ state, me, onOpen, onReview, onNav }) {
               ))}
             </tbody>
           </table>
+        </section>
+
+        {/* the Lit Labyrinth growth report, in studio dress (her note, 2026-10-02: "across all grade levels") */}
+        <section className="hs-span hs-skill" aria-label="Skill practice">
+          <ProofRoomFeature studio onOpen={onProofRoom} />
         </section>
 
         <section className="hs-card" aria-label="Writing Course">

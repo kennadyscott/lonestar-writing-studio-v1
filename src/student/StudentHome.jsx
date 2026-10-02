@@ -400,7 +400,124 @@ function PathChecklist({ stops, next, onStart, onMap }) {
   )
 }
 
-function ProofRoomFeature({ onOpen }) {
+/*
+ * The Lit Labyrinth as a progress report (her note, 2026-10-02: "more report /
+ * data style and then they can click into the map to continue ... an indication
+ * of pre-test to post-test, growth percentages, progression of the lesson that
+ * also indicates skill builder"). One path: pre-test -> now, growth, a column per
+ * clearing (its Skill Builder beside it) against the 85% mastery line, then the
+ * post-test (the Full Topic proof).
+ * DEMO: the Lit Labyrinth has no pre-test stop yet, so the baseline is a fixed
+ * demo number per path, and a first visit with no progress gets a sample
+ * mid-path history so the report has something to show.
+ */
+const MASTERY = 85
+const demoPretest = (id) => { let h = 0; for (const c of String(id)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return 38 + (h % 17) }
+function seedDemoProgress(tp, progress) {
+  const [c1, c2] = tp.core || []
+  if (!c1) return null
+  const seed = { ...progress, [c1.id]: { best: 100, passed: true } }
+  if (c2) {
+    seed[c2.id] = { best: 62, passed: false }
+    const sb = tp.skillBuilders?.[c2.id]
+    if (sb) seed[sb.id] = { best: 92, passed: true }
+  }
+  try {
+    localStorage.setItem('proofProgress', JSON.stringify(seed))
+    const done = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]')
+    localStorage.setItem('proofDemoSeeded', JSON.stringify([...(Array.isArray(done) ? done : []), tp.id]))
+  } catch { /* fine */ }
+  return seed
+}
+
+function GrowthReport({ tp, progress, stops, next, onStart, onMap }) {
+  const t = useT()
+  const core = tp.core || []
+  const pre = demoPretest(tp.id)
+  const full = tp.full ? (progress[tp.full.id] || {}) : null
+  const cols = [{ key: 'pre', label: t('Pre-test'), score: pre, kind: 'pre' }]
+  core.forEach((ws, i) => {
+    const p = progress[ws.id] || {}
+    const st = stops.find((x) => x.ws.id === ws.id)?.state || 'locked'
+    cols.push({ key: ws.id, label: clearingTitle(ws), n: i + 1, score: p.best > 0 ? p.best : null, kind: p.passed ? 'passed' : p.best > 0 ? 'below' : st === 'locked' ? 'locked' : 'open', next: next && next.ws.id === ws.id })
+    const sb = tp.skillBuilders?.[ws.id]
+    const sp = sb && progress[sb.id]
+    if (sb && (sp?.best > 0 || (next && next.ws.id === sb.id))) cols.push({ key: sb.id, label: t('Skill Builder'), score: sp?.best > 0 ? sp.best : null, kind: 'sb', next: next && next.ws.id === sb.id })
+  })
+  if (tp.full) cols.push({ key: tp.full.id, label: t('Post-test'), score: full.best > 0 ? full.best : null, kind: full.passed ? 'post' : full.best > 0 ? 'below' : 'post-off', next: next && next.ws.id === tp.full.id })
+
+  const tried = core.map((w) => progress[w.id]?.best || 0).filter((b) => b > 0)
+  const now = full?.best > 0 ? full.best : tried.length ? Math.round(tried.reduce((a, b) => a + b, 0) / tried.length) : null
+  const pts = now == null ? null : now - pre
+  const pct = now == null ? null : Math.round(((now - pre) / pre) * 100)
+  const mastered = core.filter((w) => progress[w.id]?.passed).length
+  const sbDone = core.filter((w) => { const sb = tp.skillBuilders?.[w.id]; return sb && progress[sb.id]?.passed }).length
+  const nextLabel = next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
+
+  return (
+    <div className="gr">
+      {/* the way in sits first so it is always above the fold on a Chromebook */}
+      <div className="gr-foot">
+        {nextLabel && <div className="gr-next"><span>{t('Up next')}</span><b>{nextLabel}</b></div>}
+        <span style={{ flex: 1 }} />
+        <button className="btn ghost" onClick={onMap}>{t('Open the map')}</button>
+        {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
+      </div>
+      <div className="gr-top">
+        <div className="gr-hero" aria-label={t('Growth on this path')}>
+          <div className="gr-num"><span className="gr-num-l">{t('Pre-test')}</span><span className="gr-num-v pre">{pre}%</span></div>
+          <span className="gr-arrow" aria-hidden>→</span>
+          <div className="gr-num"><span className="gr-num-l">{full?.best > 0 ? t('Post-test') : t('Now')}</span><span className="gr-num-v">{now == null ? '—' : now + '%'}</span></div>
+          {pts != null && (
+            <div className={'gr-growth' + (pts < 0 ? ' down' : '')}>
+              <b>{pts >= 0 ? '+' : ''}{pts} pts</b>
+              <span>{pct >= 0 ? '+' : ''}{pct}% {t('growth')}</span>
+            </div>
+          )}
+        </div>
+        <div className="gr-kpis">
+          <div className="gr-kpi"><b>{mastered}<small>/{core.length}</small></b><span>{t('Clearings mastered')}</span></div>
+          <div className="gr-kpi"><b>{sbDone}</b><span>{t('Skill Builders done')}</span></div>
+          <div className="gr-kpi"><b>{full?.best > 0 ? full.best + '%' : '🔒'}</b><span>{full?.best > 0 ? t('Post-test') : t('Post-test opens after clearing {n}', { n: core.length })}</span></div>
+        </div>
+      </div>
+
+      <div className="gr-chart" role="img" aria-label={t('Scores along the path')}>
+        <div className="gr-plot">
+          {[0, 50, 100].map((v) => <span key={v} className="gr-grid" style={{ bottom: v + '%' }}><i>{v}</i></span>)}
+          <span className="gr-mastery" style={{ bottom: MASTERY + '%' }}><i>{t('Mastery')} {MASTERY}%</i></span>
+          {cols.map((c) => (
+            <div key={c.key} className={'gr-col ' + c.kind + (c.next ? ' next' : '')} title={`${c.label}: ${c.score == null ? (c.kind === 'locked' || c.kind === 'post-off' ? t('Locked') : t('Not started')) : c.score + '%'}`}>
+              <span className="gr-bar" style={{ height: (c.score ?? 0) + '%' }}>
+                {c.score != null && <em>{c.score}</em>}
+              </span>
+              {c.score == null && <span className="gr-empty" aria-hidden>{c.kind === 'locked' || c.kind === 'post-off' ? '🔒' : c.next ? '▶' : ''}</span>}
+            </div>
+          ))}
+        </div>
+        <div className="gr-labels">
+          {cols.map((c) => (
+            <div key={c.key} className={'gr-lab ' + c.kind + (c.next ? ' next' : '')}>
+              <span className="gr-lab-k">{c.kind === 'pre' || c.kind.startsWith('post') ? '' : c.kind === 'sb' ? '↳' : c.n}</span>
+              <span className="gr-lab-t">{c.label}</span>
+            </div>
+          ))}
+        </div>
+        <div className="gr-legend">
+          <span><i className="pre" />{t('Pre-test')}</span>
+          <span><i className="passed" />{t('Mastered')}</span>
+          <span><i className="below" />{t('Below 85%')}</span>
+          <span><i className="sb" />{t('Skill Builder')}</span>
+          <span><i className="post" />{t('Post-test')}</span>
+        </div>
+      </div>
+
+    </div>
+  )
+}
+
+// studio: the grade 8 / high-school Writer's Studio wears it as plain "Skill Practice"
+export function ProofRoomFeature({ onOpen, studio = false }) {
   const t = useT()
   const say = useSay()
   const BASE = import.meta.env.BASE_URL || '/'
@@ -413,6 +530,8 @@ function ProofRoomFeature({ onOpen }) {
   }, [])
   let progress = {}
   try { progress = JSON.parse(localStorage.getItem('proofProgress') || '{}') } catch { /* fine */ }
+  const [seeded, setSeeded] = useState(null)
+  if (seeded) progress = seeded
   const band = useBandValue()
   const grade = bandGrade(band, topics)
   const shown = pathsGrade(band, topics)
@@ -425,15 +544,24 @@ function ProofRoomFeature({ onOpen }) {
   const stops = lead ? buildStops(lead.tp, progress) : []
   const next = nextStopOf(stops)
   const start = () => (next ? onOpen(lead.tp.id, next.ws.id) : onOpen(lead.tp.id))
+  // a path nobody has touched gets the sample history once (see GrowthReport),
+  // per path, so every band's demo opens on a report with something in it
+  useEffect(() => {
+    if (!lead || resume) return
+    let done = []
+    try { const v = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]'); done = Array.isArray(v) ? v : [] } catch { /* fine */ }
+    if (done.includes(lead.tp.id)) return
+    const s = seedDemoProgress(lead.tp, progress); if (s) setSeeded(s)
+  }, [lead?.tp.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The path you are on, as its own little trail of clearings (her pick of three,
   // 2026-09-30). The other-path rows came out so the section fits above the fold.
   return (
-      <div className="prf-card prf-c">
-        <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
+      <div className={'prf-card prf-c' + (studio ? ' studio' : '')}>
+        <div className="prf-c-head" style={studio ? undefined : { '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
           <div className="prf-c-words">
-          <span className="proof-kicker">{t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</span>
-          <span className="prf-c-title">{t('The Lit Labyrinth')}</span>
+          <span className="proof-kicker">{studio ? t('Skill practice') : t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</span>
+          <span className="prf-c-title">{studio ? t('Your growth report') : t('The Lit Labyrinth')}</span>
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
           <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
@@ -447,7 +575,7 @@ function ProofRoomFeature({ onOpen }) {
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
               </div>
-              <PathChecklist stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
+              <GrowthReport tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
             </div>
           )}
         </div>

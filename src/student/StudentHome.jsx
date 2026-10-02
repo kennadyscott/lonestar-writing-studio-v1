@@ -580,9 +580,13 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
   const pre = demoPretest(tp.id)
   const full = tp.full ? (progress[tp.full.id] || {}) : null
   const cols = [{ key: 'pre', label: t('Pre-test'), score: pre, kind: 'pre' }]
+  // her note (2026-10-02): "Show two that haven't been started yet" - the two
+  // skills after the current one read as open (Not started); further ahead stays locked
+  const nextIdx = next ? core.findIndex((w) => w.id === (next.forId || next.ws.id)) : -1
   core.forEach((ws, i) => {
     const p = progress[ws.id] || {}
-    const st = stops.find((x) => x.ws.id === ws.id)?.state || 'locked'
+    const raw = stops.find((x) => x.ws.id === ws.id)?.state || 'locked'
+    const st = raw === 'locked' && nextIdx >= 0 && i > nextIdx && i <= nextIdx + 2 ? 'open' : raw
     const sb = tp.skillBuilders?.[ws.id]
     const sp = sb && progress[sb.id]
     const sbIn = sb && (sp?.best > 0 || (next && next.ws.id === sb.id))
@@ -674,6 +678,7 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
                     {c.score != null && <em>{c.score}</em>}
                   </span>
                   {c.score == null && <span className="gr-empty" aria-hidden>{c.kind === 'locked' || c.kind === 'post-off' ? '🔒' : c.next ? '▶' : ''}</span>}
+                  {c.score == null && c.kind === 'open' && !c.next && !c.group && <span className="gr-ns-tag">{t('Not started')}</span>}
                 </div>
               ))}
             </div>
@@ -699,6 +704,8 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
           <span><i className="below" />{t('Below 85%')}</span>
           <span><i className="sb" />{t('Skill Builder')}</span>
           <span><i className="post" />{t('Post-test')}</span>
+          <span><i className="notyet" />{t('Not started')}</span>
+          <span><i className="lockd" />{t('Locked')}</span>
         </div>
       </div>
 

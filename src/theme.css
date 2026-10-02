@@ -1154,3 +1154,15 @@ a { color: var(--link); }
   .land-b-hero { margin-top: 0; min-height: 260px; }
 }
 @media (prefers-reduced-motion: reduce) { .valley-zoom, .land-arrive { transition: none; animation: none; } }
+
+/* ---- Luna's Writing Adventure logo: her artwork, given depth with light (2026-10-02) ----
+   a bright top edge, a crisp under-edge, a soft cast shadow and a crystal-blue glow;
+   a slow sheen sweeps across it, clipped to the logo's own shape */
+.luna-lockup { position: relative; display: inline-block; line-height: 0; }
+.luna-lockup img { filter: drop-shadow(0 1px 0 rgba(255,255,255,.95)) drop-shadow(0 2px 0 rgba(10,30,70,.35)) drop-shadow(0 6px 8px rgba(10,30,70,.30)) drop-shadow(0 0 14px rgba(80,170,255,.38)); }
+.luna-lockup::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  -webkit-mask: var(--lockup) center / contain no-repeat; mask: var(--lockup) center / contain no-repeat;
+  background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.75) 48%, rgba(190,230,255,.6) 52%, transparent 62%) 0 0 / 300% 100% no-repeat;
+  animation: luna-sheen 6s ease-in-out 1.2s infinite; mix-blend-mode: screen; }
+@keyframes luna-sheen { 0% { background-position: 120% 0; } 35%, 100% { background-position: -40% 0; } }
+@media (prefers-reduced-motion: reduce) { .luna-lockup::after { animation: none; opacity: 0; } }

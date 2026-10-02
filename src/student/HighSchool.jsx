@@ -116,13 +116,17 @@ export function useHsTheme() {
 }
 
 // Her note on the first mockup (2026-10-02): "a little bland ... we are going
-// to have to get some level of color in there". Three palettes to compare,
-// switched from the sidebar; the same structure carries the color (a hero band,
-// a colored sidebar, genre and unit colors).
-export const HS_PALETTES = [['brand', 'LoneStar', '#06AADE'], ['sunrise', 'Sunrise', '#ff6b4a'], ['evergreen', 'Evergreen', '#2fb37f']]
+// to have to get some level of color in there". Then: "give them LoneStar and
+// Sunrise as a setting and Dark Mode/Light Mode" - a student setting in the
+// sidebar (Evergreen was dropped). The color rides on the same structure: a
+// hero band, a colored sidebar, genre and unit colors.
+export const HS_PALETTES = [['brand', 'LoneStar', '#06AADE'], ['sunrise', 'Sunrise', '#ff6b4a']]
 export function useHsPalette() {
   const [p, setP] = useState(() => {
-    try { return localStorage.getItem('lscr.hsPalette') || 'brand' } catch { return 'brand' }
+    try {
+      const v = localStorage.getItem('lscr.hsPalette')
+      return HS_PALETTES.some(([k]) => k === v) ? v : 'brand'
+    } catch { return 'brand' }
   })
   const set = (v) => { setP(v); try { localStorage.setItem('lscr.hsPalette', v) } catch { /* fine */ } }
   React.useEffect(() => { document.documentElement.dataset.hsPalette = p }, [p])
@@ -146,20 +150,26 @@ export function HSLayout({ view, onNav, me, theme, setTheme, palette, setPalette
           ))}
         </nav>
         <div className="hs-side-foot">
-          {setPalette && (
-            <div className="hs-pal" role="group" aria-label="Color palette (prototype)">
-              <span className="hs-pal-lbl">Color</span>
+          <div className="hs-set" role="group" aria-label="Theme">
+            <span className="hs-pal-lbl">Theme</span>
+            <div className="hs-seg">
               {HS_PALETTES.map(([k, label, sw]) => (
-                <button key={k} className={'hs-pal-btn' + (palette === k ? ' on' : '')} aria-pressed={palette === k} title={label} onClick={() => setPalette(k)}>
-                  <span style={{ background: sw }} />{label}
+                <button key={k} className={palette === k ? 'on' : ''} aria-pressed={palette === k} onClick={() => setPalette(k)}>
+                  <span className="hs-sw" style={{ background: sw }} />{label}
                 </button>
               ))}
             </div>
-          )}
-          <button className="hs-theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-pressed={theme === 'dark'}>
-            <Icon d={theme === 'dark' ? I.sun : I.moon} size={16} />
-            <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
-          </button>
+          </div>
+          <div className="hs-set" role="group" aria-label="Appearance">
+            <span className="hs-pal-lbl">Appearance</span>
+            <div className="hs-seg">
+              {[['light', 'Light', I.sun], ['dark', 'Dark', I.moon]].map(([k, label, icon]) => (
+                <button key={k} className={theme === k ? 'on' : ''} aria-pressed={theme === k} onClick={() => setTheme(k)}>
+                  <Icon d={icon} size={14} />{label}
+                </button>
+              ))}
+            </div>
+          </div>
           <div className="hs-me">{me.name} · Grade 10</div>
         </div>
       </aside>

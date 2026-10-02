@@ -1463,18 +1463,10 @@ a { color: var(--link); }
   --g-argument: #d4472a; --g-narrative: #a3409e; --g-informational: #1b8f8a;
   --hs-u1: #e5533a; --hs-u2: #e8920f; --hs-u3: #c23a7c; --hs-u4: #6a4bc4; --hs-u5: #1b8f8a; --hs-u6: #2f6fd0;
 }
-:root[data-band="9-12"][data-hs-palette="evergreen"] {
-  --hs-bg: #edf3f0; --hs-accent: #18855e; --hs-accent-soft: #e1f3ea;
-  --hs-side-bg: #0e2621; --hs-side-ink: #e6f4ee; --hs-side-muted: #93b5a8; --hs-side-on: rgba(47,179,127,.2); --hs-side-on-ink: #74e2b4; --hs-side-line: rgba(255,255,255,.09);
-  --hs-hero: linear-gradient(118deg, #0e2621 0%, #134236 45%, #1d6b55 75%, #2fb37f 120%); --hs-hero-ink: #ffffff; --hs-hero-muted: #bfe3d3;
-  --hs-c1: #ffd36b; --hs-c2: #74e2b4; --hs-c3: #8fd3ff;
-  --g-argument: #d0532f; --g-narrative: #6b5bd1; --g-informational: #18855e;
-  --hs-u1: #18855e; --hs-u2: #2f7fd0; --hs-u3: #d99415; --hs-u4: #c2493a; --hs-u5: #7a55c8; --hs-u6: #0f8ea0;
-}
+
 :root[data-band="9-12"][data-hs-theme="dark"] { --hs-bg: #0e1319; }
 :root[data-band="9-12"][data-hs-theme="dark"][data-hs-palette="brand"] { --hs-accent: #4cc3ee; --hs-accent-soft: #12293a; }
 :root[data-band="9-12"][data-hs-theme="dark"][data-hs-palette="sunrise"] { --hs-accent: #ff8a6b; --hs-accent-soft: #33201d; }
-:root[data-band="9-12"][data-hs-theme="dark"][data-hs-palette="evergreen"] { --hs-accent: #5fd3a2; --hs-accent-soft: #13291f; }
 
 /* sidebar in color */
 .hs-side { background: var(--hs-side-bg); border-right: 0; color: var(--hs-side-ink); }
@@ -1523,3 +1515,12 @@ section[aria-label="Daily prompt"] { background: var(--hs-accent-soft); border-c
 .hs-lessons .hs-bar > span { background: var(--u); }
 .hs-lesson.in_progress .hs-lesson-n { background: var(--u); }
 .hs-lesson.in_progress { background: color-mix(in srgb, var(--u) 7%, transparent); }
+
+/* Theme + Appearance settings in the sidebar (her call: LoneStar or Sunrise, Light or Dark) */
+.hs-set { display: flex; flex-direction: column; gap: 4px; }
+.hs-seg { display: grid; grid-template-columns: 1fr 1fr; gap: 2px; padding: 3px; border-radius: 9px; background: rgba(255,255,255,.06); border: 1px solid var(--hs-side-line); }
+.hs-seg button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 6px 4px; border-radius: 7px; background: none; border: 0; color: var(--hs-side-muted); font: inherit; font-size: 12.5px; font-weight: 700; }
+.hs-seg button:hover { color: var(--hs-side-ink); }
+.hs-seg button.on { background: var(--hs-side-on); color: var(--hs-side-ink); }
+.hs-sw { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.hs-side-foot { gap: 12px; }

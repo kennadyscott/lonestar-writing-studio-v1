@@ -148,7 +148,7 @@ function JourneyAll({ modules, currentId, onPick }) {
 // grid of equal paintings with gold frames and connector dots): the lesson the
 // student is on gets the one big painting and the only gold; the others are
 // small plain tiles in order.
-function UpNextLesson({ a, onOpen }) {
+function UpNextLesson({ a, isUp, onOpen }) {
   const t = useT()
   const say = useSay()
   const current = a.status === 'in_progress'
@@ -158,7 +158,7 @@ function UpNextLesson({ a, onOpen }) {
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}>
       <div className="nook-upnext-art"><img src={LESSON_ART(a.art)} alt="" /></div>
       <div className="nook-upnext-words">
-        <div className="nook-upnext-kicker">{passed ? t('Completed') : current ? t('Up next') : t('Your next lesson')} · {a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
+        <div className="nook-upnext-kicker">{passed ? t('Completed') : current ? t('Up next') : isUp ? t('Your next lesson') : t('Not started')} · {a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
         <div className="nook-upnext-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}>
           <Glossed text={t(a.title)} />
         </div>
@@ -176,12 +176,11 @@ function UpNextLesson({ a, onOpen }) {
 function RailLesson({ a, isUp, picked, onOpen }) {
   const t = useT()
   const passed = a.status === 'passed'
-  const locked = a.status === 'todo' && !isUp
-  const clickable = passed || isUp
+  // nothing is locked: lessons, like modules, can be done in any order (her note, 2026-10-02)
   return (
-    <div className={`nook-rail-row${isUp ? ' up' : ''}${picked ? ' picked' : ''}${locked ? ' locked' : ''}`} role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
-      aria-pressed={clickable ? picked : undefined}
-      onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
+    <div className={`nook-rail-row${isUp ? ' up' : ''}${picked ? ' picked' : ''}`} role="button" tabIndex={0}
+      aria-pressed={picked}
+      onClick={() => onOpen?.(a)} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
       aria-current={isUp ? 'step' : undefined}>
       <span className="nook-rail-thumb"><img src={LESSON_ART(a.art)} alt="" /></span>
       <span className="nook-rail-words">
@@ -190,7 +189,7 @@ function RailLesson({ a, isUp, picked, onOpen }) {
       </span>
       {isUp ? <span className="nook-rail-now">{t('Now')}</span>
         : passed ? <span aria-label={t('Passed')} className="nook-mini-check">✓</span>
-        : <span aria-hidden className="nook-rail-lock">🔒</span>}
+        : null}
     </div>
   )
 }
@@ -208,7 +207,7 @@ function FocusLessons({ acts, onOpen }) {
         <div className="nook-rest-label">{t('All lessons')}</div>
         {acts.map((a) => <RailLesson key={a.n} a={a} isUp={a === up} picked={a === shown} onOpen={(x) => setPickedN(x.n)} />)}
       </nav>
-      <UpNextLesson a={shown} onOpen={onOpen} />
+      <UpNextLesson a={shown} isUp={shown === up} onOpen={onOpen} />
     </div>
   )
 }

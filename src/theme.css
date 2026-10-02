@@ -2205,3 +2205,11 @@ body { font-size: 16px; }
 .prf-c .gr-allprog-row { margin-top: auto; padding-top: 14px; }
 .prf-c .gre-tiles { margin-top: 0; }
 .prf-c.look-b .gr-top[hidden] ~ .gr-chart .gr-plot { height: 156px; }
+
+/* the chart fills the card's free height, with headroom above the bars
+   (her note, 2026-10-02: the bars "hit the top, but you have so much room on the bottom") */
+.prf-c .gr-pathwrap { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.prf-c .gr-pathwrap > .gr { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.prf-c.look-b .gr-pathwrap .gr-chart { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-top: 26px; }
+.prf-c.look-b .gr-top[hidden] ~ .gr-chart .gr-plot { height: auto; flex: 1; min-height: 140px; }
+.prf-c .gr-allprog-row { padding-top: 12px; }

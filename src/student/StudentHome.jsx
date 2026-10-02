@@ -605,19 +605,14 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
 
   return (
     <div className="gr grd gre">
-      <div className="grc-panel">
-        <div className="grd-stats">
-          <div className="grd-stat"><b>{domMastered}<small>/{doms.length}</small></b><span>{t('Domains mastered')}</span></div>
-          <div className="grd-stat"><b>{topicsDone}<small>/{mine.length}</small></b><span>{t('Topics mastered')}</span></div>
-          <div className="grd-stat"><b>{skillsDone}<small>/{skillsAll}</small></b><span>{t('Skills mastered')}</span></div>
-          {avgGrowth != null && <div className="gr-growth"><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth} pts</b><span>{t('avg. growth, pre to now')}</span></div>}
-        </div>
-        <div className="grc-go">
-          <div className="gr-next"><span>{lead ? (lead.tp.short || lead.tp.title) : ''}{nextLabel ? ' · ' + t('Up next') : ''}</span><b>{nextLabel || t('Pick a path')}</b></div>
-          <span style={{ flex: 1 }} />
-          <button className="btn ghost" onClick={onMap}>{t('Open the map')}</button>
-          {next && <button className="btn" onClick={onStart}>{t('Continue →')}</button>}
-        </div>
+      {/* her note (2026-10-02): no blue box - "a smaller: 1/5 domains, 1/6 topics,
+          average growth ... so we can bring all the other stuff up" */}
+      <div className="gre-strip">
+        <span className="gre-stat"><b>{domMastered}<small>/{doms.length}</small></b>{t('domains mastered')}</span>
+        <span className="gre-stat"><b>{topicsDone}<small>/{mine.length}</small></b>{t('topics mastered')}</span>
+        {avgGrowth != null && <span className={'gre-stat growth' + (avgGrowth < 0 ? ' down' : '')}><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth}</b>{t('pts average growth')}</span>}
+        <span style={{ flex: 1 }} />
+        {next && <button className="btn gre-go" onClick={onStart} title={t('Up next') + ': ' + nextLabel}>{t('Continue')}: {nextLabel} →</button>}
       </div>
 
       <div className="grd-doms">

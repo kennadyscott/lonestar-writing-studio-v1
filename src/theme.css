@@ -1844,3 +1844,25 @@ body { font-size: 16px; }
 .hs .gre-skill, .hs .gre-acts { border-color: var(--hs-line); }
 .hs .gre-skill-wrap.sb > .gre-skill { background: color-mix(in srgb, var(--hs-good) 8%, transparent); }
 @media (max-width: 1100px) { .gre-skill { grid-template-columns: minmax(0, 1fr) 60px 60px 110px; } .gre-skill > :nth-child(4) { display: none; } }
+
+/* D: a slim stats line instead of the navy panel */
+.gre { gap: 10px; }
+.gre-strip { display: flex; align-items: center; gap: 8px 18px; flex-wrap: wrap; padding: 2px 2px 4px; }
+.gre-stat { display: inline-flex; align-items: baseline; gap: 6px; font-size: 13.5px; font-weight: 700; color: #4a6f8c; }
+.gre-stat b { font-size: 22px; font-weight: 800; color: #0d2f55; font-variant-numeric: tabular-nums; }
+.gre-stat b small { font-size: 14px; color: #7d93a6; }
+.gre-stat.growth b { color: #1f7a4d; }
+.gre-stat.growth.down b { color: #a65a00; }
+.gre-next { font-size: 13.5px; font-weight: 700; color: #4a6f8c; }
+.gre-next b { color: #0d2f55; }
+.gre-go { background: #f5c542; color: #2b1d00; font-weight: 800; padding: 8px 16px; }
+.gre-go:hover { background: #ffd35c; }
+.hs .gre-stat, .hs .gre-next { color: var(--hs-muted); }
+.hs .gre-stat b, .hs .gre-next b { color: var(--hs-ink); }
+.hs .gre-stat.growth b { color: var(--hs-good); }
+.gre-strip { flex-wrap: nowrap; gap: 14px; }
+.gre-stat { white-space: nowrap; }
+.gre-next { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gre-go { flex-shrink: 0; padding: 7px 14px; }
+@media (max-width: 1100px) { .gre-strip { flex-wrap: wrap; } }
+.gre-go { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

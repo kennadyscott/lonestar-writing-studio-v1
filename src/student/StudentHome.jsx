@@ -528,6 +528,19 @@ function seedDemoMastery(mine, leadId, progress) {
   } catch { /* fine */ }
   return seed
 }
+// A skill's result under her flow (no retake, 2026-10-02): the activities score,
+// and when that was below mastery and the Skill Builder came up, the Skill
+// Builder's score is what the skill ends on.
+function skillOutcome(tp, ws, progress) {
+  const p = progress[ws.id] || {}
+  const sb = tp.skillBuilders?.[ws.id]
+  const sp = sb && progress[sb.id]
+  const acts = p.best > 0 ? (sp?.best > 0 ? (p.first ?? p.best) : p.best) : null
+  const sbScore = sp?.best > 0 ? sp.best : null
+  return { acts, sbScore, score: sbScore ?? acts, mastered: !!p.passed || !!sp?.passed }
+}
+const avgOf = (xs) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null)
+
 // one row per skill (C's table), shared by C and D: the clearing, its Skill
 // Builder as a sub-row, the post-test last; ws kept so D can list activities
 function skillRowsOf(tp, progress, next, t) {
@@ -538,7 +551,8 @@ function skillRowsOf(tp, progress, next, t) {
   rows.push({ key: tp.id + ':pre', pretest: true, label: t('Pre-test') + ' · ' + t('every skill on this path'), best: demoPretest(tp.id), passed: true })
   core.forEach((ws, i) => {
     const p = progress[ws.id] || {}
-    rows.push({ key: ws.id, ws, n: i + 1, label: clearingTitle(ws), pre: demoSkillPre(ws.id), best: p.best > 0 ? p.best : null, passed: !!p.passed, next: isNext(ws.id), locked: !p.best && !isNext(ws.id) && i > 0 && !progress[core[i - 1].id]?.passed })
+    const o = skillOutcome(tp, ws, progress)
+    rows.push({ key: ws.id, ws, n: i + 1, label: clearingTitle(ws), pre: demoSkillPre(ws.id), best: o.acts, passed: o.mastered, next: isNext(ws.id), locked: !p.best && !isNext(ws.id) && i > 0 && !progress[core[i - 1].id]?.passed })
     const sb = tp.skillBuilders?.[ws.id]
     const sp = sb && progress[sb.id]
     if (sb && (sp?.best > 0 || isNext(sb.id))) rows.push({ key: sb.id, ws: sb, sb: true, label: t('Skill Builder'), best: sp?.best > 0 ? sp.best : null, passed: !!sp?.passed, next: isNext(sb.id) })
@@ -602,8 +616,8 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
   const skillsDone = mine.reduce((n, { tp }) => n + (tp.core || []).filter((w) => progress[w.id]?.passed).length, 0)
   const nowOf = (tp) => {
     const full = tp.full && progress[tp.full.id]
-    const tried = (tp.core || []).map((w) => progress[w.id]?.best || 0).filter((b) => b > 0)
-    return full?.best > 0 ? full.best : tried.length ? Math.round(tried.reduce((a, b) => a + b, 0) / tried.length) : null
+    const tried = (tp.core || []).map((w) => skillOutcome(tp, w, progress).score).filter((b) => b != null)
+    return full?.best > 0 ? full.best : avgOf(tried)
   }
   const growth = mine.filter(({ st }) => st.started).map(({ tp }) => { const n = nowOf(tp); return n == null ? null : n - demoPretest(tp.id) }).filter((g) => g != null)
   const avgGrowth = growth.length ? Math.round(growth.reduce((a, b) => a + b, 0) / growth.length) : null
@@ -742,22 +756,22 @@ function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap })
       cols.push({ key: ws.id, label, n: i + 1, score: p.best > 0 ? p.best : null, kind: p.passed ? 'passed' : p.best > 0 ? 'below' : st === 'locked' ? 'locked' : 'open', next: next && next.ws.id === ws.id })
     } else {
       // her note (2026-10-02): the Skill Builder sits right beside the skill it was
-      // for, after a first try below mastery, then the retake: one cluster
-      const first = p.first ?? (p.passed ? null : p.best > 0 ? p.best : null)
+      // for, after the score that sent the student there: one cluster
+      const first = p.first ?? (p.best > 0 ? p.best : null)
       const g = { group: ws.id, glabel: label, n: i + 1 }
-      cols.push({ ...g, key: ws.id + ':1', sub: t('1st try'), score: first, kind: first == null ? 'open' : first >= MASTERY ? 'passed' : 'below' })
+      cols.push({ ...g, key: ws.id + ':1', sub: t('Activities'), score: first, kind: first == null ? 'open' : first >= MASTERY ? 'passed' : 'below' })
       cols.push({ ...g, key: sb.id, sub: t('Skill Builder'), score: sp?.best > 0 ? sp.best : null, kind: 'sb', next: next && next.ws.id === sb.id })
-      const retaken = p.passed || (p.best > 0 && first != null && p.best > first)
-      cols.push({ ...g, key: ws.id + ':2', sub: t('Retake'), score: retaken ? p.best : null, kind: retaken ? (p.passed ? 'passed' : 'below') : 'open', next: next && next.ws.id === ws.id })
+      // no retake column (her note, 2026-10-02: "We don't have the retake, but I
+      // like how it is grouped together"): the Skill Builder is what follows a miss
     }
   })
   if (tp.full) cols.push({ key: tp.full.id, label: t('Post-test'), score: full.best > 0 ? full.best : null, kind: full.passed ? 'post' : full.best > 0 ? 'below' : 'post-off', next: next && next.ws.id === tp.full.id })
 
-  const tried = core.map((w) => progress[w.id]?.best || 0).filter((b) => b > 0)
-  const now = full?.best > 0 ? full.best : tried.length ? Math.round(tried.reduce((a, b) => a + b, 0) / tried.length) : null
+  const tried = core.map((w) => skillOutcome(tp, w, progress).score).filter((b) => b != null)
+  const now = full?.best > 0 ? full.best : avgOf(tried)
   const pts = now == null ? null : now - pre
   const pct = now == null ? null : Math.round(((now - pre) / pre) * 100)
-  const mastered = core.filter((w) => progress[w.id]?.passed).length
+  const mastered = core.filter((w) => skillOutcome(tp, w, progress).mastered).length
   const sbDone = core.filter((w) => { const sb = tp.skillBuilders?.[w.id]; return sb && progress[sb.id]?.passed }).length
   const nextLabel = next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
 

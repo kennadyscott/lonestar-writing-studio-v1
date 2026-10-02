@@ -436,6 +436,8 @@ function LabyrinthGate({ src, onDone }) {
 // The content keeps its strand names; only what students see changes.
 const LAND_NAME = { 'Foundational Language': 'Rootwood', 'Multiple Genres': 'Genre Grove', Comprehension: 'Comprehension Skills' }
 export const landName = (d) => LAND_NAME[d] || d
+// her order for the five lands (2026-10-01)
+export const LAND_ORDER = ['Foundational Language', "Author's Purpose", 'Composition', 'Comprehension', 'Multiple Genres']
 const STRAND_ICON = { Composition: '✍️', 'Foundational Language': '🔤', 'Multiple Genres': '📚', "Author's Purpose": '🎯', Comprehension: '🧠', 'Response Skills': '💬', 'Inquiry and Research': '🔎' }
 
 function ContinueCard({ resume, topics, onOpen }) {
@@ -574,7 +576,7 @@ const LAND_META = {
   "Author's Purpose": { key: 'authors-purpose', tag: 'See why writers write, and how.', about: 'Climb the watchtower and spot the choices authors make.' },
   Comprehension: { key: 'comprehension', tag: 'Look deep. See what the text really says.', about: 'Clear pools that show what a text means, and what it leaves for you to figure out.' },
 }
-const landImg = (d) => (import.meta.env.BASE_URL || '/') + 'lands/' + ((LAND_META[d] || {}).key || 'rootwood') + '.jpg'
+export const landImg = (d) => (import.meta.env.BASE_URL || '/') + 'lands/' + ((LAND_META[d] || {}).key || 'rootwood') + '.jpg'
 const pathState = (st) => (st.finished ? 'done' : st.started ? 'here' : 'fresh')
 const nextPathOf = (list) => list.find(({ st }) => st.started && !st.finished) || list.find(({ st }) => !st.finished)
 

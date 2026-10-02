@@ -9,7 +9,7 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
-import { topicStatus, clearingTitle, buildStops, nextStopOf, kindLabel } from './ProofRoom.jsx'
+import { topicStatus, clearingTitle, buildStops, nextStopOf, kindLabel, landName, landImg, LAND_ORDER } from './ProofRoom.jsx'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
@@ -445,7 +445,7 @@ function GrowthBadge({ pts, pct }) {
 // best score, growth bar and status; the Skill Builder sits as a sub-row under
 // the clearing it supports; a mastery ring and pre -> now up top.
 const demoSkillPre = (id) => { let h = 7; for (const c of String(id)) h = (h * 33 + c.charCodeAt(0)) >>> 0; return 28 + (h % 30) }
-function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, foot, next }) {
+function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, next, nextLabel, onStart, onMap }) {
   const t = useT()
   const ring = core.length ? mastered / core.length : 0
   const C = 2 * Math.PI * 30
@@ -461,22 +461,31 @@ function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbD
   const status = (r) => r.passed ? ['ok', r.sb ? t('Done') : t('Mastered')] : r.next ? ['next', t('Up next')] : r.best != null ? ['low', t('Below 85%')] : r.locked ? ['off', t('Locked')] : ['off', t('Not started')]
   return (
     <div className="gr grc">
-      {foot}
-      <div className="grc-top">
-        <div className="grc-ring">
-          <svg viewBox="0 0 80 80" aria-hidden="true">
-            <circle cx="40" cy="40" r="30" className="grc-ring-bg" />
-            <circle cx="40" cy="40" r="30" className="grc-ring-fg" strokeDasharray={`${C * ring} ${C}`} transform="rotate(-90 40 40)" />
-          </svg>
-          <div><b>{mastered}/{core.length}</b><span>{t('skills mastered')}</span></div>
-        </div>
-        <div className="gr-hero grc-hero">
-          <div className="gr-num"><span className="gr-num-l">{t('Pre-test')}</span><span className="gr-num-v pre">{pre}%</span></div>
-          <span className="gr-arrow" aria-hidden>→</span>
-          <div className="gr-num"><span className="gr-num-l">{full?.best > 0 ? t('Post-test') : t('Now')}</span><span className="gr-num-v">{now == null ? '—' : now + '%'}</span></div>
+      {/* her note on C (2026-10-02): "a little bland ... the cream and the grey ... and the small text":
+          one bold panel carries the numbers and the way in; the table text goes up a size */}
+      <div className="grc-panel">
+        <div className="grc-stats">
+          <div className="grc-ring">
+            <svg viewBox="0 0 80 80" aria-hidden="true">
+              <circle cx="40" cy="40" r="30" className="grc-ring-bg" />
+              <circle cx="40" cy="40" r="30" className="grc-ring-fg" strokeDasharray={`${C * ring} ${C}`} transform="rotate(-90 40 40)" />
+            </svg>
+            <div><b>{mastered}/{core.length}</b><span>{t('skills mastered')}</span></div>
+          </div>
+          <div className="grc-prenow">
+            <div className="gr-num"><span className="gr-num-l">{t('Pre-test')}</span><span className="gr-num-v pre">{pre}%</span></div>
+            <span className="gr-arrow" aria-hidden>→</span>
+            <div className="gr-num"><span className="gr-num-l">{full?.best > 0 ? t('Post-test') : t('Now')}</span><span className="gr-num-v">{now == null ? '—' : now + '%'}</span></div>
+          </div>
           <GrowthBadge pts={pts} pct={pct} />
+          <div className="grc-sbcount"><b>{sbDone}</b><span>{t('Skill Builders done')}</span></div>
         </div>
-        <div className="gr-kpi"><b>{sbDone}</b><span>{t('Skill Builders done')}</span></div>
+        <div className="grc-go">
+          <div className="gr-next"><span>{tp.short || tp.title}{nextLabel ? ' · ' + t('Up next') : ''}</span><b>{nextLabel || t('Path complete')}</b></div>
+          <span style={{ flex: 1 }} />
+          <button className="btn ghost" onClick={onMap}>{t('Open the map')}</button>
+          {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
+        </div>
       </div>
       <table className="grc-table">
         <thead><tr><th>{t('Skill')}</th><th>{t('Pre-test')}</th><th>{t('Best')}</th><th>{t('Growth')}</th><th>{t('Status')}</th></tr></thead>
@@ -486,7 +495,7 @@ function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbD
             const g = r.best != null && r.pre != null ? r.best - r.pre : null
             return (
               <tr key={r.key} className={(r.sb ? 'sb ' : '') + (r.post ? 'post ' : '') + (r.next ? 'next' : '')}>
-                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className="grc-n">{r.post ? '★' : r.n}</span>}<span>{r.label}</span></td>
+                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + cls}>{r.post ? '★' : r.passed ? '✓' : r.n}</span>}<span>{r.label}</span></td>
                 <td className="grc-num">{r.pre != null ? r.pre + '%' : ''}</td>
                 <td className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></td>
                 <td className="grc-growth">
@@ -500,12 +509,98 @@ function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbD
                   )}
                   {g != null && <em className={g >= 0 ? 'up' : 'down'}>{g >= 0 ? '+' : ''}{g}</em>}
                 </td>
-                <td><span className={'grc-pill ' + cls}>{lab}</span></td>
+                <td><span className={'grc-pill ' + cls + (r.sb ? ' sb' : '')}>{lab}</span></td>
               </tr>
             )
           })}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+// D: "mastery overview" (her note, 2026-10-02: "Jeremy also wants to be able to
+// see at a glance like 'topics mastered' 'domains mastered' and what is in those").
+// The C panel with domain / topic / skill counts, then a row per domain (land)
+// with every topic in it. DEMO: one more path in another domain is shown as
+// finished so a domain reads as mastered.
+function seedDemoMastery(mine, leadId, progress) {
+  const pick = mine.find(({ tp, st }) => tp.id !== leadId && !st.started && tp.domain !== mine.find((m) => m.tp.id === leadId)?.tp.domain)
+  if (!pick) return null
+  const tp = pick.tp
+  const seed = { ...progress }
+  ;(tp.core || []).forEach((w, i) => { seed[w.id] = { best: [100, 92, 96, 88, 100, 94][i % 6], passed: true } })
+  if (tp.full) seed[tp.full.id] = { best: 94, passed: true }
+  try {
+    localStorage.setItem('proofProgress', JSON.stringify(seed))
+    const done = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]')
+    localStorage.setItem('proofDemoSeeded', JSON.stringify([...(Array.isArray(done) ? done : []), 'mastery:' + tp.grade]))
+  } catch { /* fine */ }
+  return seed
+}
+function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOpen }) {
+  const t = useT()
+  const doms = LAND_ORDER.map((d) => {
+    const list = mine.filter(({ tp }) => tp.domain === d)
+    const done = list.filter(({ st }) => st.finished).length
+    return { d, list, done, mastered: list.length > 0 && done === list.length }
+  })
+  const withPaths = doms.filter((x) => x.list.length)
+  const domMastered = doms.filter((x) => x.mastered).length
+  const topicsDone = mine.filter(({ st }) => st.finished).length
+  const skillsAll = mine.reduce((n, { tp }) => n + (tp.core || []).length, 0)
+  const skillsDone = mine.reduce((n, { tp }) => n + (tp.core || []).filter((w) => progress[w.id]?.passed).length, 0)
+  const growth = mine.filter(({ st }) => st.started).map(({ tp }) => {
+    const full = tp.full && progress[tp.full.id]
+    const tried = (tp.core || []).map((w) => progress[w.id]?.best || 0).filter((b) => b > 0)
+    const now = full?.best > 0 ? full.best : tried.length ? tried.reduce((a, b) => a + b, 0) / tried.length : null
+    return now == null ? null : now - demoPretest(tp.id)
+  }).filter((g) => g != null)
+  const avgGrowth = growth.length ? Math.round(growth.reduce((a, b) => a + b, 0) / growth.length) : null
+  const nextLabel = next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
+  return (
+    <div className="gr grd">
+      <div className="grc-panel">
+        <div className="grd-stats">
+          <div className="grd-stat"><b>{domMastered}<small>/{doms.length}</small></b><span>{t('Domains mastered')}</span></div>
+          <div className="grd-stat"><b>{topicsDone}<small>/{mine.length}</small></b><span>{t('Topics mastered')}</span></div>
+          <div className="grd-stat"><b>{skillsDone}<small>/{skillsAll}</small></b><span>{t('Skills mastered')}</span></div>
+          {avgGrowth != null && <div className="gr-growth"><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth} pts</b><span>{t('avg. growth, pre to now')}</span></div>}
+        </div>
+        <div className="grc-go">
+          <div className="gr-next"><span>{lead ? (lead.tp.short || lead.tp.title) : ''}{nextLabel ? ' · ' + t('Up next') : ''}</span><b>{nextLabel || t('Pick a path')}</b></div>
+          <span style={{ flex: 1 }} />
+          <button className="btn ghost" onClick={onMap}>{t('Open the map')}</button>
+          {next && <button className="btn" onClick={onStart}>{t('Continue →')}</button>}
+        </div>
+      </div>
+      <div className="grd-doms">
+        {doms.map((x) => (
+          <div key={x.d} className={'grd-dom' + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' empty')}>
+            <img className="grd-thumb" src={landImg(x.d)} alt="" />
+            <div className="grd-dom-name">
+              <b>{landName(x.d)}</b>
+              <span>{x.list.length ? t('{done} of {n} topics', { done: x.done, n: x.list.length }) : t('No Grade {n} paths yet', { n: grade })}</span>
+              {x.list.length > 0 && <span className="grd-bar"><i style={{ width: (x.done / x.list.length) * 100 + '%' }} /></span>}
+            </div>
+            <div className="grd-topics">
+              {x.list.map(({ tp, st }) => {
+                const pct = st.total ? Math.round((st.cleared / st.total) * 100) : 0
+                const cls = st.finished ? 'done' : st.started ? 'here' : 'fresh'
+                return (
+                  <button key={tp.id} className={'grd-chip ' + cls} onClick={() => onOpen(tp.id)} title={`${tp.title}: ${st.finished ? t('Mastered') : st.started ? t('{n} of {m} skills', { n: st.cleared, m: st.total }) : t('Not started')}`}>
+                    <i aria-hidden>{st.finished ? '✓' : st.started ? '' : ''}</i>
+                    <span>{tp.short || tp.title}</span>
+                    <em>{st.finished ? t('Mastered') : st.started ? pct + '%' : t('Not started')}</em>
+                  </button>
+                )
+              })}
+            </div>
+            {x.mastered && <span className="grd-badge">{t('Mastered')}</span>}
+          </div>
+        ))}
+      </div>
+      {withPaths.length < doms.length && <div className="grd-note">{t('Domains without paths at this grade are on the way.')}</div>}
     </div>
   )
 }
@@ -542,7 +637,7 @@ function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap })
           {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
         </div>
   )
-  const d = { tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, cols, foot, next }
+  const d = { tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, cols, foot, next, nextLabel, onStart, onMap }
   if (look === 'c') return <ReportScorecard {...d} />
 
   return (
@@ -619,7 +714,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   const [seeded, setSeeded] = useState(null)
   if (seeded) progress = seeded
   // prototype: three ways to present the report (her ask, 2026-10-02: "make 3 different versions ... in an ABC")
-  const [look, setLookState] = useState(() => { try { return localStorage.getItem('lscr.reportLook') === 'c' ? 'c' : 'a' } catch { return 'a' } })
+  const [look, setLookState] = useState(() => { try { const v = localStorage.getItem('lscr.reportLook'); return v === 'c' || v === 'd' ? v : 'a' } catch { return 'a' } })
   const setLook = (v) => { setLookState(v); try { localStorage.setItem('lscr.reportLook', v) } catch { /* fine */ } }
   const band = useBandValue()
   const grade = bandGrade(band, topics)
@@ -642,6 +737,14 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
     if (done.includes(lead.tp.id)) return
     const s = seedDemoProgress(lead.tp, progress); if (s) setSeeded(s)
   }, [lead?.tp.id]) // eslint-disable-line react-hooks/exhaustive-deps
+  // D needs a finished path in another domain to show a domain mastered (demo, once per grade)
+  useEffect(() => {
+    if (look !== 'd' || !lead || !topics) return
+    let done = []
+    try { const v = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]'); done = Array.isArray(v) ? v : [] } catch { /* fine */ }
+    if (done.includes('mastery:' + lead.tp.grade) || mine.some(({ st }) => st.finished)) return
+    const s = seedDemoMastery(mine, lead.tp.id, progress); if (s) setSeeded(s)
+  }, [look, lead?.tp.id, topics]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // The path you are on, as its own little trail of clearings (her pick of three,
   // 2026-09-30). The other-path rows came out so the section fits above the fold.
@@ -654,7 +757,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
           <div className="gr-abc" role="group" aria-label="Report layout (prototype)">
-            {[['a', 'A'], ['c', 'C']].map(([k, l]) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{l}</button>)}
+            {[['a', 'A'], ['c', 'C'], ['d', 'D']].map(([k, l]) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{l}</button>)}
           </div>
           <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>
@@ -663,11 +766,13 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
           {lead && (
             <div className="prf-c-lead">
+{look === 'a' && (
               <div className="prf-c-line">
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
               </div>
-              <GrowthReport look={look} tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
+              )}
+              {look === 'd' ? <ReportMastery mine={mine} progress={progress} grade={grade} lead={lead} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} onOpen={(id) => onOpen(id)} /> : <GrowthReport look={look} tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />}
             </div>
           )}
         </div>

@@ -1029,7 +1029,7 @@ a { color: var(--link); }
 .lab-gate.leaving { opacity: 0; pointer-events: none; }
 .lab-gate-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .lab-gate-words { position: absolute; left: clamp(20px, 5vw, 72px); bottom: clamp(24px, 8vh, 90px); color: #fff; text-shadow: 0 2px 14px rgba(0,0,0,.75);
-  opacity: 0; animation: lab-gate-words 4.6s ease forwards; }
+  opacity: 0; animation: lab-gate-words 3s ease forwards; }
 @keyframes lab-gate-words { 0%, 18% { opacity: 0; transform: translateY(10px); } 34%, 82% { opacity: 1; transform: none; } 100% { opacity: 0; } }
 .lab-gate-kicker { font-size: clamp(11px, 1vw, 14px); font-weight: 800; letter-spacing: 2.4px; text-transform: uppercase; color: #ffe08a; }
 .lab-gate-title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(34px, 5vw, 72px); line-height: 1.02; margin: 4px 0 6px; }
@@ -1039,7 +1039,6 @@ a { color: var(--link); }
 .lab-gate-skip:hover { background: rgba(8,30,26,.8); }
 .lab-gate-skip:focus-visible { outline: 3px solid #ffd56b; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .lab-gate-words { animation: none; opacity: 1; } }
-.gate-pick { position: absolute; right: 0; top: 0; z-index: 5; }
 
 /* ---- the platform's emoji as her painted icons (src/lib/lit-icons, 2026-10-01) ---- */
 .lit-ico { display: inline-block; width: 1.3em; height: 1.3em; object-fit: contain; vertical-align: -0.3em; margin: 0 .04em; user-select: none; pointer-events: none; }
@@ -1105,11 +1104,9 @@ a { color: var(--link); }
 .proof-page.on-map > .pm-immersive, .proof-page.on-map > .lh-strands { margin-top: -26px; }
 .proof-page.on-map > .backlink { position: absolute; z-index: 8; top: -12px; left: calc(50% - 50vw + clamp(16px, 2.4vw, 40px)); margin: 0;
   box-shadow: 0 4px 14px rgba(0,0,0,.25); }
-.proof-page.on-map > .gate-pick { top: -12px; right: auto; left: calc(50% - 50vw + clamp(16px, 2.4vw, 40px) + 190px); z-index: 8; }
 .proof-page.on-map .pm-hud { top: max(4.5%, 70px); }
 @media (max-width: 680px) {
   .proof-page.on-map { gap: 12px; }
   .proof-page.on-map > .pm-immersive, .proof-page.on-map > .lh-strands { margin-top: 0; }
   .proof-page.on-map > .backlink { position: static; }
-  .proof-page.on-map > .gate-pick { display: none; }
 }

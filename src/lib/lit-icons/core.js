@@ -16,7 +16,25 @@ export const ICONS = {
   '🏆': 'trophy', '✍': 'quill', '🌉': 'bridge', '🔒': 'lock',
   '🔥': 'fire', '💛': 'heart-gold', '🔍': 'search', '🔎': 'search',
   '❤': 'heart', '🎯': 'target', '👍': 'thumbs-up', '🌿': 'fern', '✅': 'check',
+  '⭐': 'star',
+  // sheets 2–5 (2026-10-01): creatures + nature
+  '🦊': 'fox', '🦌': 'deer', '🦔': 'hedgehog', '🐝': 'bee', '🌻': 'sunflower', '🕊': 'dove',
+  '🌵': 'cactus', '🌊': 'wave', '🪶': 'feather', '💎': 'gem', '✨': 'sparkles', '⚡': 'lightning',
+  '🧱': 'brick', '🪙': 'coin', '🏅': 'medal', '🧭': 'compass',
+  // writing + school
+  '📄': 'page', '📚': 'books', '📖': 'book-open', '📝': 'memo', '📋': 'clipboard', '🧾': 'receipt',
+  '🖊': 'pen', '🏷': 'tag', '🔤': 'letters', '💬': 'speech', '💭': 'thought', '🎤': 'mic',
+  '📣': 'megaphone', '🏫': 'school', '📅': 'calendar', '🕐': 'clock',
+  // play + tools
+  '🤖': 'robot', '🎲': 'die', '🎮': 'gamepad', '🧩': 'puzzle', '🏁': 'flag', '🚀': 'rocket',
+  '🎨': 'palette', '🛠': 'tools', '⚙': 'gear', '💾': 'save', '🔗': 'link', '📬': 'mailbox',
+  '🖥': 'computer', '🔊': 'speaker', '📊': 'chart-bars', '📈': 'chart-up',
+  // people + feelings
+  '💪': 'strong', '🤝': 'handshake', '👥': 'group', '👀': 'eyes', '👁': 'eye', '🧑': 'person',
+  '🚶': 'walker', '🧠': 'brain', '💜': 'heart-purple', '⚖': 'scales', '⚠': 'warning', '🛣': 'road',
+  '🗂': 'bank',
 }
+// spares from the sheets, ready when an emoji calls for them: lantern, mushroom, crystals
 
 const BASE = (import.meta.env.BASE_URL || '/') + 'icons/'
 const escape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')

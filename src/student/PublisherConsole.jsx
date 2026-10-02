@@ -1,3 +1,5 @@
+/** @jsxImportSource react */
+// Staff tool: emoji stay plain text here (her call, 2026-10-01), so this file skips the lit-icons runtime.
 import React, { useEffect, useState } from 'react'
 import { api } from '../lib/api.js'
 import { ART_CHOICES } from './ProofRoom.jsx'

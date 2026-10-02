@@ -512,7 +512,9 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
     const tried = (tp.core || []).map((w) => skillOutcome(tp, w, progress).score).filter((b) => b != null)
     return full?.best > 0 ? full.best : avgOf(tried)
   }
-  const growth = mine.filter(({ st }) => st.started).map(({ tp }) => { const n = nowOf(tp); return n == null ? null : n - demoPretest(tp.id) }).filter((g) => g != null)
+  // her note (2026-10-02): growth is only known once the post-test is taken, and
+  // it is a percentage, not points
+  const growth = mine.map(({ tp }) => { const f = tp.full && progress[tp.full.id]; return f?.best > 0 ? f.best - demoPretest(tp.id) : null }).filter((g) => g != null)
   const avgGrowth = avgOf(growth)
   const nextLabel = nextLabelOf(next, t)
   return (
@@ -521,7 +523,7 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
       <div className="gre-strip">
         <span className="gre-stat"><b>{domMastered}<small>/{doms.length}</small></b>{t('domains mastered')}</span>
         <span className="gre-stat"><b>{topicsDone}<small>/{topicsAll}</small></b>{t('topics mastered')}</span>
-        {avgGrowth != null && <span className={'gre-stat growth' + (avgGrowth < 0 ? ' down' : '')}><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth}</b>{t('pts average growth')}</span>}
+        {avgGrowth != null && <span className={'gre-stat growth' + (avgGrowth < 0 ? ' down' : '')}><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth}%</b>{t('average growth, pre-test to post-test')}</span>}
       </div>
       {/* "put all the little domain boxes at the top with a little meter" */}
       <div className="gre-tiles" role="tablist" aria-label={t('Domains')}>
@@ -575,7 +577,7 @@ function NextStep({ tp, next, progress, onStart, onMap }) {
   )
 }
 
-function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = false }) {
+function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = false, carousel = null }) {
   const t = useT()
   const core = tp.core || []
   const pre = demoPretest(tp.id)
@@ -642,11 +644,24 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
           <span className="gr-inline-path">{tp.short || tp.title}</span>
           <span>{t('Pre-test')} <b className="pre">{pre}%</b></span>
           <span className="gr-arrow" aria-hidden>→</span>
-          <span>{full?.best > 0 ? t('Post-test') : t('Now')} <b>{now == null ? '—' : now + '%'}</b></span>
-          {pts != null && <span className={'gr-inline-g' + (pts < 0 ? ' down' : '')}>{pts >= 0 ? '+' : ''}{pts} pts</span>}
+          {full?.best > 0 ? (
+            <>
+              <span>{t('Post-test')} <b>{full.best}%</b></span>
+              <span className={'gr-inline-g' + (full.best - pre < 0 ? ' down' : '')}>{full.best - pre >= 0 ? '+' : ''}{full.best - pre}%</span>
+            </>
+          ) : (
+            <span className="gr-inline-wait" title={t('The post-test opens after all {n} skills', { n: core.length })}>{t('Post-test')}: {t('not yet')}</span>
+          )}
           <span className="gr-inline-sep" />
-          <span><b>{mastered}</b>/{core.length} {t('skills mastered')}</span>
+          <span><b>{mastered}</b>/{core.length} {t('skills')}</span>
           <span><b>{sbDone}</b> {t('Skill Builder')}{sbDone === 1 ? '' : 's'}</span>
+          {carousel && carousel.n > 1 && (
+            <span className="gr-carousel" role="group" aria-label={t('Your paths')}>
+              <button onClick={carousel.prev} aria-label={t('Previous path')}>‹</button>
+              <span>{carousel.i + 1} {t('of')} {carousel.n}</span>
+              <button onClick={carousel.next} aria-label={t('Next path')}>›</button>
+            </span>
+          )}
         </div>
       )}
       <div className="gr-top" hidden={hideFoot}>
@@ -800,8 +815,18 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // A's domain tiles switch the chart to that domain's path (2026-10-02)
   const [pickId, setPickId] = useState(null)
   const [allProg, setAllProg] = useState(false)
+  // the path being worked on drives the next step; the chart can show another
+  // (her ask, 2026-10-02: a carousel through the paths finished or in progress)
+  const lead = resume || mine[0]
   const picked = pickId && mine.find(({ tp }) => tp.id === pickId)
-  const lead = picked || resume || mine[0]
+  const view = picked || lead
+  const order = (tp) => LAND_ORDER.indexOf(tp.domain)
+  const ring = mine.filter(({ st }) => st.started || st.finished).slice().sort((a, b) => order(a.tp) - order(b.tp))
+  if (lead && !ring.some((m) => m.tp.id === lead.tp.id)) ring.unshift(lead)
+  const ringAt = view ? ring.findIndex((m) => m.tp.id === view.tp.id) : -1
+  const step = (d) => { if (!ring.length) return; const i = ((ringAt < 0 ? 0 : ringAt) + d + ring.length) % ring.length; setPickId(ring[i].tp.id) }
+  const viewStops = view ? buildStops(view.tp, progress) : []
+  const viewNext = nextStopOf(viewStops)
   const pickDomain = (d) => {
     const list = mine.filter(({ tp }) => tp.domain === d)
     const best = list.find(({ st }) => st.started && !st.finished) || list.find(({ st }) => !st.finished) || list[0]
@@ -822,7 +847,6 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
       if (ver < 3) { const s = upgradeDemoV2(lead.tp, progress, done.includes(lead.tp.id)); if (s) setSeeded(s) }
       return
     }
-    if (picked) return // browsing another domain is not a reason to invent a history
     const s = seedDemoProgress(lead.tp, progress); if (s) setSeeded(s)
   }, [lead?.tp.id]) // eslint-disable-line react-hooks/exhaustive-deps
   // D needs a finished path in another domain to show a domain mastered (demo, once per grade)
@@ -851,10 +875,11 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
           {lead && (
             <div className="prf-c-lead">
-<DomainStrip mine={mine} progress={progress} selD={lead.tp.domain} onPick={pickDomain} next={next} onStart={start} />
+<DomainStrip mine={mine} progress={progress} selD={view.tp.domain} onPick={pickDomain} next={next} onStart={start} />
 <NextStep tp={lead.tp} next={next} progress={progress} onStart={start} onMap={() => onOpen(lead.tp.id)} />
 {/* the path's name now leads the numbers line under the next step (2026-10-02) */}
-              <GrowthReport hideFoot tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
+              <GrowthReport hideFoot tp={view.tp} progress={progress} stops={viewStops} next={viewNext} onStart={start} onMap={() => onOpen(view.tp.id)}
+                carousel={ringAt >= 0 ? { i: ringAt, n: ring.length, prev: () => step(-1), next: () => step(1) } : null} />
               <div className="gr-allprog-row"><button className="gr-allprog" onClick={() => setAllProg(true)}>{t('See all progress →')}</button></div>
             </div>
           )}

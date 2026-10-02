@@ -507,6 +507,11 @@ function skillOutcome(tp, ws, progress) {
 }
 const avgOf = (xs) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null)
 
+// average growth, pre-test to post-test, over the paths that have a post-test
+function avgGrowthOf(mine, progress) {
+  const g = mine.map(({ tp }) => { const f = tp.full && progress[tp.full.id]; return f?.best > 0 ? f.best - demoPretest(tp.id) : null }).filter((x) => x != null)
+  return avgOf(g)
+}
 // the stats line + domain tiles (her picks, 2026-10-02), on top of the report
 // DEMO (her note, 2026-10-02: "Even though there aren't a bunch of topics - give
 // each domain like 10-15 topics and a status bar"): the tiles count a full
@@ -546,12 +551,8 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
   const nextLabel = nextLabelOf(next, t)
   return (
     <>
-      {/* her note: no blue box - "a smaller: 1/5 domains, 1/6 topics, average growth" */}
-      <div className="gre-strip">
-        <span className="gre-stat"><b>{domMastered}<small>/{doms.length}</small></b>{t('domains mastered')}</span>
-        <span className="gre-stat"><b>{topicsDone}<small>/{topicsAll}</small></b>{t('topics mastered')}</span>
-        {avgGrowth != null && <span className={'gre-stat growth' + (avgGrowth < 0 ? ' down' : '')}><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth}%</b>{t('average growth, pre-test to post-test')}</span>}
-      </div>
+      {/* the stats line came out (her note, 2026-10-02: "Get rid of 1/5 domains mastered,
+          32/65 topics mastered"); the average growth sits in the card's header */}
       {/* "put all the little domain boxes at the top with a little meter" */}
       <div className="gre-tiles" role="tablist" aria-label={t('Domains')}>
         {doms.map((x) => (
@@ -843,6 +844,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // A's domain tiles switch the chart to that domain's path (2026-10-02)
   const [pickId, setPickId] = useState(null)
   const [allProg, setAllProg] = useState(false)
+  const headGrowth = topics ? avgGrowthOf(mine, progress) : null
   // the path being worked on drives the next step; the chart can show another
   // (her ask, 2026-10-02: a carousel through the paths finished or in progress)
   const lead = resume || mine[0]
@@ -896,7 +898,10 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
         {/* look-b: her pick of the A/B (2026-10-02): picture-free domain tiles, and the path's data on its own tinted panel */}
         <div className="prf-c-head" style={studio ? undefined : { '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
           <div className="prf-c-words">
-          <span className="proof-kicker">{studio ? t('Skill practice') : t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</span>
+          <span className="proof-kicker">{studio ? t('Skill practice') : t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}
+            {/* her note (2026-10-02): the +45% "a little smaller and in the upper left corner" */}
+            {headGrowth != null && <span className={'prf-growth' + (headGrowth < 0 ? ' down' : '')} title={t('Average growth, pre-test to post-test')}>{headGrowth >= 0 ? '+' : ''}{headGrowth}% {t('avg growth')}</span>}
+          </span>
           <span className="prf-c-title">{studio ? t('Your growth report') : t('The Lit Labyrinth')}</span>
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}

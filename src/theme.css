@@ -2196,3 +2196,12 @@ body { font-size: 16px; }
 .gre-tile.m-prog .gre-meter i { background: linear-gradient(90deg, #e9a812, #f5c542); }
 .gre-tile.m-done .gre-meter i { background: linear-gradient(90deg, #2e9e6b, #5fe0a0); }
 .gre-tile.m-none .gre-meter i { background: #c9d6e0; }
+
+/* the average growth as a small badge in the card's upper-left corner */
+.prf-growth { display: inline-flex; align-items: baseline; gap: 4px; margin-left: 10px; padding: 2px 9px; border-radius: 999px; background: #2e9e6b; color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .3px; text-transform: none; vertical-align: 1px; }
+.prf-growth.down { background: #e07b12; }
+.hs .prf-growth { background: var(--hs-good); }
+/* "See all progress" drops to the foot of the card, away from Start and the arrows */
+.prf-c .gr-allprog-row { margin-top: auto; padding-top: 14px; }
+.prf-c .gre-tiles { margin-top: 0; }
+.prf-c.look-b .gr-top[hidden] ~ .gr-chart .gr-plot { height: 156px; }

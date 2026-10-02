@@ -496,7 +496,12 @@ export function StrandTrail({ topics, picked, onPick, children }) {
   const lastLit = info.map((x) => x.cls !== 'fresh').lastIndexOf(true)
   const glow = lastLit < 0 ? 0 : slots ? SLOT_F[slots[lastLit]] : 0.04 + (0.92 * lastLit) / Math.max(1, n - 1)
   return (
-    <div className="pm-map" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+    <div className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+      <video ref={livingRef} className="pm-living-video" src={LIVING_SRC} poster={`${BASE}lit-valley.jpg`} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1}
+        onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />
+      <div className="pm-fireflies" aria-hidden="true">
+        {FIREFLIES.map(([x, y, d], i) => <span key={i} style={{ left: x + '%', top: y + '%', animationDelay: `${d}s, ${d / 2}s` }} />)}
+      </div>
       <svg className="pm-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden>
         <defs><filter id="lh-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter></defs>
         <path d={TRAIL_D} className="pm-trail-base" />
@@ -735,8 +740,70 @@ const NODE_STATE = {
   locked: { cls: 'locked', pill: 'Locked', glyph: '🔒' },
 }
 
+/* The living map (2026-10-01). Her ask: "is there anything cool we can do in here?
+ * Can the waterfalls stay flowing?" — a Higgsfield loop of the valley painting
+ * (camera locked, so the trail and medallions still sit on it) plays under the
+ * map, fireflies drift over it, the trail draws itself to the next clearing, a
+ * newly reached clearing bursts into blue-crystal sparkles, and hovering a
+ * clearing peeks at what is inside. All of it rests for reduced motion. */
+const LIVING_SRC = (import.meta.env.BASE_URL || '/') + 'gate/lit-valley-loop.mp4'
+// fixed positions so the fireflies do not jump around between renders
+const FIREFLIES = [[8, 62, 0], [15, 30, 2.1], [23, 78, 4.3], [31, 48, 1.2], [38, 18, 3.4], [46, 70, 0.6], [55, 40, 2.8],
+  [61, 85, 4.9], [68, 22, 1.7], [74, 58, 3.9], [82, 35, 0.3], [88, 72, 2.4], [93, 15, 4.1], [12, 88, 3.1]]
+// Which clearings this student has already seen reached on this path: a clearing
+// reached since the last look gets the celebration, once.
+function useNewlyReached(stops) {
+  const key = 'lscr.pmSeen.' + (stops[0]?.ws.id || 'none')
+  const passed = stops.filter((s) => s.state === 'passed').map((s) => s.ws.id)
+  const [fresh] = useState(() => {
+    try {
+      const raw = localStorage.getItem(key)
+      if (raw == null) return []            // first look at this path: nothing to celebrate yet
+      const seen = new Set(JSON.parse(raw))
+      return passed.filter((id) => !seen.has(id))
+    } catch { return [] }
+  })
+  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(passed)) } catch { /* fine */ } }, [key, passed.join('|')])
+  return new Set(fresh)
+}
+function MapPeek({ s, t, below }) {
+  const locked = s.state === 'locked'
+  return (
+    <span className={'pm-peek' + (below ? ' below' : '')} aria-hidden="true">
+      <span className="pm-peek-title">{clearingTitle(s.ws)}</span>
+      <span className="pm-peek-acts">
+        {Object.entries((s.ws.activities || []).reduce((m, a) => { const k = kindLabel(a.kind, t); m[k] = (m[k] || 0) + 1; return m }, {}))
+          .map(([k, n]) => <span key={k}>{n > 1 ? `${n} × ${k}` : k}</span>)}
+      </span>
+      <span className="pm-peek-foot">
+        {locked ? t('Reach the clearing before it to open this one')
+          : s.state === 'passed' ? t('Best score {n}%', { n: s.best })
+          : s.best > 0 ? t('Best so far {n}% · try again', { n: s.best })
+          : t('Not started yet')}
+      </span>
+    </span>
+  )
+}
+
+// The living loop: muted is set on the element itself (React only sets the
+// property), and a tab coming back into view picks the loop back up.
+function useLivingLoop() {
+  const ref = React.useRef(null)
+  useEffect(() => {
+    const v = ref.current
+    if (!v) return
+    v.muted = true
+    const go = () => { if (!document.hidden) v.play().catch(() => {}) }
+    go()
+    document.addEventListener('visibilitychange', go)
+    return () => document.removeEventListener('visibilitychange', go)
+  }, [])
+  return ref
+}
+
 export function PathMap({ stops, onPlay, children }) {
   const t = useT()
+  const livingRef = useLivingLoop()
   const BASE = import.meta.env.BASE_URL || '/'
   const main = stops.filter((s) => s.state !== 'sb')
   const n = main.length
@@ -746,6 +813,10 @@ export function PathMap({ stops, onPlay, children }) {
   // how far the glow reaches: up to the first clearing not yet reached
   const reached = main.findIndex((s) => s.state !== 'passed')
   const glow = reached < 0 ? 1 : fOf(reached)
+  const fresh = useNewlyReached(stops)
+  // the trail draws itself on open: from where it reached before a new milestone, else from the start
+  const firstFresh = main.findIndex((s) => fresh.has(s.ws.id))
+  const glowFrom = firstFresh >= 0 ? (firstFresh === 0 ? 0 : fOf(firstFresh - 1)) : 0
   let k = 0
   const nodes = []
   stops.forEach((s) => {
@@ -764,14 +835,20 @@ export function PathMap({ stops, onPlay, children }) {
     k++
   })
   return (
-    <div className="pm-map" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+    <div className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+      <video ref={livingRef} className="pm-living-video" src={LIVING_SRC} poster={`${BASE}lit-valley.jpg`} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1}
+        onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />
+      <div className="pm-fireflies" aria-hidden="true">
+        {FIREFLIES.map(([x, y, d], i) => <span key={i} style={{ left: x + '%', top: y + '%', animationDelay: `${d}s, ${d / 2}s` }} />)}
+      </div>
       <svg className="pm-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden>
         <defs>
           <filter id="pm-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter>
         </defs>
         <path d={TRAIL_D} className="pm-trail-base" />
-        <path d={TRAIL_D} pathLength="1" className="pm-trail-glow" filter="url(#pm-glow)" style={{ strokeDasharray: `${glow} 1` }} />
-        <path d={TRAIL_D} pathLength="1" className="pm-trail-lit" style={{ strokeDasharray: `${glow} 1` }} />
+        <path d={TRAIL_D} pathLength="1" className="pm-trail-glow pm-draw" filter="url(#pm-glow)" style={{ strokeDasharray: `${glow} 1`, '--from': glowFrom, '--to': glow }} />
+        <path d={TRAIL_D} pathLength="1" className="pm-trail-lit pm-draw" style={{ strokeDasharray: `${glow} 1`, '--from': glowFrom, '--to': glow }} />
+        {glow > 0 && <path d={TRAIL_D} pathLength="1" className="pm-trail-shimmer" style={{ '--to': glow }} />}
         {nodes.filter((d) => d.branchOf).map((d) => (
           <path key={'b' + d.s.ws.id} d={`M ${d.branchOf.x} ${d.branchOf.y} Q ${d.branchOf.x + 10} ${(d.y + d.branchOf.y) / 2} ${d.x} ${d.y}`} className="pm-branch-line" />
         ))}
@@ -781,12 +858,15 @@ export function PathMap({ stops, onPlay, children }) {
         const glyph = d.s.capstone ? (d.s.state === 'passed' ? '✓' : d.s.state === 'locked' ? '🔒' : '🏆') : st.glyph || d.n
         const locked = d.s.state === 'locked'
         return (
-          <button key={d.s.ws.id} className={`pm-node ${st.cls}${d.s.capstone ? ' cap' : ''}`} disabled={locked}
+          <button key={d.s.ws.id} className={`pm-node ${st.cls}${d.s.capstone ? ' cap' : ''}${fresh.has(d.s.ws.id) ? ' celebrate' : ''}`} disabled={locked}
             style={{ left: `${d.x / 10}%`, top: `${(d.y / 560) * 100}%` }}
             onClick={() => !locked && onPlay(d.s.ws)} title={locked ? t('Reach the clearing above') : clearingTitle(d.s.ws)}>
+            {st.cls === 'here' && <span className="pm-lantern" aria-hidden />}
             <span className="pm-orb" aria-hidden>{glyph}</span>
+            {fresh.has(d.s.ws.id) && <span className="pm-burst" aria-hidden>{Array.from({ length: 10 }, (_, i) => <i key={i} style={{ '--a': `${i * 36}deg` }} />)}</span>}
             <span className="pm-name">{clearingTitle(d.s.ws)}</span>
             <span className="pm-pill">{d.s.capstone && d.s.state === 'locked' ? t('Final milestone') : t(st.pill)}</span>
+            <MapPeek s={d.s} t={t} below={d.y < 230} />
           </button>
         )
       })}

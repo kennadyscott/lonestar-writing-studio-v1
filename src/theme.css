@@ -1792,3 +1792,55 @@ body { font-size: 16px; }
 .grd-chip { padding: 5px 11px; font-size: 13.5px; }
 .grd-stats { padding: 14px 20px 12px; }
 .grd-stat b { font-size: 28px; }
+
+/* ---- D: domains -> topics -> skills -> activities (C + D combined) ---- */
+.gre-dom { border-radius: 14px; background: #fff; box-shadow: 0 2px 10px rgba(2,30,60,.08); overflow: hidden; }
+.gre-dom.mastered { box-shadow: 0 0 0 2px #f5b400 inset, 0 2px 10px rgba(2,30,60,.08); }
+.gre-dom.empty { opacity: .6; }
+.gre-dom-head { width: 100%; box-shadow: none !important; background: none; font: inherit; text-align: left; cursor: pointer; grid-template-columns: 54px 190px minmax(0, 1fr) auto auto; }
+.gre-dom-head:disabled { cursor: default; }
+.gre-dom-head .grd-badge { position: static; transform: none; }
+.gre-dom-head .grd-topics { padding-right: 0; }
+.gre-dom.open .gre-dom-head { background: linear-gradient(90deg, #e4f5fc, #fff); }
+.gre-chev { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; font-size: 18px; font-weight: 800; color: #035c78; transition: transform .15s; flex-shrink: 0; }
+.gre-chev.open { transform: rotate(90deg); }
+.gre-topics { display: flex; flex-direction: column; gap: 6px; padding: 4px 10px 10px; }
+.gre-topic { border-radius: 12px; border: 1px solid #e3ebf1; overflow: hidden; }
+.gre-topic.open { border-color: #8fdcf7; }
+.gre-topic-head { width: 100%; display: grid; grid-template-columns: 22px minmax(0, 1fr) auto auto; gap: 12px; align-items: center; padding: 9px 12px; background: #fff; font: inherit; text-align: left; cursor: pointer; }
+.gre-topic.open .gre-topic-head { background: #f3fbfe; }
+.gre-topic-name { display: flex; flex-direction: column; min-width: 0; }
+.gre-topic-name b { font-size: 15.5px; color: #0d2f55; }
+.gre-topic-name span { font-size: 12.5px; font-weight: 700; color: #4a6f8c; }
+.gre-prenow { font-size: 14px; font-weight: 700; color: #4a6f8c; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.gre-prenow .pre { color: #7d93a6; }
+.gre-prenow b { color: #0d2f55; font-size: 15px; }
+.gre-prenow em { font-style: normal; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 12.5px; font-weight: 800; }
+.gre-prenow em.up { background: #2e9e6b; color: #fff; } .gre-prenow em.down { background: #e07b12; color: #fff; }
+.gre-skills { border-top: 1px solid #e3ebf1; }
+.gre-skill { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) 70px 64px 170px 110px; gap: 10px; align-items: center; padding: 6px 12px; background: #fff; font: inherit; text-align: left; cursor: pointer; border-bottom: 1px solid #eef3f6; }
+.gre-skill-head { cursor: default; background: #e4f5fc; font-size: 11.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; color: #035c78; padding: 6px 12px; }
+.gre-skill .grc-skill { font-size: 14.5px; }
+.gre-skill-wrap.next > .gre-skill { background: #e3f5fc; }
+.gre-skill-wrap.sb > .gre-skill { background: #effaf4; }
+.gre-skill-wrap.post > .gre-skill { border-top: 1px solid #e3ebf1; }
+.gre-acts { list-style: none; margin: 0; padding: 6px 12px 10px 76px; background: #f7fbfd; border-bottom: 1px solid #eef3f6; display: flex; flex-direction: column; gap: 4px; }
+.gre-acts li { display: grid; grid-template-columns: 24px 110px minmax(0, 1fr); gap: 10px; align-items: baseline; font-size: 14px; }
+.gre-act-n { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; background: #e4ecf2; color: #4a6f8c; font-size: 12px; font-weight: 800; }
+.gre-acts li.done .gre-act-n { background: #2e9e6b; color: #fff; }
+.gre-act-kind { font-weight: 800; color: #035c78; }
+.gre-act-brief { color: #2f5573; line-height: 1.4; }
+.gre-act-none { color: #7d93a6; }
+.gre-acts li.gre-act-go { display: block; margin-top: 4px; }
+.gre-acts .btn.ghost { padding: 6px 14px; font-size: 13.5px; }
+.hs .gre-dom, .hs .gre-topic-head, .hs .gre-skill { background: var(--hs-surface); }
+.hs .gre-topic, .hs .gre-skills { border-color: var(--hs-line); }
+.hs .gre-dom.open .gre-dom-head, .hs .gre-topic.open .gre-topic-head, .hs .gre-skill-head, .hs .gre-skill-wrap.next > .gre-skill { background: var(--hs-accent-soft); }
+.hs .gre-skill-head { color: var(--hs-accent); }
+.hs .gre-acts { background: var(--hs-sunk); }
+.hs .gre-topic-name b, .hs .gre-prenow b { color: var(--hs-ink); }
+.hs .gre-topic-name span, .hs .gre-prenow, .hs .gre-act-brief { color: var(--hs-muted); }
+.hs .gre-chev, .hs .gre-act-kind { color: var(--hs-accent); }
+.hs .gre-skill, .hs .gre-acts { border-color: var(--hs-line); }
+.hs .gre-skill-wrap.sb > .gre-skill { background: color-mix(in srgb, var(--hs-good) 8%, transparent); }
+@media (max-width: 1100px) { .gre-skill { grid-template-columns: minmax(0, 1fr) 60px 60px 110px; } .gre-skill > :nth-child(4) { display: none; } }

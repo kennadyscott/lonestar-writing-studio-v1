@@ -538,6 +538,48 @@ function seedDemoMastery(mine, leadId, progress) {
   } catch { /* fine */ }
   return seed
 }
+// one row per skill (C's table), shared by C and D: the clearing, its Skill
+// Builder as a sub-row, the post-test last; ws kept so D can list activities
+function skillRowsOf(tp, progress, next, t) {
+  const core = tp.core || []
+  const rows = []
+  const isNext = (id) => !!next && next.ws.id === id
+  core.forEach((ws, i) => {
+    const p = progress[ws.id] || {}
+    rows.push({ key: ws.id, ws, n: i + 1, label: clearingTitle(ws), pre: demoSkillPre(ws.id), best: p.best > 0 ? p.best : null, passed: !!p.passed, next: isNext(ws.id), locked: !p.best && !isNext(ws.id) && i > 0 && !progress[core[i - 1].id]?.passed })
+    const sb = tp.skillBuilders?.[ws.id]
+    const sp = sb && progress[sb.id]
+    if (sb && (sp?.best > 0 || isNext(sb.id))) rows.push({ key: sb.id, ws: sb, sb: true, label: t('Skill Builder'), best: sp?.best > 0 ? sp.best : null, passed: !!sp?.passed, next: isNext(sb.id) })
+  })
+  if (tp.full) {
+    const f = progress[tp.full.id] || {}
+    rows.push({ key: tp.full.id, ws: tp.full, post: true, label: t('Post-test') + ' · ' + clearingTitle(tp.full), pre: demoPretest(tp.id), best: f.best > 0 ? f.best : null, passed: !!f.passed, next: isNext(tp.full.id), locked: !(f.best > 0) && !isNext(tp.full.id) })
+  }
+  return rows
+}
+const rowStatus = (r, t) => r.passed ? ['ok', r.sb ? t('Done') : t('Mastered')] : r.next ? ['next', t('Up next')] : r.best != null ? ['low', t('Below 85%')] : r.locked ? ['off', t('Locked')] : ['off', t('Not started')]
+function GrowthCell({ r }) {
+  const g = r.best != null && r.pre != null ? r.best - r.pre : null
+  return (
+    <span className="grc-growth">
+      {r.pre != null && (
+        <span className="grc-bar" title={r.best != null ? `${r.pre}% → ${r.best}%` : `${r.pre}%`}>
+          <i className="grc-m" style={{ left: MASTERY + '%' }} />
+          {r.best != null && <span className="grc-fill" style={{ left: Math.min(r.pre, r.best) + '%', width: Math.abs(r.best - r.pre) + '%' }} />}
+          <span className="grc-d pre" style={{ left: r.pre + '%' }} />
+          {r.best != null && <span className={'grc-d ' + (r.passed ? 'ok' : 'low')} style={{ left: r.best + '%' }} />}
+        </span>
+      )}
+      {g != null && <em className={g >= 0 ? 'up' : 'down'}>{g >= 0 ? '+' : ''}{g}</em>}
+    </span>
+  )
+}
+const Chevron = ({ open }) => <span className={'gre-chev' + (open ? ' open' : '')} aria-hidden>›</span>
+
+// D: C + the old D in one drill-down (her ask, 2026-10-02: "combine C and D
+// where the skills are drop-downs and we can see the full list of
+// activities"). Domains -> topics -> skills -> activities. The domain and topic
+// the student is working in open on arrival.
 function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOpen }) {
   const t = useT()
   const doms = LAND_ORDER.map((d) => {
@@ -545,21 +587,24 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
     const done = list.filter(({ st }) => st.finished).length
     return { d, list, done, mastered: list.length > 0 && done === list.length }
   })
-  const withPaths = doms.filter((x) => x.list.length)
   const domMastered = doms.filter((x) => x.mastered).length
   const topicsDone = mine.filter(({ st }) => st.finished).length
   const skillsAll = mine.reduce((n, { tp }) => n + (tp.core || []).length, 0)
   const skillsDone = mine.reduce((n, { tp }) => n + (tp.core || []).filter((w) => progress[w.id]?.passed).length, 0)
-  const growth = mine.filter(({ st }) => st.started).map(({ tp }) => {
+  const nowOf = (tp) => {
     const full = tp.full && progress[tp.full.id]
     const tried = (tp.core || []).map((w) => progress[w.id]?.best || 0).filter((b) => b > 0)
-    const now = full?.best > 0 ? full.best : tried.length ? tried.reduce((a, b) => a + b, 0) / tried.length : null
-    return now == null ? null : now - demoPretest(tp.id)
-  }).filter((g) => g != null)
+    return full?.best > 0 ? full.best : tried.length ? Math.round(tried.reduce((a, b) => a + b, 0) / tried.length) : null
+  }
+  const growth = mine.filter(({ st }) => st.started).map(({ tp }) => { const n = nowOf(tp); return n == null ? null : n - demoPretest(tp.id) }).filter((g) => g != null)
   const avgGrowth = growth.length ? Math.round(growth.reduce((a, b) => a + b, 0) / growth.length) : null
   const nextLabel = next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
+
+  const [open, setOpen] = useState(() => ({ [lead?.tp.domain]: true, [lead?.tp.id]: true }))
+  const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }))
+
   return (
-    <div className="gr grd">
+    <div className="gr grd gre">
       <div className="grc-panel">
         <div className="grd-stats">
           <div className="grd-stat"><b>{domMastered}<small>/{doms.length}</small></b><span>{t('Domains mastered')}</span></div>
@@ -574,33 +619,94 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
           {next && <button className="btn" onClick={onStart}>{t('Continue →')}</button>}
         </div>
       </div>
+
       <div className="grd-doms">
-        {doms.map((x) => (
-          <div key={x.d} className={'grd-dom' + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' empty')}>
-            <img className="grd-thumb" src={landImg(x.d)} alt="" />
-            <div className="grd-dom-name">
-              <b>{landName(x.d)}</b>
-              <span>{x.list.length ? t('{done} of {n} topics', { done: x.done, n: x.list.length }) : t('No Grade {n} paths yet', { n: grade })}</span>
-              {x.list.length > 0 && <span className="grd-bar"><i style={{ width: (x.done / x.list.length) * 100 + '%' }} /></span>}
+        {doms.map((x) => {
+          const dOpen = !!open[x.d] && x.list.length > 0
+          return (
+            <div key={x.d} className={'gre-dom' + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' empty') + (dOpen ? ' open' : '')}>
+              <button className="grd-dom gre-dom-head" onClick={() => x.list.length && toggle(x.d)} aria-expanded={dOpen} disabled={!x.list.length}>
+                <img className="grd-thumb" src={landImg(x.d)} alt="" />
+                <span className="grd-dom-name">
+                  <b>{landName(x.d)}</b>
+                  <span>{x.list.length ? t('{done} of {n} topics mastered', { done: x.done, n: x.list.length }) : t('No Grade {n} paths yet', { n: grade })}</span>
+                  {x.list.length > 0 && <span className="grd-bar"><i style={{ width: (x.done / x.list.length) * 100 + '%' }} /></span>}
+                </span>
+                <span className="grd-topics">
+                  {!dOpen && x.list.map(({ tp, st }) => (
+                    <span key={tp.id} className={'grd-chip ' + (st.finished ? 'done' : st.started ? 'here' : 'fresh')}>
+                      {st.finished && <i aria-hidden>✓</i>}<span>{tp.short || tp.title}</span>
+                    </span>
+                  ))}
+                </span>
+                {x.mastered && <span className="grd-badge">{t('Mastered')}</span>}
+                {x.list.length > 0 && <Chevron open={dOpen} />}
+              </button>
+
+              {dOpen && (
+                <div className="gre-topics">
+                  {x.list.map(({ tp, st }) => {
+                    const tOpen = !!open[tp.id]
+                    const now = nowOf(tp)
+                    const pre = demoPretest(tp.id)
+                    const cls = st.finished ? 'ok' : st.started ? 'next' : 'off'
+                    const rows = tOpen ? skillRowsOf(tp, progress, lead?.tp.id === tp.id ? next : null, t) : []
+                    return (
+                      <div key={tp.id} className={'gre-topic' + (tOpen ? ' open' : '')}>
+                        <button className="gre-topic-head" onClick={() => toggle(tp.id)} aria-expanded={tOpen}>
+                          <Chevron open={tOpen} />
+                          <span className="gre-topic-name"><b>{tp.short || tp.title}</b><span>{t('{n} of {m} skills mastered', { n: st.cleared, m: st.total })}</span></span>
+                          <span className="gre-prenow"><span className="pre">{pre}%</span> → <b>{now == null ? '—' : now + '%'}</b>{now != null && <em className={now - pre >= 0 ? 'up' : 'down'}>{now - pre >= 0 ? '+' : ''}{now - pre}</em>}</span>
+                          <span className={'grc-pill ' + cls}>{st.finished ? t('Mastered') : st.started ? t('In progress') : t('Not started')}</span>
+                        </button>
+                        {tOpen && (
+                          <div className="gre-skills">
+                            <div className="gre-skill gre-skill-head" aria-hidden>
+                              <span>{t('Skill')}</span><span>{t('Pre-test')}</span><span>{t('Best')}</span><span>{t('Growth')}</span><span>{t('Status')}</span>
+                            </div>
+                            {rows.map((r) => {
+                              const [scls, lab] = rowStatus(r, t)
+                              const sOpen = !!open[r.key]
+                              return (
+                                <div key={r.key} className={'gre-skill-wrap' + (r.sb ? ' sb' : '') + (r.post ? ' post' : '') + (r.next ? ' next' : '') + (sOpen ? ' open' : '')}>
+                                  <button className="gre-skill" onClick={() => toggle(r.key)} aria-expanded={sOpen}>
+                                    <span className="grc-skill">
+                                      <Chevron open={sOpen} />
+                                      {r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + scls}>{r.post ? '★' : r.passed ? '✓' : r.n}</span>}
+                                      <span>{r.label}</span>
+                                    </span>
+                                    <span className="grc-num">{r.pre != null ? r.pre + '%' : ''}</span>
+                                    <span className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></span>
+                                    <GrowthCell r={r} />
+                                    <span><span className={'grc-pill ' + scls + (r.sb ? ' sb' : '')}>{lab}</span></span>
+                                  </button>
+                                  {sOpen && (
+                                    <ol className="gre-acts">
+                                      {(r.ws.activities || []).map((a, i) => (
+                                        <li key={i} className={r.passed ? 'done' : ''}>
+                                          <span className="gre-act-n">{r.passed ? '✓' : i + 1}</span>
+                                          <span className="gre-act-kind">{kindLabel(a.kind, t)}</span>
+                                          <span className="gre-act-brief">{a.brief || ''}</span>
+                                        </li>
+                                      ))}
+                                      {(!r.ws.activities || !r.ws.activities.length) && <li className="gre-act-none">{t('No activities yet')}</li>}
+                                      <li className="gre-act-go"><button className="btn ghost" onClick={() => onOpen(tp.id, r.ws.id)}>{r.passed ? t('Practice again') : t('Open this skill →')}</button></li>
+                                    </ol>
+                                  )}
+                                </div>
+                              )
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
-            <div className="grd-topics">
-              {x.list.map(({ tp, st }) => {
-                const pct = st.total ? Math.round((st.cleared / st.total) * 100) : 0
-                const cls = st.finished ? 'done' : st.started ? 'here' : 'fresh'
-                return (
-                  <button key={tp.id} className={'grd-chip ' + cls} onClick={() => onOpen(tp.id)} title={`${tp.title}: ${st.finished ? t('Mastered') : st.started ? t('{n} of {m} skills', { n: st.cleared, m: st.total }) : t('Not started')}`}>
-                    <i aria-hidden>{st.finished ? '✓' : st.started ? '' : ''}</i>
-                    <span>{tp.short || tp.title}</span>
-                    <em>{st.finished ? t('Mastered') : st.started ? pct + '%' : t('Not started')}</em>
-                  </button>
-                )
-              })}
-            </div>
-            {x.mastered && <span className="grd-badge">{t('Mastered')}</span>}
-          </div>
-        ))}
+          )
+        })}
       </div>
-      {withPaths.length < doms.length && <div className="grd-note">{t('Domains without paths at this grade are on the way.')}</div>}
     </div>
   )
 }
@@ -772,7 +878,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
               </div>
               )}
-              {look === 'd' ? <ReportMastery mine={mine} progress={progress} grade={grade} lead={lead} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} onOpen={(id) => onOpen(id)} /> : <GrowthReport look={look} tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />}
+              {look === 'd' ? <ReportMastery mine={mine} progress={progress} grade={grade} lead={lead} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} onOpen={(id, wsId) => onOpen(id, wsId)} /> : <GrowthReport look={look} tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />}
             </div>
           )}
         </div>

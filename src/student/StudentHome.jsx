@@ -731,7 +731,7 @@ function ProgressReport({ mine, progress, grade, onOpen, onClose }) {
   return createPortal(
     <div className="prg-shade" role="dialog" aria-modal="true" aria-label={t('All progress')} onClick={onClose}>
       <div className="prg" onClick={(e) => e.stopPropagation()}>
-        <div className="prg-head">
+        <div className="prg-head" style={{ '--prf-img': `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg)` }}>
           <div>
             <span className="proof-kicker">{t('The Lit Labyrinth')} · {t('Grade {n}', { n: grade })}</span>
             <h2>{t('All progress')}</h2>

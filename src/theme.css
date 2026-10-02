@@ -2086,3 +2086,12 @@ body { font-size: 16px; }
 .hs .prg-more { background: var(--hs-sunk); } .hs .prg-topic { border-color: var(--hs-line); }
 .hs .gr-allprog { background: var(--hs-accent-soft); color: var(--hs-accent); border-color: transparent; }
 .prg-shade { z-index: 120; }
+/* her note (2026-10-02): the Lit Labyrinth header gets its valley painting back,
+   faded under the blue, "so it's not so boring" */
+.practice-view[data-clean] .prf-c-head, .prf-c .prf-c-head, .prg-head {
+  background: linear-gradient(90deg, rgba(2,40,62,.94) 0%, rgba(2,40,62,.78) 42%, rgba(2,40,62,.5) 100%), var(--prf-img) center 58% / cover no-repeat, #02283e; }
+.prf-c .prf-c-title, .prg-head h2 { text-shadow: 0 2px 10px rgba(1,23,45,.5); }
+.hs .prf-c.studio .prf-c-head { background: var(--hs-hero); }
+.practice-view[data-clean] .prf-c-head, .prf-c .prf-c-head, .prg-head {
+  background: linear-gradient(90deg, rgba(2,40,62,.93) 0%, rgba(2,40,62,.7) 40%, rgba(2,40,62,.32) 100%), var(--prf-img) center 58% / cover no-repeat, #02283e; }
+.hs .prf-c.studio .prf-c-head { background: var(--hs-hero); }

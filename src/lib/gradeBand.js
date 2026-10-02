@@ -1,8 +1,10 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 
 // Prototype switch: which grade band the demo is dressed for. Stamped on <html>
-// as data-band so any page can restyle per band. ?band=2-4 links straight to one.
-export const BANDS = ['2-4', '5-7', '8-12']
+// as data-band so any page can restyle per band. ?band=2-3 links straight to one.
+// Bands follow the Astra framework (her note, 2026-10-02: "bring 4th grade over"):
+// 2-3, 4-5 (the baseline), 6-8, 9-12.
+export const BANDS = ['2-3', '4-5', '6-8', '9-12']
 const KEY = 'lscr.band'
 
 function initial() {
@@ -12,7 +14,7 @@ function initial() {
     const s = localStorage.getItem(KEY)
     if (BANDS.includes(s)) return s
   } catch {}
-  return '5-7'
+  return '4-5'
 }
 
 export function useBand() {
@@ -24,5 +26,5 @@ export function useBand() {
   return [band, setBand]
 }
 
-export const BandContext = createContext('5-7')
+export const BandContext = createContext('4-5')
 export const useBandValue = () => useContext(BandContext)

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import ModuleBadge from '../components/ModuleBadge.jsx'
+import { useLessonArt } from '../lib/lessonArt.js'
 import { useT } from '../lib/i18n/index.jsx'
 import { Directions, Glossed, useSay } from './Scaffold.jsx'
 
@@ -55,7 +56,6 @@ Object.entries(LATER_TITLES).forEach(([id, titles], mi) => {
 // m<module>-<lesson>.jpg: a fresh 3D card for every lesson (Higgsfield, 2026-10-02, her
 // "fresh imagery on each one"); g1-g6 were the earlier shared set.
 // g1-g6: her 16:9 lesson cards (2026-09-24), replacing the f1-f6 strips. l1-l6.webp are the old space set.
-const LESSON_ART = (key) => `${BASE}lessons/${key}.jpg`
 
 // "Master the {label}" reads wrong for some ("Master the The Writing Process")
 const MISSION_TITLE = {
@@ -152,6 +152,7 @@ function JourneyAll({ modules, currentId, onPick }) {
 // small plain tiles in order.
 function UpNextLesson({ a, isUp, onOpen }) {
   const t = useT()
+  const LESSON_ART = useLessonArt()
   const say = useSay()
   const current = a.status === 'in_progress'
   const passed = a.status === 'passed'
@@ -177,6 +178,7 @@ function UpNextLesson({ a, isUp, onOpen }) {
 // The side rail (she chose it over tiles-below, 2026-09-24): every lesson in order, the current one lit gold.
 function RailLesson({ a, isUp, picked, onOpen }) {
   const t = useT()
+  const LESSON_ART = useLessonArt()
   const passed = a.status === 'passed'
   // nothing is locked: lessons, like modules, can be done in any order (her note, 2026-10-02)
   return (

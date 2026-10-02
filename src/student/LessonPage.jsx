@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { BRAND } from '../lib/brand.js'
+import { useLessonArt } from '../lib/lessonArt.js'
 import { useT } from '../lib/i18n/index.jsx'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
 import { useSay, Directions, Glossed } from './Scaffold.jsx'
@@ -239,6 +240,7 @@ function ReviewStep({ sentence, answers, pick }) {
 export default function LessonPage({ lesson, moduleLabel, supportLevel = null, onBack }) {
   const say = useSay()
   const t = useT()
+  const lessonArt = useLessonArt()
   const [step, setStep] = useState(0)
   const [done, setDone] = useState(0) // furthest step reached
   const [answers, setAnswers] = useState({})
@@ -266,7 +268,7 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
   // Back to lessons at the top and Back / Continue pinned to the bottom.
   const lessonTitle = t(lesson.title.replace(/^Module \d+: /, ''))
   const moduleN = (moduleLabel.match(/\d+/) || [''])[0]
-  const art = BASE + 'lessons/' + (lesson.art || 'g1') + '.jpg'
+  const art = lessonArt(lesson.art || 'g1')
   const stepTitle = step === 0 ? t(VIDEO.title) : step === 1 ? activity : t('{step}: {topic}', { step: t(STEPS[step]), topic: activityTopic })
   const stepSub = step === 0 ? t('Watch Luna walk through the skill, then try it yourself in the next step.') : step === 1 ? say(STARBURST.directions) : step === 2 ? t('Check your eye for detail before you write your own.') : step === 3 ? t('Bring your answers together into one strong sentence.') : t('See how your sentence grew, and where the stars came from.')
   const body = (

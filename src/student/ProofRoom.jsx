@@ -276,6 +276,7 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
   const say = useSay()
   // Opened from the Practice tab on one path, the page starts on that path.
   const [topicId, setTopicId] = useState(initialTopicId)
+  const [land, setLand] = useState(null)   // the land a student walked into from the valley (null = the valley)
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
@@ -308,7 +309,8 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
   }, [topicId, raw])
   // Started from the Practice page on one clearing: open it straight away, once.
   // Quitting it lands on the path map, so the map is one step in.
-  const [gate, setGate] = useState(() => !initialWsId && gateWanted())
+  // every way in from Practice plays the gate, Start this clearing included (her call, 2026-10-01)
+  const [gate, setGate] = useState(() => gateWanted())
 
   const startedWs = React.useRef(false)
   useEffect(() => {
@@ -352,7 +354,7 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
       <>
         {!raw && <div className="card" style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>}
         {/* the strand map: the page is the valley (her pick of three, 2026-09-30) */}
-        {raw && <HomeStrands grade={grade} shown={shown} topics={topics} resume={resume} onOpen={openTopic} />}
+        {raw && <HomeStrands grade={grade} shown={shown} topics={topics} resume={resume} onOpen={openTopic} land={land} setLand={setLand} />}
       </>
     )
   }
@@ -366,8 +368,8 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
           : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
       {/* on the map, Back and the prototype pill float over the valley instead of taking a row (her note, 2026-10-01) */}
       <div className={'proof-page' + (!running && raw ? ' on-map' : '')}>
-        {onBack && <button className="backlink on-scene" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : onBack())}>
-          {running ? t('← Back to the path') : topic ? t('← All paths') : t('← Back to Practice')}
+        {onBack && <button className="backlink on-scene" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : land ? setLand(null) : onBack())}>
+          {running ? t('← Back to the path') : topic ? (land ? t('← Back to {land}', { land: t(landName(land)) }) : t('← All paths')) : land ? t('← All lands') : t('← Back to Practice')}
         </button>}
         {body}
       </div>
@@ -381,8 +383,9 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
  * Her ask: "a fun animation that helps them enter into the labyrinth". A Higgsfield
  * clip (public/gate/lit-gate.mp4): the carved gate swings open and the camera glides
  * through, ending on the very valley painting the map is drawn over, so the clip
- * fades straight into the live map. Once per visit (sessionStorage); ?gate=1 plays
- * it every time for demos; skipped for reduced motion; Skip / Esc / Enter end it. */
+ * fades straight into the live map. Plays on every way in from Practice (See every
+ * path, See the map, Start this clearing); skipped for reduced motion; Skip / Esc /
+ * Enter end it. */
 // Her pick of two Higgsfield takes (Clip 2, MiniMax H3 Max), played in 3 seconds:
 // "I like Clip 2, but can we get it to 3 seconds?" — sped up, not cut, so the gate
 // still opens and the clip still lands on the valley.
@@ -391,12 +394,8 @@ const GATE_SECONDS = 3
 const GATE_POSTER = (import.meta.env.BASE_URL || '/') + 'gate/lit-gate.jpg'
 function gateWanted() {
   try {
-    if (new URLSearchParams(location.search).has('gate')) return true
-    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
-    if (sessionStorage.getItem('lscr.gateSeen')) return false
-    sessionStorage.setItem('lscr.gateSeen', '1')
-    return true
-  } catch { return false }
+    return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  } catch { return true }
 }
 function LabyrinthGate({ src, onDone }) {
   const t = useT()
@@ -511,7 +510,7 @@ export function StrandTrail({ topics, picked, onPick, children }) {
         const [px, py] = at(i)
         return (
           <button key={x.d} className={`pm-node ${x.cls}${x.d === picked ? ' picked' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
-            onClick={() => onPick(x.d)} aria-pressed={picked ? x.d === picked : undefined}>
+            onClick={() => onPick(x.d, { x: px / 10, y: (py / 560) * 100 })} aria-pressed={picked ? x.d === picked : undefined}>
             <span className="pm-orb" aria-hidden>{STRAND_ICON[x.d] || '✦'}</span>
             <span className="pm-name">{t(landName(x.d))}</span>
             <span className="pm-pill">{x.list.length === 1 ? t('{a} of 1 path', { a: x.done }) : t('{a} of {b} paths', { a: x.done, b: x.list.length })}</span>
@@ -523,15 +522,37 @@ export function StrandTrail({ topics, picked, onPick, children }) {
   )
 }
 
-function HomeStrands({ grade, shown, topics, resume, onOpen }) {
+function HomeStrands({ grade, shown, topics, resume, onOpen, land, setLand }) {
   const t = useT()
   const info = strandInfo(topics)
-  const [pick, setPick] = useState(() => (info.find((x) => x.cls === 'here') || info[0])?.d)
-  const chosen = info.find((x) => x.d === pick) || info[0]
+  // click a land: the camera zooms into its medallion, then the land opens
+  const [zoom, setZoom] = useState(null)
+  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.landLook') || 'A' } catch { return 'A' } })
+  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.landLook', k) } catch { /* fine */ } }
+  function enter(d, at) {
+    if (zoom) return
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    if (reduce) { setLand(d); return }
+    setZoom(at)
+    setTimeout(() => { setLand(d); setZoom(null); window.scrollTo(0, 0) }, 650)
+  }
+  const here = land && info.find((x) => x.d === land)
+  if (here) {
+    return (
+      <div className="lh-strands land-view">
+        {/* PROTOTYPE A/B (2026-10-01): two ways to be inside a land */}
+        <div className="style-pick land-pick" role="group" aria-label="Land layout">
+          <span className="lbl">Land</span>
+          {['A', 'B'].map((k) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => pickLook(k)}>{k}</button>)}
+        </div>
+        {look === 'B' ? <LandBook land={here} onOpen={onOpen} /> : <LandScene land={here} onOpen={onOpen} />}
+      </div>
+    )
+  }
   return (
     <div className="lh-strands">
-      <div className="pm-immersive">
-        <StrandTrail topics={topics} picked={chosen?.d} onPick={setPick}>
+      <div className={'pm-immersive valley-zoom' + (zoom ? ' zooming' : '')} style={zoom ? { transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}>
+        <StrandTrail topics={topics} onPick={enter}>
           <LabyrinthTitle grade={grade} shown={shown} topics={topics} skills={topics.reduce((m, { tp }) => m + (tp.core || []).length, 0)} />
         </StrandTrail>
         <div className="pm-side">
@@ -539,17 +560,115 @@ function HomeStrands({ grade, shown, topics, resume, onOpen }) {
             : <div className="pm-card"><div className="pm-card-head">{t('New paths are on the way')}</div><div className="pm-next-skill">{t('No Grade {n} paths are published yet.', { n: grade })}</div></div>}
         </div>
       </div>
-      {chosen && (
-        <div className="card proof-shelf">
-          <div className="proof-shelf-head">
-            <div><div className="proof-section-kicker">{t('Land')}</div><div className="proof-shelf-title">{t(landName(chosen.d))}</div></div>
-            <span className="prf-count">{chosen.list.length === 1 ? t('{a} of 1 path', { a: chosen.done }) : t('{a} of {b} paths', { a: chosen.done, b: chosen.list.length })}</span>
-          </div>
-          <div className="pr-row-track lh-wrap">
-            {chosen.list.map(({ tp, st }) => <MiniTopic key={tp.id} tp={tp} st={st} onOpen={() => onOpen(tp)} />)}
+    </div>
+  )
+}
+
+/* ---------------- inside a land (2026-10-01) ----------------
+ * Each land has its own Higgsfield scene (public/lands/<key>.jpg, painted in the
+ * valley's style). The tag lines are starter copy for her to change. */
+const LAND_META = {
+  'Foundational Language': { key: 'rootwood', tag: 'Where every word puts down roots.', about: 'Grammar, spelling and word power: the roots every other land grows from.' },
+  'Multiple Genres': { key: 'genre-grove', tag: 'Every tree tells a different kind of story.', about: 'Poems, plays, fiction and informational texts, and what makes each one work.' },
+  Composition: { key: 'composition', tag: 'Where ideas become writing.', about: 'At the Quill Cliffs you plan, draft, revise and edit.' },
+  "Author's Purpose": { key: 'authors-purpose', tag: 'See why writers write, and how.', about: 'Climb the watchtower and spot the choices authors make.' },
+  Comprehension: { key: 'comprehension', tag: 'Look deep. See what the text really says.', about: 'Clear pools that show what a text means, and what it leaves for you to figure out.' },
+}
+const landImg = (d) => (import.meta.env.BASE_URL || '/') + 'lands/' + ((LAND_META[d] || {}).key || 'rootwood') + '.jpg'
+const pathState = (st) => (st.finished ? 'done' : st.started ? 'here' : 'fresh')
+const nextPathOf = (list) => list.find(({ st }) => st.started && !st.finished) || list.find(({ st }) => !st.finished)
+
+// A: the land's scene fills the screen and its paths are landmarks on it
+function LandScene({ land, onOpen }) {
+  const t = useT()
+  const meta = LAND_META[land.d] || {}
+  const list = land.list
+  const n = list.length
+  const slots = slotsFor(n)
+  const at = (i) => (slots ? SLOTS[slots[i]].at : pointAt(0.04 + (0.92 * i) / Math.max(1, n - 1)))
+  const next = nextPathOf(list)
+  return (
+    <div className="pm-immersive land-arrive">
+      <div className="pm-map land-map" style={{ '--pm-img': `url(${landImg(land.d)})` }}>
+        <div className="pm-fireflies" aria-hidden="true">
+          {FIREFLIES.map(([x, y, d], i) => <span key={i} style={{ left: x + '%', top: y + '%', animationDelay: `${d}s, ${d / 2}s` }} />)}
+        </div>
+        <div className="pm-hud">
+          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t('Land')}</div>
+          <h1 className="pm-hud-title">{t(landName(land.d))}</h1>
+          <div className="pm-hud-sub">{t(meta.tag || '')}</div>
+        </div>
+        {list.map(({ tp, st }, i) => {
+          const [x, y] = at(i)
+          const cls = pathState(st)
+          return (
+            <button key={tp.id} className={`pm-node land-mark ${cls}`} style={{ left: `${x / 10}%`, top: `${(y / 560) * 100}%` }} onClick={() => onOpen(tp)}>
+              {tp === next?.tp && <span className="pm-lantern" aria-hidden />}
+              <span className="pm-orb" aria-hidden>{cls === 'done' ? '✓' : tp.icon || '✦'}</span>
+              <span className="pm-name">{tp.short || tp.title}</span>
+              <span className="pm-pill">{cls === 'done' ? t('Path complete') : t('{a} of {b} clearings', { a: st.cleared ?? 0, b: (tp.core || []).length })}</span>
+            </button>
+          )
+        })}
+      </div>
+      <div className="pm-side">
+        <div className="pm-card pm-next">
+          <div className="pm-card-head">{t('About this land')}</div>
+          <div className="pm-next-skill">{t(meta.about || '')}</div>
+          {next ? (
+            <>
+              <div className="pm-kicker" style={{ marginTop: 6 }}>{next.st.started ? t('Continue Your Path') : t('Start here')}</div>
+              <div className="pm-next-title">{next.tp.short || next.tp.title}</div>
+              <ProofBar st={next.st} />
+              <button className="btn pm-go" onClick={() => onOpen(next.tp)}>{next.st.started ? t('Keep going →') : t('Begin this path →')}</button>
+            </>
+          ) : <div className="pm-next-title">{t('✓ Every path here is complete')}</div>}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// B: a storybook page — the scene as a banner with the land's story, its paths as cards
+function LandBook({ land, onOpen }) {
+  const t = useT()
+  const meta = LAND_META[land.d] || {}
+  const next = nextPathOf(land.list)
+  return (
+    <div className="land-b land-arrive">
+      <div className="land-b-hero" style={{ '--land-img': `url(${landImg(land.d)})` }}>
+        <div className="land-b-words">
+          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t('Land')}</div>
+          <h1 className="land-b-title">{t(landName(land.d))}</h1>
+          <div className="land-b-tag">{t(meta.tag || '')}</div>
+          <p className="land-b-about">{t(meta.about || '')}</p>
+          <div className="proof-stats">
+            <span>{land.list.length === 1 ? t('1 path') : t('{n} paths', { n: land.list.length })}</span>
+            <span>{t('{a} complete', { a: land.done })}</span>
           </div>
         </div>
-      )}
+      </div>
+      <div className="land-b-paths">
+        {land.list.map(({ tp, st }) => {
+          const cls = pathState(st)
+          return (
+            <button key={tp.id} className={`land-card ${cls}${tp === next?.tp ? ' next' : ''}`} onClick={() => onOpen(tp)}>
+              <span className="land-card-top" style={coverOf(tp) ? { '--cover': `url(${coverOf(tp)})` } : undefined}>
+                {!coverOf(tp) && <span className="land-card-icon" aria-hidden>{tp.icon || '✦'}</span>}
+                {tp === next?.tp && <span className="land-card-flag">{st.started ? t('Continue') : t('Start here')}</span>}
+              </span>
+              <span className="land-card-body">
+                <span className="land-card-title">{tp.short || tp.title}</span>
+                <span className="land-card-clearings">
+                  {(tp.core || []).slice(0, 5).map((w) => <span key={w.id}>{clearingTitle(w)}</span>)}
+                </span>
+                {cls === 'done' ? <span className="pill green" style={{ alignSelf: 'flex-start' }}>{t('✓ Path complete')}</span> : <ProofBar st={st} />}
+                <span className="land-card-go">{cls === 'done' ? t('Review →') : st.started ? t('Keep going →') : t('Begin →')}</span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
@@ -559,22 +678,6 @@ const strandsOf = (topics) => {
   topics.forEach(({ tp }) => { const d = tp.domain || 'Other'; n[d] = (n[d] || 0) + 1 })
   return Object.entries(n).sort((a, b) => b[1] - a[1]).map(([d]) => d)
 }
-function MiniTopic({ tp, st, onOpen }) {
-  const t = useT()
-  return (
-    <button className="pr-mini" onClick={onOpen}>
-      <span className={`pr-mini-top${coverOf(tp) ? ' has-cover' : ''}`} style={coverOf(tp) ? { '--cover': `url(${coverOf(tp)})` } : undefined}>
-        {!coverOf(tp) && <span className="pr-mini-icon" aria-hidden>{tp.icon}</span>}
-      </span>
-      <span className="pr-mini-body">
-        <span className="proof-card-kicker">{(tp.core || []).length === 1 ? t('1 clearing') : t('{n} clearings', { n: (tp.core || []).length })}</span>
-        <span className="pr-mini-title">{tp.short || tp.title}</span>
-        {st.finished ? <span className="pill green" style={{ alignSelf: 'flex-start' }}>{t('✓ Path complete')}</span> : <ProofBar st={st} />}
-      </span>
-    </button>
-  )
-}
-
 export function ProofBar({ st }) {
   const t = useT()
   const pct = st.total ? Math.round((st.cleared / st.total) * 100) : 0

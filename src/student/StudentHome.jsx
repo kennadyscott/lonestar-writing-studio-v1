@@ -333,7 +333,7 @@ function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
     <button className="big-task prac-tile" disabled={busy} onClick={onClick}
       style={{ '--tile-img': `url(${BASE}${bg})`, '--tile-tint': tint }}>
       <span aria-hidden className="prac-art" />
-      <span aria-hidden className="big-task-icon prac-icon">{icon}</span>
+      {/* no icon ring: the painting already says what the card is (her call, 2026-10-01) */}
       <span className="prac-words">
         <span className="prac-title">{title}</span>
         <span className="prac-sub">{sub}</span>

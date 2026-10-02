@@ -33,6 +33,8 @@ export const ICONS = {
   '💪': 'strong', '🤝': 'handshake', '👥': 'group', '👀': 'eyes', '👁': 'eye', '🧑': 'person',
   '🚶': 'walker', '🧠': 'brain', '💜': 'heart-purple', '⚖': 'scales', '⚠': 'warning', '🛣': 'road',
   '🗂': 'bank',
+  // path icons that come from the curriculum data
+  '🐱': 'cat',
 }
 // spares from the sheets, ready when an emoji calls for them: lantern, mushroom, crystals
 

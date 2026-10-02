@@ -102,7 +102,7 @@ function WatchStep({ watched, onWatched }) {
   const [playing, setPlaying] = useState(false)
   const play = () => { setPlaying(true); onWatched() }
   return (
-    <div style={{ maxWidth: 'min(100%, calc((100vh - 330px) * 1.778))', margin: '0 auto' }}>
+    <div className="lsn-video" style={{ margin: '0 auto' }}>
       <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', background: '#0d2f55', aspectRatio: '16 / 9', boxShadow: '0 8px 26px rgba(2,20,50,.25)' }}>
         <img src={VIDEO.poster} alt={t(VIDEO.title)} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         {!playing && (
@@ -293,6 +293,8 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
     <div className="lsn-nav">
       <div className="lsn-nav-in">
         <button className="lsn-btn ghost" onClick={step === 0 ? onBack : () => setStep(step - 1)}>{step === 0 ? t('← Back to lessons') : t('← Back')}</button>
+        {/* the way out from every step (her note: no back button inside a lesson) */}
+        {step > 0 && <button className="lsn-exit" onClick={() => { save(); onBack() }}>{t('Exit to lessons')}</button>}
         <div className="lsn-nav-prog" aria-label={t('{n} of {total}', { n: step + 1, total: STEPS.length })}>
           <span className="lsn-nav-step">{t('Step {n} of {total}', { n: step + 1, total: STEPS.length })} · {t(STEPS[step])}</span>
           <span className="lsn-nav-bar"><span style={{ width: `${pct}%` }} /></span>
@@ -308,10 +310,6 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
   return (
       <div className="lsn lsn-b">
         <div aria-hidden className="lsn-bg" style={{ '--bg': `url(${BASE}bg-nook.jpg)` }} />
-        <div className="lsn-top">
-          <button className="lsn-back" onClick={onBack}>{t('← Back to lessons')}</button>
-          <span className="lsn-crumbs">{t("Luna's Writing Adventure")} · {t('Module {n}', { n: moduleN })} · {t('Lesson {n}', { n: lesson.n })}</span>
-        </div>
         <div className="lsn-book">
           <aside className="lsn-page lsn-left">
             <div className="lsn-left-art"><img src={art} alt="" /></div>

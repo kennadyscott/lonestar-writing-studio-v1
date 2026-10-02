@@ -521,8 +521,6 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
         <span className="gre-stat"><b>{domMastered}<small>/{doms.length}</small></b>{t('domains mastered')}</span>
         <span className="gre-stat"><b>{topicsDone}<small>/{topicsAll}</small></b>{t('topics mastered')}</span>
         {avgGrowth != null && <span className={'gre-stat growth' + (avgGrowth < 0 ? ' down' : '')}><b>{avgGrowth >= 0 ? '+' : ''}{avgGrowth}</b>{t('pts average growth')}</span>}
-        <span style={{ flex: 1 }} />
-        {next && <button className="btn gre-go" onClick={onStart} title={t('Up next') + ': ' + nextLabel}>{t('Continue')}: {nextLabel} →</button>}
       </div>
       {/* "put all the little domain boxes at the top with a little meter" */}
       <div className="gre-tiles" role="tablist" aria-label={t('Domains')}>
@@ -539,6 +537,40 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
         ))}
       </div>
     </>
+  )
+}
+
+// her note (2026-10-02): "It feels just a little squished - like I don't think
+// students would know what to do next". One clear card: which step of the flow,
+// which skill, one plain sentence, one big button.
+function NextStep({ tp, next, progress, onStart, onMap }) {
+  const t = useT()
+  if (!next) return null
+  const ws = next.ws
+  const acts = (ws.activities || []).length
+  const started = progress[ws.id]?.best > 0
+  const stage = next.capstone ? 'post' : next.state === 'sb' ? 'sb' : started ? 'acts' : 'lesson'
+  const STAGE = {
+    lesson: [t('Lesson'), t('Start with a short lesson, then {n} activities.', { n: acts })],
+    acts: [t('Activities'), t('Pick up your activities where you left off.')],
+    sb: [t('Skill Builder'), t('Your activities score was under 85%. The Skill Builder gives you extra practice on just this skill.')],
+    post: [t('Post-test'), t('Every skill is done. Show what you have learned on the post-test.')],
+  }
+  const [stageName, line] = STAGE[stage]
+  const n = next.capstone ? null : (tp.core || []).findIndex((w) => w.id === (next.forId || ws.id)) + 1
+  return (
+    <div className={'gr-nextstep ' + stage}>
+      <span className="gr-ns-n" aria-hidden>{next.capstone ? '★' : n || '•'}</span>
+      <div className="gr-ns-words">
+        <span className="gr-ns-k">{t('Your next step')} · {stageName}</span>
+        <b>{next.capstone ? clearingTitle(ws) : stage === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(ws) : clearingTitle(ws)}</b>
+        <span className="gr-ns-line">{line}</span>
+      </div>
+      <div className="gr-ns-go">
+        <button className="btn gr-ns-btn" onClick={onStart}>{stage === 'lesson' ? t('Start') : t('Continue')} →</button>
+        <button className="gr-ns-map" onClick={onMap}>{t('or see the map')}</button>
+      </div>
+    </div>
   )
 }
 
@@ -751,7 +783,8 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
           {lead && (
             <div className="prf-c-lead">
-{<DomainStrip mine={mine} progress={progress} selD={lead.tp.domain} onPick={pickDomain} next={next} onStart={start} />}
+<DomainStrip mine={mine} progress={progress} selD={lead.tp.domain} onPick={pickDomain} next={next} onStart={start} />
+<NextStep tp={lead.tp} next={next} progress={progress} onStart={start} onMap={() => onOpen(lead.tp.id)} />
 {(
               <div className="prf-c-line">
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>

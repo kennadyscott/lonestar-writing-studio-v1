@@ -1982,3 +1982,28 @@ body { font-size: 16px; }
 .gre-tile.nopath:hover { transform: none; }
 .gre-meter { height: 7px; }
 .hs .gre-tile-n em { color: var(--hs-good); }
+
+/* the next step, unmissable (her note: "I don't think students would know what to do next") */
+.prf-c .prf-c-lead { gap: 14px; }
+.gre-tiles { margin-top: 2px; }
+.gr-nextstep { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border-radius: 16px; background: linear-gradient(110deg, #fff6d6, #fffdf5 70%); border: 2px solid #f5c542; box-shadow: 0 6px 18px rgba(245,180,0,.18); }
+.gr-nextstep.sb { background: linear-gradient(110deg, #def4fc, #f7fcfe 70%); border-color: #0f97c2; box-shadow: 0 6px 18px rgba(15,151,194,.18); }
+.gr-ns-n { width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 22px; font-weight: 800; background: #f5b400; color: #2b1d00; box-shadow: 0 0 0 5px rgba(245,180,0,.22); }
+.gr-nextstep.sb .gr-ns-n { background: #0f97c2; color: #fff; box-shadow: 0 0 0 5px rgba(15,151,194,.2); }
+.gr-ns-words { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.gr-ns-k { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #9a6b00; }
+.gr-nextstep.sb .gr-ns-k { color: #0b7aa3; }
+.gr-ns-words b { font-size: 22px; font-weight: 800; color: #0d2f55; line-height: 1.15; }
+.gr-ns-line { font-size: 14.5px; font-weight: 600; color: #4a6f8c; }
+.gr-ns-go { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+.gr-ns-btn { padding: 12px 26px; font-size: 16px; font-weight: 800; border-radius: 12px; background: #0d2f55; color: #fff; }
+.gr-ns-btn:hover { background: #134478; }
+.gr-ns-map { background: none; border: 0; font: inherit; font-size: 12.5px; font-weight: 700; color: #4a6f8c; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.hs .gr-nextstep { background: var(--hs-accent-soft); border-color: var(--hs-accent); box-shadow: none; }
+.hs .gr-ns-words b { color: var(--hs-ink); } .hs .gr-ns-line, .hs .gr-ns-map { color: var(--hs-muted); } .hs .gr-ns-k { color: var(--hs-accent); }
+.hs .gr-ns-btn { background: var(--hs-accent); color: var(--hs-accent-ink); }
+@media (max-width: 900px) { .gr-nextstep { flex-wrap: wrap; } .gr-ns-go { flex-direction: row; } }
+/* her note: "Make the continue button green" */
+.gr-ns-btn { background: #2e9e6b; color: #fff; box-shadow: 0 4px 12px rgba(46,158,107,.3); }
+.gr-ns-btn:hover { background: #268a5d; }
+.hs .gr-ns-btn { background: var(--hs-good); color: #fff; }

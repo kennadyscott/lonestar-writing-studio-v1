@@ -430,9 +430,7 @@ function seedDemoProgress(tp, progress) {
   return seed
 }
 
-// B: "journey line": pre-test -> now as a dumbbell on the 0-100 scale, then
-// a line through every step of the path; the Skill Builder branches off below
-// its clearing; steps ahead show as targets on the mastery line.
+// (B, the "journey line", was tried and dropped: her pick 2026-10-02 was "I like A and C".)
 function GrowthBadge({ pts, pct }) {
   const t = useT()
   if (pts == null) return null
@@ -443,79 +441,6 @@ function GrowthBadge({ pts, pct }) {
     </div>
   )
 }
-function ReportJourney({ pre, now, pts, pct, cols, foot, mastered, core, sbDone }) {
-  const t = useT()
-  const W = 760, H = 150, L = 34, R = 18, T = 20, B = 8
-  const y = (v) => T + (1 - v / 100) * (H - T - B)
-  const main = cols.filter((c) => c.kind !== 'sb')
-  const step = (W - L - R) / Math.max(1, main.length - 1)
-  const xOf = (c) => L + main.indexOf(c) * step
-  const real = main.filter((c) => c.score != null)
-  const last = real[real.length - 1]
-  const ahead = main.slice(main.indexOf(last) + 1)
-  const sbs = cols.map((c, i) => (c.kind === 'sb' ? { sb: c, of: cols[i - 1] } : null)).filter(Boolean)
-  const color = (c) => (c.kind === 'pre' ? 'var(--gr-pre)' : c.kind === 'passed' || c.kind === 'post' ? 'var(--gr-pass)' : 'var(--gr-below)')
-  return (
-    <div className="gr grb">
-      {foot}
-      <div className="grb-dumb">
-        <div className="grb-dumb-head">
-          <span className="gr-num-l">{t('Pre-test')} → {t('Now')}</span>
-          <span className="grb-kpis">
-            <span><b>{mastered}</b>/{core.length} {t('mastered')}</span>
-            <span><b>{sbDone}</b> {t('Skill Builders')}</span>
-          </span>
-          <GrowthBadge pts={pts} pct={pct} />
-        </div>
-        <div className="grb-track">
-          {[0, 25, 50, 75, 100].map((v) => <span key={v} className="grb-tick" style={{ left: v + '%' }}><i>{v}</i></span>)}
-          <span className="grb-mastery" style={{ left: MASTERY + '%' }}><i>{t('Mastery')}</i></span>
-          {now != null && <span className="grb-span" style={{ left: Math.min(pre, now) + '%', width: Math.abs(now - pre) + '%' }} />}
-          <span className="grb-dot pre" style={{ left: pre + '%' }}><b>{pre}%</b></span>
-          {now != null && <span className="grb-dot now" style={{ left: now + '%' }}><b>{now}%</b></span>}
-        </div>
-      </div>
-      <div className="gr-chart grb-chart">
-        <svg viewBox={`0 0 ${W} ${H + 8}`} className="grb-svg" role="img" aria-label={t('Scores along the path')}>
-          <rect x={L} y={y(100)} width={W - L - R} height={y(MASTERY) - y(100)} className="grb-band" />
-          {[0, 50, 100].map((v) => <g key={v}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="grb-grid" /><text x={L - 8} y={y(v) + 4} className="grb-axis" textAnchor="end">{v}</text></g>)}
-          <line x1={L} x2={W - R} y1={y(MASTERY)} y2={y(MASTERY)} className="grb-mline" />
-          <text x={L + 6} y={y(MASTERY) - 5} className="grb-mlabel" textAnchor="start">{t('Mastery')} {MASTERY}%</text>
-          {real.length > 1 && <polyline points={real.map((c) => `${xOf(c)},${y(c.score)}`).join(' ')} className="grb-line" />}
-          {last && ahead.length > 0 && <polyline points={[`${xOf(last)},${y(last.score)}`, ...ahead.map((c) => `${xOf(c)},${y(MASTERY)}`)].join(' ')} className="grb-ahead" />}
-          {sbs.map(({ sb, of }) => {
-            const x0 = xOf(of), x1 = x0 + step * 0.5
-            const y0 = y(of.score ?? 0), y1 = y(sb.score ?? MASTERY)
-            return (
-              <g key={sb.key}>
-                <path d={`M${x0},${y0} C${x0 + step * 0.25},${y0} ${x1 - step * 0.2},${y1} ${x1},${y1}`} className="grb-branch" />
-                <circle cx={x1} cy={y1} r={7} className="grb-sb"><title>{t('Skill Builder')}: {sb.score == null ? t('Not started') : sb.score + '%'}</title></circle>
-                <text x={x1} y={y1 - 12} textAnchor="middle" className="grb-val sb">{sb.score != null ? sb.score : ''}</text>
-                <text x={x1 + 12} y={y1 + 4} textAnchor="start" className="grb-sblabel">{t('Skill Builder')}</text>
-              </g>
-            )
-          })}
-          {main.map((c) => (c.score != null ? (
-            <g key={c.key}>
-              <circle cx={xOf(c)} cy={y(c.score)} r={8} fill={color(c)} className="grb-pt"><title>{c.label}: {c.score}%</title></circle>
-              <text x={xOf(c)} y={y(c.score) - 13} textAnchor="middle" className="grb-val">{c.score}</text>
-            </g>
-          ) : (
-            <circle key={c.key} cx={xOf(c)} cy={y(MASTERY)} r={7} className={'grb-target' + (c.next ? ' next' : '')}><title>{c.label}: {c.kind === 'locked' || c.kind === 'post-off' ? t('Locked') : t('Not started')}</title></circle>
-          )))}
-        </svg>
-        <div className="grb-labels">
-          {main.map((c) => (
-            <span key={c.key} className={'grb-lab ' + c.kind + (c.next ? ' next' : '')} style={{ left: (xOf(c) / W) * 100 + '%', width: (100 / main.length) + '%' }}>
-              {c.n ? <small>{c.n}</small> : null}{c.label}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
 // C: "scorecard": a report-card table, one row per skill with its own pre-test,
 // best score, growth bar and status; the Skill Builder sits as a sub-row under
 // the clearing it supports; a mastery ring and pre -> now up top.
@@ -618,7 +543,6 @@ function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap })
         </div>
   )
   const d = { tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, cols, foot, next }
-  if (look === 'b') return <ReportJourney {...d} />
   if (look === 'c') return <ReportScorecard {...d} />
 
   return (
@@ -695,7 +619,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   const [seeded, setSeeded] = useState(null)
   if (seeded) progress = seeded
   // prototype: three ways to present the report (her ask, 2026-10-02: "make 3 different versions ... in an ABC")
-  const [look, setLookState] = useState(() => { try { return localStorage.getItem('lscr.reportLook') || 'a' } catch { return 'a' } })
+  const [look, setLookState] = useState(() => { try { return localStorage.getItem('lscr.reportLook') === 'c' ? 'c' : 'a' } catch { return 'a' } })
   const setLook = (v) => { setLookState(v); try { localStorage.setItem('lscr.reportLook', v) } catch { /* fine */ } }
   const band = useBandValue()
   const grade = bandGrade(band, topics)
@@ -730,7 +654,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
           <div className="gr-abc" role="group" aria-label="Report layout (prototype)">
-            {[['a', 'A'], ['b', 'B'], ['c', 'C']].map(([k, l]) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{l}</button>)}
+            {[['a', 'A'], ['c', 'C']].map(([k, l]) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{l}</button>)}
           </div>
           <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>

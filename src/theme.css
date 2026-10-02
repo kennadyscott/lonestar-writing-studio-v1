@@ -2125,3 +2125,46 @@ body { font-size: 16px; }
 .prf-c.look-b .gre-tile.mastered .gre-tile-name { padding-right: 30px; }
 .prf-c.look-b .gr-top[hidden] ~ .gr-chart .gr-plot { height: 138px; }
 .prf-c.look-b .gre-tile-name { font-size: 12.5px; letter-spacing: -.1px; }
+
+/* ---- the vine reveal + the data growing in (2026-10-02) ---- */
+.prf-c { position: relative; }
+.vr { position: absolute; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; border-radius: inherit; }
+.vr-half { position: absolute; top: 0; bottom: 0; width: 52%; height: 100%; animation: vrPart 1.1s cubic-bezier(.65,.05,.36,1) .3s both; }
+.vr-half.l { left: 0; transform-origin: left center; }
+.vr-half.r { right: 0; transform: scaleX(-1); --flip: -1; }
+@keyframes vrPart {
+  0% { transform: translateX(0) scaleX(var(--flip, 1)); opacity: 1; }
+  100% { transform: translateX(calc(-105% * var(--flip, 1))) scaleX(var(--flip, 1)) rotate(calc(-4deg * var(--flip, 1))); opacity: .2; }
+}
+.vr-half.l { --flip: 1; }
+.vr-crystal { animation: vrTwinkle .9s ease-in-out infinite alternate; transform-box: fill-box; transform-origin: center; }
+@keyframes vrTwinkle { from { opacity: .75; } to { opacity: 1; filter: drop-shadow(0 0 6px #8fe6ff); } }
+
+/* the data grows in every time the card opens */
+.gr-bar { transform-origin: bottom; animation: grGrow .75s cubic-bezier(.2,.8,.2,1) both; }
+.gr-slot:nth-child(1) .gr-bar { animation-delay: .05s; } .gr-slot:nth-child(2) .gr-bar { animation-delay: .12s; }
+.gr-slot:nth-child(3) .gr-bar { animation-delay: .19s; } .gr-slot:nth-child(4) .gr-bar { animation-delay: .26s; }
+.gr-slot:nth-child(5) .gr-bar { animation-delay: .33s; } .gr-slot:nth-child(6) .gr-bar { animation-delay: .4s; }
+.gr-slot:nth-child(7) .gr-bar { animation-delay: .47s; } .gr-slot:nth-child(8) .gr-bar { animation-delay: .54s; }
+@keyframes grGrow { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+.gr-bar em { animation: grFadeIn .3s ease .7s both; }
+@keyframes grFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.gre-meter i { transform-origin: left; animation: grFill .9s cubic-bezier(.2,.8,.2,1) .15s both; }
+@keyframes grFill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.gre-tile-badge { animation: grPop .45s cubic-bezier(.3,1.6,.5,1) .85s both; }
+@keyframes grPop { from { transform: scale(0); } to { transform: scale(1); } }
+/* while the vines part, the growth waits for them */
+.prf-c.vining .gr-bar { animation-delay: .75s; }
+.prf-c.vining .gre-meter i { animation-delay: .7s; }
+.prf-c.vining .gre-tile-badge { animation-delay: 1.3s; }
+.prf-c.vining .gr-bar em { animation-delay: 1.3s; }
+@media (prefers-reduced-motion: reduce) {
+  .vr { display: none; }
+  .gr-bar, .gr-bar em, .gre-meter i, .gre-tile-badge { animation: none !important; }
+}
+@keyframes vrPart {
+  0% { transform: translateX(0) scaleX(var(--flip, 1)); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateX(calc(-102% * var(--flip, 1))) scaleX(var(--flip, 1)); opacity: 0; }
+}
+.vr-half { animation-duration: 1s; }

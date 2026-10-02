@@ -810,6 +810,57 @@ function ProgressReport({ mine, progress, grade, onOpen, onClose }) {
   )
 }
 
+// The vine reveal (her ask, 2026-10-02): the first time Practice opens in a
+// session, two curtains of crystal vines cover the card and part to the sides
+// while the data grows in underneath. Drawn in SVG, no video. Skipped for
+// reduced motion and after the first time per session.
+function VineCurtain({ side }) {
+  // one half: layered vine strands with leaves and blue crystals, hanging
+  const strands = [0.18, 0.42, 0.66, 0.88]
+  return (
+    <svg className={'vr-half ' + side} viewBox="0 0 400 600" preserveAspectRatio="none" aria-hidden="true">
+      <defs>
+        <linearGradient id={'vrBg' + side} x1="0" x2="1" y1="0" y2="1">
+          <stop offset="0" stopColor="#0b3a2b" /><stop offset=".55" stopColor="#13563d" /><stop offset="1" stopColor="#0d2f3f" />
+        </linearGradient>
+        <radialGradient id={'vrGlow' + side}><stop offset="0" stopColor="#bdf0ff" /><stop offset=".55" stopColor="#4cc3ee" /><stop offset="1" stopColor="#0f97c2" /></radialGradient>
+      </defs>
+      <rect width="400" height="600" fill={`url(#vrBg${side})`} />
+      {strands.map((x, i) => {
+        const X = x * 400
+        const d = `M${X},-10 C${X + 40},90 ${X - 40},170 ${X + 10},260 S${X - 30},430 ${X + 20},520 S${X - 10},600 ${X},620`
+        return (
+          <g key={i}>
+            <path d={d} fill="none" stroke="#2c7a50" strokeWidth={10 - i} strokeLinecap="round" />
+            <path d={d} fill="none" stroke="#49a86c" strokeWidth={3} strokeLinecap="round" opacity=".8" />
+            {[60, 150, 240, 330, 420, 510].map((y, k) => (
+              <ellipse key={k} cx={X + (k % 2 ? 22 : -22)} cy={y + i * 9} rx="24" ry="10" fill={k % 3 ? '#3fae6e' : '#5cc483'} transform={`rotate(${k % 2 ? 28 : -28} ${X + (k % 2 ? 22 : -22)} ${y + i * 9})`} />
+            ))}
+            {[110, 300, 470].map((y, k) => (
+              <polygon key={'c' + k} points={`${X},${y - 16} ${X + 9},${y} ${X},${y + 16} ${X - 9},${y}`} fill={`url(#vrGlow${side})`} className="vr-crystal" style={{ animationDelay: (i * 0.12 + k * 0.08) + 's' }} />
+            ))}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+function VineReveal({ onDone }) {
+  React.useEffect(() => { const id = setTimeout(onDone, 1500); return () => clearTimeout(id) }, [onDone])
+  return (
+    <div className="vr" aria-hidden="true">
+      <VineCurtain side="l" />
+      <VineCurtain side="r" />
+    </div>
+  )
+}
+const wantVines = () => {
+  try {
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+    return !sessionStorage.getItem('lscr.vines')
+  } catch { return false }
+}
+
 // studio: the grade 8 / high-school Writer's Studio wears it as plain "Skill Practice"
 export function ProofRoomFeature({ onOpen, studio = false }) {
   const t = useT()
@@ -837,10 +888,8 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // A's domain tiles switch the chart to that domain's path (2026-10-02)
   const [pickId, setPickId] = useState(null)
   const [allProg, setAllProg] = useState(false)
-  // prototype A/B (her ask, 2026-10-02): B = picture-free domain tiles, and the
-  // path's data on its own tinted panel so it reads as separate
-  const [cardLook, setCardLookState] = useState(() => { try { return localStorage.getItem('lscr.cardLook') === 'b' ? 'b' : 'a' } catch { return 'a' } })
-  const setCardLook = (v) => { setCardLookState(v); try { localStorage.setItem('lscr.cardLook', v) } catch { /* fine */ } }
+  const [vines, setVines] = useState(() => !studio && wantVines())
+  const vinesDone = React.useCallback(() => { setVines(false); try { sessionStorage.setItem('lscr.vines', '1') } catch { /* fine */ } }, [])
   // the path being worked on drives the next step; the chart can show another
   // (her ask, 2026-10-02: a carousel through the paths finished or in progress)
   const lead = resume || mine[0]
@@ -890,14 +939,12 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // The path you are on, as its own little trail of clearings (her pick of three,
   // 2026-09-30). The other-path rows came out so the section fits above the fold.
   return (
-      <div className={'prf-card prf-c' + (studio ? ' studio' : '') + (cardLook === 'b' ? ' look-b' : '')}>
+      <div className={'prf-card prf-c look-b' + (studio ? ' studio' : '') + (vines ? ' vining' : '')}>
+        {/* look-b: her pick of the A/B (2026-10-02): picture-free domain tiles, and the path's data on its own tinted panel */}
         <div className="prf-c-head" style={studio ? undefined : { '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
           <div className="prf-c-words">
           <span className="proof-kicker">{studio ? t('Skill practice') : t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</span>
           <span className="prf-c-title">{studio ? t('Your growth report') : t('The Lit Labyrinth')}</span>
-          </div>
-          <div className="gr-abc" role="group" aria-label="Card layout (prototype)">
-            {[['a', 'A'], ['b', 'B']].map(([k, l]) => <button key={k} className={cardLook === k ? 'on' : ''} aria-pressed={cardLook === k} onClick={() => setCardLook(k)}>{l}</button>)}
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
           <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
@@ -918,6 +965,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
             </div>
           )}
         </div>
+        {vines && lead && <VineReveal onDone={vinesDone} />}
         {allProg && <ProgressReport mine={mine} progress={progress} grade={grade} onOpen={onOpen} onClose={() => setAllProg(false)} />}
       </div>
   )

@@ -460,64 +460,42 @@ function GrowthBadge({ pts, pct }) {
 // best score, growth bar and status; the Skill Builder sits as a sub-row under
 // the clearing it supports; a mastery ring and pre -> now up top.
 const demoSkillPre = (id) => { let h = 7; for (const c of String(id)) h = (h * 33 + c.charCodeAt(0)) >>> 0; return 28 + (h % 30) }
-function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, next, nextLabel, onStart, onMap }) {
+function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, full, next, nextLabel, onStart }) {
   const t = useT()
-  const ring = core.length ? mastered / core.length : 0
-  const C = 2 * Math.PI * 30
-  const rows = skillRowsOf(tp, progress, next, t)
-  const status = (r) => rowStatus(r, t)
+  // her note (2026-10-02): "it's so busy". One panel (growth + the flow + one
+  // button), and a table where only rows with something to say carry color.
+  const rows = skillRowsOf(tp, progress, next, t).filter((r) => !r.pretest)
   return (
-    <div className="gr grc">
-      {/* her note on C (2026-10-02): "a little bland ... the cream and the grey ... and the small text":
-          one bold panel carries the numbers and the way in; the table text goes up a size */}
+    <div className="gr grc grc2">
       <div className="grc-panel">
-        <div className="grc-stats">
-          <div className="grc-ring">
-            <svg viewBox="0 0 80 80" aria-hidden="true">
-              <circle cx="40" cy="40" r="30" className="grc-ring-bg" />
-              <circle cx="40" cy="40" r="30" className="grc-ring-fg" strokeDasharray={`${C * ring} ${C}`} transform="rotate(-90 40 40)" />
-            </svg>
-            <div><b>{mastered}/{core.length}</b><span>{t('skills mastered')}</span></div>
-          </div>
+        <div className="grc2-top">
           <div className="grc-prenow">
             <div className="gr-num"><span className="gr-num-l">{t('Pre-test')}</span><span className="gr-num-v pre">{pre}%</span></div>
             <span className="gr-arrow" aria-hidden>→</span>
             <div className="gr-num"><span className="gr-num-l">{full?.best > 0 ? t('Post-test') : t('Now')}</span><span className="gr-num-v">{now == null ? '—' : now + '%'}</span></div>
           </div>
           <GrowthBadge pts={pts} pct={pct} />
-          <div className="grc-sbcount"><b>{sbDone}</b><span>{t('Skill Builders done')}</span></div>
+          <span className="grc2-mastered"><b>{mastered}/{core.length}</b> {t('skills mastered')}</span>
         </div>
         <div className="grc-go">
-          <div className="gr-next"><span>{tp.short || tp.title}{nextLabel ? ' · ' + t('Up next') : ''}</span><b>{nextLabel || t('Path complete')}</b></div>
+          <PathFlow next={next} progress={progress} compact />
           <span style={{ flex: 1 }} />
-          <button className="btn ghost" onClick={onMap}>{t('Open the map')}</button>
-          {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
+          {next && <button className="btn" onClick={onStart}>{next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue') + ': ' + nextLabel + ' →'}</button>}
         </div>
       </div>
-      <PathFlow next={next} progress={progress} />
       <table className="grc-table">
         <thead><tr><th>{t('Skill')}</th><th>{t('Pre-test')}</th><th>{t('Best')}</th><th>{t('Growth')}</th><th>{t('Status')}</th></tr></thead>
         <tbody>
           {rows.map((r) => {
-            const [cls, lab] = status(r)
-            const g = r.best != null && r.pre != null ? r.best - r.pre : null
+            const [cls, lab] = rowStatus(r, t)
+            const quiet = r.best == null && !r.next
             return (
-              <tr key={r.key} className={(r.sb ? 'sb ' : '') + (r.pretest ? 'pretest ' : '') + (r.post ? 'post ' : '') + (r.next ? 'next' : '')}>
-                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + cls}>{r.pretest ? 'P' : r.post ? '★' : r.passed ? '✓' : r.n}</span>}<span>{r.label}</span></td>
-                <td className="grc-num">{r.pre != null ? r.pre + '%' : ''}</td>
-                <td className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></td>
-                <td className="grc-growth">
-                  {r.pre != null && (
-                    <span className="grc-bar" title={r.best != null ? `${r.pre}% → ${r.best}%` : `${r.pre}%`}>
-                      <i className="grc-m" style={{ left: MASTERY + '%' }} />
-                      {r.best != null && <span className="grc-fill" style={{ left: Math.min(r.pre, r.best) + '%', width: Math.abs(r.best - r.pre) + '%' }} />}
-                      <span className="grc-d pre" style={{ left: r.pre + '%' }} />
-                      {r.best != null && <span className={'grc-d ' + (r.passed ? 'ok' : 'low')} style={{ left: r.best + '%' }} />}
-                    </span>
-                  )}
-                  {g != null && <em className={g >= 0 ? 'up' : 'down'}>{g >= 0 ? '+' : ''}{g}</em>}
-                </td>
-                <td><span className={'grc-pill ' + cls + (r.sb ? ' sb' : '')}>{lab}</span></td>
+              <tr key={r.key} className={(r.sb ? 'sb ' : '') + (r.post ? 'post ' : '') + (r.next ? 'next ' : '') + (quiet ? 'quiet' : '')}>
+                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + (quiet ? '' : cls)}>{r.post ? '★' : r.passed ? '✓' : r.n}</span>}<span>{r.label}</span></td>
+                <td className="grc-num">{r.pre != null && !r.post ? r.pre + '%' : ''}</td>
+                <td className="grc-num"><b>{r.best != null ? r.best + '%' : ''}</b></td>
+                <td>{r.best != null && !r.sb ? <GrowthCell r={r} /> : null}</td>
+                <td>{quiet ? <span className="grc-quiet">{lab}</span> : <span className={'grc-pill ' + cls + (r.sb ? ' sb' : '')}>{lab}</span>}</td>
               </tr>
             )
           })}
@@ -585,13 +563,13 @@ function GrowthCell({ r }) {
   )
 }
 // the five stages every path runs (her flow, 2026-10-02), with where the student is
-function PathFlow({ next, progress }) {
+function PathFlow({ next, progress, compact = false }) {
   const t = useT()
   const steps = [['pre', t('Pre-test')], ['lesson', t('Lesson')], ['acts', t('Activities')], ['sb', t('Skill Builder')], ['post', t('Post-test')]]
   const cur = !next ? 'done' : next.capstone ? 'post' : next.state === 'sb' ? 'sb' : (progress[next.ws.id]?.best > 0 ? 'acts' : 'lesson')
   const at = steps.findIndex(([k]) => k === cur)
   return (
-    <ol className="grf" aria-label={t('How a path works')}>
+    <ol className={'grf' + (compact ? ' compact' : '')} aria-label={t('How a path works')}>
       {steps.map(([k, label], i) => (
         <li key={k} className={(cur === 'done' || i < at ? 'done' : i === at ? 'cur' : '') + (k === 'sb' ? ' opt' : '')}>
           <span className="grf-n">{cur === 'done' || i < at ? '✓' : i + 1}</span>

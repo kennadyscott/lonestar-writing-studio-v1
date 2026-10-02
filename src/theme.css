@@ -1890,3 +1890,32 @@ body { font-size: 16px; }
 .hs .grf li.done .grf-n { background: var(--hs-good); color: #fff; }
 .hs .grf li.done .grf-l { color: var(--hs-good); }
 .hs .grc-table tr.pretest td, .hs .gre-skill-wrap.pretest > .gre-skill { background: var(--hs-sunk); }
+
+/* C, calmer (her note: "it's so busy") */
+.grc2-top { display: flex; align-items: center; gap: 18px; padding: 14px 20px 12px; }
+.grc2-mastered { margin-left: auto; font-size: 14px; font-weight: 700; color: #a9d3e6; }
+.grc2-mastered b { font-size: 20px; color: #fff; }
+.grc2 .grc-go { padding: 10px 16px 10px 20px; }
+.grf.compact { flex: 0 1 auto; gap: 4px; }
+.grf.compact li { flex: 0 0 auto; padding-right: 14px; gap: 6px; }
+.grf.compact li + li::before { left: -12px; width: 10px; background: rgba(255,255,255,.25); }
+.grf.compact .grf-n { width: 20px; height: 20px; font-size: 11px; background: rgba(255,255,255,.12); color: #a9d3e6; }
+.grf.compact .grf-l { font-size: 12.5px; color: #a9d3e6; }
+.grf.compact .grf-l small { display: none; }
+.grf.compact li.done .grf-n { background: #2e9e6b; color: #fff; }
+.grf.compact li.done .grf-l { color: #bfe9d2; }
+.grf.compact li.cur .grf-n { background: #f5c542; color: #2b1d00; box-shadow: 0 0 0 3px rgba(245,197,66,.3); }
+.grf.compact li.cur .grf-l { color: #fff; }
+.grf.compact li.opt .grf-n { border: 1.5px dashed rgba(143,220,247,.7); background: transparent; color: #8fdcf7; }
+.grf.compact li.opt.done .grf-n, .grf.compact li.opt.cur .grf-n { border: 0; background: #0f97c2; color: #fff; }
+.grc2 .grc-go .btn { white-space: nowrap; max-width: 280px; overflow: hidden; text-overflow: ellipsis; }
+.grc2 .grc-table tr.quiet td { color: #8aa0b3; }
+.grc2 .grc-table tr.quiet .grc-skill { color: #6b8296; font-weight: 600; }
+.grc2 .grc-table tr.quiet .grc-n { background: transparent; border: 1.5px solid #d3dde5; color: #8aa0b3; }
+.grc-quiet { font-size: 12.5px; font-weight: 700; color: #9fb3c4; }
+.grc2 .grc-table tr.next td { background: #e8f7fd; }
+.hs .grc2 .grc-table tr.quiet .grc-skill, .hs .grc-quiet { color: var(--hs-muted); }
+.hs .grc2 .grc-table tr.quiet .grc-n { border-color: var(--hs-line); }
+.grc2 .grc-go { flex-wrap: nowrap; gap: 12px; }
+.grc2 .grc-go .grf { min-width: 0; overflow: hidden; }
+@media (max-width: 1100px) { .grc2 .grc-go { flex-wrap: wrap; } }

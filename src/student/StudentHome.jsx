@@ -95,10 +95,10 @@ function LunaNook({ modules, onLuna }) {
             {modules.map((m, mi) => {
               const cur = m.status === 'in_progress'
               return (
-                <button key={m.id} className={`luna-mod${cur ? ' on' : ''}`} onClick={onLuna} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
+                <button key={m.id} className={`luna-mod${cur ? ' on' : ''}`} onClick={() => onLuna?.(m.id)} title={`${t('Module {n}', { n: mi + 1 })}: ${m.label}`}
                   aria-current={cur ? 'step' : undefined}>
-                  <ModuleBadge id={m.id} size={52} dim={m.status === 'not_started'} />
-                  <span className="luna-mod-label" style={cur ? undefined : { color: m.status === 'not_started' ? '#8fb3c8' : 'var(--scene-sky)' }}>
+                  <ModuleBadge id={m.id} size={52} />
+                  <span className="luna-mod-label" style={cur ? undefined : { color: 'var(--scene-sky)' }}>
                     {MODULE_SHORT[m.id] ? t(MODULE_SHORT[m.id]) : `M${mi + 1}`}
                   </span>
                 </button>
@@ -107,7 +107,7 @@ function LunaNook({ modules, onLuna }) {
           </div>
 
           <span className="journey-divider" aria-hidden />
-          <button className="journey-btn" onClick={onLuna}>
+          <button className="journey-btn" onClick={() => onLuna?.()}>
             {t('Go to my path')} <span aria-hidden>→</span>
           </button>
         </div>

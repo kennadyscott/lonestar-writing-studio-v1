@@ -1290,3 +1290,8 @@ a { color: var(--link); }
 .lsn-left .lsn-step-sub { font-size: 12.5px; line-height: 1.4; margin-top: 3px; max-width: none; }
 .lsn-video { width: min(100%, calc((100vh - 64px - var(--lsn-nav) - 8px - 28px) * 1.778)); }
 @media (max-width: 900px) { .lsn-video { width: 100%; } }
+
+/* Luna module row: every module is pickable (any order, 2026-10-02) */
+.journey-pick { color: inherit; transition: background .15s, border-color .15s; }
+.journey-pick:not([aria-pressed="true"]):hover { background: rgba(92,192,230,.12) !important; border-color: rgba(92,192,230,.4) !important; }
+.journey-pick:focus-visible { outline: 3px solid #f0b429; outline-offset: 2px; }

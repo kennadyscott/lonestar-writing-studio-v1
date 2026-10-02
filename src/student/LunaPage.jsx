@@ -34,9 +34,34 @@ const M1_ACTIVITIES = [
   { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'g5' },
   { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'g6', final: true },
 ]
+// Modules 2-6 (her note, 2026-10-02: "the modules up top shouldn't be locked -
+// students can complete them in any order"). Level 1 lesson titles from the
+// Luna CMS crawl (2026-09-24), each module ending in its test; not started yet.
+const LATER_TITLES = {
+  m2: ['Identify a Central Idea or Claim', 'Effective Organization', 'Selecting Evidence', 'Expression of Ideas', 'Conventions', 'Write an Extended Constructed Response'],
+  m3: ['Writing Sentences', 'Connecting Ideas', 'Details and Evidence', 'Vocabulary and Language'],
+  m4: ['Topic, Audience, Purpose', 'Annotating and Gathering Information', 'Writing an Outline', 'From Outline to Draft', 'Revise and Edit'],
+  m5: ['Expanding Sentences', 'Adding and Removing Sentences', 'Elaborate, Combine, and Rearrange', 'Vocabulary and Language Skills'],
+  m6: ['Capitalization', 'Usage', 'Punctuation', 'Spelling'],
+}
+const MODULE_LESSONS = { m1: M1_ACTIVITIES }
+Object.entries(LATER_TITLES).forEach(([id, titles], mi) => {
+  const n = mi + 2
+  MODULE_LESSONS[id] = [
+    ...titles.map((title, i) => ({ n: i + 1, title, stars: 0, status: 'todo', art: 'g' + ((i % 5) + 1) })),
+    { n: titles.length + 1, title: `Module ${n} Test`, sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'g6', final: true },
+  ]
+})
 // g1-g6: her 16:9 lesson cards (2026-09-24), replacing the f1-f6 strips. l1-l6.webp are the old space set.
 const LESSON_ART = (key) => `${BASE}lessons/${key}.jpg`
 
+// "Master the {label}" reads wrong for some ("Master the The Writing Process")
+const MISSION_TITLE = {
+  m3: 'Become a Stellar Writer',
+  m4: 'Master the Writing Process',
+  m5: 'Master Revision',
+  m6: 'Master Editing',
+}
 const MISSION_BLURB = {
   m1: 'Build a strong foundation for clear, thoughtful answers.',
   m2: 'Stretch your answers into full, well-organized responses.',
@@ -87,29 +112,28 @@ function BandHead({ modules, right }) {
 }
 
 // A — every module in one slim row.
-function JourneyAll({ modules, currentId }) {
+function JourneyAll({ modules, currentId, onPick }) {
   const t = useT()
   return (
     <div style={{ ...BAND, padding: '7px 16px 8px', marginBottom: 12 }}>
       <BandHead modules={modules} />
       <div style={{ display: 'flex', alignItems: 'flex-start' }}>
         {modules.map((m, i) => {
-          const locked = m.status === 'not_started'
           const cur = m.id === currentId
           const done = m.status === 'completed'
           return (
             <React.Fragment key={m.id}>
               {i > 0 && <div className="constellation-rule" style={{ flex: '0 0 auto', width: 22, marginTop: 15, display: 'flex', alignItems: 'center', gap: 3 }}><i /><span /></div>}
-              <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', background: cur ? 'rgba(245,197,66,.14)' : 'transparent', border: cur ? '1px solid rgba(240,180,41,.55)' : '1px solid transparent', borderRadius: 10, padding: '3px 6px' }}>
+              <button type="button" className="journey-pick" onClick={() => onPick?.(m.id)} aria-pressed={cur} title={`${t('Module {n}', { n: i + 1 })}: ${t(m.label)}`}
+                style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, textAlign: 'center', cursor: 'pointer', font: 'inherit', background: cur ? 'rgba(245,197,66,.14)' : 'transparent', border: cur ? '1px solid rgba(240,180,41,.55)' : '1px solid transparent', borderRadius: 10, padding: '3px 6px' }}>
                 <div style={{ position: 'relative', width: 32, height: 32, borderRadius: '50%', display: 'grid', placeItems: 'center', boxShadow: cur ? '0 0 0 2.5px #f5b400, 0 0 16px rgba(245,180,0,.5)' : '0 0 0 1px rgba(92,192,230,.35)', background: cur ? 'rgba(4,18,40,.7)' : 'rgba(4,18,40,.45)' }}>
-                  <ModuleBadge id={m.id} size={cur ? 27 : 23} dim={locked} />
+                  <ModuleBadge id={m.id} size={cur ? 27 : 23} />
                   {done && <span style={{ position: 'absolute', top: -3, right: -4, width: 14, height: 14, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 8.5, fontWeight: 800 }}>✓</span>}
-                  {locked && <span style={{ position: 'absolute', top: -5, right: -5, fontSize: 10 }}>🔒</span>}
                 </div>
-                <div style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.2, color: cur ? '#fff' : locked ? '#8fb3c8' : '#cfe7f3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
+                <div style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.2, color: cur ? '#fff' : '#cfe7f3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
                   <span style={{ color: cur ? '#f5c542' : 'inherit' }}>M{i + 1}</span> · {t(m.label)}
                 </div>
-              </div>
+              </button>
             </React.Fragment>
           )
         })}
@@ -191,13 +215,15 @@ function FocusLessons({ acts, onOpen }) {
 
 /* ---------------- page ---------------- */
 
-export default function LunaPage({ state, me, onBack, onOpenLesson }) {
+export default function LunaPage({ state, me, onBack, onOpenLesson, initialModuleId, onPickModule }) {
   const t = useT()
   const say = useSay()
   const modules = state.modules
-  const current = modules.find((m) => m.status === 'in_progress') || modules[0]
+  const inProgress = modules.find((m) => m.status === 'in_progress') || modules[0]
+  const [pickedId, setPickedId] = React.useState(initialModuleId || inProgress.id)
+  const current = modules.find((m) => m.id === pickedId) || inProgress
   const currentIdx = modules.indexOf(current)
-  const acts = M1_ACTIVITIES
+  const acts = MODULE_LESSONS[current.id] || M1_ACTIVITIES
   const done = acts.filter((a) => a.status === 'passed').length
   const left = acts.length - done
   const pct = done / acts.length
@@ -226,7 +252,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
           )}
         </div>
 
-        <JourneyAll modules={modules} currentId={current.id} />
+        <JourneyAll modules={modules} currentId={current.id} onPick={(id) => { setPickedId(id); onPickModule?.(id) }} />
 
         {/* The Writer Profile sidebar is gone (2026-09-24, "we don't need this"): the lessons get the full width. */}
         <div>
@@ -235,7 +261,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
             <White style={{ padding: '16px 20px 20px', color: 'var(--ink)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap', paddingBottom: 14, marginBottom: 18, borderBottom: '1px solid #e6eef3' }}>
                 <div style={{ flex: 1, minWidth: 260 }}>
-                  <div style={{ fontFamily: SERIF, fontSize: 'clamp(22px, 2vw, 30px)', fontWeight: 700, color: NAVY, lineHeight: 1.15 }}>{t('Master the {label}', { label: t(current.label) })}</div>
+                  <div style={{ fontFamily: SERIF, fontSize: 'clamp(22px, 2vw, 30px)', fontWeight: 700, color: NAVY, lineHeight: 1.15 }}>{MISSION_TITLE[current.id] ? t(MISSION_TITLE[current.id]) : t('Master the {label}', { label: t(current.label) })}</div>
                   {/* The mission blurb is the page's directions — the one Listen on this page. */}
                   <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}><Directions text={MISSION_BLURB[current.id]} /></div>
                 </div>
@@ -247,7 +273,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson }) {
                   </div>
                 </div>
               </div>
-              <FocusLessons acts={acts} onOpen={open} />
+              <FocusLessons key={current.id} acts={acts} onOpen={open} />
             </White>
           </div>
         </div>

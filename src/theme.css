@@ -1866,3 +1866,27 @@ body { font-size: 16px; }
 .gre-go { flex-shrink: 0; padding: 7px 14px; }
 @media (max-width: 1100px) { .gre-strip { flex-wrap: wrap; } }
 .gre-go { max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* the path flow: Pre-test -> Lesson -> Activities -> Skill Builder (if needed) -> Post-test */
+.grf { list-style: none; margin: 0; padding: 0; display: flex; align-items: center; gap: 0; }
+.grf li { flex: 1 1 0; display: flex; align-items: center; gap: 8px; min-width: 0; position: relative; padding-right: 18px; }
+.grf li + li::before { content: ''; position: absolute; left: -16px; top: 50%; width: 12px; height: 2px; background: #c9d6e0; }
+.grf-n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 12.5px; font-weight: 800; background: #e4ecf2; color: #5d7488; }
+.grf-l { display: flex; flex-direction: column; font-size: 13.5px; font-weight: 800; color: #4a6f8c; line-height: 1.15; white-space: nowrap; }
+.grf-l small { font-size: 11px; font-weight: 700; color: #7d93a6; }
+.grf li.done .grf-n { background: #2e9e6b; color: #fff; }
+.grf li.done .grf-l { color: #1f7a4d; }
+.grf li.cur .grf-n { background: #f5b400; color: #2b1d00; box-shadow: 0 0 0 4px rgba(245,180,0,.25); }
+.grf li.cur .grf-l { color: #0d2f55; }
+.grf li.opt .grf-n { border: 2px dashed #0f97c2; background: #fff; color: #0b7aa3; }
+.grf li.opt.done .grf-n { border: 0; background: #0f97c2; color: #fff; }
+.grf li.opt.cur .grf-n { border: 0; background: #0f97c2; color: #fff; box-shadow: 0 0 0 4px rgba(15,151,194,.25); }
+.grc-n.pre, .grc-pill.pre { background: #8aa3b8; color: #fff; }
+.grc-table tr.pretest td { background: #f4f8fb; }
+.gre-skill-wrap.pretest > .gre-skill { background: #f4f8fb; cursor: default; }
+.hs .grf-n { background: var(--hs-sunk); color: var(--hs-muted); }
+.hs .grf-l { color: var(--hs-muted); }
+.hs .grf li.cur .grf-l { color: var(--hs-ink); }
+.hs .grf li.done .grf-n { background: var(--hs-good); color: #fff; }
+.hs .grf li.done .grf-l { color: var(--hs-good); }
+.hs .grc-table tr.pretest td, .hs .gre-skill-wrap.pretest > .gre-skill { background: var(--hs-sunk); }

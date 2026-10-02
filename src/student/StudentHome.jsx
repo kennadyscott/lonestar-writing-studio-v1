@@ -416,18 +416,33 @@ const demoPretest = (id) => { let h = 0; for (const c of String(id)) h = (h * 31
 function seedDemoProgress(tp, progress) {
   const [c1, c2] = tp.core || []
   if (!c1) return null
+  // v2 (her note, 2026-10-02: "show a Skill Builder was completed for Irregular
+  // verbs"): clearing 1 was missed, its Skill Builder done, then mastered;
+  // clearing 2 was missed and its Skill Builder is up next.
   const seed = { ...progress, [c1.id]: { best: 100, passed: true } }
-  if (c2) {
-    seed[c2.id] = { best: 62, passed: false }
-    const sb = tp.skillBuilders?.[c2.id]
-    if (sb) seed[sb.id] = { best: 92, passed: true }
-  }
+  const sb1 = tp.skillBuilders?.[c1.id]
+  if (sb1) seed[sb1.id] = { best: 90, passed: true }
+  if (c2) seed[c2.id] = { best: 62, passed: false }
   try {
     localStorage.setItem('proofProgress', JSON.stringify(seed))
     const done = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]')
     localStorage.setItem('proofDemoSeeded', JSON.stringify([...(Array.isArray(done) ? done : []), tp.id]))
+    localStorage.setItem('proofDemoVer', '2')
   } catch { /* fine */ }
   return seed
+}
+// browsers that already hold the v1 sample (or her own play) get the v2 story:
+// a done Skill Builder under clearing 1; v1's done Skill Builder under clearing 2 comes off
+function upgradeDemoV2(tp, progress, wasSeeded) {
+  const [c1, c2] = tp.core || []
+  if (!c1) return null
+  const next = { ...progress }
+  const sb1 = tp.skillBuilders?.[c1.id]
+  if (sb1 && next[c1.id]?.passed && !(next[sb1.id]?.best > 0)) next[sb1.id] = { best: 90, passed: true }
+  const sb2 = c2 && tp.skillBuilders?.[c2.id]
+  if (wasSeeded && sb2 && next[c2.id]?.best === 62 && !next[c2.id]?.passed && next[sb2.id]?.best === 92) delete next[sb2.id]
+  try { localStorage.setItem('proofProgress', JSON.stringify(next)); localStorage.setItem('proofDemoVer', '2') } catch { /* fine */ }
+  return next
 }
 
 // (B, the "journey line", was tried and dropped: her pick 2026-10-02 was "I like A and C".)
@@ -449,16 +464,8 @@ function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbD
   const t = useT()
   const ring = core.length ? mastered / core.length : 0
   const C = 2 * Math.PI * 30
-  const rows = []
-  core.forEach((ws, i) => {
-    const p = progress[ws.id] || {}
-    rows.push({ key: ws.id, n: i + 1, label: clearingTitle(ws), pre: demoSkillPre(ws.id), best: p.best > 0 ? p.best : null, passed: !!p.passed, next: next && next.ws.id === ws.id, locked: !p.best && !(next && next.ws.id === ws.id) && i > 0 && !progress[core[i - 1].id]?.passed })
-    const sb = tp.skillBuilders?.[ws.id]
-    const sp = sb && progress[sb.id]
-    if (sb && (sp?.best > 0 || (next && next.ws.id === sb.id))) rows.push({ key: sb.id, sb: true, label: t('Skill Builder'), best: sp?.best > 0 ? sp.best : null, passed: !!sp?.passed, next: next && next.ws.id === sb.id })
-  })
-  if (tp.full) rows.push({ key: tp.full.id, post: true, label: t('Post-test') + ' · ' + clearingTitle(tp.full), pre, best: full.best > 0 ? full.best : null, passed: !!full.passed, next: next && next.ws.id === tp.full.id, locked: !(full.best > 0) && !(next && next.ws.id === tp.full.id) })
-  const status = (r) => r.passed ? ['ok', r.sb ? t('Done') : t('Mastered')] : r.next ? ['next', t('Up next')] : r.best != null ? ['low', t('Below 85%')] : r.locked ? ['off', t('Locked')] : ['off', t('Not started')]
+  const rows = skillRowsOf(tp, progress, next, t)
+  const status = (r) => rowStatus(r, t)
   return (
     <div className="gr grc">
       {/* her note on C (2026-10-02): "a little bland ... the cream and the grey ... and the small text":
@@ -487,6 +494,7 @@ function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbD
           {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
         </div>
       </div>
+      <PathFlow next={next} progress={progress} />
       <table className="grc-table">
         <thead><tr><th>{t('Skill')}</th><th>{t('Pre-test')}</th><th>{t('Best')}</th><th>{t('Growth')}</th><th>{t('Status')}</th></tr></thead>
         <tbody>
@@ -494,8 +502,8 @@ function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbD
             const [cls, lab] = status(r)
             const g = r.best != null && r.pre != null ? r.best - r.pre : null
             return (
-              <tr key={r.key} className={(r.sb ? 'sb ' : '') + (r.post ? 'post ' : '') + (r.next ? 'next' : '')}>
-                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + cls}>{r.post ? '★' : r.passed ? '✓' : r.n}</span>}<span>{r.label}</span></td>
+              <tr key={r.key} className={(r.sb ? 'sb ' : '') + (r.pretest ? 'pretest ' : '') + (r.post ? 'post ' : '') + (r.next ? 'next' : '')}>
+                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + cls}>{r.pretest ? 'P' : r.post ? '★' : r.passed ? '✓' : r.n}</span>}<span>{r.label}</span></td>
                 <td className="grc-num">{r.pre != null ? r.pre + '%' : ''}</td>
                 <td className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></td>
                 <td className="grc-growth">
@@ -544,6 +552,8 @@ function skillRowsOf(tp, progress, next, t) {
   const core = tp.core || []
   const rows = []
   const isNext = (id) => !!next && next.ws.id === id
+  // the flow (her note, 2026-10-02): Pre-test, lesson, activities, Skill Builder if needed, post-test
+  rows.push({ key: tp.id + ':pre', pretest: true, label: t('Pre-test') + ' · ' + t('every skill on this path'), best: demoPretest(tp.id), passed: true })
   core.forEach((ws, i) => {
     const p = progress[ws.id] || {}
     rows.push({ key: ws.id, ws, n: i + 1, label: clearingTitle(ws), pre: demoSkillPre(ws.id), best: p.best > 0 ? p.best : null, passed: !!p.passed, next: isNext(ws.id), locked: !p.best && !isNext(ws.id) && i > 0 && !progress[core[i - 1].id]?.passed })
@@ -557,7 +567,7 @@ function skillRowsOf(tp, progress, next, t) {
   }
   return rows
 }
-const rowStatus = (r, t) => r.passed ? ['ok', r.sb ? t('Done') : t('Mastered')] : r.next ? ['next', t('Up next')] : r.best != null ? ['low', t('Below 85%')] : r.locked ? ['off', t('Locked')] : ['off', t('Not started')]
+const rowStatus = (r, t) => r.pretest ? ['pre', t('Taken')] : r.passed ? ['ok', r.sb ? t('Done') : t('Mastered')] : r.next ? ['next', t('Up next')] : r.best != null ? ['low', t('Below 85%')] : r.locked ? ['off', t('Locked')] : ['off', t('Not started')]
 function GrowthCell({ r }) {
   const g = r.best != null && r.pre != null ? r.best - r.pre : null
   return (
@@ -572,6 +582,23 @@ function GrowthCell({ r }) {
       )}
       {g != null && <em className={g >= 0 ? 'up' : 'down'}>{g >= 0 ? '+' : ''}{g}</em>}
     </span>
+  )
+}
+// the five stages every path runs (her flow, 2026-10-02), with where the student is
+function PathFlow({ next, progress }) {
+  const t = useT()
+  const steps = [['pre', t('Pre-test')], ['lesson', t('Lesson')], ['acts', t('Activities')], ['sb', t('Skill Builder')], ['post', t('Post-test')]]
+  const cur = !next ? 'done' : next.capstone ? 'post' : next.state === 'sb' ? 'sb' : (progress[next.ws.id]?.best > 0 ? 'acts' : 'lesson')
+  const at = steps.findIndex(([k]) => k === cur)
+  return (
+    <ol className="grf" aria-label={t('How a path works')}>
+      {steps.map(([k, label], i) => (
+        <li key={k} className={(cur === 'done' || i < at ? 'done' : i === at ? 'cur' : '') + (k === 'sb' ? ' opt' : '')}>
+          <span className="grf-n">{cur === 'done' || i < at ? '✓' : i + 1}</span>
+          <span className="grf-l">{label}{k === 'sb' && <small>{t('if needed')}</small>}</span>
+        </li>
+      ))}
+    </ol>
   )
 }
 const Chevron = ({ open }) => <span className={'gre-chev' + (open ? ' open' : '')} aria-hidden>›</span>
@@ -663,11 +690,11 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
                               const [scls, lab] = rowStatus(r, t)
                               const sOpen = !!open[r.key]
                               return (
-                                <div key={r.key} className={'gre-skill-wrap' + (r.sb ? ' sb' : '') + (r.post ? ' post' : '') + (r.next ? ' next' : '') + (sOpen ? ' open' : '')}>
-                                  <button className="gre-skill" onClick={() => toggle(r.key)} aria-expanded={sOpen}>
+                                <div key={r.key} className={'gre-skill-wrap' + (r.pretest ? ' pretest' : '') + (r.sb ? ' sb' : '') + (r.post ? ' post' : '') + (r.next ? ' next' : '') + (sOpen ? ' open' : '')}>
+                                  <button className="gre-skill" onClick={() => !r.pretest && toggle(r.key)} aria-expanded={r.pretest ? undefined : sOpen}>
                                     <span className="grc-skill">
-                                      <Chevron open={sOpen} />
-                                      {r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + scls}>{r.post ? '★' : r.passed ? '✓' : r.n}</span>}
+                                      {r.pretest ? <span className="gre-chev" aria-hidden /> : <Chevron open={sOpen} />}
+                                      {r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + scls}>{r.pretest ? 'P' : r.post ? '★' : r.passed ? '✓' : r.n}</span>}
                                       <span>{r.label}</span>
                                     </span>
                                     <span className="grc-num">{r.pre != null ? r.pre + '%' : ''}</span>
@@ -675,8 +702,16 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
                                     <GrowthCell r={r} />
                                     <span><span className={'grc-pill ' + scls + (r.sb ? ' sb' : '')}>{lab}</span></span>
                                   </button>
-                                  {sOpen && (
+                                  {sOpen && !r.pretest && (
                                     <ol className="gre-acts">
+                                      {/* the flow: a short lesson first, then the activities (her note, 2026-10-02) */}
+                                      {!r.sb && !r.post && (
+                                        <li className={r.best != null ? 'done' : ''}>
+                                          <span className="gre-act-n">{r.best != null ? '✓' : '▶'}</span>
+                                          <span className="gre-act-kind">{t('Lesson')}</span>
+                                          <span className="gre-act-brief">{t('Mini-lesson: watch the model, then try it.')}</span>
+                                        </li>
+                                      )}
                                       {(r.ws.activities || []).map((a, i) => (
                                         <li key={i} className={r.passed ? 'done' : ''}>
                                           <span className="gre-act-n">{r.passed ? '✓' : i + 1}</span>
@@ -832,10 +867,15 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // a path nobody has touched gets the sample history once (see GrowthReport),
   // per path, so every band's demo opens on a report with something in it
   useEffect(() => {
-    if (!lead || resume) return
+    if (!lead) return
     let done = []
     try { const v = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]'); done = Array.isArray(v) ? v : [] } catch { /* fine */ }
-    if (done.includes(lead.tp.id)) return
+    let ver = 0
+    try { ver = Number(localStorage.getItem('proofDemoVer') || 0) } catch { /* fine */ }
+    if (done.includes(lead.tp.id) || resume) {
+      if (ver < 2) { const s = upgradeDemoV2(lead.tp, progress, done.includes(lead.tp.id)); if (s) setSeeded(s) }
+      return
+    }
     const s = seedDemoProgress(lead.tp, progress); if (s) setSeeded(s)
   }, [lead?.tp.id]) // eslint-disable-line react-hooks/exhaustive-deps
   // D needs a finished path in another domain to show a domain mastered (demo, once per grade)

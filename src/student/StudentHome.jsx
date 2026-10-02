@@ -561,8 +561,9 @@ function NextStep({ tp, next, progress, onStart, onMap }) {
   return (
     <div className={'gr-nextstep ' + stage}>
       <span className="gr-ns-n" aria-hidden>{next.capstone ? '★' : n || '•'}</span>
+      {/* her note (2026-10-02): "make the 'start' bar much slimmer so the data can be more prominent" */}
       <div className="gr-ns-words">
-        <span className="gr-ns-k">{t('Your next step')} · {stageName}</span>
+        <span className="gr-ns-k">{t('Next')} · {stageName}</span>
         <b>{next.capstone ? clearingTitle(ws) : stage === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(ws) : clearingTitle(ws)}</b>
         <span className="gr-ns-line">{line}</span>
       </div>

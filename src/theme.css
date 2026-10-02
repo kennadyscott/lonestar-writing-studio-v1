@@ -1166,3 +1166,8 @@ a { color: var(--link); }
   animation: luna-sheen 6s ease-in-out 1.2s infinite; mix-blend-mode: screen; }
 @keyframes luna-sheen { 0% { background-position: 120% 0; } 35%, 100% { background-position: -40% 0; } }
 @media (prefers-reduced-motion: reduce) { .luna-lockup::after { animation: none; opacity: 0; } }
+/* the lesson showing in the big card (her note, 2026-10-02); gold stays on the lesson you're on */
+.nook-rail-row.picked:not(.up) { border: 2px solid #0f97c2; background: #f0f8fc; box-shadow: 0 0 12px rgba(15,151,194,.18); }
+.nook-upnext { animation: nook-card-in .25s ease; }
+@keyframes nook-card-in { from { opacity: .4; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .nook-upnext { animation: none; } }

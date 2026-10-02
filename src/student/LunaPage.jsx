@@ -128,19 +128,20 @@ function UpNextLesson({ a, onOpen }) {
   const t = useT()
   const say = useSay()
   const current = a.status === 'in_progress'
+  const passed = a.status === 'passed'
   return (
-    <div className="nook-upnext" role="button" tabIndex={0} onClick={() => onOpen?.(a)}
+    <div className="nook-upnext" key={a.n} role="button" tabIndex={0} onClick={() => onOpen?.(a)}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}>
       <div className="nook-upnext-art"><img src={LESSON_ART(a.art)} alt="" /></div>
       <div className="nook-upnext-words">
-        <div className="nook-upnext-kicker">{current ? t('Up next') : t('Your next lesson')} · {a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
+        <div className="nook-upnext-kicker">{passed ? t('Completed') : current ? t('Up next') : t('Your next lesson')} · {a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
         <div className="nook-upnext-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}>
           <Glossed text={t(a.title)} />
         </div>
         {a.sub && <div style={{ fontSize: 14, color: '#4a6f8c', fontWeight: 600 }}>{say(a.sub)}</div>}
         <Stars n={a.stars} size={22} dimColor="#d3dbe3" />
         <button className="nook-upnext-btn" onClick={(e) => { e.stopPropagation(); onOpen?.(a) }}>
-          {current ? t('✦ Continue →') : t('Start →')}
+          {passed ? t('Review →') : current ? t('✦ Continue →') : t('Start →')}
         </button>
       </div>
     </div>
@@ -148,13 +149,14 @@ function UpNextLesson({ a, onOpen }) {
 }
 
 // The side rail (she chose it over tiles-below, 2026-09-24): every lesson in order, the current one lit gold.
-function RailLesson({ a, isUp, onOpen }) {
+function RailLesson({ a, isUp, picked, onOpen }) {
   const t = useT()
   const passed = a.status === 'passed'
   const locked = a.status === 'todo' && !isUp
   const clickable = passed || isUp
   return (
-    <div className={`nook-rail-row${isUp ? ' up' : ''}${locked ? ' locked' : ''}`} role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
+    <div className={`nook-rail-row${isUp ? ' up' : ''}${picked ? ' picked' : ''}${locked ? ' locked' : ''}`} role={clickable ? 'button' : undefined} tabIndex={clickable ? 0 : -1}
+      aria-pressed={clickable ? picked : undefined}
       onClick={() => clickable && onOpen?.(a)} onKeyDown={(e) => clickable && (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}
       aria-current={isUp ? 'step' : undefined}>
       <span className="nook-rail-thumb"><img src={LESSON_ART(a.art)} alt="" /></span>
@@ -169,16 +171,20 @@ function RailLesson({ a, isUp, onOpen }) {
   )
 }
 
+// A lesson in the rail shows itself in the big card; the card's button opens it
+// (her note, 2026-10-02: clicking Lesson 1 "should just take me to the lesson card").
 function FocusLessons({ acts, onOpen }) {
   const t = useT()
   const up = acts.find((a) => a.status === 'in_progress') || acts.find((a) => a.status === 'todo') || acts[acts.length - 1]
+  const [pickedN, setPickedN] = React.useState(up?.n)
+  const shown = acts.find((a) => a.n === pickedN) || up
   return (
     <div className="nook-railwrap">
       <nav className="nook-rail" aria-label={t('All lessons')}>
         <div className="nook-rest-label">{t('All lessons')}</div>
-        {acts.map((a) => <RailLesson key={a.n} a={a} isUp={a === up} onOpen={onOpen} />)}
+        {acts.map((a) => <RailLesson key={a.n} a={a} isUp={a === up} picked={a === shown} onOpen={(x) => setPickedN(x.n)} />)}
       </nav>
-      <UpNextLesson a={up} onOpen={onOpen} />
+      <UpNextLesson a={shown} onOpen={onOpen} />
     </div>
   )
 }

@@ -334,7 +334,9 @@ function BigTask({ icon, title, sub, bg, tint, onClick, busy }) {
     <button className="big-task prac-tile" disabled={busy} onClick={onClick}
       style={{ '--tile-img': `url(${BASE}${bg})`, '--tile-tint': tint }}>
       <span aria-hidden className="prac-art" />
-      {/* no icon ring: the painting already says what the card is (her call, 2026-10-01) */}
+      {/* the icon shows only on the white side cards (B, 2026-10-02); with the painting
+          it was dropped (her call, 2026-10-01: "the images suffice") */}
+      <span aria-hidden className="prac-icon prac-icon-white">{icon}</span>
       <span className="prac-words">
         <span className="prac-title">{title}</span>
         <span className="prac-sub">{sub}</span>
@@ -1435,6 +1437,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
+  const [sideLook, setSideLookState] = useState(() => { try { return localStorage.getItem('lscr.sideLook') === 'b' ? 'b' : 'a' } catch { return 'a' } })
+  const setSideLook = (v) => { setSideLookState(v); try { localStorage.setItem('lscr.sideLook', v) } catch { /* fine */ } }
 
   // A grid game finished: record the clear, reveal the coins, refresh state.
   // Closing a zone game before it is finished forfeits the round: ask first.
@@ -1561,8 +1565,13 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
         // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
-        <div className="practice-view" data-clean="" style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div className="practice-view" data-clean="" data-side={sideLook} style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
+          {/* prototype A/B for the side cards (her ask, 2026-10-02): A paintings, B the white cards she liked */}
+          <div className="side-abc" role="group" aria-label="Side cards (prototype)">
+            <span>{t('Side cards')}</span>
+            {[['a', 'A'], ['b', 'B']].map(([k, l]) => <button key={k} className={sideLook === k ? 'on' : ''} aria-pressed={sideLook === k} onClick={() => setSideLook(k)}>{l}</button>)}
+          </div>
           <div className="practice-split">
             <ProofRoomFeature onOpen={onProofRoom} />
             <div className="practice-side">

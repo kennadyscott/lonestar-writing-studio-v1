@@ -439,6 +439,10 @@ function LabyrinthGate({ src, onDone }) {
 
 /* ---------------- the front page: the strand map (chosen 2026-09-30 over a valley gate and a trail journal) ---------------- */
 
+// The lands students explore: her names for two of the TEKS strands (2026-10-01).
+// The content keeps its strand names; only what students see changes.
+const LAND_NAME = { 'Foundational Language': 'Rootwood', 'Multiple Genres': 'Genre Grove', Comprehension: 'Comprehension Skills' }
+export const landName = (d) => LAND_NAME[d] || d
 const STRAND_ICON = { Composition: '✍️', 'Foundational Language': '🔤', 'Multiple Genres': '📚', "Author's Purpose": '🎯', Comprehension: '🧠', 'Response Skills': '💬', 'Inquiry and Research': '🔎' }
 
 function ContinueCard({ resume, topics, onOpen }) {
@@ -448,7 +452,7 @@ function ContinueCard({ resume, topics, onOpen }) {
   return (
     <div className="pm-card pm-next">
       <div className="pm-card-head">{resume ? t('Continue Your Path') : t('Start here')}</div>
-      <div className="pm-kicker">{t(first.tp.domain || 'Path')}</div>
+      <div className="pm-kicker">{t(landName(first.tp.domain) || 'Path')}</div>
       <div className="pm-next-title">{first.tp.short || first.tp.title}</div>
       {first.st.next && <div className="pm-next-skill">{t('Next clearing: {title}', { title: clearingTitle(first.st.next) })}</div>}
       <ProofBar st={first.st} />
@@ -488,6 +492,7 @@ export function strandInfo(topics) {
 // student has gone. Used by the front page and the Practice card.
 export function StrandTrail({ topics, picked, onPick, children }) {
   const t = useT()
+  const livingRef = useLivingLoop()
   const BASE = import.meta.env.BASE_URL || '/'
   const info = strandInfo(topics)
   const n = info.length
@@ -514,7 +519,7 @@ export function StrandTrail({ topics, picked, onPick, children }) {
           <button key={x.d} className={`pm-node ${x.cls}${x.d === picked ? ' picked' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
             onClick={() => onPick(x.d)} aria-pressed={picked ? x.d === picked : undefined}>
             <span className="pm-orb" aria-hidden>{STRAND_ICON[x.d] || '✦'}</span>
-            <span className="pm-name">{t(x.d)}</span>
+            <span className="pm-name">{t(landName(x.d))}</span>
             <span className="pm-pill">{x.list.length === 1 ? t('{a} of 1 path', { a: x.done }) : t('{a} of {b} paths', { a: x.done, b: x.list.length })}</span>
           </button>
         )
@@ -543,7 +548,7 @@ function HomeStrands({ grade, shown, topics, resume, onOpen }) {
       {chosen && (
         <div className="card proof-shelf">
           <div className="proof-shelf-head">
-            <div><div className="proof-section-kicker">{t('Strand')}</div><div className="proof-shelf-title">{t(chosen.d)}</div></div>
+            <div><div className="proof-section-kicker">{t('Land')}</div><div className="proof-shelf-title">{t(landName(chosen.d))}</div></div>
             <span className="prf-count">{chosen.list.length === 1 ? t('{a} of 1 path', { a: chosen.done }) : t('{a} of {b} paths', { a: chosen.done, b: chosen.list.length })}</span>
           </div>
           <div className="pr-row-track lh-wrap">
@@ -629,7 +634,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
       <div className="pm-immersive">
         <PathMap stops={stops} onPlay={onPlay}>
           <div className="pm-hud">
-            <div className="proof-kicker">{t('The Lit Labyrinth')} · {t(topic.domain || 'Path')}</div>
+            <div className="proof-kicker">{t('The Lit Labyrinth')} · {t(landName(topic.domain) || 'Path')}</div>
             <h1 className="pm-hud-title">{topic.short || topic.title}</h1>
             <div className="pm-hud-sub">{t('{n} of {total} clearings reached', { n: cleared, total: topic.core.length })}</div>
             <div className="pm-hud-bar"><div style={{ width: `${pct}%` }} /></div>
@@ -637,7 +642,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
         </PathMap>
         {/* phones have no scene, so the path's name goes here */}
         <div className="pm-phone-title" style={{ '--pm-img': `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg)` }}>
-          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t(topic.domain || 'Path')}</div>
+          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t(landName(topic.domain) || 'Path')}</div>
           <h1>{topic.short || topic.title}</h1>
           <div>{t('{n} of {total} clearings reached', { n: cleared, total: topic.core.length })}</div>
         </div>
@@ -655,7 +660,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   }
 
   return (
-    <Shell onClose={onClose} sub={topic.title} onBack={onBack} topic={topic} kicker={`${t('The Lit Labyrinth')} · ${t(topic.domain || 'Path')}`}>
+    <Shell onClose={onClose} sub={topic.title} onBack={onBack} topic={topic} kicker={`${t('The Lit Labyrinth')} · ${t(landName(topic.domain) || 'Path')}`}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, background: '#f4f8fb', borderRadius: 13, padding: '12px 15px', marginBottom: 16, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 22 }}>{topic.icon}</span>
         <div style={{ flex: 1, minWidth: 170 }}>

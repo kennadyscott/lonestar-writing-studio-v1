@@ -829,24 +829,26 @@ function VineReveal({ onDone }) {
   React.useEffect(() => {
     const v = ref.current
     let started = false
-    const giveUp = setTimeout(() => { if (!started) onDone() }, 1200)
+    // the poster keeps the card covered while the clip loads; give it 2.5s
+    const giveUp = setTimeout(() => { if (!started) onDone(false) }, 2500)
     // never leave the card covered: the clip is ~2s at 2x, so 4s is a hard stop
-    const hardStop = setTimeout(onDone, 3500)
+    const hardStop = setTimeout(() => onDone(started), 6000)
     // some browsers pause a fresh muted clip on its own (the gate did, too): resume it
-    const resume = () => { if (v && started && !v.ended) v.play().catch(() => onDone()) }
+    const resume = () => { if (v && started && !v.ended) v.play().catch(() => onDone(false)) }
     const go = () => {
       if (!v || started) return
       started = true
       // the file itself is the 2.5s cut, no audio (her note, 2026-10-02: "5 seconds is too long ... 2.5 and no sound")
-      v.play().catch(() => onDone())
+      v.play().catch(() => onDone(false))
     }
     const tick = () => { if (v && v.duration && v.currentTime > v.duration - 0.4) setFading(true) }
     v?.addEventListener('canplay', go)
     v?.addEventListener('timeupdate', tick)
-    v?.addEventListener('ended', onDone)
+    const ended = () => onDone(true)
+    v?.addEventListener('ended', ended)
     v?.addEventListener('pause', resume)
     if (v && v.readyState >= 3) go()
-    return () => { clearTimeout(giveUp); clearTimeout(hardStop); v?.removeEventListener('canplay', go); v?.removeEventListener('timeupdate', tick); v?.removeEventListener('ended', onDone); v?.removeEventListener('pause', resume) }
+    return () => { clearTimeout(giveUp); clearTimeout(hardStop); v?.removeEventListener('canplay', go); v?.removeEventListener('timeupdate', tick); v?.removeEventListener('ended', ended); v?.removeEventListener('pause', resume) }
   }, [onDone])
   return (
     <div className={'vr vr-video' + (fading ? ' fading' : '')} aria-hidden="true">
@@ -856,9 +858,20 @@ function VineReveal({ onDone }) {
 }
 const wantVines = () => {
   try {
+    // ?vines=1 replays it on demand (for demos), even with reduced motion
+    if (new URLSearchParams(location.search).get('vines') === '1') return true
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
     return !sessionStorage.getItem('lscr.vines')
   } catch { return false }
+}
+// fetch the clip and its first frame as soon as the dashboard opens, so the
+// reveal is ready by the time Practice is clicked
+let vinesWarm = false
+function warmVines() {
+  if (vinesWarm) return
+  vinesWarm = true
+  const BASE = import.meta.env.BASE_URL || '/'
+  try { new Image().src = BASE + 'vines/vines-start.jpg'; fetch(BASE + 'vines/vines.mp4').catch(() => {}) } catch { /* fine */ }
 }
 
 // studio: the grade 8 / high-school Writer's Studio wears it as plain "Skill Practice"
@@ -889,7 +902,8 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   const [pickId, setPickId] = useState(null)
   const [allProg, setAllProg] = useState(false)
   const [vines, setVines] = useState(() => !studio && wantVines())
-  const vinesDone = React.useCallback(() => { setVines(false); try { sessionStorage.setItem('lscr.vines', '1') } catch { /* fine */ } }, [])
+  // only a reveal that actually played counts as seen; a skipped one tries again next time
+  const vinesDone = React.useCallback((played) => { setVines(false); if (played) { try { sessionStorage.setItem('lscr.vines', '1') } catch { /* fine */ } } }, [])
   // the path being worked on drives the next step; the chart can show another
   // (her ask, 2026-10-02: a carousel through the paths finished or in progress)
   const lead = resume || mine[0]
@@ -1435,6 +1449,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
+  useEffect(() => { if (wantVines()) warmVines() }, [])
   const [sideLook, setSideLookState] = useState(() => { try { const v = localStorage.getItem('lscr.sideLook'); return ['b', 'c', 'd'].includes(v) ? v : 'a' } catch { return 'a' } })
   const setSideLook = (v) => { setSideLookState(v); try { localStorage.setItem('lscr.sideLook', v) } catch { /* fine */ } }
 

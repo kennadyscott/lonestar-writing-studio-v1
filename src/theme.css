@@ -1275,3 +1275,18 @@ a { color: var(--link); }
 .lsn-exit:hover { text-decoration: underline; }
 /* header 64 + bottom bar + step title (~60) + caption (~34) + page padding (~50) */
 .lsn-video { width: min(100%, calc((100vh - 64px - var(--lsn-nav) - 160px) * 1.778)); }
+
+/* Lesson, Chromebook pass (1366x768 ≈ 1366x670 usable): no step header on the
+   right page, the step title + directions sit under the current tab, a slimmer
+   bottom bar, and the video takes all the height left between header and bar. */
+.lsn { --lsn-nav: 60px; }
+.lsn-nav-in { padding-top: 8px; padding-bottom: 8px; }
+.lsn-btn { padding: 9px 22px; font-size: 14.5px; }
+.lsn-nav-prog { gap: 4px; }
+.lsn-book { grid-template-columns: clamp(210px, 16vw, 260px) minmax(0, 1fr); padding-bottom: calc(var(--lsn-nav) + 8px); }
+.lsn-right { padding: 14px clamp(16px, 1.8vw, 32px) 14px; }
+.lsn-tab-detail { margin: 6px 2px 4px 12px; padding: 2px 0 2px 12px; border-left: 2px solid #f0d9a8; }
+.lsn-left .lsn-step-title { font-size: 14.5px; line-height: 1.25; }
+.lsn-left .lsn-step-sub { font-size: 12.5px; line-height: 1.4; margin-top: 3px; max-width: none; }
+.lsn-video { width: min(100%, calc((100vh - 64px - var(--lsn-nav) - 8px - 28px) * 1.778)); }
+@media (max-width: 900px) { .lsn-video { width: 100%; } }

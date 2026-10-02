@@ -121,11 +121,6 @@ function WatchStep({ watched, onWatched }) {
           <span aria-hidden>⛶</span>
         </div>
       </div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 12, fontSize: 13, color: '#4a6f8c', fontWeight: 600 }}>
-        <span style={{ background: '#eaf6fd', color: '#0a7dba', fontWeight: 800, fontSize: 11, letterSpacing: .6, padding: '3px 8px', borderRadius: 6 }}>{t('VIDEO')}</span>
-        <span>{t(VIDEO.title)} · {VIDEO.length}</span>
-        <span style={{ marginLeft: 'auto', color: watched ? '#2e9e6b' : '#7d93a6' }}>{watched ? t('✓ Watched') : t('Press play to begin')}</span>
-      </div>
     </div>
   )
 }
@@ -323,6 +318,12 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
                     <button className={'lsn-tab' + (cur ? ' cur' : '') + (past ? ' past' : '')} disabled={i > done} onClick={() => i <= done && setStep(i)} aria-current={cur ? 'step' : undefined}>
                       <span className="lsn-tab-n">{past ? '✓' : i + 1}</span>{t(label)}
                     </button>
+                    {cur && (
+                      <div className="lsn-tab-detail">
+                        <div className="lsn-step-title">{stepTitle}</div>
+                        <div className="lsn-step-sub">{stepSub}</div>
+                      </div>
+                    )}
                   </li>
                 )
               })}
@@ -330,10 +331,6 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
             {tip}
           </aside>
           <main className="lsn-page lsn-right">
-            <div className="lsn-step-head">
-              <div className="lsn-step-title">{stepTitle}</div>
-              <div className="lsn-step-sub">{stepSub}</div>
-            </div>
             {body}
           </main>
         </div>

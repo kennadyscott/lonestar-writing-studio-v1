@@ -2179,20 +2179,6 @@ body { font-size: 16px; }
 .practice-view[data-side="c"] .prac-sub { color: var(--muted); text-shadow: none; }
 .practice-view[data-side="c"] .prac-chev { color: #9db0c0; }
 
-/* side cards D (2026-10-02): each painting fades into white instead of navy */
-.practice-view[data-side="d"] .prac-tile { color: #10294a; background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view[data-side="d"] .prac-art { background: linear-gradient(90deg, rgba(255,255,255,0) 35%, #fff 100%), var(--tile-img) left center / cover no-repeat, var(--tile-tint); }
-.practice-view[data-side="d"] .prac-title { color: #10294a; text-shadow: none; }
-.practice-view[data-side="d"] .prac-sub { color: var(--muted); text-shadow: none; }
-.practice-view[data-side="d"] .prac-chev { color: #9db0c0; }
-.practice-view[data-side="d"] .practice-side .daily-banner { color: #10294a; background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view[data-side="d"] .practice-side .daily-art { background: linear-gradient(90deg, rgba(255,255,255,0) 35%, #fff 100%), var(--daily-img) left center / cover no-repeat; }
-.practice-view[data-side="d"] .practice-side .daily-art::after { display: none; }
-.practice-view[data-side="d"] .daily-kicker { color: #0f97c2; }
-.practice-view[data-side="d"] .daily-title { color: #10294a; text-shadow: none; }
-.practice-view[data-side="d"] .daily-dir { color: var(--muted); text-shadow: none; }
-.practice-view[data-side="d"] .daily-cta { background: var(--navy); border: none; box-shadow: none; color: #fff; }
-
 /* domain tile bars by state (her note: all-green bars next to the green Start read as one thing) */
 .gre-tile.m-prog .gre-meter i { background: linear-gradient(90deg, #e9a812, #f5c542); }
 .gre-tile.m-done .gre-meter i { background: linear-gradient(90deg, #2e9e6b, #5fe0a0); }

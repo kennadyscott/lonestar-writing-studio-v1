@@ -102,7 +102,7 @@ function WatchStep({ watched, onWatched }) {
   const [playing, setPlaying] = useState(false)
   const play = () => { setPlaying(true); onWatched() }
   return (
-    <div style={{ maxWidth: 860, margin: '0 auto' }}>
+    <div style={{ maxWidth: 'min(100%, calc((100vh - 330px) * 1.778))', margin: '0 auto' }}>
       <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', background: '#0d2f55', aspectRatio: '16 / 9', boxShadow: '0 8px 26px rgba(2,20,50,.25)' }}>
         <img src={VIDEO.poster} alt={t(VIDEO.title)} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
         {!playing && (
@@ -266,11 +266,9 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
   const activityTopic = (activity.split(':')[1] || activity).trim()
   const canContinue = step === 0 ? watched : step === 1 ? STARBURST.prompts.filter((p) => (answers[p.key] || '').trim()).length >= 2 : step === 2 ? pick != null : step === 3 ? sentence.trim().length > 0 : false
 
-  // PROTOTYPE A/B (2026-10-02): her note — no way back from inside a lesson, and
-  // "I also am just not loving the design of this". Both layouts keep a Back to
-  // lessons link at the top and Back / Continue pinned to the bottom of the screen.
-  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.lessonLook') || 'A' } catch { return 'A' } })
-  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.lessonLook', k) } catch { /* fine */ } }
+  // The open-storybook layout (her pick, B of A/B, 2026-10-02 — "the lesson is the most
+  // important part"): a slim left page, the work across the rest of the screen,
+  // Back to lessons at the top and Back / Continue pinned to the bottom.
   const lessonTitle = t(lesson.title.replace(/^Module \d+: /, ''))
   const moduleN = (moduleLabel.match(/\d+/) || [''])[0]
   const art = BASE + 'lessons/' + (lesson.art || 'g1') + '.jpg'
@@ -307,22 +305,12 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
       </div>
     </div>
   )
-  const lookPick = (
-    <div className="style-pick lsn-pick" role="group" aria-label="Lesson layout">
-      <span className="lbl">Lesson</span>
-      {['A', 'B'].map((k) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => pickLook(k)}>{k}</button>)}
-    </div>
-  )
-
-  if (look === 'B') {
-    // B: an open storybook — the lesson's painting, the steps as bookmarks and Luna on the left page; the work on the right
-    return (
+  return (
       <div className="lsn lsn-b">
         <div aria-hidden className="lsn-bg" style={{ '--bg': `url(${BASE}bg-nook.jpg)` }} />
         <div className="lsn-top">
           <button className="lsn-back" onClick={onBack}>{t('← Back to lessons')}</button>
           <span className="lsn-crumbs">{t("Luna's Writing Adventure")} · {t('Module {n}', { n: moduleN })} · {t('Lesson {n}', { n: lesson.n })}</span>
-          {lookPick}
         </div>
         <div className="lsn-book">
           <aside className="lsn-page lsn-left">
@@ -353,48 +341,5 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
         </div>
         {nav}
       </div>
-    )
-  }
-
-  // A: the lesson's 3D painting as a banner, the five steps as a glowing trail, then the work
-  return (
-    <div className="lsn lsn-a">
-      <div aria-hidden className="lsn-bg" style={{ '--bg': `url(${BASE}bg-nook.jpg)` }} />
-      <div className="lsn-hero" style={{ '--art': `url(${art})` }}>
-        <div className="lsn-hero-top">
-          <button className="lsn-back" onClick={onBack}>{t('← Back to lessons')}</button>
-          {lookPick}
-        </div>
-        <div className="lsn-hero-words">
-          <div className="lsn-kicker light">{t("Luna's Writing Adventure")} · {t('Module {n}', { n: moduleN })} · {t('Lesson {n}', { n: lesson.n })}</div>
-          <h1 className="lsn-title light">{lessonTitle}</h1>
-          <div className="lsn-hero-sub"><Directions text="Use what you know about {title} to expand a sentence." vars={{ title: lessonTitle }} inline /></div>
-        </div>
-      </div>
-      <ol className="lsn-trail">
-        {STEPS.map((label, i) => {
-          const cur = i === step, past = i < done && !cur
-          return (
-            <li key={label} className={'lsn-stop' + (cur ? ' cur' : '') + (past ? ' past' : '') + (i <= done ? ' open' : '')}>
-              <button disabled={i > done} onClick={() => i <= done && setStep(i)} aria-current={cur ? 'step' : undefined}>
-                <span className="lsn-stop-dot">{past ? '✓' : i + 1}</span>
-                <span className="lsn-stop-label">{t(label)}</span>
-              </button>
-            </li>
-          )
-        })}
-      </ol>
-      <div className="lsn-card">
-        <div className="lsn-card-head">
-          <div>
-            <div className="lsn-step-title">{stepTitle}</div>
-            <div className="lsn-step-sub">{stepSub}</div>
-          </div>
-          {tip}
-        </div>
-        {body}
-      </div>
-      {nav}
-    </div>
   )
 }

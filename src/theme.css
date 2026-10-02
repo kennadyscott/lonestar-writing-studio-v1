@@ -2020,3 +2020,29 @@ body { font-size: 16px; }
 .gr-legend i.lockd { background: #fff; border: 1.5px dashed #c9d6e0; }
 .hs .gr-col.open:not(.next)::after { background: transparent; border-color: var(--hs-accent); }
 .hs .gr-ns-tag { color: var(--hs-accent); }
+/* back above the fold (her note: "I don't like how this pushes below the fold now") */
+.prf-c .prf-c-lead { gap: 10px; }
+.gre-tile img { height: 38px; }
+.gre-tile { gap: 3px; padding-bottom: 7px; }
+.gr-nextstep { padding: 10px 14px; gap: 14px; }
+.gr-ns-n { width: 40px; height: 40px; font-size: 19px; box-shadow: 0 0 0 4px rgba(245,180,0,.22); }
+.gr-ns-words b { font-size: 20px; }
+.gr-ns-line { font-size: 14px; }
+.gr-ns-btn { padding: 11px 26px; }
+.gr-inline { margin-top: 2px; }
+.gr-inline-path { font-family: Georgia, 'Times New Roman', serif; font-size: 19px; font-weight: 700; color: #0d2f55; margin-right: 6px; }
+.hs .gr-inline-path { font-family: var(--hs-serif); color: var(--hs-ink); }
+.gr-top[hidden] ~ .gr-chart .gr-plot { height: 118px; }
+.gr-top[hidden] ~ .gr-chart { padding-top: 10px; padding-bottom: 8px; }
+.gr-top[hidden] ~ .gr-chart .gr-legend { margin-top: 6px; }
+.gr-top[hidden] ~ .gr-chart .gr-plot { height: 96px; }
+.gr-top[hidden] ~ .gr-chart { padding-top: 8px; padding-bottom: 6px; }
+.gr-top[hidden] ~ .gr-chart .gr-legend { display: none; }
+.gr-top[hidden] ~ .gr-chart .gr-ns-tag { bottom: 38px; }
+.prf-c .prf-c-head { padding: 10px 20px 9px; }
+.prf-c .prf-c-title { font-size: clamp(20px, 1.8vw, 26px); }
+.gr-top[hidden] ~ .gr-chart .gr-lab-t { -webkit-line-clamp: 1; }
+.gr-top[hidden] ~ .gr-chart .gr-lab-k { min-height: 11px; font-size: 10px; }
+.gr-top[hidden] ~ .gr-chart .gr-gbracket { margin: 2px 0 1px; height: 5px; }
+.gre-tile img { height: 30px; }
+.gre-strip { padding-bottom: 0; }

@@ -568,7 +568,6 @@ function NextStep({ tp, next, progress, onStart, onMap }) {
       </div>
       <div className="gr-ns-go">
         <button className="btn gr-ns-btn" onClick={onStart}>{stage === 'lesson' ? t('Start') : t('Continue')} →</button>
-        <button className="gr-ns-map" onClick={onMap}>{t('or see the map')}</button>
       </div>
     </div>
   )
@@ -638,6 +637,7 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
       {!hideFoot && foot}
       {hideFoot && (
         <div className="gr-inline">
+          <span className="gr-inline-path">{tp.short || tp.title}</span>
           <span>{t('Pre-test')} <b className="pre">{pre}%</b></span>
           <span className="gr-arrow" aria-hidden>→</span>
           <span>{full?.best > 0 ? t('Post-test') : t('Now')} <b>{now == null ? '—' : now + '%'}</b></span>
@@ -792,12 +792,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
             <div className="prf-c-lead">
 <DomainStrip mine={mine} progress={progress} selD={lead.tp.domain} onPick={pickDomain} next={next} onStart={start} />
 <NextStep tp={lead.tp} next={next} progress={progress} onStart={start} onMap={() => onOpen(lead.tp.id)} />
-{(
-              <div className="prf-c-line">
-                <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
-                <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
-              </div>
-              )}
+{/* the path's name now leads the numbers line under the next step (2026-10-02) */}
               <GrowthReport hideFoot tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
             </div>
           )}
@@ -1370,7 +1365,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           onClose={() => setFwChooser(false)} />
       )}
 
-      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 16, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
         <div className="seg nav-tabs" role="tablist" aria-label={t('Dashboard sections')} style={{ position: 'relative', zIndex: 2 }}>
           {TABS.map(([k, label]) => (
             <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>

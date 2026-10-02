@@ -610,6 +610,8 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
   const nextLabel = next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
 
   const [open, setOpen] = useState(() => ({ [lead?.tp.domain]: true, [lead?.tp.id]: true }))
+  const [selD, setSelD] = useState(lead?.tp.domain || null)
+  const sel = doms.find((x) => x.d === selD && x.list.length) || doms.find((x) => x.list.length)
   const toggle = (k) => setOpen((o) => ({ ...o, [k]: !o[k] }))
 
   return (
@@ -624,101 +626,101 @@ function ReportMastery({ mine, progress, grade, lead, next, onStart, onMap, onOp
         {next && <button className="btn gre-go" onClick={onStart} title={t('Up next') + ': ' + nextLabel}>{t('Continue')}: {nextLabel} →</button>}
       </div>
 
-      <div className="grd-doms">
-        {doms.map((x) => {
-          const dOpen = !!open[x.d] && x.list.length > 0
-          return (
-            <div key={x.d} className={'gre-dom' + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' empty') + (dOpen ? ' open' : '')}>
-              <button className="grd-dom gre-dom-head" onClick={() => x.list.length && toggle(x.d)} aria-expanded={dOpen} disabled={!x.list.length}>
-                <img className="grd-thumb" src={landImg(x.d)} alt="" />
-                <span className="grd-dom-name">
-                  <b>{landName(x.d)}</b>
-                  <span>{x.list.length ? t('{done} of {n} topics mastered', { done: x.done, n: x.list.length }) : t('No Grade {n} paths yet', { n: grade })}</span>
-                  {x.list.length > 0 && <span className="grd-bar"><i style={{ width: (x.done / x.list.length) * 100 + '%' }} /></span>}
-                </span>
-                <span className="grd-topics">
-                  {!dOpen && x.list.map(({ tp, st }) => (
-                    <span key={tp.id} className={'grd-chip ' + (st.finished ? 'done' : st.started ? 'here' : 'fresh')}>
-                      {st.finished && <i aria-hidden>✓</i>}<span>{tp.short || tp.title}</span>
-                    </span>
-                  ))}
-                </span>
-                {x.mastered && <span className="grd-badge">{t('Mastered')}</span>}
-                {x.list.length > 0 && <Chevron open={dOpen} />}
-              </button>
-
-              {dOpen && (
-                <div className="gre-topics">
-                  {x.list.map(({ tp, st }) => {
-                    const tOpen = !!open[tp.id]
-                    const now = nowOf(tp)
-                    const pre = demoPretest(tp.id)
-                    const cls = st.finished ? 'ok' : st.started ? 'next' : 'off'
-                    const rows = tOpen ? skillRowsOf(tp, progress, lead?.tp.id === tp.id ? next : null, t) : []
-                    return (
-                      <div key={tp.id} className={'gre-topic' + (tOpen ? ' open' : '')}>
-                        <button className="gre-topic-head" onClick={() => toggle(tp.id)} aria-expanded={tOpen}>
-                          <Chevron open={tOpen} />
-                          <span className="gre-topic-name"><b>{tp.short || tp.title}</b><span>{t('{n} of {m} skills mastered', { n: st.cleared, m: st.total })}</span></span>
-                          <span className="gre-prenow"><span className="pre">{pre}%</span> → <b>{now == null ? '—' : now + '%'}</b>{now != null && <em className={now - pre >= 0 ? 'up' : 'down'}>{now - pre >= 0 ? '+' : ''}{now - pre}</em>}</span>
-                          <span className={'grc-pill ' + cls}>{st.finished ? t('Mastered') : st.started ? t('In progress') : t('Not started')}</span>
-                        </button>
-                        {tOpen && (
-                          <div className="gre-skills">
-                            <div className="gre-skill gre-skill-head" aria-hidden>
-                              <span>{t('Skill')}</span><span>{t('Pre-test')}</span><span>{t('Best')}</span><span>{t('Growth')}</span><span>{t('Status')}</span>
-                            </div>
-                            {rows.map((r) => {
-                              const [scls, lab] = rowStatus(r, t)
-                              const sOpen = !!open[r.key]
-                              return (
-                                <div key={r.key} className={'gre-skill-wrap' + (r.pretest ? ' pretest' : '') + (r.sb ? ' sb' : '') + (r.post ? ' post' : '') + (r.next ? ' next' : '') + (sOpen ? ' open' : '')}>
-                                  <button className="gre-skill" onClick={() => !r.pretest && toggle(r.key)} aria-expanded={r.pretest ? undefined : sOpen}>
-                                    <span className="grc-skill">
-                                      {r.pretest ? <span className="gre-chev" aria-hidden /> : <Chevron open={sOpen} />}
-                                      {r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + scls}>{r.pretest ? 'P' : r.post ? '★' : r.passed ? '✓' : r.n}</span>}
-                                      <span>{r.label}</span>
-                                    </span>
-                                    <span className="grc-num">{r.pre != null ? r.pre + '%' : ''}</span>
-                                    <span className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></span>
-                                    <GrowthCell r={r} />
-                                    <span><span className={'grc-pill ' + scls + (r.sb ? ' sb' : '')}>{lab}</span></span>
-                                  </button>
-                                  {sOpen && !r.pretest && (
-                                    <ol className="gre-acts">
-                                      {/* the flow: a short lesson first, then the activities (her note, 2026-10-02) */}
-                                      {!r.sb && !r.post && (
-                                        <li className={r.best != null ? 'done' : ''}>
-                                          <span className="gre-act-n">{r.best != null ? '✓' : '▶'}</span>
-                                          <span className="gre-act-kind">{t('Lesson')}</span>
-                                          <span className="gre-act-brief">{t('Mini-lesson: watch the model, then try it.')}</span>
-                                        </li>
-                                      )}
-                                      {(r.ws.activities || []).map((a, i) => (
-                                        <li key={i} className={r.passed ? 'done' : ''}>
-                                          <span className="gre-act-n">{r.passed ? '✓' : i + 1}</span>
-                                          <span className="gre-act-kind">{kindLabel(a.kind, t)}</span>
-                                          <span className="gre-act-brief">{a.brief || ''}</span>
-                                        </li>
-                                      ))}
-                                      {(!r.ws.activities || !r.ws.activities.length) && <li className="gre-act-none">{t('No activities yet')}</li>}
-                                      <li className="gre-act-go"><button className="btn ghost" onClick={() => onOpen(tp.id, r.ws.id)}>{r.passed ? t('Practice again') : t('Open this skill →')}</button></li>
-                                    </ol>
-                                  )}
-                                </div>
-                              )
-                            })}
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )
-        })}
+      {/* her note (2026-10-02): "put all the little domain boxes at the top with a
+          little meter to see how many topics have been completed in that domain" */}
+      <div className="gre-tiles" role="tablist" aria-label={t('Domains')}>
+        {doms.map((x) => (
+          <button key={x.d} role="tab" aria-selected={sel?.d === x.d} disabled={!x.list.length}
+            className={'gre-tile' + (sel?.d === x.d ? ' on' : '') + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' empty')}
+            onClick={() => x.list.length && setSelD(x.d)} title={landName(x.d)}>
+            <img src={landImg(x.d)} alt="" />
+            <span className="gre-tile-name">{landName(x.d)}</span>
+            {x.list.length ? (
+              <>
+                <span className="gre-meter" aria-hidden><i style={{ width: (x.done / x.list.length) * 100 + '%' }} /></span>
+                <span className="gre-tile-n"><b>{x.done}/{x.list.length}</b> {t('topics')}</span>
+              </>
+            ) : <span className="gre-tile-n">{t('Coming soon')}</span>}
+            {x.mastered && <span className="gre-tile-badge" aria-label={t('Mastered')}>✓</span>}
+          </button>
+        ))}
       </div>
+
+      {sel && (
+        <div className={'gre-dom open' + (sel.mastered ? ' mastered' : '')}>
+          <div className="gre-sel-head">
+            <b>{landName(sel.d)}</b>
+            <span>{t('{done} of {n} topics mastered', { done: sel.done, n: sel.list.length })}</span>
+            {sel.mastered && <span className="grd-badge">{t('Mastered')}</span>}
+          </div>
+          <div className="gre-topics">
+            {sel.list.map(({ tp, st }) => {
+              const tOpen = !!open[tp.id]
+              const now = nowOf(tp)
+              const pre = demoPretest(tp.id)
+              const cls = st.finished ? 'ok' : st.started ? 'next' : 'off'
+              const rows = tOpen ? skillRowsOf(tp, progress, lead?.tp.id === tp.id ? next : null, t) : []
+              return (
+                <div key={tp.id} className={'gre-topic' + (tOpen ? ' open' : '')}>
+                  <button className="gre-topic-head" onClick={() => toggle(tp.id)} aria-expanded={tOpen}>
+                    <Chevron open={tOpen} />
+                    <span className="gre-topic-name"><b>{tp.short || tp.title}</b><span>{t('{n} of {m} skills mastered', { n: st.cleared, m: st.total })}</span></span>
+                    <span className="gre-prenow"><span className="pre">{pre}%</span> → <b>{now == null ? '—' : now + '%'}</b>{now != null && <em className={now - pre >= 0 ? 'up' : 'down'}>{now - pre >= 0 ? '+' : ''}{now - pre}</em>}</span>
+                    <span className={'grc-pill ' + cls}>{st.finished ? t('Mastered') : st.started ? t('In progress') : t('Not started')}</span>
+                  </button>
+                  {tOpen && (
+                    <div className="gre-skills">
+                      <div className="gre-skill gre-skill-head" aria-hidden>
+                        <span>{t('Skill')}</span><span>{t('Pre-test')}</span><span>{t('Best')}</span><span>{t('Growth')}</span><span>{t('Status')}</span>
+                      </div>
+                      {rows.map((r) => {
+                        const [scls, lab] = rowStatus(r, t)
+                        const sOpen = !!open[r.key]
+                        return (
+                          <div key={r.key} className={'gre-skill-wrap' + (r.pretest ? ' pretest' : '') + (r.sb ? ' sb' : '') + (r.post ? ' post' : '') + (r.next ? ' next' : '') + (sOpen ? ' open' : '')}>
+                            <button className="gre-skill" onClick={() => !r.pretest && toggle(r.key)} aria-expanded={r.pretest ? undefined : sOpen}>
+                              <span className="grc-skill">
+                                {r.pretest ? <span className="gre-chev" aria-hidden /> : <Chevron open={sOpen} />}
+                                {r.sb ? <span className="grc-sbmark">↳</span> : <span className={'grc-n ' + scls}>{r.pretest ? 'P' : r.post ? '★' : r.passed ? '✓' : r.n}</span>}
+                                <span>{r.label}</span>
+                              </span>
+                              <span className="grc-num">{r.pre != null ? r.pre + '%' : ''}</span>
+                              <span className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></span>
+                              <GrowthCell r={r} />
+                              <span><span className={'grc-pill ' + scls + (r.sb ? ' sb' : '')}>{lab}</span></span>
+                            </button>
+                            {sOpen && !r.pretest && (
+                              <ol className="gre-acts">
+                                {/* the flow: a short lesson first, then the activities (her note, 2026-10-02) */}
+                                {!r.sb && !r.post && (
+                                  <li className={r.best != null ? 'done' : ''}>
+                                    <span className="gre-act-n">{r.best != null ? '✓' : '▶'}</span>
+                                    <span className="gre-act-kind">{t('Lesson')}</span>
+                                    <span className="gre-act-brief">{t('Mini-lesson: watch the model, then try it.')}</span>
+                                  </li>
+                                )}
+                                {(r.ws.activities || []).map((a, i) => (
+                                  <li key={i} className={r.passed ? 'done' : ''}>
+                                    <span className="gre-act-n">{r.passed ? '✓' : i + 1}</span>
+                                    <span className="gre-act-kind">{kindLabel(a.kind, t)}</span>
+                                    <span className="gre-act-brief">{a.brief || ''}</span>
+                                  </li>
+                                ))}
+                                {(!r.ws.activities || !r.ws.activities.length) && <li className="gre-act-none">{t('No activities yet')}</li>}
+                                <li className="gre-act-go"><button className="btn ghost" onClick={() => onOpen(tp.id, r.ws.id)}>{r.passed ? t('Practice again') : t('Open this skill →')}</button></li>
+                              </ol>
+                            )}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
     </div>
   )
 }

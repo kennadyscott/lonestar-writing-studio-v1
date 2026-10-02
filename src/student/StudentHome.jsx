@@ -285,7 +285,7 @@ function GoalBanner({ me, classFocus }) {
   // read-only on Home — the goal is set and managed in a writing conference
   const half = { flex: '1 1 320px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 14, padding: '4px 2px' }
   return (
-    <div className="card gold-edge" style={{ padding: '14px 20px', marginBottom: 18, display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
+    <div className="card gold-edge" style={{ padding: '14px 20px', display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
       background: 'linear-gradient(120deg,#eef6f9,#fff)' }}>
       <div style={half}>
         <span style={{ fontSize: 28 }}>🎯</span>

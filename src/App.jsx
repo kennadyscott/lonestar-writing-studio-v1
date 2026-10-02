@@ -13,7 +13,7 @@ import LessonPage from './student/LessonPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
 import ProofRoom from './student/ProofRoom.jsx'
-import { useBand, BandContext } from './lib/gradeBand.js'
+import { useBand, BandContext, lookBand } from './lib/gradeBand.js'
 import FeedbackReview from './student/FeedbackReview.jsx'
 import { HSLayout, HSHome, HSCourse, useHsTheme, useHsPalette } from './student/HighSchool.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
@@ -67,7 +67,9 @@ export default function App() {
 
   const me = state.students.find((s) => s.id === ME_STUDENT)
   // 9-12 mockup: the seed school is an elementary; the high-school band shows a high school
-  const who = { name: me.name, sub: band === '9-12' ? state.teacher.school.replace(/Elementary/, 'High School') : state.teacher.school, initials: me.initials }
+  const studio = lookBand(band) === '9-12' // grade 8 and high school share the Writer's Studio look
+  const school = band === '9-12' ? state.teacher.school.replace(/Elementary/, 'High School') : band === '8' || band === '6-7' ? state.teacher.school.replace(/Elementary/, 'Middle School') : state.teacher.school
+  const who = { name: me.name, sub: school, initials: me.initials }
 
   const goHome = () => { setView('home'); setOpenSub(null); setReviewSub(null) }
 
@@ -111,13 +113,13 @@ export default function App() {
 
   // Grades 9-12 mockup (2026-10-02): Home and the Writing Course get the
   // Writer's Studio layout; every other view still renders its 2-8 page.
-  if (band === '9-12' && (view === 'home' || view === 'luna') && !sub && !reviewing) {
+  if (studio && (view === 'home' || view === 'luna') && !sub && !reviewing) {
     const nav = (k) => { setOpenSub(null); setReviewSub(null); if (k === 'proof') { setProofTopic(null); setProofWs(null) } setView(k) }
     body = (
-      <HSLayout view={view} onNav={nav} me={me} theme={hsTheme} setTheme={setHsTheme} palette={hsPalette} setPalette={setHsPalette}>
+      <HSLayout view={view} onNav={nav} me={me} grade={band === '8' ? 8 : 10} theme={hsTheme} setTheme={setHsTheme} palette={hsPalette} setPalette={setHsPalette}>
         {view === 'home'
           ? <HSHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onNav={nav} />
-          : <HSCourse state={state} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />}
+          : <HSCourse state={state} grade={band === '8' ? 8 : 10} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />}
       </HSLayout>
     )
   }

@@ -73,6 +73,9 @@ const LESSON_PURPOSE = {
   Spelling: 'Catch the errors spellcheck misses.',
 }
 
+// grade 8 wears the studio look but is still a middle-school class (6-8 content)
+const courseName = (grade) => (grade === 8 ? 'English 8' : 'English I')
+
 /* ---------------- icons (inline, stroke) ---------------- */
 const I = {
   home: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z',
@@ -133,12 +136,12 @@ export function useHsPalette() {
   return [p, set]
 }
 
-export function HSLayout({ view, onNav, me, theme, setTheme, palette, setPalette, children }) {
+export function HSLayout({ view, onNav, me, grade = 10, theme, setTheme, palette, setPalette, children }) {
   return (
     <div className="hs">
       <aside className="hs-side">
         <div className="hs-class">
-          <div className="hs-class-name">English I</div>
+          <div className="hs-class-name">{courseName(grade)}</div>
           <div className="hs-class-sub">Period 3 · Writer’s Studio</div>
         </div>
         <nav className="hs-nav" aria-label="Main">
@@ -170,7 +173,7 @@ export function HSLayout({ view, onNav, me, theme, setTheme, palette, setPalette
               ))}
             </div>
           </div>
-          <div className="hs-me">{me.name} · Grade 10</div>
+          <div className="hs-me">{me.name} · Grade {grade}</div>
         </div>
       </aside>
       <main className="hs-main">{children}</main>
@@ -323,7 +326,7 @@ export function HSHome({ state, me, onOpen, onReview, onNav }) {
 }
 
 /* ---------------- course ---------------- */
-export function HSCourse({ state, onOpenLesson }) {
+export function HSCourse({ state, grade = 10, onOpenLesson }) {
   const modules = state.modules
   const [unit, setUnit] = useState(modules.find((m) => m.status === 'in_progress')?.id || modules[0].id)
   const mi = modules.findIndex((m) => m.id === unit)
@@ -337,7 +340,7 @@ export function HSCourse({ state, onOpenLesson }) {
     <div className="hs-page">
       <header className="hs-hero">
         <div className="hs-hero-words">
-          <div className="hs-date">English I · {state.assignments[0]?.teacher?.display || 'Your teacher'}</div>
+          <div className="hs-date">{courseName(grade)} · {state.assignments[0]?.teacher?.display || 'Your teacher'}</div>
           <h1 className="hs-h1">Writing Course</h1>
           <p className="hs-lede">Six units, in any order. Each lesson is a short model, practice, and one paragraph of your own.</p>
         </div>

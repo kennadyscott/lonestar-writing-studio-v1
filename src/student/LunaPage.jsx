@@ -27,12 +27,12 @@ const CARD_SHADOW = '0 6px 22px rgba(2, 20, 50, .22)'
 // Titles and blurbs stay English here (module scope, no hook) — every render
 // site runs them through t(); the Spanish lives in i18n/es/luna.js.
 const M1_ACTIVITIES = [
-  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: 'g1' },
-  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: 'g2' },
-  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: 'g3' },
-  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: 'g4' },
-  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'g5' },
-  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'g6', final: true },
+  { n: 1, title: 'Restate the Question', stars: 3, status: 'passed', art: 'm1-1' },
+  { n: 2, title: 'Answer the Question', stars: 3, status: 'passed', art: 'm1-2' },
+  { n: 3, title: 'Cite the Evidence', stars: 2, status: 'passed', art: 'm1-3' },
+  { n: 4, title: 'Explain Your Thinking', stars: 3, status: 'passed', art: 'm1-4' },
+  { n: 5, title: 'RACE', stars: 0, status: 'in_progress', art: 'm1-5' },
+  { n: 6, title: 'Module 1 Test', sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'm1-6', final: true },
 ]
 // Modules 2-6 (her note, 2026-10-02: "the modules up top shouldn't be locked -
 // students can complete them in any order"). Level 1 lesson titles from the
@@ -48,10 +48,12 @@ const MODULE_LESSONS = { m1: M1_ACTIVITIES }
 Object.entries(LATER_TITLES).forEach(([id, titles], mi) => {
   const n = mi + 2
   MODULE_LESSONS[id] = [
-    ...titles.map((title, i) => ({ n: i + 1, title, stars: 0, status: 'todo', art: 'g' + ((i % 5) + 1) })),
-    { n: titles.length + 1, title: `Module ${n} Test`, sub: "Show what you've learned!", stars: 0, status: 'todo', art: 'g6', final: true },
+    ...titles.map((title, i) => ({ n: i + 1, title, stars: 0, status: 'todo', art: `m${n}-${i + 1}` })),
+    { n: titles.length + 1, title: `Module ${n} Test`, sub: "Show what you've learned!", stars: 0, status: 'todo', art: `m${n}-${titles.length + 1}`, final: true },
   ]
 })
+// m<module>-<lesson>.jpg: a fresh 3D card for every lesson (Higgsfield, 2026-10-02, her
+// "fresh imagery on each one"); g1-g6 were the earlier shared set.
 // g1-g6: her 16:9 lesson cards (2026-09-24), replacing the f1-f6 strips. l1-l6.webp are the old space set.
 const LESSON_ART = (key) => `${BASE}lessons/${key}.jpg`
 

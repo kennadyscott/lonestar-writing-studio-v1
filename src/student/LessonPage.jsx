@@ -266,61 +266,135 @@ export default function LessonPage({ lesson, moduleLabel, supportLevel = null, o
   const activityTopic = (activity.split(':')[1] || activity).trim()
   const canContinue = step === 0 ? watched : step === 1 ? STARBURST.prompts.filter((p) => (answers[p.key] || '').trim()).length >= 2 : step === 2 ? pick != null : step === 3 ? sentence.trim().length > 0 : false
 
-  return (
-    <div style={{ margin: '-26px calc(50% - 50vw) -70px', minHeight: 'calc(100vh - 64px)', display: 'grid', gridTemplateColumns: '190px minmax(0,1fr)', color: 'var(--ink)',
-      background: 'var(--canvas)' }}>
-      <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none', background: `url(${BASE}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }} />
-
-      {/* left rail */}
-      <aside style={{ position: 'relative', background: 'rgba(255,255,255,.72)', borderRight: '1px solid rgba(188,217,236,.7)', padding: '22px 18px 24px 24px', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ marginBottom: 26 }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: '#0a7dba' }}>{t('Module {n}', { n: (moduleLabel.match(/\d+/) || [''])[0] }).toUpperCase()}</div>
-          <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontWeight: 700, fontSize: 22, color: NAVY, lineHeight: 1.15 }}>{t(lesson.title.replace(/^Module \d+: /, ''))}</div>
-          <div style={{ fontSize: 12, color: '#4a6f8c', marginTop: 4, lineHeight: 1.35 }}><Directions text="Use what you know about {title} to expand a sentence." vars={{ title: t(lesson.title.replace(/^Module \d+: /, '')) }} inline /></div>
+  // PROTOTYPE A/B (2026-10-02): her note — no way back from inside a lesson, and
+  // "I also am just not loving the design of this". Both layouts keep a Back to
+  // lessons link at the top and Back / Continue pinned to the bottom of the screen.
+  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.lessonLook') || 'A' } catch { return 'A' } })
+  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.lessonLook', k) } catch { /* fine */ } }
+  const lessonTitle = t(lesson.title.replace(/^Module \d+: /, ''))
+  const moduleN = (moduleLabel.match(/\d+/) || [''])[0]
+  const art = BASE + 'lessons/' + (lesson.art || 'g1') + '.jpg'
+  const stepTitle = step === 0 ? t(VIDEO.title) : step === 1 ? activity : t('{step}: {topic}', { step: t(STEPS[step]), topic: activityTopic })
+  const stepSub = step === 0 ? t('Watch Luna walk through the skill, then try it yourself in the next step.') : step === 1 ? say(STARBURST.directions) : step === 2 ? t('Check your eye for detail before you write your own.') : step === 3 ? t('Bring your answers together into one strong sentence.') : t('See how your sentence grew, and where the stars came from.')
+  const body = (
+    <>
+      {step === 0 && <WatchStep watched={watched} onWatched={() => setWatched(true)} />}
+      {step === 1 && <LearnStep answers={answers} setAnswers={setAnswers} />}
+      {step === 2 && <PracticeStep pick={pick} setPick={setPick} />}
+      {step === 3 && <YourTurnStep answers={answers} sentence={sentence} setSentence={setSentence} supportLevel={supportLevel} />}
+      {step === 4 && <ReviewStep sentence={sentence} answers={answers} pick={pick} />}
+    </>
+  )
+  const tip = (
+    <div className="lsn-tip">
+      <img src={BRAND.luna} alt="" className="lsn-tip-luna" />
+      <div className="lsn-tip-bubble"><Glossed text={say(STARBURST.luna[step])} /></div>
+    </div>
+  )
+  const nav = (
+    <div className="lsn-nav">
+      <div className="lsn-nav-in">
+        <button className="lsn-btn ghost" onClick={step === 0 ? onBack : () => setStep(step - 1)}>{step === 0 ? t('← Back to lessons') : t('← Back')}</button>
+        <div className="lsn-nav-prog" aria-label={t('{n} of {total}', { n: step + 1, total: STEPS.length })}>
+          <span className="lsn-nav-step">{t('Step {n} of {total}', { n: step + 1, total: STEPS.length })} · {t(STEPS[step])}</span>
+          <span className="lsn-nav-bar"><span style={{ width: `${pct}%` }} /></span>
         </div>
-        <Stepper step={step} done={done} onJump={setStep} />
-        <div style={{ marginTop: 'auto', marginBottom: 110, fontFamily: '"Bradley Hand", "Segoe Script", cursive', fontSize: 22, lineHeight: 1.15, color: NAVY, opacity: .85, whiteSpace: 'pre-line' }}>{t('Better\nWriters\nBrighter\nFutures')} <span style={{ color: '#f5b400' }}>✦</span></div>
-      </aside>
+        {step < STEPS.length - 1 ? (
+          <button className="lsn-btn" onClick={next} disabled={!canContinue} title={canContinue ? '' : t('Finish this step first')}>{t('Continue →')}</button>
+        ) : (
+          <button className="lsn-btn done" onClick={() => { save(); onBack() }}>{t('Finish lesson ✓')}</button>
+        )}
+      </div>
+    </div>
+  )
+  const lookPick = (
+    <div className="style-pick lsn-pick" role="group" aria-label="Lesson layout">
+      <span className="lbl">Lesson</span>
+      {['A', 'B'].map((k) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => pickLook(k)}>{k}</button>)}
+    </div>
+  )
 
-      {/* main */}
-      <section style={{ padding: '18px clamp(22px, 2.6vw, 56px) 0', position: 'relative', zIndex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-
-        <div style={{ position: 'relative', background: 'rgba(255,255,255,.96)', borderRadius: 22, boxShadow: '0 8px 30px rgba(2,20,50,.14)', overflow: 'hidden' }}>
-          <div style={{ padding: '18px 26px 22px' }}>
-            <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 12, paddingRight: 300 }}>
-              <div style={{ position: 'absolute', right: 24, top: 20, display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div style={{ position: 'relative', width: 'clamp(120px, 14vw, 220px)', height: 18, background: '#eef3f6', border: '1.5px solid #cfdde8', borderRadius: 10, overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 10 }} />
-                  <span style={{ position: 'absolute', left: 8, top: 0, lineHeight: '18px', fontSize: 10.5, fontWeight: 800, color: pct > 22 ? '#fff' : NAVY }}>{pct}%</span>
-                </div>
-                <span style={{ fontSize: 12.5, fontWeight: 800, color: NAVY, whiteSpace: 'nowrap' }}>{t('{n} of {total}', { n: step + 1, total: STEPS.length })}</span>
-              </div>
-              <span style={{ width: 52, height: 52, borderRadius: '50%', background: '#fbf7ec', border: '1.5px solid #f0dfae', display: 'grid', placeItems: 'center', fontSize: 22, flexShrink: 0 }}>{['▶', '✎', '☑', '✍', '★'][step]}</span>
-              <div>
-                <div style={{ fontFamily: 'Georgia, serif', fontSize: 21, fontWeight: 700, color: NAVY }}>{step === 0 ? t(VIDEO.title) : step === 1 ? activity : t('{step}: {topic}', { step: t(STEPS[step]), topic: activityTopic })}</div>
-                <div style={{ fontSize: 13.5, color: '#4a6f8c', marginTop: 3, maxWidth: 560 }}>{step === 0 ? t('Watch Luna walk through the skill, then try it yourself in the next step.') : step === 1 ? say(STARBURST.directions) : step === 2 ? t('Check your eye for detail before you write your own.') : step === 3 ? t('Bring your answers together into one strong sentence.') : t('See how your sentence grew, and where the stars came from.')}</div>
-              </div>
+  if (look === 'B') {
+    // B: an open storybook — the lesson's painting, the steps as bookmarks and Luna on the left page; the work on the right
+    return (
+      <div className="lsn lsn-b">
+        <div aria-hidden className="lsn-bg" style={{ '--bg': `url(${BASE}bg-nook.jpg)` }} />
+        <div className="lsn-top">
+          <button className="lsn-back" onClick={onBack}>{t('← Back to lessons')}</button>
+          <span className="lsn-crumbs">{t("Luna's Writing Adventure")} · {t('Module {n}', { n: moduleN })} · {t('Lesson {n}', { n: lesson.n })}</span>
+          {lookPick}
+        </div>
+        <div className="lsn-book">
+          <aside className="lsn-page lsn-left">
+            <div className="lsn-left-art"><img src={art} alt="" /></div>
+            <div className="lsn-kicker">{t('Module {n}', { n: moduleN })} · {t('Lesson {n}', { n: lesson.n })}</div>
+            <h1 className="lsn-title">{lessonTitle}</h1>
+            <ol className="lsn-tabs">
+              {STEPS.map((label, i) => {
+                const cur = i === step, past = i < done && !cur
+                return (
+                  <li key={label}>
+                    <button className={'lsn-tab' + (cur ? ' cur' : '') + (past ? ' past' : '')} disabled={i > done} onClick={() => i <= done && setStep(i)} aria-current={cur ? 'step' : undefined}>
+                      <span className="lsn-tab-n">{past ? '✓' : i + 1}</span>{t(label)}
+                    </button>
+                  </li>
+                )
+              })}
+            </ol>
+            {tip}
+          </aside>
+          <main className="lsn-page lsn-right">
+            <div className="lsn-step-head">
+              <div className="lsn-step-title">{stepTitle}</div>
+              <div className="lsn-step-sub">{stepSub}</div>
             </div>
-            {step === 0 && <WatchStep watched={watched} onWatched={() => setWatched(true)} />}
-            {step === 1 && <LearnStep answers={answers} setAnswers={setAnswers} />}
-            {step === 2 && <PracticeStep pick={pick} setPick={setPick} />}
-            {step === 3 && <YourTurnStep answers={answers} sentence={sentence} setSentence={setSentence} supportLevel={supportLevel} />}
-            {step === 4 && <ReviewStep sentence={sentence} answers={answers} pick={pick} />}
+            {body}
+          </main>
+        </div>
+        {nav}
+      </div>
+    )
+  }
+
+  // A: the lesson's 3D painting as a banner, the five steps as a glowing trail, then the work
+  return (
+    <div className="lsn lsn-a">
+      <div aria-hidden className="lsn-bg" style={{ '--bg': `url(${BASE}bg-nook.jpg)` }} />
+      <div className="lsn-hero" style={{ '--art': `url(${art})` }}>
+        <div className="lsn-hero-top">
+          <button className="lsn-back" onClick={onBack}>{t('← Back to lessons')}</button>
+          {lookPick}
+        </div>
+        <div className="lsn-hero-words">
+          <div className="lsn-kicker light">{t("Luna's Writing Adventure")} · {t('Module {n}', { n: moduleN })} · {t('Lesson {n}', { n: lesson.n })}</div>
+          <h1 className="lsn-title light">{lessonTitle}</h1>
+          <div className="lsn-hero-sub"><Directions text="Use what you know about {title} to expand a sentence." vars={{ title: lessonTitle }} inline /></div>
+        </div>
+      </div>
+      <ol className="lsn-trail">
+        {STEPS.map((label, i) => {
+          const cur = i === step, past = i < done && !cur
+          return (
+            <li key={label} className={'lsn-stop' + (cur ? ' cur' : '') + (past ? ' past' : '') + (i <= done ? ' open' : '')}>
+              <button disabled={i > done} onClick={() => i <= done && setStep(i)} aria-current={cur ? 'step' : undefined}>
+                <span className="lsn-stop-dot">{past ? '✓' : i + 1}</span>
+                <span className="lsn-stop-label">{t(label)}</span>
+              </button>
+            </li>
+          )
+        })}
+      </ol>
+      <div className="lsn-card">
+        <div className="lsn-card-head">
+          <div>
+            <div className="lsn-step-title">{stepTitle}</div>
+            <div className="lsn-step-sub">{stepSub}</div>
           </div>
-
+          {tip}
         </div>
-
-        {/* bottom bar */}
-        <div style={{ marginTop: 14, display: 'flex', alignItems: 'center', gap: 12, padding: '0 0 18px' }}>
-          <button onClick={step === 0 ? onBack : () => setStep(step - 1)} style={{ background: '#fff', border: '1.5px solid #bcd9ec', borderRadius: 10, padding: '11px 22px', fontWeight: 800, fontSize: 14, color: NAVY }}>{t('← Back')}</button>
-          <div style={{ flex: 1 }} />
-          {step < STEPS.length - 1 ? (
-            <button onClick={next} disabled={!canContinue} title={canContinue ? '' : t('Finish this step first')} style={{ background: canContinue ? NAVY : '#9fb3c4', color: '#fff', borderRadius: 10, padding: '11px 26px', fontWeight: 800, fontSize: 15, cursor: canContinue ? 'pointer' : 'default' }}>{t('Continue →')}</button>
-          ) : (
-            <button onClick={() => { save(); onBack() }} style={{ background: '#2e9e6b', color: '#fff', borderRadius: 10, padding: '11px 26px', fontWeight: 800, fontSize: 15 }}>{t('Finish lesson ✓')}</button>
-          )}
-        </div>
-      </section>
+        {body}
+      </div>
+      {nav}
     </div>
   )
 }

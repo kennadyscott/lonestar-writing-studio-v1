@@ -813,46 +813,44 @@ function ProgressReport({ mine, progress, grade, onOpen, onClose }) {
 }
 
 // The vine reveal (her ask, 2026-10-02): the first time Practice opens in a
-// session, two curtains of crystal vines cover the card and part to the sides
-// while the data grows in underneath. Drawn in SVG, no video. Skipped for
-// reduced motion and after the first time per session.
-function VineCurtain({ side }) {
-  // one half: layered vine strands with leaves and blue crystals, hanging
-  const strands = [0.18, 0.42, 0.66, 0.88]
-  return (
-    <svg className={'vr-half ' + side} viewBox="0 0 400 600" preserveAspectRatio="none" aria-hidden="true">
-      <defs>
-        <linearGradient id={'vrBg' + side} x1="0" x2="1" y1="0" y2="1">
-          <stop offset="0" stopColor="#0b3a2b" /><stop offset=".55" stopColor="#13563d" /><stop offset="1" stopColor="#0d2f3f" />
-        </linearGradient>
-        <radialGradient id={'vrGlow' + side}><stop offset="0" stopColor="#bdf0ff" /><stop offset=".55" stopColor="#4cc3ee" /><stop offset="1" stopColor="#0f97c2" /></radialGradient>
-      </defs>
-      <rect width="400" height="600" fill={`url(#vrBg${side})`} />
-      {strands.map((x, i) => {
-        const X = x * 400
-        const d = `M${X},-10 C${X + 40},90 ${X - 40},170 ${X + 10},260 S${X - 30},430 ${X + 20},520 S${X - 10},600 ${X},620`
-        return (
-          <g key={i}>
-            <path d={d} fill="none" stroke="#2c7a50" strokeWidth={10 - i} strokeLinecap="round" />
-            <path d={d} fill="none" stroke="#49a86c" strokeWidth={3} strokeLinecap="round" opacity=".8" />
-            {[60, 150, 240, 330, 420, 510].map((y, k) => (
-              <ellipse key={k} cx={X + (k % 2 ? 22 : -22)} cy={y + i * 9} rx="24" ry="10" fill={k % 3 ? '#3fae6e' : '#5cc483'} transform={`rotate(${k % 2 ? 28 : -28} ${X + (k % 2 ? 22 : -22)} ${y + i * 9})`} />
-            ))}
-            {[110, 300, 470].map((y, k) => (
-              <polygon key={'c' + k} points={`${X},${y - 16} ${X + 9},${y} ${X},${y + 16} ${X - 9},${y}`} fill={`url(#vrGlow${side})`} className="vr-crystal" style={{ animationDelay: (i * 0.12 + k * 0.08) + 's' }} />
-            ))}
-          </g>
-        )
-      })}
-    </svg>
-  )
-}
+// session, a curtain of crystal vines covers the card and parts while the data
+// grows in underneath. Skipped for reduced motion and after the first time per
+// session. (A first version drew the vines in SVG; the Higgsfield clip replaced it.)
 function VineReveal({ onDone }) {
-  React.useEffect(() => { const id = setTimeout(onDone, 1500); return () => clearTimeout(id) }, [onDone])
+  // Higgsfield clip (2026-10-02, her ask "Can you use higgsfield for the vine
+  // opening?"): a 3D vine curtain parting to pure white. multiply blends the
+  // white away, so the card shows through the opening. The closed frame is the
+  // poster, so the card is covered from the first paint. If the clip has not
+  // started within 1.2s it is skipped and the card is simply there.
+  const BASE = import.meta.env.BASE_URL || '/'
+  const ref = React.useRef(null)
+  const [fading, setFading] = useState(false)
+  React.useEffect(() => {
+    const v = ref.current
+    let started = false
+    const giveUp = setTimeout(() => { if (!started) onDone() }, 1200)
+    // never leave the card covered: the clip is ~2s at 2x, so 4s is a hard stop
+    const hardStop = setTimeout(onDone, 4000)
+    // some browsers pause a fresh muted clip on its own (the gate did, too): resume it
+    const resume = () => { if (v && started && !v.ended) v.play().catch(() => onDone()) }
+    const go = () => {
+      if (!v || started) return
+      started = true
+      try { v.currentTime = 1.1 } catch { /* fine */ }
+      v.playbackRate = 2
+      v.play().catch(() => onDone())
+    }
+    const tick = () => { if (v && v.duration && v.currentTime > v.duration - 0.5) setFading(true) }
+    v?.addEventListener('canplay', go)
+    v?.addEventListener('timeupdate', tick)
+    v?.addEventListener('ended', onDone)
+    v?.addEventListener('pause', resume)
+    if (v && v.readyState >= 3) go()
+    return () => { clearTimeout(giveUp); clearTimeout(hardStop); v?.removeEventListener('canplay', go); v?.removeEventListener('timeupdate', tick); v?.removeEventListener('ended', onDone); v?.removeEventListener('pause', resume) }
+  }, [onDone])
   return (
-    <div className="vr" aria-hidden="true">
-      <VineCurtain side="l" />
-      <VineCurtain side="r" />
+    <div className={'vr vr-video' + (fading ? ' fading' : '')} aria-hidden="true">
+      <video ref={ref} src={BASE + 'vines/vines.mp4'} poster={BASE + 'vines/vines-start.jpg'} muted playsInline preload="auto" />
     </div>
   )
 }

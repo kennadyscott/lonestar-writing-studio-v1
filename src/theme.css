@@ -2192,3 +2192,13 @@ body { font-size: 16px; }
   background: var(--daily-img) 18% 22% / 300% auto no-repeat, #1a2a5a; box-shadow: 0 0 0 2px #f0b429; }
 .practice-view[data-side="b"] .practice-side .daily-art::after { display: none; }
 .practice-view[data-side="b"] .practice-side .daily-words > span:last-child { box-shadow: none !important; }
+
+/* the Higgsfield vine curtain (video): its white blends away over the card */
+.vr-video video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; mix-blend-mode: multiply; }
+.vr-video { transition: opacity .45s ease; }
+.vr-video.fading { opacity: 0; }
+.prf-c.vining .gr-bar { animation-delay: .55s; }
+.prf-c.vining .gre-meter i { animation-delay: .5s; }
+.prf-c.vining .gre-tile-badge, .prf-c.vining .gr-bar em { animation-delay: 1.1s; }
+.vr-video video { mix-blend-mode: normal; }
+.vr-video { mix-blend-mode: multiply; isolation: auto; }

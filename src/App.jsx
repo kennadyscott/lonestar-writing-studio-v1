@@ -15,7 +15,7 @@ import WritingBankPage from './student/WritingBankPage.jsx'
 import ProofRoom from './student/ProofRoom.jsx'
 import { useBand, BandContext } from './lib/gradeBand.js'
 import FeedbackReview from './student/FeedbackReview.jsx'
-import { HSLayout, HSHome, HSCourse, useHsTheme } from './student/HighSchool.jsx'
+import { HSLayout, HSHome, HSCourse, useHsTheme, useHsPalette } from './student/HighSchool.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
 import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
 
@@ -38,6 +38,7 @@ export default function App() {
   const { setLang } = useLang()
   const [band, setBand] = useBand()
   const [hsTheme, setHsTheme] = useHsTheme()
+  const [hsPalette, setHsPalette] = useHsPalette()
   // A slower state fetch must not paint an older streak over one that just landed.
   const refreshGen = useRef(0)
   const refresh = useCallback(async () => {
@@ -113,7 +114,7 @@ export default function App() {
   if (band === '9-12' && (view === 'home' || view === 'luna') && !sub && !reviewing) {
     const nav = (k) => { setOpenSub(null); setReviewSub(null); if (k === 'proof') { setProofTopic(null); setProofWs(null) } setView(k) }
     body = (
-      <HSLayout view={view} onNav={nav} me={me} theme={hsTheme} setTheme={setHsTheme}>
+      <HSLayout view={view} onNav={nav} me={me} theme={hsTheme} setTheme={setHsTheme} palette={hsPalette} setPalette={setHsPalette}>
         {view === 'home'
           ? <HSHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onNav={nav} />
           : <HSCourse state={state} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />}

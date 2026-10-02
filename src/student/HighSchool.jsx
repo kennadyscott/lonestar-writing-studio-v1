@@ -115,7 +115,21 @@ export function useHsTheme() {
   return [theme, set]
 }
 
-export function HSLayout({ view, onNav, me, theme, setTheme, children }) {
+// Her note on the first mockup (2026-10-02): "a little bland ... we are going
+// to have to get some level of color in there". Three palettes to compare,
+// switched from the sidebar; the same structure carries the color (a hero band,
+// a colored sidebar, genre and unit colors).
+export const HS_PALETTES = [['brand', 'LoneStar', '#06AADE'], ['sunrise', 'Sunrise', '#ff6b4a'], ['evergreen', 'Evergreen', '#2fb37f']]
+export function useHsPalette() {
+  const [p, setP] = useState(() => {
+    try { return localStorage.getItem('lscr.hsPalette') || 'brand' } catch { return 'brand' }
+  })
+  const set = (v) => { setP(v); try { localStorage.setItem('lscr.hsPalette', v) } catch { /* fine */ } }
+  React.useEffect(() => { document.documentElement.dataset.hsPalette = p }, [p])
+  return [p, set]
+}
+
+export function HSLayout({ view, onNav, me, theme, setTheme, palette, setPalette, children }) {
   return (
     <div className="hs">
       <aside className="hs-side">
@@ -132,6 +146,16 @@ export function HSLayout({ view, onNav, me, theme, setTheme, children }) {
           ))}
         </nav>
         <div className="hs-side-foot">
+          {setPalette && (
+            <div className="hs-pal" role="group" aria-label="Color palette (prototype)">
+              <span className="hs-pal-lbl">Color</span>
+              {HS_PALETTES.map(([k, label, sw]) => (
+                <button key={k} className={'hs-pal-btn' + (palette === k ? ' on' : '')} aria-pressed={palette === k} title={label} onClick={() => setPalette(k)}>
+                  <span style={{ background: sw }} />{label}
+                </button>
+              ))}
+            </div>
+          )}
           <button className="hs-theme" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} aria-pressed={theme === 'dark'}>
             <Icon d={theme === 'dark' ? I.sun : I.moon} size={16} />
             <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
@@ -175,17 +199,25 @@ export function HSHome({ state, me, onOpen, onReview, onNav }) {
 
   return (
     <div className="hs-page">
-      <header className="hs-head">
-        <div className="hs-date">Thursday, July 2</div>
-        <h1 className="hs-h1">Good morning, {me.name.split(' ')[0]}.</h1>
-        <p className="hs-lede">{dueThisWeek} assignment{dueThisWeek === 1 ? '' : 's'} due this week · {feedback.length} piece{feedback.length === 1 ? '' : 's'} of feedback to read</p>
+      <header className="hs-hero">
+        <div className="hs-hero-words">
+          <div className="hs-date">Thursday, July 2</div>
+          <h1 className="hs-h1">Good morning, {me.name.split(' ')[0]}.</h1>
+          <p className="hs-lede">Pick up where you left off, or start something new.</p>
+        </div>
+        <div className="hs-hero-chips">
+          <span className="hs-chip c1"><b>{dueThisWeek}</b> due this week</span>
+          <span className="hs-chip c2"><b>{feedback.length}</b> feedback to read</span>
+          <span className="hs-chip c3"><b>{gs.streakDays ?? 0}</b> day writing streak</span>
+        </div>
       </header>
 
       <div className="hs-grid">
         {current && (
           <section className="hs-card hs-draft" aria-label="Continue writing">
             <div className="hs-eyebrow">Continue writing</div>
-            <div className="hs-doc">
+            <div className={'hs-doc g-' + current.a.genre}>
+              <div className="hs-doc-cover"><span>{hsKind(current.a)}</span><span>{current.a.format}</span></div>
               <div className="hs-doc-title">{hsTitle(current.a)}</div>
               <div className="hs-doc-meta">{hsKind(current.a)} · {current.a.format} · Draft {current.sub?.drafts?.length || 1} · {wc} words · {dueLabel(current.a.dueDate)}</div>
               <p className="hs-doc-body">{excerpt || 'No words yet. Open the draft to start.'}</p>
@@ -241,7 +273,7 @@ export function HSHome({ state, me, onOpen, onReview, onNav }) {
               {[...open, ...feedback].map((r) => (
                 <tr key={r.a.id}>
                   <td className="hs-td-title">{hsTitle(r.a)}</td>
-                  <td>{hsKind(r.a)}</td>
+                  <td><span className={'hs-kind g-' + r.a.genre}><i aria-hidden />{hsKind(r.a)}</span></td>
                   <td><span className="hs-tag">{r.a.format}</span></td>
                   <td className={daysTo(r.a.dueDate) <= 2 && r.status !== 'completed' ? 'hs-soon' : ''}>{r.status === 'completed' ? 'Submitted' : dueLabel(r.a.dueDate)}</td>
                   <td><span className={'hs-status ' + r.status}>{r.status === 'completed' ? 'Returned' : r.status === 'in_progress' ? 'In progress' : 'Not started'}</span></td>
@@ -293,15 +325,17 @@ export function HSCourse({ state, onOpenLesson }) {
 
   return (
     <div className="hs-page">
-      <header className="hs-head">
-        <div className="hs-date">English I · {state.assignments[0]?.teacher?.display || 'Your teacher'}</div>
-        <h1 className="hs-h1">Writing Course</h1>
-        <p className="hs-lede">Six units, in any order. Each lesson is a short model, practice, and one paragraph of your own.</p>
+      <header className="hs-hero">
+        <div className="hs-hero-words">
+          <div className="hs-date">English I · {state.assignments[0]?.teacher?.display || 'Your teacher'}</div>
+          <h1 className="hs-h1">Writing Course</h1>
+          <p className="hs-lede">Six units, in any order. Each lesson is a short model, practice, and one paragraph of your own.</p>
+        </div>
       </header>
       <div className="hs-course">
         <nav className="hs-units" aria-label="Units">
           {modules.map((u, i) => (
-            <button key={u.id} className={'hs-unit-row' + (u.id === unit ? ' on' : '')} aria-pressed={u.id === unit} onClick={() => setUnit(u.id)}>
+            <button key={u.id} className={'hs-unit-row' + (u.id === unit ? ' on' : '')} style={{ '--u': `var(--hs-u${i + 1})` }} aria-pressed={u.id === unit} onClick={() => setUnit(u.id)}>
               <span className="hs-unit-n">{String(i + 1).padStart(2, '0')}</span>
               <span className="hs-unit-words">
                 <span className="hs-unit-t">{u.label}</span>
@@ -310,7 +344,8 @@ export function HSCourse({ state, onOpenLesson }) {
             </button>
           ))}
         </nav>
-        <section className="hs-card hs-lessons" aria-label={m.label}>
+        <section className="hs-card hs-lessons" style={{ '--u': `var(--hs-u${mi + 1})` }} aria-label={m.label}>
+          <div className="hs-lessons-cover" aria-hidden />
           <div className="hs-eyebrow">Unit {mi + 1}</div>
           <h2 className="hs-h2">{m.label}</h2>
           <p className="hs-muted" style={{ marginTop: 2 }}>{UNIT_PURPOSE[unit]}</p>

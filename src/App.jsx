@@ -15,6 +15,7 @@ import WritingBankPage from './student/WritingBankPage.jsx'
 import ProofRoom from './student/ProofRoom.jsx'
 import { useBand, BandContext } from './lib/gradeBand.js'
 import FeedbackReview from './student/FeedbackReview.jsx'
+import { HSLayout, HSHome, HSCourse, useHsTheme } from './student/HighSchool.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
 import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
 
@@ -36,6 +37,7 @@ export default function App() {
 
   const { setLang } = useLang()
   const [band, setBand] = useBand()
+  const [hsTheme, setHsTheme] = useHsTheme()
   // A slower state fetch must not paint an older streak over one that just landed.
   const refreshGen = useRef(0)
   const refresh = useCallback(async () => {
@@ -63,7 +65,8 @@ export default function App() {
   if (!state) return <div style={{ padding: 40, fontFamily: 'Manrope, sans-serif' }}>Loading the Writing Studio…</div>
 
   const me = state.students.find((s) => s.id === ME_STUDENT)
-  const who = { name: me.name, sub: state.teacher.school, initials: me.initials }
+  // 9-12 mockup: the seed school is an elementary; the high-school band shows a high school
+  const who = { name: me.name, sub: band === '9-12' ? state.teacher.school.replace(/Elementary/, 'High School') : state.teacher.school, initials: me.initials }
 
   const goHome = () => { setView('home'); setOpenSub(null); setReviewSub(null) }
 
@@ -103,6 +106,19 @@ export default function App() {
     body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onWall={() => setView('wall')} onChange={refresh} />
   } else {
     body = <ArcadePage me={me} state={state} onBack={goHome} />
+  }
+
+  // Grades 9-12 mockup (2026-10-02): Home and the Writing Course get the
+  // Writer's Studio layout; every other view still renders its 2-8 page.
+  if (band === '9-12' && (view === 'home' || view === 'luna') && !sub && !reviewing) {
+    const nav = (k) => { setOpenSub(null); setReviewSub(null); if (k === 'proof') { setProofTopic(null); setProofWs(null) } setView(k) }
+    body = (
+      <HSLayout view={view} onNav={nav} me={me} theme={hsTheme} setTheme={setHsTheme}>
+        {view === 'home'
+          ? <HSHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onNav={nav} />
+          : <HSCourse state={state} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />}
+      </HSLayout>
+    )
   }
 
   return (

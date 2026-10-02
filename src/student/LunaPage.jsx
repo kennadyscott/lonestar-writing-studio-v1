@@ -45,7 +45,7 @@ const LATER_TITLES = {
   m5: ['Expanding Sentences', 'Adding and Removing Sentences', 'Elaborate, Combine, and Rearrange', 'Vocabulary and Language Skills'],
   m6: ['Capitalization', 'Usage', 'Punctuation', 'Spelling'],
 }
-const MODULE_LESSONS = { m1: M1_ACTIVITIES }
+export const MODULE_LESSONS = { m1: M1_ACTIVITIES }
 Object.entries(LATER_TITLES).forEach(([id, titles], mi) => {
   const n = mi + 2
   MODULE_LESSONS[id] = [

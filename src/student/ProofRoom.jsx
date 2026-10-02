@@ -365,7 +365,8 @@ export default function ProofRoom({ band = '5-7', initialTopicId = null, initial
         ...((topic && !running) || (!topic && !running && raw)
           ? { background: `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg) center / cover no-repeat, #0b2a22`, filter: 'blur(8px) brightness(.55)', transform: 'scale(1.06)' }
           : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
-      <div className="proof-page">
+      {/* on the map, Back and the prototype pill float over the valley instead of taking a row (her note, 2026-10-01) */}
+      <div className={'proof-page' + (!running && raw ? ' on-map' : '')}>
         {!running && (
           <div className="style-pick gate-pick" role="group" aria-label="Entrance clip">
             <span className="lbl">Entrance</span>

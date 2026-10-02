@@ -1099,3 +1099,17 @@ a { color: var(--link); }
   .pm-living-video, .pm-fireflies, .pm-trail-shimmer, .pm-burst { display: none; }
   .pm-draw, .pm-lantern, .pm-node.celebrate .pm-orb { animation: none; }
 }
+
+/* the map starts right under the header; Back floats over its top-left corner */
+.proof-page.on-map { gap: 0; }
+.proof-page.on-map > .pm-immersive, .proof-page.on-map > .lh-strands { margin-top: -26px; }
+.proof-page.on-map > .backlink { position: absolute; z-index: 8; top: -12px; left: calc(50% - 50vw + clamp(16px, 2.4vw, 40px)); margin: 0;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+.proof-page.on-map > .gate-pick { top: -12px; right: auto; left: calc(50% - 50vw + clamp(16px, 2.4vw, 40px) + 190px); z-index: 8; }
+.proof-page.on-map .pm-hud { top: max(4.5%, 70px); }
+@media (max-width: 680px) {
+  .proof-page.on-map { gap: 12px; }
+  .proof-page.on-map > .pm-immersive, .proof-page.on-map > .lh-strands { margin-top: 0; }
+  .proof-page.on-map > .backlink { position: static; }
+  .proof-page.on-map > .gate-pick { display: none; }
+}

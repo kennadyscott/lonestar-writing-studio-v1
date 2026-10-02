@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { api, TRAIT_LABELS } from '../lib/api.js'
 import { BRAND } from '../lib/brand.js'
 import FluencyGame from './FluencyGame.jsx'
@@ -714,6 +715,64 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
   )
 }
 
+// "See all progress" (her ask, 2026-10-02: "a little button at the bottom ... where
+// they could go into a report and see these graphs and data for all topics"):
+// the domain strip, then every domain with each of its published topics as its
+// own chart. Topics not published yet are counted, not drawn.
+function ProgressReport({ mine, progress, grade, onOpen, onClose }) {
+  const t = useT()
+  const doms = domainsOf(mine)
+  React.useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  // rendered on <body> so it sits above the top bar (the card is its own stacking layer)
+  return createPortal(
+    <div className="prg-shade" role="dialog" aria-modal="true" aria-label={t('All progress')} onClick={onClose}>
+      <div className="prg" onClick={(e) => e.stopPropagation()}>
+        <div className="prg-head">
+          <div>
+            <span className="proof-kicker">{t('The Lit Labyrinth')} · {t('Grade {n}', { n: grade })}</span>
+            <h2>{t('All progress')}</h2>
+          </div>
+          <button className="prg-close" onClick={onClose} aria-label={t('Close')}>✕</button>
+        </div>
+        <div className="prg-body">
+          <DomainStrip mine={mine} progress={progress} selD={null} onPick={(d) => document.getElementById('prg-' + d.replace(/\W+/g, ''))?.scrollIntoView({ behavior: 'smooth', block: 'start' })} next={null} onStart={() => {}} />
+          {doms.map((x) => (
+            <section key={x.d} id={'prg-' + x.d.replace(/\W+/g, '')} className="prg-dom">
+              <div className="prg-dom-head">
+                <img src={landImg(x.d)} alt="" />
+                <div>
+                  <b>{landName(x.d)}</b>
+                  <span>{t('{done} of {n} topics mastered', { done: x.done, n: x.total })}</span>
+                </div>
+                <span className="gre-meter prg-meter" aria-hidden><i style={{ width: (x.done / Math.max(1, x.total)) * 100 + '%' }} /></span>
+                <em>{Math.round((x.done / Math.max(1, x.total)) * 100)}%</em>
+              </div>
+              {x.list.map(({ tp }) => {
+                const stops = buildStops(tp, progress)
+                const nx = nextStopOf(stops)
+                return (
+                  <div key={tp.id} className="prg-topic">
+                    <GrowthReport hideFoot tp={tp} progress={progress} stops={stops} next={nx} onStart={() => onOpen(tp.id, nx?.ws.id)} onMap={() => onOpen(tp.id)} />
+                    <button className="prg-open" onClick={() => { onClose(); onOpen(tp.id) }}>{t('Open this path →')}</button>
+                  </div>
+                )
+              })}
+              {x.total > x.list.length && (
+                <div className="prg-more">{x.list.length ? t('{n} more topics in this domain: their charts appear as each path opens for Grade {g}.', { n: x.total - x.list.length, g: grade }) : t('{n} topics in this domain: their charts appear as each path opens for Grade {g}.', { n: x.total, g: grade })}</div>
+              )}
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>,
+    document.body
+  )
+}
+
 // studio: the grade 8 / high-school Writer's Studio wears it as plain "Skill Practice"
 export function ProofRoomFeature({ onOpen, studio = false }) {
   const t = useT()
@@ -740,6 +799,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   const resume = mine.find(({ st }) => st.started && !st.finished)
   // A's domain tiles switch the chart to that domain's path (2026-10-02)
   const [pickId, setPickId] = useState(null)
+  const [allProg, setAllProg] = useState(false)
   const picked = pickId && mine.find(({ tp }) => tp.id === pickId)
   const lead = picked || resume || mine[0]
   const pickDomain = (d) => {
@@ -795,9 +855,11 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
 <NextStep tp={lead.tp} next={next} progress={progress} onStart={start} onMap={() => onOpen(lead.tp.id)} />
 {/* the path's name now leads the numbers line under the next step (2026-10-02) */}
               <GrowthReport hideFoot tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
+              <div className="gr-allprog-row"><button className="gr-allprog" onClick={() => setAllProg(true)}>{t('See all progress →')}</button></div>
             </div>
           )}
         </div>
+        {allProg && <ProgressReport mine={mine} progress={progress} grade={grade} onOpen={onOpen} onClose={() => setAllProg(false)} />}
       </div>
   )
 }

@@ -453,12 +453,37 @@ function upgradeDemoV2(tp, progress, wasSeeded) {
 // DEMO: one more path, in another domain, is shown as finished so the domain
 // strip has a mastered domain to show (Jeremy's "domains mastered" at a glance).
 // Options B, C and D were tried on 2026-10-02; she went with A.
+// her note (2026-10-02): in the finished path, the student "didn't do well on
+// puns" - the second skill's activities came in under 85% and its Skill
+// Builder carried it to mastery
+function sbOnSecond(tp, seed) {
+  const w = (tp.core || [])[1]
+  const sb = w && tp.skillBuilders?.[w.id]
+  if (!sb) return false
+  seed[w.id] = { best: 61, passed: true, first: 61 }
+  seed[sb.id] = { best: 88, passed: true, first: 88 }
+  return true
+}
+// browsers already holding the finished sample (all skills high, no Skill
+// Builder) get the story above, once
+function upgradeDemoV4(mine, progress) {
+  const next = { ...progress }
+  let changed = false
+  for (const { tp } of mine) {
+    const [w1, w2] = tp.core || []
+    const sb = w2 && tp.skillBuilders?.[w2.id]
+    if (w1 && sb && next[w1.id]?.best === 100 && next[w2.id]?.best === 92 && next[w2.id]?.passed && !(next[sb.id]?.best > 0) && tp.full && next[tp.full.id]?.best === 94) changed = sbOnSecond(tp, next) || changed
+  }
+  try { if (changed) localStorage.setItem('proofProgress', JSON.stringify(next)); localStorage.setItem('proofDemoVer4', '1') } catch { /* fine */ }
+  return changed ? next : null
+}
 function seedDemoMastery(mine, leadId, progress) {
   const pick = mine.find(({ tp, st }) => tp.id !== leadId && !st.started && tp.domain !== mine.find((m) => m.tp.id === leadId)?.tp.domain)
   if (!pick) return null
   const tp = pick.tp
   const seed = { ...progress }
   ;(tp.core || []).forEach((w, i) => { seed[w.id] = { best: [100, 92, 96, 88, 100, 94][i % 6], passed: true } })
+  sbOnSecond(tp, seed)
   if (tp.full) seed[tp.full.id] = { best: 94, passed: true }
   try {
     localStorage.setItem('proofProgress', JSON.stringify(seed))
@@ -652,9 +677,6 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
           ) : (
             <span className="gr-inline-wait" title={t('The post-test opens after all {n} skills', { n: core.length })}>{t('Post-test')}: {t('not yet')}</span>
           )}
-          <span className="gr-inline-sep" />
-          <span><b>{mastered}</b>/{core.length} {t('skills')}</span>
-          <span><b>{sbDone}</b> {t('Skill Builder')}{sbDone === 1 ? '' : 's'}</span>
           {carousel && carousel.n > 1 && (
             <span className="gr-carousel" role="group" aria-label={t('Your paths')}>
               <button onClick={carousel.prev} aria-label={t('Previous path')}>‹</button>
@@ -686,7 +708,7 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap, hideFoot = fa
       <div className="gr-chart" role="img" aria-label={t('Scores along the path')}>
         <div className="gr-plot">
           {[0, 50, 100].map((v) => <span key={v} className="gr-grid" style={{ bottom: v + '%' }}><i>{v}</i></span>)}
-          <span className="gr-mastery" style={{ bottom: MASTERY + '%' }}><i>{t('Mastery')} {MASTERY}%</i></span>
+          {/* the 85% mastery line came out (her note, 2026-10-02: "it's too busy") */}
           {groups.map((g) => (
             <div key={g.key} className={'gr-slot' + (g.cluster ? ' cluster' : '')} style={{ flex: g.flex }}>
               {g.cols.map((c) => (
@@ -854,6 +876,9 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
     if (!lead || !topics) return
     let done = []
     try { const v = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]'); done = Array.isArray(v) ? v : [] } catch { /* fine */ }
+    let v4 = false
+    try { v4 = !!localStorage.getItem('proofDemoVer4') } catch { /* fine */ }
+    if (!v4) { const u = upgradeDemoV4(mine, progress); if (u) { setSeeded(u); return } }
     if (done.includes('mastery:' + lead.tp.grade) || mine.some(({ st }) => st.finished)) return
     const s = seedDemoMastery(mine, lead.tp.id, progress); if (s) setSeeded(s)
   }, [lead?.tp.id, topics]) // eslint-disable-line react-hooks/exhaustive-deps

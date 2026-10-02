@@ -1919,3 +1919,21 @@ body { font-size: 16px; }
 .grc2 .grc-go { flex-wrap: nowrap; gap: 12px; }
 .grc2 .grc-go .grf { min-width: 0; overflow: hidden; }
 @media (max-width: 1100px) { .grc2 .grc-go { flex-wrap: wrap; } }
+
+/* A: a skill's 1st try, Skill Builder and retake sit together (her note, 2026-10-02) */
+.gr-plot { gap: 10px; }
+.gr-slot { flex: 1 1 0; min-width: 0; height: 100%; display: flex; align-items: flex-end; gap: 3px; }
+.gr-slot.cluster { padding: 0 6px; margin: 0 -2px; border-radius: 10px 10px 0 0; background: linear-gradient(180deg, rgba(15,151,194,0), rgba(15,151,194,.08)); }
+.gr-slot .gr-col { flex: 1 1 0; }
+.gr-slot.cluster .gr-bar { width: min(100%, 38px); }
+.gr-slot.cluster .gr-col.sb .gr-bar { width: min(100%, 38px); }
+.gr-labels { gap: 10px; }
+.gr-glab { padding: 0 6px; }
+.gr-subs { display: flex; gap: 3px; width: 100%; }
+.gr-subs span { flex: 1 1 0; min-width: 0; font-size: 10.5px; font-weight: 800; color: #6b8296; text-align: center; line-height: 1.15; }
+.gr-subs span.below { color: #b06a00; } .gr-subs span.sb { color: #0b7aa3; } .gr-subs span.passed { color: #1f7a4d; }
+.gr-gbracket { display: block; width: 100%; height: 6px; margin: 3px 0 2px; border: 2px solid #9fc4d6; border-top: 0; border-radius: 0 0 6px 6px; }
+.gr-glab .gr-lab-t { font-weight: 800; color: #0d2f55; }
+.gr-glab .gr-lab-t small { font-size: 10.5px; color: #8aa0b3; margin-right: 2px; }
+.hs .gr-glab .gr-lab-t { color: var(--hs-ink); }
+.hs .gr-gbracket { border-color: var(--hs-line); }

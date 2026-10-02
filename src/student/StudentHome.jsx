@@ -419,15 +419,17 @@ function seedDemoProgress(tp, progress) {
   // v2 (her note, 2026-10-02: "show a Skill Builder was completed for Irregular
   // verbs"): clearing 1 was missed, its Skill Builder done, then mastered;
   // clearing 2 was missed and its Skill Builder is up next.
-  const seed = { ...progress, [c1.id]: { best: 100, passed: true } }
+  // v3 (her note, 2026-10-02: make it look like they "didn't do well on Irregular
+  // Verbs, which is why they took the Skill Builder"): 58% on the first try.
+  const seed = { ...progress, [c1.id]: { best: 100, passed: true, first: 58 } }
   const sb1 = tp.skillBuilders?.[c1.id]
-  if (sb1) seed[sb1.id] = { best: 90, passed: true }
-  if (c2) seed[c2.id] = { best: 62, passed: false }
+  if (sb1) seed[sb1.id] = { best: 90, passed: true, first: 90 }
+  if (c2) seed[c2.id] = { best: 62, passed: false, first: 62 }
   try {
     localStorage.setItem('proofProgress', JSON.stringify(seed))
     const done = JSON.parse(localStorage.getItem('proofDemoSeeded') || '[]')
     localStorage.setItem('proofDemoSeeded', JSON.stringify([...(Array.isArray(done) ? done : []), tp.id]))
-    localStorage.setItem('proofDemoVer', '2')
+    localStorage.setItem('proofDemoVer', '3')
   } catch { /* fine */ }
   return seed
 }
@@ -439,9 +441,11 @@ function upgradeDemoV2(tp, progress, wasSeeded) {
   const next = { ...progress }
   const sb1 = tp.skillBuilders?.[c1.id]
   if (sb1 && next[c1.id]?.passed && !(next[sb1.id]?.best > 0)) next[sb1.id] = { best: 90, passed: true }
+  // v3: the first try on clearing 1 was below mastery (that is why its Skill Builder came up)
+  if (sb1 && next[c1.id]?.passed && next[c1.id].first == null) next[c1.id] = { ...next[c1.id], first: 58 }
   const sb2 = c2 && tp.skillBuilders?.[c2.id]
   if (wasSeeded && sb2 && next[c2.id]?.best === 62 && !next[c2.id]?.passed && next[sb2.id]?.best === 92) delete next[sb2.id]
-  try { localStorage.setItem('proofProgress', JSON.stringify(next)); localStorage.setItem('proofDemoVer', '2') } catch { /* fine */ }
+  try { localStorage.setItem('proofProgress', JSON.stringify(next)); localStorage.setItem('proofDemoVer', '3') } catch { /* fine */ }
   return next
 }
 
@@ -728,10 +732,22 @@ function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap })
   core.forEach((ws, i) => {
     const p = progress[ws.id] || {}
     const st = stops.find((x) => x.ws.id === ws.id)?.state || 'locked'
-    cols.push({ key: ws.id, label: clearingTitle(ws), n: i + 1, score: p.best > 0 ? p.best : null, kind: p.passed ? 'passed' : p.best > 0 ? 'below' : st === 'locked' ? 'locked' : 'open', next: next && next.ws.id === ws.id })
     const sb = tp.skillBuilders?.[ws.id]
     const sp = sb && progress[sb.id]
-    if (sb && (sp?.best > 0 || (next && next.ws.id === sb.id))) cols.push({ key: sb.id, label: t('Skill Builder'), score: sp?.best > 0 ? sp.best : null, kind: 'sb', next: next && next.ws.id === sb.id })
+    const sbIn = sb && (sp?.best > 0 || (next && next.ws.id === sb.id))
+    const label = clearingTitle(ws)
+    if (!sbIn) {
+      cols.push({ key: ws.id, label, n: i + 1, score: p.best > 0 ? p.best : null, kind: p.passed ? 'passed' : p.best > 0 ? 'below' : st === 'locked' ? 'locked' : 'open', next: next && next.ws.id === ws.id })
+    } else {
+      // her note (2026-10-02): the Skill Builder sits right beside the skill it was
+      // for, after a first try below mastery, then the retake: one cluster
+      const first = p.first ?? (p.passed ? null : p.best > 0 ? p.best : null)
+      const g = { group: ws.id, glabel: label, n: i + 1 }
+      cols.push({ ...g, key: ws.id + ':1', sub: t('1st try'), score: first, kind: first == null ? 'open' : first >= MASTERY ? 'passed' : 'below' })
+      cols.push({ ...g, key: sb.id, sub: t('Skill Builder'), score: sp?.best > 0 ? sp.best : null, kind: 'sb', next: next && next.ws.id === sb.id })
+      const retaken = p.passed || (p.best > 0 && first != null && p.best > first)
+      cols.push({ ...g, key: ws.id + ':2', sub: t('Retake'), score: retaken ? p.best : null, kind: retaken ? (p.passed ? 'passed' : 'below') : 'open', next: next && next.ws.id === ws.id })
+    }
   })
   if (tp.full) cols.push({ key: tp.full.id, label: t('Post-test'), score: full.best > 0 ? full.best : null, kind: full.passed ? 'post' : full.best > 0 ? 'below' : 'post-off', next: next && next.ws.id === tp.full.id })
 
@@ -753,6 +769,15 @@ function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap })
   )
   const d = { tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, cols, foot, next, nextLabel, onStart, onMap }
   if (look === 'c') return <ReportScorecard {...d} />
+
+  // consecutive columns of one skill (1st try, Skill Builder, retake) share a slot
+  const groups = []
+  cols.forEach((c) => {
+    const last = groups[groups.length - 1]
+    if (c.group && last && last.key === c.group) last.cols.push(c)
+    else groups.push({ key: c.group || c.key, cluster: !!c.group, cols: [c] })
+  })
+  groups.forEach((g) => { g.flex = g.cluster ? g.cols.length * 0.62 : 1 })
 
   return (
     <div className="gr">
@@ -781,22 +806,32 @@ function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap })
         <div className="gr-plot">
           {[0, 50, 100].map((v) => <span key={v} className="gr-grid" style={{ bottom: v + '%' }}><i>{v}</i></span>)}
           <span className="gr-mastery" style={{ bottom: MASTERY + '%' }}><i>{t('Mastery')} {MASTERY}%</i></span>
-          {cols.map((c) => (
-            <div key={c.key} className={'gr-col ' + c.kind + (c.next ? ' next' : '')} title={`${c.label}: ${c.score == null ? (c.kind === 'locked' || c.kind === 'post-off' ? t('Locked') : t('Not started')) : c.score + '%'}`}>
-              <span className="gr-bar" style={{ height: (c.score ?? 0) + '%' }}>
-                {c.score != null && <em>{c.score}</em>}
-              </span>
-              {c.score == null && <span className="gr-empty" aria-hidden>{c.kind === 'locked' || c.kind === 'post-off' ? '🔒' : c.next ? '▶' : ''}</span>}
+          {groups.map((g) => (
+            <div key={g.key} className={'gr-slot' + (g.cluster ? ' cluster' : '')} style={{ flex: g.flex }}>
+              {g.cols.map((c) => (
+                <div key={c.key} className={'gr-col ' + c.kind + (c.next ? ' next' : '')} title={`${c.glabel ? c.glabel + ' · ' + c.sub : c.label}: ${c.score == null ? (c.kind === 'locked' || c.kind === 'post-off' ? t('Locked') : t('Not started')) : c.score + '%'}`}>
+                  <span className="gr-bar" style={{ height: (c.score ?? 0) + '%' }}>
+                    {c.score != null && <em>{c.score}</em>}
+                  </span>
+                  {c.score == null && <span className="gr-empty" aria-hidden>{c.kind === 'locked' || c.kind === 'post-off' ? '🔒' : c.next ? '▶' : ''}</span>}
+                </div>
+              ))}
             </div>
           ))}
         </div>
         <div className="gr-labels">
-          {cols.map((c) => (
-            <div key={c.key} className={'gr-lab ' + c.kind + (c.next ? ' next' : '')}>
-              <span className="gr-lab-k">{c.kind === 'pre' || c.kind.startsWith('post') ? '' : c.kind === 'sb' ? '↳' : c.n}</span>
+          {groups.map((g) => g.cluster ? (
+            <div key={g.key} className="gr-lab gr-glab" style={{ flex: g.flex }}>
+              <span className="gr-subs">{g.cols.map((c) => <span key={c.key} className={c.kind + (c.next ? ' next' : '')}>{c.sub}</span>)}</span>
+              <span className="gr-gbracket" aria-hidden />
+              <span className="gr-lab-t"><small>{g.cols[0].n}</small> {g.cols[0].glabel}</span>
+            </div>
+          ) : g.cols.map((c) => (
+            <div key={c.key} className={'gr-lab ' + c.kind + (c.next ? ' next' : '')} style={{ flex: g.flex }}>
+              <span className="gr-lab-k">{c.kind === 'pre' || c.kind.startsWith('post') ? '' : c.n}</span>
               <span className="gr-lab-t">{c.label}</span>
             </div>
-          ))}
+          )))}
         </div>
         <div className="gr-legend">
           <span><i className="pre" />{t('Pre-test')}</span>
@@ -851,7 +886,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
     let ver = 0
     try { ver = Number(localStorage.getItem('proofDemoVer') || 0) } catch { /* fine */ }
     if (done.includes(lead.tp.id) || resume) {
-      if (ver < 2) { const s = upgradeDemoV2(lead.tp, progress, done.includes(lead.tp.id)); if (s) setSeeded(s) }
+      if (ver < 3) { const s = upgradeDemoV2(lead.tp, progress, done.includes(lead.tp.id)); if (s) setSeeded(s) }
       return
     }
     const s = seedDemoProgress(lead.tp, progress); if (s) setSeeded(s)

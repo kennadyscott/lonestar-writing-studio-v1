@@ -329,7 +329,9 @@ export default function ProofRoom({ band = '4-5', initialTopicId = null, initial
   function record(wsId, pct) {
     setProgress((p) => {
       const prev = p[wsId] || { best: 0, passed: false }
-      const next = { ...p, [wsId]: { best: Math.max(prev.best, pct), passed: prev.passed || pct >= PASS_MARK } }
+      // first: the first attempt's score, kept so the growth report can show
+      // "1st try -> Skill Builder -> retake" (2026-10-02)
+      const next = { ...p, [wsId]: { best: Math.max(prev.best, pct), passed: prev.passed || pct >= PASS_MARK, first: prev.first ?? (prev.best > 0 ? prev.best : pct) } }
       try { localStorage.setItem('proofProgress', JSON.stringify(next)) } catch {}
       return next
     })

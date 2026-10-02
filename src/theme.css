@@ -1528,7 +1528,8 @@ section[aria-label="Daily prompt"] { background: var(--hs-accent-soft); border-c
 /* 2nd & 3rd grade: every font 2pt bigger (her note, 2026-10-02). The px font
    sizes are rewritten at build time to calc(size + var(--fs-up)); see vite.config.js. */
 body { font-size: 16px; }
-:root[data-band="2-3"] { --fs-up: 2pt; }
+/* 2-3 matches 4-5 again (her call, 2026-10-02: "Change 2-3 font size so it matches 4-5").
+   The bump stays wired: set --fs-up on a band to grow every font there. */
 
 /* the dashboard's forest behind pages that had none (Quick Write, assignments, feedback, revision, Arcade) */
 .scene-page { margin: -26px calc(50% - 50vw) -70px; padding: 26px clamp(22px, 2.6vw, 56px) 70px; min-height: calc(100vh - 64px); box-sizing: border-box; position: relative; }

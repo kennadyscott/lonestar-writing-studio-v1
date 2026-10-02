@@ -2007,3 +2007,8 @@ body { font-size: 16px; }
 .gr-ns-btn { background: #2e9e6b; color: #fff; box-shadow: 0 4px 12px rgba(46,158,107,.3); }
 .gr-ns-btn:hover { background: #268a5d; }
 .hs .gr-ns-btn { background: var(--hs-good); color: #fff; }
+/* her note (2026-10-02): the Skill Builder bar is skinnier than the skill's main bar */
+.gr-slot.cluster .gr-col.sb { flex: .55 1 0; }
+.gr-slot.cluster .gr-col.sb .gr-bar { width: min(100%, 20px); }
+.gr-slot.cluster .gr-col.sb.next::after, .gr-slot.cluster .gr-col.sb.open::after { width: min(100%, 20px); }
+.gr-subs span.sb { flex: .55 1 0; }

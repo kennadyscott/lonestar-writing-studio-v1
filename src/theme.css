@@ -2105,3 +2105,23 @@ body { font-size: 16px; }
 .gr-inline-path { overflow: hidden; text-overflow: ellipsis; min-width: 0; flex-shrink: 1; }
 .gr-carousel button { width: 28px; height: 28px; font-size: 18px; }
 @media (max-width: 1100px) { .gr-inline { flex-wrap: wrap; } }
+
+/* card B (prototype): picture-free domain tiles; the path's data on its own panel */
+.prf-c.look-b .prf-c-lead { gap: 8px; }
+.prf-c.look-b .gre-tile img { display: none; }
+.prf-c.look-b .gre-tile { padding: 8px 0 8px; gap: 5px; border: 1.5px solid #e3ebf1; box-shadow: none; }
+.prf-c.look-b .gre-tile.on { border-color: #0f97c2; box-shadow: 0 2px 10px rgba(15,151,194,.18); }
+.prf-c.look-b .gre-tile.mastered { border-color: #f5b400; }
+.prf-c.look-b .gre-tile-name { font-size: 13.5px; padding-right: 30px; }
+.prf-c.look-b .gre-tile-badge { top: 7px; right: 7px; width: 20px; height: 20px; font-size: 11px; }
+.prf-c.look-b .gr-pathwrap { background: linear-gradient(180deg, #e4f1f9, #eef6fb); border: 1px solid #cfe5f2; border-radius: 16px; padding: 12px 14px 12px; }
+.prf-c.look-b .gr-pathwrap .gr-chart { background: #fff; border-color: #d6e7f1; }
+.prf-c.look-b .gr-pathwrap .gr-inline { margin-top: 0; }
+.prf-c.look-b .gr-top[hidden] ~ .gr-chart .gr-plot { height: 150px; }
+.hs .prf-c.look-b .gr-pathwrap { background: var(--hs-sunk); border-color: var(--hs-line); }
+.hs .prf-c.look-b .gr-pathwrap .gr-chart { background: var(--hs-surface); }
+.hs .prf-c.look-b .gre-tile { border-color: var(--hs-line); }
+.prf-c.look-b .gre-tile-name { padding-right: 9px; }
+.prf-c.look-b .gre-tile.mastered .gre-tile-name { padding-right: 30px; }
+.prf-c.look-b .gr-top[hidden] ~ .gr-chart .gr-plot { height: 138px; }
+.prf-c.look-b .gre-tile-name { font-size: 12.5px; letter-spacing: -.1px; }

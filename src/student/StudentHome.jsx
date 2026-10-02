@@ -837,6 +837,10 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // A's domain tiles switch the chart to that domain's path (2026-10-02)
   const [pickId, setPickId] = useState(null)
   const [allProg, setAllProg] = useState(false)
+  // prototype A/B (her ask, 2026-10-02): B = picture-free domain tiles, and the
+  // path's data on its own tinted panel so it reads as separate
+  const [cardLook, setCardLookState] = useState(() => { try { return localStorage.getItem('lscr.cardLook') === 'b' ? 'b' : 'a' } catch { return 'a' } })
+  const setCardLook = (v) => { setCardLookState(v); try { localStorage.setItem('lscr.cardLook', v) } catch { /* fine */ } }
   // the path being worked on drives the next step; the chart can show another
   // (her ask, 2026-10-02: a carousel through the paths finished or in progress)
   const lead = resume || mine[0]
@@ -886,11 +890,14 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // The path you are on, as its own little trail of clearings (her pick of three,
   // 2026-09-30). The other-path rows came out so the section fits above the fold.
   return (
-      <div className={'prf-card prf-c' + (studio ? ' studio' : '')}>
+      <div className={'prf-card prf-c' + (studio ? ' studio' : '') + (cardLook === 'b' ? ' look-b' : '')}>
         <div className="prf-c-head" style={studio ? undefined : { '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
           <div className="prf-c-words">
           <span className="proof-kicker">{studio ? t('Skill practice') : t('Practice')} · {t('Grade {n}', { n: grade })}{topics && shown !== grade && <span className="band-borrow">{t('showing Grade {n} paths for now', { n: shown })}</span>}</span>
           <span className="prf-c-title">{studio ? t('Your growth report') : t('The Lit Labyrinth')}</span>
+          </div>
+          <div className="gr-abc" role="group" aria-label="Card layout (prototype)">
+            {[['a', 'A'], ['b', 'B']].map(([k, l]) => <button key={k} className={cardLook === k ? 'on' : ''} aria-pressed={cardLook === k} onClick={() => setCardLook(k)}>{l}</button>)}
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
           <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
@@ -903,8 +910,10 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
 <DomainStrip mine={mine} progress={progress} selD={view.tp.domain} onPick={pickDomain} next={next} onStart={start} />
 <NextStep tp={lead.tp} next={next} progress={progress} onStart={start} onMap={() => onOpen(lead.tp.id)} />
 {/* the path's name now leads the numbers line under the next step (2026-10-02) */}
+              <div className="gr-pathwrap">
               <GrowthReport hideFoot tp={view.tp} progress={progress} stops={viewStops} next={viewNext} onStart={start} onMap={() => onOpen(view.tp.id)}
                 carousel={ringAt >= 0 ? { i: ringAt, n: ring.length, prev: () => step(-1), next: () => step(1) } : null} />
+              </div>
               <div className="gr-allprog-row"><button className="gr-allprog" onClick={() => setAllProg(true)}>{t('See all progress →')}</button></div>
             </div>
           )}

@@ -556,12 +556,13 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
       <div className="gre-tiles" role="tablist" aria-label={t('Domains')}>
         {doms.map((x) => (
           <button key={x.d} role="tab" aria-selected={selD === x.d}
-            className={'gre-tile' + (selD === x.d ? ' on' : '') + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' nopath')}
+            className={'gre-tile' + (selD === x.d ? ' on' : '') + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' nopath') + (x.mastered ? ' m-done' : x.done > 0 ? ' m-prog' : ' m-none')}
             onClick={() => x.list.length && onPick(x.d)} title={x.list.length ? landName(x.d) : landName(x.d) + ': ' + t('paths for this grade are on the way')}>
             <img src={landImg(x.d)} alt="" />
             <span className="gre-tile-name">{landName(x.d)}</span>
             <span className="gre-meter" aria-hidden><i style={{ width: (x.done / Math.max(1, x.total)) * 100 + '%' }} /></span>
-            <span className="gre-tile-n"><b>{x.done}/{x.total}</b> {t('topics')} <em>{Math.round((x.done / Math.max(1, x.total)) * 100)}%</em></span>
+            {/* no percent (her note, 2026-10-02); the bar's colour says the state: green mastered, gold in progress */}
+            <span className="gre-tile-n"><b>{x.done}/{x.total}</b> {t('topics')}</span>
             {x.mastered && <span className="gre-tile-badge" aria-label={t('Mastered')}>✓</span>}
           </button>
         ))}
@@ -830,17 +831,16 @@ function VineReveal({ onDone }) {
     let started = false
     const giveUp = setTimeout(() => { if (!started) onDone() }, 1200)
     // never leave the card covered: the clip is ~2s at 2x, so 4s is a hard stop
-    const hardStop = setTimeout(onDone, 4000)
+    const hardStop = setTimeout(onDone, 3500)
     // some browsers pause a fresh muted clip on its own (the gate did, too): resume it
     const resume = () => { if (v && started && !v.ended) v.play().catch(() => onDone()) }
     const go = () => {
       if (!v || started) return
       started = true
-      try { v.currentTime = 1.1 } catch { /* fine */ }
-      v.playbackRate = 2
+      // the file itself is the 2.5s cut, no audio (her note, 2026-10-02: "5 seconds is too long ... 2.5 and no sound")
       v.play().catch(() => onDone())
     }
-    const tick = () => { if (v && v.duration && v.currentTime > v.duration - 0.5) setFading(true) }
+    const tick = () => { if (v && v.duration && v.currentTime > v.duration - 0.4) setFading(true) }
     v?.addEventListener('canplay', go)
     v?.addEventListener('timeupdate', tick)
     v?.addEventListener('ended', onDone)
@@ -1435,7 +1435,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
-  const [sideLook, setSideLookState] = useState(() => { try { return localStorage.getItem('lscr.sideLook') === 'b' ? 'b' : 'a' } catch { return 'a' } })
+  const [sideLook, setSideLookState] = useState(() => { try { const v = localStorage.getItem('lscr.sideLook'); return ['b', 'c', 'd'].includes(v) ? v : 'a' } catch { return 'a' } })
   const setSideLook = (v) => { setSideLookState(v); try { localStorage.setItem('lscr.sideLook', v) } catch { /* fine */ } }
 
   // A grid game finished: record the clear, reveal the coins, refresh state.
@@ -1568,7 +1568,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           {/* prototype A/B for the side cards (her ask, 2026-10-02): A paintings, B the white cards she liked */}
           <div className="side-abc" role="group" aria-label="Side cards (prototype)">
             <span>{t('Side cards')}</span>
-            {[['a', 'A'], ['b', 'B']].map(([k, l]) => <button key={k} className={sideLook === k ? 'on' : ''} aria-pressed={sideLook === k} onClick={() => setSideLook(k)}>{l}</button>)}
+            {[['a', 'A'], ['b', 'B'], ['c', 'C'], ['d', 'D']].map(([k, l]) => <button key={k} className={sideLook === k ? 'on' : ''} aria-pressed={sideLook === k} onClick={() => setSideLook(k)}>{l}</button>)}
           </div>
           <div className="practice-split">
             <ProofRoomFeature onOpen={onProofRoom} />

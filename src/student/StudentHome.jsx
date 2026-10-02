@@ -430,7 +430,162 @@ function seedDemoProgress(tp, progress) {
   return seed
 }
 
-function GrowthReport({ tp, progress, stops, next, onStart, onMap }) {
+// B: "journey line": pre-test -> now as a dumbbell on the 0-100 scale, then
+// a line through every step of the path; the Skill Builder branches off below
+// its clearing; steps ahead show as targets on the mastery line.
+function GrowthBadge({ pts, pct }) {
+  const t = useT()
+  if (pts == null) return null
+  return (
+    <div className={'gr-growth' + (pts < 0 ? ' down' : '')}>
+      <b>{pts >= 0 ? '+' : ''}{pts} pts</b>
+      <span>{pct >= 0 ? '+' : ''}{pct}% {t('growth')}</span>
+    </div>
+  )
+}
+function ReportJourney({ pre, now, pts, pct, cols, foot, mastered, core, sbDone }) {
+  const t = useT()
+  const W = 760, H = 150, L = 34, R = 18, T = 20, B = 8
+  const y = (v) => T + (1 - v / 100) * (H - T - B)
+  const main = cols.filter((c) => c.kind !== 'sb')
+  const step = (W - L - R) / Math.max(1, main.length - 1)
+  const xOf = (c) => L + main.indexOf(c) * step
+  const real = main.filter((c) => c.score != null)
+  const last = real[real.length - 1]
+  const ahead = main.slice(main.indexOf(last) + 1)
+  const sbs = cols.map((c, i) => (c.kind === 'sb' ? { sb: c, of: cols[i - 1] } : null)).filter(Boolean)
+  const color = (c) => (c.kind === 'pre' ? 'var(--gr-pre)' : c.kind === 'passed' || c.kind === 'post' ? 'var(--gr-pass)' : 'var(--gr-below)')
+  return (
+    <div className="gr grb">
+      {foot}
+      <div className="grb-dumb">
+        <div className="grb-dumb-head">
+          <span className="gr-num-l">{t('Pre-test')} → {t('Now')}</span>
+          <span className="grb-kpis">
+            <span><b>{mastered}</b>/{core.length} {t('mastered')}</span>
+            <span><b>{sbDone}</b> {t('Skill Builders')}</span>
+          </span>
+          <GrowthBadge pts={pts} pct={pct} />
+        </div>
+        <div className="grb-track">
+          {[0, 25, 50, 75, 100].map((v) => <span key={v} className="grb-tick" style={{ left: v + '%' }}><i>{v}</i></span>)}
+          <span className="grb-mastery" style={{ left: MASTERY + '%' }}><i>{t('Mastery')}</i></span>
+          {now != null && <span className="grb-span" style={{ left: Math.min(pre, now) + '%', width: Math.abs(now - pre) + '%' }} />}
+          <span className="grb-dot pre" style={{ left: pre + '%' }}><b>{pre}%</b></span>
+          {now != null && <span className="grb-dot now" style={{ left: now + '%' }}><b>{now}%</b></span>}
+        </div>
+      </div>
+      <div className="gr-chart grb-chart">
+        <svg viewBox={`0 0 ${W} ${H + 8}`} className="grb-svg" role="img" aria-label={t('Scores along the path')}>
+          <rect x={L} y={y(100)} width={W - L - R} height={y(MASTERY) - y(100)} className="grb-band" />
+          {[0, 50, 100].map((v) => <g key={v}><line x1={L} x2={W - R} y1={y(v)} y2={y(v)} className="grb-grid" /><text x={L - 8} y={y(v) + 4} className="grb-axis" textAnchor="end">{v}</text></g>)}
+          <line x1={L} x2={W - R} y1={y(MASTERY)} y2={y(MASTERY)} className="grb-mline" />
+          <text x={L + 6} y={y(MASTERY) - 5} className="grb-mlabel" textAnchor="start">{t('Mastery')} {MASTERY}%</text>
+          {real.length > 1 && <polyline points={real.map((c) => `${xOf(c)},${y(c.score)}`).join(' ')} className="grb-line" />}
+          {last && ahead.length > 0 && <polyline points={[`${xOf(last)},${y(last.score)}`, ...ahead.map((c) => `${xOf(c)},${y(MASTERY)}`)].join(' ')} className="grb-ahead" />}
+          {sbs.map(({ sb, of }) => {
+            const x0 = xOf(of), x1 = x0 + step * 0.5
+            const y0 = y(of.score ?? 0), y1 = y(sb.score ?? MASTERY)
+            return (
+              <g key={sb.key}>
+                <path d={`M${x0},${y0} C${x0 + step * 0.25},${y0} ${x1 - step * 0.2},${y1} ${x1},${y1}`} className="grb-branch" />
+                <circle cx={x1} cy={y1} r={7} className="grb-sb"><title>{t('Skill Builder')}: {sb.score == null ? t('Not started') : sb.score + '%'}</title></circle>
+                <text x={x1} y={y1 - 12} textAnchor="middle" className="grb-val sb">{sb.score != null ? sb.score : ''}</text>
+                <text x={x1 + 12} y={y1 + 4} textAnchor="start" className="grb-sblabel">{t('Skill Builder')}</text>
+              </g>
+            )
+          })}
+          {main.map((c) => (c.score != null ? (
+            <g key={c.key}>
+              <circle cx={xOf(c)} cy={y(c.score)} r={8} fill={color(c)} className="grb-pt"><title>{c.label}: {c.score}%</title></circle>
+              <text x={xOf(c)} y={y(c.score) - 13} textAnchor="middle" className="grb-val">{c.score}</text>
+            </g>
+          ) : (
+            <circle key={c.key} cx={xOf(c)} cy={y(MASTERY)} r={7} className={'grb-target' + (c.next ? ' next' : '')}><title>{c.label}: {c.kind === 'locked' || c.kind === 'post-off' ? t('Locked') : t('Not started')}</title></circle>
+          )))}
+        </svg>
+        <div className="grb-labels">
+          {main.map((c) => (
+            <span key={c.key} className={'grb-lab ' + c.kind + (c.next ? ' next' : '')} style={{ left: (xOf(c) / W) * 100 + '%', width: (100 / main.length) + '%' }}>
+              {c.n ? <small>{c.n}</small> : null}{c.label}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// C: "scorecard": a report-card table, one row per skill with its own pre-test,
+// best score, growth bar and status; the Skill Builder sits as a sub-row under
+// the clearing it supports; a mastery ring and pre -> now up top.
+const demoSkillPre = (id) => { let h = 7; for (const c of String(id)) h = (h * 33 + c.charCodeAt(0)) >>> 0; return 28 + (h % 30) }
+function ReportScorecard({ tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, foot, next }) {
+  const t = useT()
+  const ring = core.length ? mastered / core.length : 0
+  const C = 2 * Math.PI * 30
+  const rows = []
+  core.forEach((ws, i) => {
+    const p = progress[ws.id] || {}
+    rows.push({ key: ws.id, n: i + 1, label: clearingTitle(ws), pre: demoSkillPre(ws.id), best: p.best > 0 ? p.best : null, passed: !!p.passed, next: next && next.ws.id === ws.id, locked: !p.best && !(next && next.ws.id === ws.id) && i > 0 && !progress[core[i - 1].id]?.passed })
+    const sb = tp.skillBuilders?.[ws.id]
+    const sp = sb && progress[sb.id]
+    if (sb && (sp?.best > 0 || (next && next.ws.id === sb.id))) rows.push({ key: sb.id, sb: true, label: t('Skill Builder'), best: sp?.best > 0 ? sp.best : null, passed: !!sp?.passed, next: next && next.ws.id === sb.id })
+  })
+  if (tp.full) rows.push({ key: tp.full.id, post: true, label: t('Post-test') + ' · ' + clearingTitle(tp.full), pre, best: full.best > 0 ? full.best : null, passed: !!full.passed, next: next && next.ws.id === tp.full.id, locked: !(full.best > 0) && !(next && next.ws.id === tp.full.id) })
+  const status = (r) => r.passed ? ['ok', r.sb ? t('Done') : t('Mastered')] : r.next ? ['next', t('Up next')] : r.best != null ? ['low', t('Below 85%')] : r.locked ? ['off', t('Locked')] : ['off', t('Not started')]
+  return (
+    <div className="gr grc">
+      {foot}
+      <div className="grc-top">
+        <div className="grc-ring">
+          <svg viewBox="0 0 80 80" aria-hidden="true">
+            <circle cx="40" cy="40" r="30" className="grc-ring-bg" />
+            <circle cx="40" cy="40" r="30" className="grc-ring-fg" strokeDasharray={`${C * ring} ${C}`} transform="rotate(-90 40 40)" />
+          </svg>
+          <div><b>{mastered}/{core.length}</b><span>{t('skills mastered')}</span></div>
+        </div>
+        <div className="gr-hero grc-hero">
+          <div className="gr-num"><span className="gr-num-l">{t('Pre-test')}</span><span className="gr-num-v pre">{pre}%</span></div>
+          <span className="gr-arrow" aria-hidden>→</span>
+          <div className="gr-num"><span className="gr-num-l">{full?.best > 0 ? t('Post-test') : t('Now')}</span><span className="gr-num-v">{now == null ? '—' : now + '%'}</span></div>
+          <GrowthBadge pts={pts} pct={pct} />
+        </div>
+        <div className="gr-kpi"><b>{sbDone}</b><span>{t('Skill Builders done')}</span></div>
+      </div>
+      <table className="grc-table">
+        <thead><tr><th>{t('Skill')}</th><th>{t('Pre-test')}</th><th>{t('Best')}</th><th>{t('Growth')}</th><th>{t('Status')}</th></tr></thead>
+        <tbody>
+          {rows.map((r) => {
+            const [cls, lab] = status(r)
+            const g = r.best != null && r.pre != null ? r.best - r.pre : null
+            return (
+              <tr key={r.key} className={(r.sb ? 'sb ' : '') + (r.post ? 'post ' : '') + (r.next ? 'next' : '')}>
+                <td className="grc-skill">{r.sb ? <span className="grc-sbmark">↳</span> : <span className="grc-n">{r.post ? '★' : r.n}</span>}<span>{r.label}</span></td>
+                <td className="grc-num">{r.pre != null ? r.pre + '%' : ''}</td>
+                <td className="grc-num"><b>{r.best != null ? r.best + '%' : '—'}</b></td>
+                <td className="grc-growth">
+                  {r.pre != null && (
+                    <span className="grc-bar" title={r.best != null ? `${r.pre}% → ${r.best}%` : `${r.pre}%`}>
+                      <i className="grc-m" style={{ left: MASTERY + '%' }} />
+                      {r.best != null && <span className="grc-fill" style={{ left: Math.min(r.pre, r.best) + '%', width: Math.abs(r.best - r.pre) + '%' }} />}
+                      <span className="grc-d pre" style={{ left: r.pre + '%' }} />
+                      {r.best != null && <span className={'grc-d ' + (r.passed ? 'ok' : 'low')} style={{ left: r.best + '%' }} />}
+                    </span>
+                  )}
+                  {g != null && <em className={g >= 0 ? 'up' : 'down'}>{g >= 0 ? '+' : ''}{g}</em>}
+                </td>
+                <td><span className={'grc-pill ' + cls}>{lab}</span></td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function GrowthReport({ look = 'a', tp, progress, stops, next, onStart, onMap }) {
   const t = useT()
   const core = tp.core || []
   const pre = demoPretest(tp.id)
@@ -454,15 +609,22 @@ function GrowthReport({ tp, progress, stops, next, onStart, onMap }) {
   const sbDone = core.filter((w) => { const sb = tp.skillBuilders?.[w.id]; return sb && progress[sb.id]?.passed }).length
   const nextLabel = next ? (next.state === 'sb' ? t('Skill Builder') + ': ' + clearingTitle(next.ws) : next.capstone ? t('Post-test') : clearingTitle(next.ws)) : null
 
+  const foot = (
+        <div className="gr-foot">
+          {nextLabel && <div className="gr-next"><span>{t('Up next')}</span><b>{nextLabel}</b></div>}
+          <span style={{ flex: 1 }} />
+          <button className="btn ghost" onClick={onMap}>{t('Open the map')}</button>
+          {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
+        </div>
+  )
+  const d = { tp, progress, core, pre, now, pts, pct, mastered, sbDone, full, cols, foot, next }
+  if (look === 'b') return <ReportJourney {...d} />
+  if (look === 'c') return <ReportScorecard {...d} />
+
   return (
     <div className="gr">
       {/* the way in sits first so it is always above the fold on a Chromebook */}
-      <div className="gr-foot">
-        {nextLabel && <div className="gr-next"><span>{t('Up next')}</span><b>{nextLabel}</b></div>}
-        <span style={{ flex: 1 }} />
-        <button className="btn ghost" onClick={onMap}>{t('Open the map')}</button>
-        {next && <button className="btn" onClick={onStart}>{next.state === 'retry' ? t('Try it again →') : next.state === 'sb' ? t('Start the Skill Builder →') : t('Continue →')}</button>}
-      </div>
+      {foot}
       <div className="gr-top">
         <div className="gr-hero" aria-label={t('Growth on this path')}>
           <div className="gr-num"><span className="gr-num-l">{t('Pre-test')}</span><span className="gr-num-v pre">{pre}%</span></div>
@@ -532,6 +694,9 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   try { progress = JSON.parse(localStorage.getItem('proofProgress') || '{}') } catch { /* fine */ }
   const [seeded, setSeeded] = useState(null)
   if (seeded) progress = seeded
+  // prototype: three ways to present the report (her ask, 2026-10-02: "make 3 different versions ... in an ABC")
+  const [look, setLookState] = useState(() => { try { return localStorage.getItem('lscr.reportLook') || 'a' } catch { return 'a' } })
+  const setLook = (v) => { setLookState(v); try { localStorage.setItem('lscr.reportLook', v) } catch { /* fine */ } }
   const band = useBandValue()
   const grade = bandGrade(band, topics)
   const shown = pathsGrade(band, topics)
@@ -564,6 +729,9 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           <span className="prf-c-title">{studio ? t('Your growth report') : t('The Lit Labyrinth')}</span>
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
+          <div className="gr-abc" role="group" aria-label="Report layout (prototype)">
+            {[['a', 'A'], ['b', 'B'], ['c', 'C']].map(([k, l]) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{l}</button>)}
+          </div>
           <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>
         <div className="prf-body">
@@ -575,7 +743,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
                 <span className="prf-resume-kicker">{resume ? t('Continue Your Path') : t('Start here')}</span>
                 <span className="prf-c-path">{lead.tp.short || lead.tp.title}</span>
               </div>
-              <GrowthReport tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
+              <GrowthReport look={look} tp={lead.tp} progress={progress} stops={stops} next={next} onStart={start} onMap={() => onOpen(lead.tp.id)} />
             </div>
           )}
         </div>

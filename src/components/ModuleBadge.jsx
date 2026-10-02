@@ -13,8 +13,21 @@ const BADGES = {
   m6: { shape: 'pentagon', fill: '#b9c2c9', ring: '#98a4ad', glyph: '✏️' },
 }
 
+// Her 3D module badges (Higgsfield, 2026-10-02: "generate cooler badges for each of
+// the Luna modules"): public/badges/m1-m6.webp. The drawn shapes below stay as the
+// fallback if a picture ever fails to load.
+const BASE = import.meta.env.BASE_URL || '/'
+
 export default function ModuleBadge({ id, size = 40, dim = false }) {
   const b = BADGES[id] || BADGES.m1
+  const [broken, setBroken] = React.useState(false)
+  if (!broken && BADGES[id]) {
+    return (
+      <img src={`${BASE}badges/${id}.webp`} alt="" aria-hidden="true" width={size} height={size} draggable={false} onError={() => setBroken(true)}
+        style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0, display: 'block',
+          filter: dim ? 'grayscale(.9) brightness(.8) opacity(.6)' : 'drop-shadow(0 2px 4px rgba(2,30,60,.35))' }} />
+    )
+  }
   return (
     <svg viewBox="0 0 100 100" width={size} height={size} style={{ flexShrink: 0, filter: dim ? 'grayscale(1) opacity(.55)' : 'drop-shadow(0 1px 2px rgba(2,56,77,.25))' }} aria-hidden="true">
       {b.shape === 'pentagon' && <path d="M50 4 L95 37 L78 94 L22 94 L5 37 Z" fill={b.fill} stroke={b.ring} strokeWidth="7" strokeLinejoin="round" />}

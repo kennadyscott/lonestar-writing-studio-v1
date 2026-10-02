@@ -1524,3 +1524,14 @@ section[aria-label="Daily prompt"] { background: var(--hs-accent-soft); border-c
 .hs-seg button.on { background: var(--hs-side-on); color: var(--hs-side-ink); }
 .hs-sw { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .hs-side-foot { gap: 12px; }
+
+/* 2nd & 3rd grade: every font 2pt bigger (her note, 2026-10-02). The px font
+   sizes are rewritten at build time to calc(size + var(--fs-up)); see vite.config.js. */
+body { font-size: 16px; }
+:root[data-band="2-3"] { --fs-up: 2pt; }
+
+/* the dashboard's forest behind pages that had none (Quick Write, assignments, feedback, revision, Arcade) */
+.scene-page { margin: -26px calc(50% - 50vw) -70px; padding: 26px clamp(22px, 2.6vw, 56px) 70px; min-height: calc(100vh - 64px); box-sizing: border-box; position: relative; }
+.scene-bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; background-position: center; background-size: cover; background-repeat: no-repeat; opacity: .22; }
+.scene-inner { position: relative; z-index: 1; max-width: 1780px; margin: 0 auto; }
+:root[data-band="9-12"] .scene-bg { display: none; }

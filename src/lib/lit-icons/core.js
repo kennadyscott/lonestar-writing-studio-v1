@@ -63,7 +63,24 @@ function splitText(s) {
   return out
 }
 
+// Grade-band type bump (her note, 2026-10-02: "For 2nd & 3rd grade, increase the
+// font size across the board by 2pt"). Every px font size, inline or in CSS,
+// becomes calc(size + var(--fs-up)); --fs-up is 2pt under data-band="2-3" and 0
+// everywhere else. The CSS half is the fs-up PostCSS step in vite.config.js.
+const bumpSize = (v) => {
+  if (typeof v === 'number') return `calc(${v}px + var(--fs-up, 0px))`
+  if (typeof v === 'string' && v.includes('px') && !v.includes('--fs-up')) return `calc(${v} + var(--fs-up, 0px))`
+  return v
+}
+function withFontBump(props) {
+  const fs = props.style && props.style.fontSize
+  if (fs == null) return props
+  const next = bumpSize(fs)
+  return next === fs ? props : { ...props, style: { ...props.style, fontSize: next } }
+}
+
 export function withIcons(type, props) {
+  if (props && typeof type === 'string') props = withFontBump(props)
   // only real page elements: a component handed text (Glossed, Speak, read-aloud)
   // may split or speak it, so it must still get the plain string
   if (!props || typeof type !== 'string' || SKIP.has(type)) return props

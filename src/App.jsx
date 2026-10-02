@@ -111,6 +111,14 @@ export default function App() {
     body = <ArcadePage me={me} state={state} onBack={goHome} />
   }
 
+  // Pages that had no backdrop of their own get the dashboard's forest at the
+  // same 22% (her note, 2026-10-02: "This page is missing a background." - Quick
+  // Write). The Writing Bank, Share Wall, Free Write studio, Luna, lessons and
+  // the Lit Labyrinth already paint their own.
+  const subAsg = sub && state.assignments.find((a) => a.id === sub.assignmentId)
+  const bare = (view === 'quickwrite' || view === 'arcade' || ((view === 'home' || view === 'bank') && (reviewing || (sub && subAsg?.genre !== 'free'))))
+  if (bare) body = <div className="scene-page"><div aria-hidden className="scene-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg)` }} /><div className="scene-inner">{body}</div></div>
+
   // Grades 9-12 mockup (2026-10-02): Home and the Writing Course get the
   // Writer's Studio layout; every other view still renders its 2-8 page.
   if (studio && (view === 'home' || view === 'luna') && !sub && !reviewing) {

@@ -2184,3 +2184,8 @@ body { font-size: 16px; }
 .prf-c.look-b .gr-pathwrap .gr-chart { flex: 1; display: flex; flex-direction: column; min-height: 0; padding-top: 26px; }
 .prf-c.look-b .gr-top[hidden] ~ .gr-chart .gr-plot { height: auto; flex: 1; min-height: 140px; }
 .prf-c .gr-allprog-row { padding-top: 12px; }
+
+/* living lands (2026-10-02): "I want all of the lands to be animated like the main map is" -
+   each land's Higgsfield loop plays under its scene, its tint rides above the loop */
+.land-map.pm-living::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, rgba(4,20,28,.12), rgba(4,20,28,.28)); }
+.land-map.pm-living .pm-hud { z-index: 2; }

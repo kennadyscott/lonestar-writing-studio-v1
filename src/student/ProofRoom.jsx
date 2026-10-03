@@ -595,6 +595,23 @@ const LAND_META = {
   Comprehension: { key: 'comprehension', tag: 'Look deep. See what the text really says.', about: 'Clear pools that show what a text means, and what it leaves for you to figure out.' },
 }
 export const landImg = (d) => (import.meta.env.BASE_URL || '/') + 'lands/' + ((LAND_META[d] || {}).key || 'rootwood') + '.jpg'
+// A smooth trail (Catmull-Rom) through a land's medallions, and how far along it
+// the k-th one sits, so the glow can stop right at the student's current path.
+function smoothThrough(p) {
+  if (p.length < 2) return ''
+  const r = (v) => Math.round(v)
+  let d = `M ${r(p[0][0])} ${r(p[0][1])}`
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[i - 1] || p[i], p1 = p[i], p2 = p[i + 1], p3 = p[i + 2] || p2
+    d += ` C ${r(p1[0] + (p2[0] - p0[0]) / 6)} ${r(p1[1] + (p2[1] - p0[1]) / 6)}, ${r(p2[0] - (p3[0] - p1[0]) / 6)} ${r(p2[1] - (p3[1] - p1[1]) / 6)}, ${r(p2[0])} ${r(p2[1])}`
+  }
+  return d
+}
+function trailFraction(p, k) {
+  const seg = p.slice(1).map((q, i) => Math.hypot(q[0] - p[i][0], q[1] - p[i][1]))
+  const total = seg.reduce((a, b) => a + b, 0) || 1
+  return Math.max(0, Math.min(1, seg.slice(0, Math.max(0, k)).reduce((a, b) => a + b, 0) / total))
+}
 const pathState = (st) => (st.finished ? 'done' : st.started ? 'here' : 'fresh')
 const nextPathOf = (list) => list.find(({ st }) => st.started && !st.finished) || list.find(({ st }) => !st.finished)
 
@@ -607,12 +624,35 @@ function LandScene({ land, onOpen }) {
   const slots = slotsFor(n)
   const at = (i) => (slots ? SLOTS[slots[i]].at : pointAt(0.04 + (0.92 * i) / Math.max(1, n - 1)))
   const next = nextPathOf(list)
+  const livingRef = useLivingLoop()
+  const [loopOk, setLoopOk] = useState(true)
+  const key = meta.key || 'rootwood'
+  // the trail through this land's paths, lit up to the one the student is on
+  const pts = list.map((_, i) => at(i))
+  const trailD = smoothThrough(pts)
+  const reachedAt = next ? list.indexOf(next) : n - 1
+  const glow = trailFraction(pts, reachedAt)
   return (
     <div className="pm-immersive land-arrive">
-      <div className="pm-map land-map" style={{ '--pm-img': `url(${landImg(land.d)})` }}>
+      <div className="pm-map land-map pm-living" style={{ '--pm-img': `url(${landImg(land.d)})` }}>
+        {loopOk && <video ref={livingRef} className="pm-living-video" src={`${import.meta.env.BASE_URL || '/'}lands/${key}-loop.mp4`} poster={landImg(land.d)}
+          autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1} onError={() => setLoopOk(false)}
+          onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />}
         <div className="pm-fireflies" aria-hidden="true">
           {FIREFLIES.map(([x, y, d], i) => <span key={i} style={{ left: x + '%', top: y + '%', animationDelay: `${d}s, ${d / 2}s` }} />)}
         </div>
+        {n > 1 && (
+          <svg className="pm-svg" viewBox="0 0 1000 560" preserveAspectRatio="none" aria-hidden>
+            <defs>
+              <filter id="land-glow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6" /></filter>
+            </defs>
+            <path d={trailD} className="pm-trail-base" />
+            <path d={trailD} pathLength="1" className="pm-trail-glow pm-draw" filter="url(#land-glow)" style={{ strokeDasharray: `${glow} 1`, '--from': 0, '--to': glow }} />
+            <path d={trailD} pathLength="1" className="pm-trail-lit pm-draw" style={{ strokeDasharray: `${glow} 1`, '--from': 0, '--to': glow }} />
+            {/* a light keeps running the whole trail, so the land glows even before the first path */}
+            <path d={trailD} pathLength="1" className="pm-trail-shimmer" style={{ '--to': 1 }} />
+          </svg>
+        )}
         <div className="pm-hud">
           <div className="proof-kicker">{t('The Lit Labyrinth')} · {t('Land')}</div>
           <h1 className="pm-hud-title">{t(landName(land.d))}</h1>

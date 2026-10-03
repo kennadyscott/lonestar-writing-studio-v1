@@ -497,8 +497,24 @@ export function StrandTrail({ topics, picked, onPick, children }) {
   const at = (i) => (slots ? SLOTS[slots[i]].at : pointAt(0.04 + (0.92 * i) / Math.max(1, n - 1)))
   const lastLit = info.map((x) => x.cls !== 'fresh').lastIndexOf(true)
   const glow = lastLit < 0 ? 0 : slots ? SLOT_F[slots[lastLit]] : 0.04 + (0.92 * lastLit) / Math.max(1, n - 1)
+  // her note (2026-10-02): "wherever the student is, it should start them there" -
+  // if the land they are working in sits below the fold, the page opens on it.
+  // A beat later than the page's own scroll-to-top, and only if it's off screen.
+  const mapRef = React.useRef(null)
+  const here = info.find((x) => x.cls === 'here')?.d
+  React.useEffect(() => {
+    if (!here) return
+    const id = setTimeout(() => {
+      const el = mapRef.current?.querySelector('.pm-node.here')
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      // Land the student on their current land: centre it unless it already sits in the upper part of the screen.
+      if (r.top < 70 || r.bottom > window.innerHeight * 0.7) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    }, 350)
+    return () => clearTimeout(id)
+  }, [here])
   return (
-    <div className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+    <div ref={mapRef} className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
       <video ref={livingRef} className="pm-living-video" src={LIVING_SRC} poster={`${BASE}lit-valley.jpg`} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1}
         onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />
       <div className="pm-fireflies" aria-hidden="true">

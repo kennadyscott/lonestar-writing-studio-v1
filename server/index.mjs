@@ -85,6 +85,11 @@ const DAILY_CHALLENGE_COINS = 50
 // pays 10, under 70% does not clear the tile (play it again). Sentence
 // Stretch has no right answers, so finishing it counts as a pass at 10.
 const FLUENCY_BONUS = 50
+// Bingo (2026-10-02): "I want this to feel a little more 'bingo' like they have to clear the card,
+// but they get coins for 3 in a row". The first nine tiles are the 3 x 3 card, in category order;
+// every row, column and diagonal pays once per round.
+const FLUENCY_LINE_BONUS = 15
+const FLUENCY_LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
 const FLUENCY_PASS = 70
 function fluencyScorePct(game, body) {
   if (game === 'typing') return Math.max(0, Math.min(100, Number(body.accuracy) || 0))
@@ -598,6 +603,11 @@ const server = http.createServer(async (req, res) => {
       if (coins > 0) { state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_round', coins, ts: now() }); if (stu) stu.coins += coins }
       if (grid.missed) delete grid.missed[cat.id]
       grid.cleared[cat.id] = { game: body.game, coins, pct, ts: now() }
+      const card = (state.fluencyCategories || []).slice(0, 9).map((c) => c.id)
+      grid.lines = grid.lines || []
+      const newLines = FLUENCY_LINES.map((l, i) => i).filter((i) => !grid.lines.includes(i) && FLUENCY_LINES[i].every((k) => card[k] && grid.cleared[card[k]]))
+      const lineBonus = newLines.length * FLUENCY_LINE_BONUS
+      if (lineBonus) { grid.lines.push(...newLines); state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_line', coins: lineBonus, ts: now() }); if (stu) stu.coins += lineBonus }
       let bonus = 0
       const playable = fluencyPlayable(state.fluencyCategories || [], state.fluencyGames || [])
       if (!grid.bonusPaid && playable.every((id) => grid.cleared[id])) {
@@ -605,12 +615,12 @@ const server = http.createServer(async (req, res) => {
         state.coinEvents.push({ id: uid('ce'), studentId: ME, submissionId: null, type: 'fluency_grid', coins: bonus, ts: now() }); if (stu) stu.coins += bonus
       }
       save()
-      return send(res, 200, { coins, passed: true, pct, bonus, grid })
+      return send(res, 200, { coins, passed: true, pct, bonus, lineBonus, newLines, grid })
     }
     // POST /api/fluency/reset -> new round, empty grid.
     if (req.method === 'POST' && url.pathname === '/api/fluency/reset') {
       const prev = state.fluencyGrid || { round: 0 }
-      state.fluencyGrid = { round: (prev.round || 0) + 1, cleared: {}, missed: {}, bonusPaid: false }
+      state.fluencyGrid = { round: (prev.round || 0) + 1, cleared: {}, missed: {}, lines: [], bonusPaid: false }
       save()
       return send(res, 200, state.fluencyGrid)
     }

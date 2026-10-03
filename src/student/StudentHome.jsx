@@ -1079,18 +1079,28 @@ function Coin({ size = 14 }) {
   )
 }
 
-function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal }) {
+// Bingo card (2026-10-02): "I want this to feel a little more 'bingo' like they have to clear the
+// card, but they get coins for 3 in a row, etc. But I want to see the whole card in one screen."
+// The nine tiles are a 3 x 3 card; every row, column and diagonal pays +15 once a round
+// (server/index.mjs + localBackend.js), and clearing the whole card still pays +50.
+const ZONE_LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
+const ZONE_LINE_BONUS = 15
+
+function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal, lastLines }) {
   const t = useT()
   const say = useSay()
   const byKey = Object.fromEntries(games.map((g) => [g.game, g]))
   const playable = (c) => c.games.map((k) => byKey[k]).filter((g) => g && g.kind === 'builtin')
   const cleared = grid?.cleared || {}
   const missed = grid?.missed || {}
-  const tiles = categories.map((c) => ({ ...c, options: playable(c), done: cleared[c.id] || null, miss: missed[c.id] || null }))
+  const tiles = categories.slice(0, 9).map((c) => ({ ...c, options: playable(c), done: cleared[c.id] || null, miss: missed[c.id] || null }))
   const inPlay = tiles.filter((tile) => tile.options.length > 0)
   const doneCount = inPlay.filter((tile) => tile.done).length
   const allClear = inPlay.length > 0 && doneCount === inPlay.length
-  const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + (grid?.bonusPaid ? 50 : 0)
+  // lines the server has paid; fall back to working them out from the stamps
+  const lines = grid?.lines || ZONE_LINES.map((l, i) => i).filter((i) => ZONE_LINES[i].every((k) => tiles[k]?.done))
+  const earned = Object.values(cleared).reduce((a, x) => a + (x.coins || 0), 0) + lines.length * ZONE_LINE_BONUS + (grid?.bonusPaid ? 50 : 0)
+  const fresh = new Set(lastLines || [])
   const BASE = import.meta.env.BASE_URL || '/'
   const NAVY = '#0d2f55'
   const [lockedNote, setLockedNote] = useState(null)
@@ -1101,112 +1111,107 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
+  // where a line's stroke starts and ends, in a 3 x 3 box
+  const ends = (l) => { const c = (k) => [(k % 3) + 0.5, Math.floor(k / 3) + 0.5]; const [a, b] = [c(l[0]), c(l[2])]
+    const dx = Math.sign(b[0] - a[0]) * 0.32, dy = Math.sign(b[1] - a[1]) * 0.32
+    return [a[0] - dx, a[1] - dy, b[0] + dx, b[1] + dy] }
+
   return (
     <div className="zone-backdrop" onClick={onClose}>
-      <div className="zone-sheet" role="dialog" aria-modal="true" aria-labelledby="zone-title" onClick={(e) => e.stopPropagation()}>
+      <div className="zone-sheet bingo" role="dialog" aria-modal="true" aria-labelledby="zone-title" onClick={(e) => e.stopPropagation()}>
 
-        {/* header stays on screen; the tiles scroll underneath it */}
-        <div className="zone-sheet-head" style={{ padding: '16px 22px 14px', borderBottom: '1px solid var(--line)' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div className="eyebrow">{t('The Writing Studio')} · {t('Grade {n}', { n: grade })}</div>
-              <h2 id="zone-title" className="page" style={{ margin: '2px 0 4px', fontSize: 26 }}>{t('Fluency Zone')} <span style={{ color: 'var(--gold)' }}>✦</span></h2>
-              <p className="page-sub" style={{ margin: 0, fontSize: 13.5 }}>
-                <Directions inline text="Tap a tile and we pick the game. Score 90% for 20 coins, 70% for 10. Under 70% and you play that tile again." />
-              </p>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <div style={{ background: '#fff', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '6px 14px 6px 10px', display: 'flex', alignItems: 'center', gap: 7, fontWeight: 800, fontSize: 16, color: NAVY }}>
-                <Coin size={16} />{earned}
-              </div>
-              <button onClick={onClose} aria-label={t('Close')} style={{ width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--line)', color: 'var(--muted)', fontSize: 18, fontWeight: 700, display: 'grid', placeItems: 'center', background: '#fff' }}>×</button>
-            </div>
+        <div className="zone-sheet-head bingo-head">
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="eyebrow">{t('The Writing Studio')} · {t('Grade {n}', { n: grade })}</div>
+            <h2 id="zone-title" className="page" style={{ margin: '1px 0 0', fontSize: 24 }}>{t('Fluency Zone')} <span style={{ color: 'var(--gold)' }}>✦</span></h2>
           </div>
-          <div className="zone-progress">
-            <div className="zone-progress-top">
-              <span>{t('{done} of {total} cleared', { done: doneCount, total: inPlay.length })}</span>
-              <span>🏆 {t('+50 bonus coins')}</span>
-            </div>
-            <div className="zone-progress-track" role="progressbar" aria-valuenow={doneCount} aria-valuemin={0} aria-valuemax={inPlay.length} aria-label={t('{done} of {total} cleared', { done: doneCount, total: inPlay.length })}>
-              <div className="zone-progress-fill" style={{ width: `${inPlay.length ? (doneCount / inPlay.length) * 100 : 0}%` }} />
-            </div>
+          <div className="bingo-pays" aria-label={t('How coins work')}>
+            <span><b>3 {t('in a row')}</b> <Coin size={13} /> +{ZONE_LINE_BONUS}</span>
+            <span><b>{t('Whole card')}</b> <Coin size={13} /> +50</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+            <div className="bingo-coins"><Coin size={16} />{earned}</div>
+            <button onClick={onClose} aria-label={t('Close')} className="bingo-x">×</button>
           </div>
         </div>
 
-        <div className="zone-sheet-body">
+        <div className="bingo-status">
+          <span><b>{doneCount}</b> {t('of {total} tiles', { total: inPlay.length })}</span>
+          <span className="bingo-dots" aria-label={t('{n} of 8 lines', { n: lines.length })}>
+            {ZONE_LINES.map((l, i) => <i key={i} className={lines.includes(i) ? 'on' : ''} />)}
+            <em><b>{lines.length}</b> {t('of 8 lines')}</em>
+          </span>
+        </div>
+
+        {fresh.size > 0 && (
+          <div className="bingo-call" role="status">
+            <span className="bingo-call-word">{t('Bingo!')}</span>
+            {fresh.size > 1 ? t('{n} lines', { n: fresh.size }) : t('3 in a row')} · <Coin size={14} /> <b>+{fresh.size * ZONE_LINE_BONUS}</b>
+          </div>
+        )}
         {allClear && (
-          <div style={{ margin: '14px 22px 0', display: 'flex', alignItems: 'center', gap: 14, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 14, padding: '10px 16px' }}>
-            <span style={{ fontSize: 26 }}>🏆</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 800, fontSize: 15, color: NAVY }}>{t('Board cleared!')} {grid?.bonusPaid ? t('+50 bonus coins banked.') : ''}</div>
-              <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{say('Reset the board for a fresh round of surprise games.')}</div>
-            </div>
-            <button className="btn" disabled={busy} onClick={onReset}>↺ {t('Reset & play again')}</button>
+          <div className="bingo-call full" role="status">
+            <span className="bingo-call-word">🏆 {t('Card cleared!')}</span>
+            {grid?.bonusPaid ? <>+50 {t('bonus coins banked.')}</> : null}
+            <button className="btn" disabled={busy} onClick={onReset} style={{ marginLeft: 'auto', padding: '6px 14px', fontSize: 13 }}>↺ {t('New card')}</button>
           </div>
         )}
-
-        {/* tiles */}
         {lockedNote && (
-          <div className="zone-locked-note" role="status">{t('{name} is already cleared. Reset the board to play it again.', { name: lockedNote })}</div>
+          <div className="zone-locked-note" role="status">{t('{name} is already stamped. Start a new card to play it again.', { name: lockedNote })}</div>
         )}
-        <div className="zone-grid">
-          {tiles.map((tile) => {
-            const soon = tile.options.length === 0
-            const done = !!tile.done
-            const miss = !done && tile.miss
-            const justNow = lastReveal === tile.id
-            const played = done ? byKey[tile.done.game] : null
-            const openable = !done && !soon && !busy
-            function activate() {
-              if (busy || soon) return
-              if (done) { setLockedNote(tile.title); return }
-              setLockedNote(null)
-              onPlay(tile)
-            }
-            return (
-              <div key={tile.id} className={`zone-tile${openable ? ' playable' : ''}`} role={!soon ? 'button' : undefined} tabIndex={!soon ? 0 : -1}
-                aria-disabled={done || undefined}
-                title={done ? t('{name} is already cleared. Reset the board to play it again.', { name: tile.title }) : undefined}
-                onClick={activate} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), activate())}
-                style={{ position: 'relative', borderRadius: 16, overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
-                background: done ? '#f4f6f8' : miss ? '#fff8f6' : '#fff', border: `1px solid ${done ? '#cbd8e2' : miss ? '#e08a2b' : 'var(--gold-line)'}`,
-                boxShadow: justNow ? '0 0 0 3px #f5b400, 0 8px 24px rgba(245,180,0,.3)' : 'var(--shadow)', opacity: soon ? .75 : 1, cursor: soon ? 'default' : 'pointer' }}>
-                {/* art panel cropped from her card render; the crops are ~2.2:1 so cover shows them whole */}
-                <div aria-hidden style={{ width: '100%', aspectRatio: '720 / 328', backgroundImage: `url(${BASE}zone/${tile.id}-forest3.webp)`, backgroundSize: 'cover', backgroundPosition: 'center 40%', borderBottom: '1px solid var(--gold-line)', filter: done ? 'saturate(.2) brightness(.85)' : soon ? 'saturate(.5)' : 'none' }} />
-                {done && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#2e9e6b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 12, fontWeight: 800 }}>✓</span>}
-                {miss && <span aria-hidden style={{ position: 'absolute', top: 8, right: 8, width: 24, height: 24, borderRadius: '50%', background: '#e08a2b', border: '2px solid #fff', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 14, fontWeight: 800 }}>!</span>}
-                {soon && <span aria-hidden style={{ position: 'absolute', top: 8, right: 10, fontSize: 14 }}>🔒</span>}
-                <div style={{ padding: '8px 12px 10px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, width: '100%', flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 14.5, color: NAVY, lineHeight: 1.15 }}>{tile.title}</div>
-                  <div style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, minHeight: 15 }}><Glossed text={tile.blurb} /></div>
-                  <div style={{ flex: 1 }} />
-                  {done ? (
-                    <>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> <b style={{ fontSize: 16, color: NAVY }}>+{tile.done.coins}</b> · {tile.done.pct != null ? `${tile.done.pct}% · ` : ''}{played?.title}</div>
-                      <div className="zone-done">✓ {t('Completed')}</div>
-                    </>
-                  ) : miss ? (
-                    <>
-                      <div style={{ fontSize: 12.5, fontWeight: 800, color: '#b23b3b' }}>{tile.miss.pct != null ? `${tile.miss.pct}% · ` : ''}{t('Under 70% · try again')}</div>
-                      <div className="zone-retry">{t('Try again')}</div>
-                    </>
-                  ) : soon ? (
-                    <div style={{ marginTop: 18, border: '1px solid var(--line)', color: 'var(--muted)', fontWeight: 800, fontSize: 11, letterSpacing: 1, borderRadius: 999, padding: '7px 14px', width: '100%' }}>{t('COMING SOON')}</div>
-                  ) : (
-                    <>
-                      <div style={{ fontSize: 12.5, fontWeight: 700, color: 'var(--muted)' }}><Coin /> {t('up to')} <b style={{ fontSize: 15, color: NAVY }}>+{maxCoinsFor(tile.options)}</b></div>
-                      <div style={{ fontSize: 10.5, color: 'var(--muted)', marginTop: 2 }}>{tile.options.length === 1 ? tile.options[0].title : t('Surprise: {n} games in the mix', { n: tile.options.length })}</div>
-                    </>
+
+        <div className="bingo-card">
+          <div className="bingo-grid">
+            {tiles.map((tile) => {
+              const soon = tile.options.length === 0
+              const done = !!tile.done
+              const miss = !done && tile.miss
+              const justNow = lastReveal === tile.id
+              const played = done ? byKey[tile.done.game] : null
+              const openable = !done && !soon && !busy
+              function activate() {
+                if (busy || soon) return
+                if (done) { setLockedNote(tile.title); return }
+                setLockedNote(null)
+                onPlay(tile)
+              }
+              return (
+                <div key={tile.id} className={'bingo-tile' + (openable ? ' playable' : '') + (done ? ' done' : '') + (miss ? ' miss' : '') + (soon ? ' soon' : '') + (justNow ? ' just' : '')}
+                  role={!soon ? 'button' : undefined} tabIndex={!soon ? 0 : -1} aria-disabled={done || undefined}
+                  aria-label={done ? `${tile.title}: ${t('stamped')} +${tile.done.coins}` : tile.title}
+                  onClick={activate} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), activate())}>
+                  <div className="bingo-art" aria-hidden style={{ backgroundImage: `url(${BASE}zone/${tile.id}-forest3.webp)` }} />
+                  {done && (
+                    <span className="bingo-stamp" aria-hidden>
+                      <span className="bingo-stamp-check">✓</span>
+                      <span className="bingo-stamp-coins">+{tile.done.coins}</span>
+                    </span>
                   )}
+                  {miss && <span className="bingo-flag" aria-hidden>{t('Try again')}</span>}
+                  {soon && <span className="bingo-flag lock" aria-hidden>🔒 {t('Soon')}</span>}
+                  <div className="bingo-label">
+                    <div className="bingo-title">{tile.title}</div>
+                    <div className="bingo-sub">
+                      {done ? <>{tile.done.pct != null ? `${tile.done.pct}% · ` : ''}{played?.title}</>
+                        : miss ? <span style={{ color: '#b23b3b', fontWeight: 800 }}>{tile.miss.pct != null ? `${tile.miss.pct}% · ` : ''}{t('under 70%')}</span>
+                        : <Glossed text={tile.blurb} />}
+                    </div>
+                  </div>
+                  {!done && !soon && <span className="bingo-worth" aria-hidden><Coin size={12} /> {maxCoinsFor(tile.options)}</span>}
                 </div>
-              </div>
-            )
-          })}
+              )
+            })}
+          </div>
+          {/* the lines that are complete, struck through like a bingo card */}
+          <svg className="bingo-lines" viewBox="0 0 3 3" preserveAspectRatio="none" aria-hidden>
+            {lines.map((i) => { const [x1, y1, x2, y2] = ends(ZONE_LINES[i]); return (
+              <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} pathLength="1" className={fresh.has(i) ? 'fresh' : ''} />
+            ) })}
+          </svg>
         </div>
 
-        <div style={{ padding: '8px 22px 12px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>
-          <Coin /> {t('20 coins for 90%+, 10 for 70%+. Every round pays')} <b style={{ color: NAVY }}>{t('double coins')}</b> {t('in ClassCade')} <span style={{ color: '#f5b400' }}>✦</span>
-        </div>
+        <div className="bingo-foot">
+          <Coin /> {say('Tap a tile and we pick the game. 90% stamps it for 20 coins, 70% for 10. Under 70%, play that tile again.')}
         </div>
       </div>
     </div>
@@ -1387,6 +1392,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
   const [lastReveal, setLastReveal] = useState(null)
+  const [lastLines, setLastLines] = useState([])
   const [gridBusy, setGridBusy] = useState(false)
   const [gameFinished, setGameFinished] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
@@ -1406,7 +1412,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     if (!game?.category) return
     const payload = { category: game.category, game: game.key, score: result?.score ?? null, total: result?.total ?? null, accuracy: result?.accuracy ?? null }
     setGridBusy(true)
-    try { const r = await api.fluencyFinish(payload); setLastReveal(r?.passed ? game.category : null); await onChange?.() } catch {} finally { setGridBusy(false) }
+    try { const r = await api.fluencyFinish(payload); setLastReveal(r?.passed ? game.category : null); setLastLines(r?.newLines || []); await onChange?.() } catch {} finally { setGridBusy(false) }
   }
   const rows = useMemo(() => {
     const subFor = (aid) => state.submissions.find((s) => s.assignmentId === aid && s.studentId === me.id)
@@ -1482,9 +1488,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
         </div>
       )}
       {gamePicker && (
-        <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal}
-          onPlay={(tile) => { const pick = tile.options[Math.floor(Math.random() * tile.options.length)]; setLastReveal(null); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
-          onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null) } }}
+        <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal} lastLines={lastLines}
+          onPlay={(tile) => { const pick = tile.options[Math.floor(Math.random() * tile.options.length)]; setLastReveal(null); setLastLines([]); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
+          onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null); setLastLines([]) } }}
           onClose={() => setGamePicker(false)} />
       )}
       {fwChooser && (

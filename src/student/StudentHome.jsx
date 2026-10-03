@@ -1530,8 +1530,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           <div className="practice-split">
             <ProofRoomFeature onOpen={onProofRoom} />
             <div className="practice-side">
-              <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />
+              {/* Fluency Zone leads the side column (her call, 2026-10-02) */}
               <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />
+              <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />
               <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} bg="prac-bank.jpg" tint="#4a3010" onClick={onBank} />
               <DailyBanner dc={dc} busy={busy} onGo={peer} />
               {/* the Share Wall fills the space under the side cards (her call, 2026-09-30) */}

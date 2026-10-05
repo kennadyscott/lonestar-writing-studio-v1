@@ -2295,7 +2295,8 @@ body { font-size: 16px; }
    it covers the frame (full width, the height under the top bar) and the frame clips the overflow,
    about 90px of painting top + bottom at 1366x670. Everything on the painting moves with it, so
    medallions stay on their painted spots. The title and side card stay pinned to the frame.
-   Path maps (clearings) keep the fitted frame: their side branches reach the painting's edges. */
+   Path maps fill too (2026-10-05, "Make the path map fill the full screen too"); their two edge
+   branch spots moved in so nothing is trimmed. */
 .pm-art { position: absolute; inset: 0; }
 .pm-immersive.pm-fill { width: auto; margin: 0 calc(50% - 50vw); }
 .pm-fill .pm-map { aspect-ratio: auto; height: calc(100dvh - 64px); background: #0b2a22; }

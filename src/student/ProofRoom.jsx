@@ -778,7 +778,7 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
   const page = React.useContext(PageMode)
   if (page) {
     return (
-      <div className="pm-immersive">
+      <div className="pm-immersive pm-fill">
         <PathMap stops={stops} onPlay={onPlay}>
           <div className="pm-hud">
             <div className="proof-kicker">{t('The Lit Labyrinth')} · {t(landName(topic.domain) || 'Path')}</div>
@@ -847,13 +847,17 @@ function TopicPath({ topic, progress, onPlay, onBack, onClose }) {
 // spaced so no two medallions overlap and none sits under the cards floating
 // over the sky at the top right. Each slot says which way its branch grows.
 const SLOTS = [
-  { at: [850, 455], branch: [930, 335] },
+  { at: [850, 455], branch: [750, 478] },
   { at: [650, 420], branch: [660, 300] },
-  { at: [480, 335], branch: [450, 475] },
+  { at: [480, 335], branch: [380, 465] },
   { at: [280, 300], branch: [150, 430] },
-  { at: [370, 165], branch: [200, 110] },
-  { at: [560, 125], branch: [220, 70] },
+  { at: [370, 165], branch: [120, 300] },
+  { at: [560, 125], branch: [670, 215] },
 ]
+// (2026-10-05) the path map fills the screen now, which trims ~90px of painting top + bottom at
+// 1366x670, so the two edge branches moved: [450,475] -> [380,465] (label above, clear of
+// clearing 3's label), [220,70] -> [670,215] (in frame, clear of the Up Next card); and two that
+// sat under the Up Next card / the title: [930,335] -> [750,478], [200,110] -> [120,300].
 const TRAIL_PTS = SLOTS.map((s) => s.at)
 // Catmull-Rom through the slots, as cubic segments.
 const TRAIL = TRAIL_PTS.slice(0, -1).map((p1, i) => {
@@ -988,6 +992,7 @@ export function PathMap({ stops, onPlay, children }) {
   })
   return (
     <div className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+      <div className="pm-art">
       <video ref={livingRef} className="pm-living-video" src={LIVING_SRC} poster={`${BASE}lit-valley.jpg`} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1}
         onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />
       <div className="pm-fireflies" aria-hidden="true">
@@ -1010,7 +1015,7 @@ export function PathMap({ stops, onPlay, children }) {
         const glyph = d.s.capstone ? (d.s.state === 'passed' ? '✓' : d.s.state === 'locked' ? '🔒' : '🏆') : st.glyph || d.n
         const locked = d.s.state === 'locked'
         return (
-          <button key={d.s.ws.id} className={`pm-node ${st.cls}${d.s.capstone ? ' cap' : ''}${fresh.has(d.s.ws.id) ? ' celebrate' : ''}`} disabled={locked}
+          <button key={d.s.ws.id} className={`pm-node ${st.cls}${d.s.capstone ? ' cap' : ''}${fresh.has(d.s.ws.id) ? ' celebrate' : ''}${d.y > LOW_Y ? ' low' : ''}`} disabled={locked}
             style={{ left: `${d.x / 10}%`, top: `${(d.y / 560) * 100}%` }}
             onClick={() => !locked && onPlay(d.s.ws)} title={locked ? t('Reach the clearing above') : clearingTitle(d.s.ws)}>
             {st.cls === 'here' && <span className="pm-lantern" aria-hidden />}
@@ -1022,6 +1027,7 @@ export function PathMap({ stops, onPlay, children }) {
           </button>
         )
       })}
+      </div>
       {children}
     </div>
   )

@@ -5,13 +5,13 @@ import { useT } from '../lib/i18n/index.jsx'
  * earn coins, they need a little pop up or coins falling or something that shows they earned
  * those coins". She tried a Higgsfield treasure chest to tap open and a top-bar coin wallet,
  * then: "I just want like coins to rain down and it tells them they earned coins. We don't
- * need the coin counter in the top." So: her painted Higgsfield star coin (public/coins/coin.png)
- * rains down and a card says how many coins and what earned them.
+ * need the coin counter in the top." So: the ClassCade coin (public/coins/coin.svg, drawn to match
+ * her ClassCade screenshot) rains down and a card says how many coins and what earned them.
  * Every coin the platform pays lands in state.coinEvents, so useCoinWatch watches that list;
  * api.js nudges a state refresh whenever a response carries coins. */
 
 const BASE = import.meta.env.BASE_URL || '/'
-const COIN_IMG = BASE + 'coins/coin.png'
+const COIN_IMG = BASE + 'coins/coin.svg' // the ClassCade coin, drawn to match her screenshot
 
 const LABELS = {
   fluency_round: 'Fluency tile stamped',

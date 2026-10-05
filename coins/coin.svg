@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- The ClassCade coin (her screenshot, 2026-10-05): chunky orange-gold coin tilted a touch so
+       its deep red-orange edge shows lower left, inset darker face ring, chunky rounded gold star.
+       Colours sampled from her image. -->
+  <defs>
+    <linearGradient id="rim" x1=".15" y1=".05" x2=".85" y2=".95">
+      <stop offset="0" stop-color="#fff04a"/>
+      <stop offset=".4" stop-color="#fcc82c"/>
+      <stop offset="1" stop-color="#f6961f"/>
+    </linearGradient>
+    <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f08a2b"/>
+      <stop offset="1" stop-color="#b9431a"/>
+    </linearGradient>
+    <linearGradient id="face" x1=".2" y1="0" x2=".8" y2="1">
+      <stop offset="0" stop-color="#ee7d20"/>
+      <stop offset=".6" stop-color="#f8a226"/>
+      <stop offset="1" stop-color="#fbbd2c"/>
+    </linearGradient>
+    <linearGradient id="star" x1=".3" y1="0" x2=".7" y2="1">
+      <stop offset="0" stop-color="#fffa9c"/>
+      <stop offset=".45" stop-color="#fde232"/>
+      <stop offset="1" stop-color="#fbb627"/>
+    </linearGradient>
+  </defs>
+  <!-- edge: the coin's thickness, seen lower left -->
+  <ellipse cx="46" cy="54" rx="43" ry="42" fill="url(#edge)"/>
+  <!-- rim -->
+  <ellipse cx="51" cy="48" rx="43" ry="42" fill="url(#rim)"/>
+  <!-- face, sunk into the rim: dark ring, then the face -->
+  <ellipse cx="52" cy="48" rx="31.5" ry="31" fill="#c9561e"/>
+  <ellipse cx="52.5" cy="49" rx="29" ry="28.5" fill="url(#face)"/>
+  <!-- chunky star: drawn twice with a round stroke so its points come out soft -->
+  <g transform="translate(52.5 50) scale(.92)">
+    <path d="M0 -24 L7.3 -9.4 L23.4 -7.4 L11.6 3.8 L14.5 19.6 L0 12 L-14.5 19.6 L-11.6 3.8 L-23.4 -7.4 L-7.3 -9.4 Z"
+          fill="#d0601f" stroke="#d0601f" stroke-width="7" stroke-linejoin="round" transform="translate(0 2)"/>
+    <path d="M0 -24 L7.3 -9.4 L23.4 -7.4 L11.6 3.8 L14.5 19.6 L0 12 L-14.5 19.6 L-11.6 3.8 L-23.4 -7.4 L-7.3 -9.4 Z"
+          fill="url(#star)" stroke="url(#star)" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M-2 -18 L-6 -9" stroke="#fffde0" stroke-width="2.4" stroke-linecap="round" opacity=".9"/>
+  </g>
+  <!-- shine on the upper-left rim -->
+  <path d="M14.5 40 A37 37 0 0 1 33 14.5" fill="none" stroke="#fffbd0" stroke-width="4" stroke-linecap="round" opacity=".8"/>
+</svg>

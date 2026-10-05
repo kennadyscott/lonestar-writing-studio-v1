@@ -2302,3 +2302,13 @@ body { font-size: 16px; }
 .pm-fill .pm-art { --iw: max(100cqw, calc((100dvh - 64px) * 1000 / 560)); inset: auto; width: var(--iw); height: calc(var(--iw) * .56);
   left: calc(50% - var(--iw) / 2); top: clamp(calc(100% - var(--iw) * .56), calc(50% - var(--iw) * .29), 0px); background: var(--pm-img) center / cover no-repeat; }
 /* (top is clamped so the painting always covers the frame, whichever way the screen is shaped) */
+
+/* ---- Lit Labyrinth breadcrumb trail (2026-10-05): one click to the map, the land or Practice ---- */
+.backlink.crumbs { gap: 2px; padding: 5px 8px; flex-wrap: nowrap; max-width: calc(100vw - 32px); overflow: hidden; }
+.crumbs .crumb { border: 0; background: none; font: inherit; font-size: 13.5px; font-weight: 800; color: #0f6f99; padding: 3px 7px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.crumbs .crumb:hover { background: rgba(15,111,153,.1); color: #0b5577; }
+.crumbs .crumb:focus-visible { outline: 2px solid #0f97c2; outline-offset: 1px; }
+.crumbs .crumb.back { color: var(--ink); }
+.crumbs .crumb.here { color: var(--ink); cursor: default; max-width: 26ch; overflow: hidden; text-overflow: ellipsis; }
+.crumbs .crumb-sep { color: #8aa0b0; font-weight: 800; font-size: 14px; }
+@media (max-width: 680px) { .crumbs .crumb { padding: 3px 4px; font-size: 12.5px; } }

@@ -271,6 +271,36 @@ export function topicStatus(tp, progress) {
  * in on their own once there are enough topics to need them. Opening a topic
  * walks its path on this same page, and a worksheet runs here too.
  */
+/* Where am I, and one click to anywhere above it (2026-10-05). Her note: "As you click in, you
+ * have to click 'back' a lot of times to even get back to the main map, which is a little
+ * frustrating." The single Back (one level at a time: clearing -> path -> land -> map -> Practice)
+ * became a trail: Practice > Lit Labyrinth > land > path > clearing, every step above the current
+ * page clickable. A path opened straight from Practice still shows its land, so the student can
+ * step to it. */
+function Crumbs({ t, onBack, land, topic, running, toMap, toLand, toPath }) {
+  const landKey = topic ? topic.domain || land : land
+  const steps = [
+    { key: 'practice', label: t('Practice'), go: onBack, back: true },
+    { key: 'map', label: t('The Lit Labyrinth'), go: toMap },
+    landKey && { key: 'land', label: t(landName(landKey)), go: () => toLand(landKey) },
+    topic && { key: 'path', label: topic.short || topic.title, go: toPath },
+    running && { key: 'ws', label: clearingTitle(running) },
+  ].filter(Boolean)
+  const last = steps.length - 1
+  return (
+    <nav className="backlink on-scene crumbs" aria-label={t('Where you are')}>
+      {steps.map((st, i) => (
+        <React.Fragment key={st.key}>
+          {i > 0 && <span className="crumb-sep" aria-hidden>›</span>}
+          {i === last
+            ? <span className="crumb here" aria-current="page">{st.label}</span>
+            : <button className={'crumb' + (st.back ? ' back' : '')} onClick={st.go}>{st.back ? '← ' : ''}{st.label}</button>}
+        </React.Fragment>
+      ))}
+    </nav>
+  )
+}
+
 export default function ProofRoom({ band = '4-5', initialTopicId = null, initialWsId = null, onBack, onChange }) {
   const t = useT()
   const say = useSay()
@@ -370,9 +400,10 @@ export default function ProofRoom({ band = '4-5', initialTopicId = null, initial
           : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
       {/* on the map, Back and the prototype pill float over the valley instead of taking a row (her note, 2026-10-01) */}
       <div className={'proof-page' + (!running && raw ? ' on-map' : '')}>
-        {onBack && <button className="backlink on-scene" onClick={() => (running ? setRunning(null) : topic ? setTopicId(null) : land ? setLand(null) : onBack())}>
-          {running ? t('← Back to the path') : topic ? (land ? t('← Back to {land}', { land: t(landName(land)) }) : t('← All paths')) : land ? t('← All lands') : t('← Back to Practice')}
-        </button>}
+        {onBack && <Crumbs t={t} onBack={onBack} land={land} topic={topic} running={running}
+          toMap={() => { setRunning(null); setTopicId(null); setLand(null) }}
+          toLand={(d) => { setRunning(null); setTopicId(null); setLand(d) }}
+          toPath={() => setRunning(null)} />}
         {body}
       </div>
       {gate && <LabyrinthGate src={GATE_SRC} onDone={() => setGate(false)} />}

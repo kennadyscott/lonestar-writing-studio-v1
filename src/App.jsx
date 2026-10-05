@@ -57,6 +57,8 @@ export default function App() {
     return () => window.removeEventListener('lscr:coins', on)
   }, [refresh])
   const [coinBurst, clearCoinBurst] = useCoinWatch(state, ME_STUDENT)
+  // while a chest is open the wallet shows the old balance and counts up as the coins land
+  const [walletShown, setWalletShown] = useState(null)
 
   // Interface language is a teacher setting that rides on the student record.
   const meLang = state?.students?.find((s) => s.id === ME_STUDENT)?.lang
@@ -150,12 +152,13 @@ export default function App() {
         onLogo={goHome}
         band={band}
         onBand={setBand}
+        coins={coinBurst ? (walletShown ?? coinBurst.from) : me.coins}
       />
       <div className="content">{body}</div>
       <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)}
         settings={{ lang: me.lang, supportLevel: me.supportLevel }} onSettings={saveSettings} />
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
-      <CoinBurst burst={coinBurst} onDone={clearCoinBurst} />
+      <CoinBurst key={coinBurst?.key || 'none'} burst={coinBurst} onDone={clearCoinBurst} onWallet={setWalletShown} />
     </div>
     </BridgeProvider>
     </BandContext.Provider>

@@ -4,7 +4,7 @@ import { useLang, useT, LANGS } from '../lib/i18n/index.jsx'
 import { LEVELS } from '../lib/languageBridge.js'
 import { BANDS } from '../lib/gradeBand.js'
 
-export function TopBar({ who, onArcade, onLogo, band, onBand }) {
+export function TopBar({ who, onArcade, onLogo, band, onBand, coins }) {
   const t = useT()
   const [menu, setMenu] = useState(false)
   return (
@@ -25,6 +25,14 @@ export function TopBar({ who, onArcade, onLogo, band, onBand }) {
       )}
 
       <div style={{ flex: 1, minWidth: 0 }} />
+
+      {/* the coin wallet: earned coins fly in here (components/CoinBurst.jsx) */}
+      {coins != null && (
+        <button className="coin-wallet" onClick={onArcade} title={t('Your coins. Spend them in ClassCade')}>
+          <img src={(import.meta.env.BASE_URL || '/') + 'coins/coin.png'} alt="" />
+          <b>{Number(coins).toLocaleString()}</b>
+        </button>
+      )}
 
       <button className="cc-btn" onClick={onArcade} title={t('Switch to ClassCade')}>
         <img src={BRAND.classcade} alt="ClassCade" />

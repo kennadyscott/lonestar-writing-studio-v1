@@ -508,13 +508,15 @@ export function StrandTrail({ topics, picked, onPick, children }) {
       const el = mapRef.current?.querySelector('.pm-node.here')
       if (!el) return
       const r = el.getBoundingClientRect()
-      // Land the student on their current land: centre it unless it already sits in the upper part of the screen.
-      if (r.top < 70 || r.bottom > window.innerHeight * 0.7) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      // only when it is really off screen (her note 2026-10-05: "it's weird when the bubble fits on the screen to push it")
+      if (r.top < 64 || r.bottom > window.innerHeight - 8) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
     }, 350)
     return () => clearTimeout(id)
   }, [here])
   return (
     <div ref={mapRef} className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+      {/* the painting and everything placed on it move together (see .pm-fill in theme.css) */}
+      <div className="pm-art">
       <video ref={livingRef} className="pm-living-video" src={LIVING_SRC} poster={`${BASE}lit-valley.jpg`} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1}
         onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />
       <div className="pm-fireflies" aria-hidden="true">
@@ -537,6 +539,7 @@ export function StrandTrail({ topics, picked, onPick, children }) {
           </button>
         )
       })}
+      </div>
       {children}
     </div>
   )
@@ -566,7 +569,7 @@ function HomeStrands({ grade, shown, topics, resume, onOpen, land, setLand }) {
   }
   return (
     <div className="lh-strands">
-      <div className={'pm-immersive valley-zoom' + (zoom ? ' zooming' : '')} style={zoom ? { transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}>
+      <div className={'pm-immersive pm-fill valley-zoom' + (zoom ? ' zooming' : '')} style={zoom ? { transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}>
         <StrandTrail topics={topics} onPick={enter}>
           <LabyrinthTitle grade={grade} shown={shown} topics={topics} skills={topics.reduce((m, { tp }) => m + (tp.core || []).length, 0)} />
         </StrandTrail>
@@ -631,8 +634,9 @@ function LandScene({ land, onOpen }) {
   const reachedAt = next ? list.indexOf(next) : n - 1
   const glow = trailFraction(pts, reachedAt)
   return (
-    <div className="pm-immersive land-arrive">
+    <div className="pm-immersive pm-fill land-arrive">
       <div className="pm-map land-map pm-living" style={{ '--pm-img': `url(${landImg(land.d)})` }}>
+        <div className="pm-art">
         {loopOk && <video ref={livingRef} className="pm-living-video" src={`${import.meta.env.BASE_URL || '/'}lands/${key}-loop.mp4`} poster={landImg(land.d)}
           autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1} onError={() => setLoopOk(false)}
           onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />}
@@ -651,11 +655,6 @@ function LandScene({ land, onOpen }) {
             <path d={trailD} pathLength="1" className="pm-trail-shimmer" style={{ '--to': 1 }} />
           </svg>
         )}
-        <div className="pm-hud">
-          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t('Land')}</div>
-          <h1 className="pm-hud-title">{t(landName(land.d))}</h1>
-          <div className="pm-hud-sub">{t(meta.tag || '')}</div>
-        </div>
         {list.map(({ tp, st }, i) => {
           const [x, y] = at(i)
           const cls = pathState(st)
@@ -668,6 +667,12 @@ function LandScene({ land, onOpen }) {
             </button>
           )
         })}
+        </div>
+        <div className="pm-hud">
+          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t('Land')}</div>
+          <h1 className="pm-hud-title">{t(landName(land.d))}</h1>
+          <div className="pm-hud-sub">{t(meta.tag || '')}</div>
+        </div>
       </div>
       <div className="pm-side">
         <div className="pm-card pm-next">

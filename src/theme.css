@@ -2289,3 +2289,16 @@ body { font-size: 16px; }
 .pm-node.low .pm-pill { order: 2; }
 .pm-node.low .pm-orb { order: 3; }
 .pm-node.low .pm-lantern { top: auto; bottom: calc(var(--orb) / 2); transform: translate(-50%, 50%); }
+
+/* ---- valley + lands fill the whole screen (2026-10-05: "Can the map fill the full screen?") ----
+   .pm-art holds the painting, its loop, the trail and the medallions in the painting's own shape;
+   it covers the frame (full width, the height under the top bar) and the frame clips the overflow,
+   about 90px of painting top + bottom at 1366x670. Everything on the painting moves with it, so
+   medallions stay on their painted spots. The title and side card stay pinned to the frame.
+   Path maps (clearings) keep the fitted frame: their side branches reach the painting's edges. */
+.pm-art { position: absolute; inset: 0; }
+.pm-immersive.pm-fill { width: auto; margin: 0 calc(50% - 50vw); }
+.pm-fill .pm-map { aspect-ratio: auto; height: calc(100dvh - 64px); background: #0b2a22; }
+.pm-fill .pm-art { --iw: max(100cqw, calc((100dvh - 64px) * 1000 / 560)); inset: auto; width: var(--iw); height: calc(var(--iw) * .56);
+  left: calc(50% - var(--iw) / 2); top: clamp(calc(100% - var(--iw) * .56), calc(50% - var(--iw) * .29), 0px); background: var(--pm-img) center / cover no-repeat; }
+/* (top is clamped so the painting always covers the frame, whichever way the screen is shaped) */

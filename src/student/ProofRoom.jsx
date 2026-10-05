@@ -2129,7 +2129,8 @@ function OrderActivity({ act, onDone, onPlay, doneLabel }) {
       <Directions text={act.directions || 'Drag the tiles into the right order — or tap a tile, then tap the spot it goes. Check when it looks right.'} />
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
       {seqs.map((s, si) => {
-        const row = s.steps.every((st) => st.length <= 24 && st.trim().split(/\s+/).length <= 3)
+        // the CMS can set how the tiles sit (Lit Lab, October 5, 2026); unset, short words go in a row
+        const row = s.layout ? s.layout === 'row' : s.steps.every((st) => st.length <= 24 && st.trim().split(/\s+/).length <= 3)
         return (
           <div key={si} style={{ border: '1.5px solid #e3edf4', borderRadius: 12, padding: '12px 14px', marginBottom: 10, background: '#fbfdfe' }}>
             {s.prompt && <div style={{ fontSize: 14, fontWeight: 700, color: NAVY, marginBottom: 8 }}>{s.prompt}</div>}

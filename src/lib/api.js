@@ -49,7 +49,26 @@ const networkApi = {
 }
 
 // VITE_STATIC=1 builds (e.g. GitHub Pages) have no server — run everything in-browser.
-export const api = import.meta.env.VITE_STATIC === '1' ? localApi : networkApi
+const baseApi = import.meta.env.VITE_STATIC === '1' ? localApi : networkApi
+
+// Coins earned (2026-10-05): any response that pays coins nudges the app to refresh, so
+// the coin celebration (components/CoinBurst.jsx) plays the moment the coins land.
+const paid = (v) => typeof v === 'number' && v > 0
+// reads hand back whole records (every student's balance), so only actions are checked,
+// and only the fields that mean "coins were just paid"
+const READS = new Set(['health', 'state', 'proofContent', 'proofStudio'])
+const PAY_LISTS = ['milestones', 'newMilestones']
+function paysCoins(r) {
+  if (!r || typeof r !== 'object' || Array.isArray(r) || r.students) return false
+  if (paid(r.coins) || paid(r.bonus) || paid(r.lineBonus) || paid(r.coinsAwarded)) return true
+  if (r.milestone && paid(r.milestone.coins)) return true
+  return PAY_LISTS.some((k) => Array.isArray(r[k]) && r[k].some((x) => x && paid(x.coins)))
+}
+export const api = Object.fromEntries(Object.entries(baseApi).map(([k, fn]) => [k, typeof fn !== 'function' || READS.has(k) ? fn : (...args) => {
+  const out = fn(...args)
+  if (out && typeof out.then === 'function') out.then((r) => { if (paysCoins(r)) window.dispatchEvent(new Event('lscr:coins')) }, () => {})
+  return out
+}]))
 
 export const TRAIT_LABELS = {
   ideas: 'Ideas', organization: 'Organization', voice: 'Voice',

@@ -18,6 +18,7 @@ import FeedbackReview from './student/FeedbackReview.jsx'
 import { HSLayout, HSHome, HSCourse, useHsTheme, useHsPalette } from './student/HighSchool.jsx'
 import PublisherConsole from './student/PublisherConsole.jsx'
 import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
+import CoinBurst, { useCoinWatch } from './components/CoinBurst.jsx'
 
 const ME_STUDENT = 'stu_kscott'
 
@@ -49,6 +50,13 @@ export default function App() {
     return next
   }, [])
   useEffect(() => { refresh(); api.health().then(setHealth) }, [refresh])
+  // coins just paid: refresh so the celebration can see the new coin events
+  useEffect(() => {
+    const on = () => refresh()
+    window.addEventListener('lscr:coins', on)
+    return () => window.removeEventListener('lscr:coins', on)
+  }, [refresh])
+  const [coinBurst, clearCoinBurst] = useCoinWatch(state, ME_STUDENT)
 
   // Interface language is a teacher setting that rides on the student record.
   const meLang = state?.students?.find((s) => s.id === ME_STUDENT)?.lang
@@ -147,6 +155,7 @@ export default function App() {
       <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)}
         settings={{ lang: me.lang, supportLevel: me.supportLevel }} onSettings={saveSettings} />
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
+      <CoinBurst burst={coinBurst} onDone={clearCoinBurst} />
     </div>
     </BridgeProvider>
     </BandContext.Provider>

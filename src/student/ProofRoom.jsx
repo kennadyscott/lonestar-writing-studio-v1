@@ -547,8 +547,6 @@ function HomeStrands({ grade, shown, topics, resume, onOpen, land, setLand }) {
   const info = strandInfo(topics)
   // click a land: the camera zooms into its medallion, then the land opens
   const [zoom, setZoom] = useState(null)
-  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.landLook') || 'A' } catch { return 'A' } })
-  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.landLook', k) } catch { /* fine */ } }
   function enter(d, at) {
     if (zoom) return
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -560,12 +558,9 @@ function HomeStrands({ grade, shown, topics, resume, onOpen, land, setLand }) {
   if (here) {
     return (
       <div className="lh-strands land-view">
-        {/* PROTOTYPE A/B (2026-10-01): two ways to be inside a land */}
-        <div className="style-pick land-pick" role="group" aria-label="Land layout">
-          <span className="lbl">Land</span>
-          {['A', 'B'].map((k) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => pickLook(k)}>{k}</button>)}
-        </div>
-        {look === 'B' ? <LandBook land={here} onOpen={onOpen} /> : <LandScene land={here} onOpen={onOpen} />}
+        {/* Land layout A, her pick (2026-10-05: "I like Land A options across the board - turn off
+            option B"). B, the storybook page with path cards, was removed. */}
+        <LandScene land={here} onOpen={onOpen} />
       </div>
     )
   }
@@ -684,50 +679,6 @@ function LandScene({ land, onOpen }) {
             </>
           ) : <div className="pm-next-title">{t('✓ Every path here is complete')}</div>}
         </div>
-      </div>
-    </div>
-  )
-}
-
-// B: a storybook page — the scene as a banner with the land's story, its paths as cards
-function LandBook({ land, onOpen }) {
-  const t = useT()
-  const meta = LAND_META[land.d] || {}
-  const next = nextPathOf(land.list)
-  return (
-    <div className="land-b land-arrive">
-      <div className="land-b-hero" style={{ '--land-img': `url(${landImg(land.d)})` }}>
-        <div className="land-b-words">
-          <div className="proof-kicker">{t('The Lit Labyrinth')} · {t('Land')}</div>
-          <h1 className="land-b-title">{t(landName(land.d))}</h1>
-          <div className="land-b-tag">{t(meta.tag || '')}</div>
-          <p className="land-b-about">{t(meta.about || '')}</p>
-          <div className="proof-stats">
-            <span>{land.list.length === 1 ? t('1 path') : t('{n} paths', { n: land.list.length })}</span>
-            <span>{t('{a} complete', { a: land.done })}</span>
-          </div>
-        </div>
-      </div>
-      <div className="land-b-paths">
-        {land.list.map(({ tp, st }) => {
-          const cls = pathState(st)
-          return (
-            <button key={tp.id} className={`land-card ${cls}${tp === next?.tp ? ' next' : ''}`} onClick={() => onOpen(tp)}>
-              <span className="land-card-top" style={coverOf(tp) ? { '--cover': `url(${coverOf(tp)})` } : undefined}>
-                {!coverOf(tp) && <span className="land-card-icon" aria-hidden>{tp.icon || '✦'}</span>}
-                {tp === next?.tp && <span className="land-card-flag">{st.started ? t('Continue') : t('Start here')}</span>}
-              </span>
-              <span className="land-card-body">
-                <span className="land-card-title">{tp.short || tp.title}</span>
-                <span className="land-card-clearings">
-                  {(tp.core || []).slice(0, 5).map((w) => <span key={w.id}>{clearingTitle(w)}</span>)}
-                </span>
-                {cls === 'done' ? <span className="pill green" style={{ alignSelf: 'flex-start' }}>{t('✓ Path complete')}</span> : <ProofBar st={st} />}
-                <span className="land-card-go">{cls === 'done' ? t('Review →') : st.started ? t('Keep going →') : t('Begin →')}</span>
-              </span>
-            </button>
-          )
-        })}
       </div>
     </div>
   )

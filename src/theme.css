@@ -1119,40 +1119,12 @@ a { color: var(--link); }
 .land-arrive { animation: land-arrive .7s ease both; }
 @keyframes land-arrive { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
 .land-view { position: relative; }
-.land-pick { position: absolute; z-index: 8; top: 14px; left: calc(50% - 50vw + clamp(16px, 2.4vw, 40px) + 170px); }
 
-/* A: paths as landmarks on the land's scene */
+/* inside a land: paths as landmarks on the land's scene (layout A; B was removed 2026-10-05) */
 .land-map { background: linear-gradient(180deg, rgba(4,20,28,.12), rgba(4,20,28,.28)), var(--pm-img) center / cover no-repeat, #0b2a22; }
 .pm-node.land-mark { --orb: clamp(44px, 7.4cqw, 74px); width: clamp(110px, 15cqw, 160px); }
 .pm-node.land-mark .pm-name { font-size: clamp(12px, 1.6cqw, 16px); }
 
-/* B: storybook layout */
-.land-b { display: flex; flex-direction: column; gap: 18px; }
-.land-b-hero { margin: -26px calc(50% - 50vw) 0; min-height: clamp(300px, 50vh, 500px); display: flex; align-items: flex-end;
-  background: linear-gradient(90deg, rgba(2,24,38,.86) 0%, rgba(2,24,38,.55) 38%, rgba(2,24,38,0) 70%), linear-gradient(0deg, rgba(2,24,38,.55), rgba(2,24,38,0) 45%), var(--land-img) center / cover no-repeat, #0b2a22; }
-.land-b-words { max-width: 560px; padding: 80px clamp(20px, 4vw, 64px) 34px; color: #fff; text-shadow: 0 2px 10px rgba(0,0,0,.55); }
-.land-b-title { margin: 4px 0 4px; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(36px, 4.4vw, 60px); line-height: 1.02; }
-.land-b-tag { font-size: clamp(16px, 1.6vw, 20px); font-weight: 700; color: #ffe08a; }
-.land-b-about { margin: 8px 0 12px; font-size: 15px; line-height: 1.55; color: #e7f1f6; max-width: 46ch; }
-.land-b-paths { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
-.land-card { display: flex; flex-direction: column; text-align: left; padding: 0; border-radius: 18px; overflow: hidden; background: #fff; border: 1.5px solid var(--line);
-  box-shadow: 0 6px 18px rgba(8,30,50,.10); cursor: pointer; transition: transform .15s, box-shadow .15s; }
-.land-card:hover { transform: translateY(-3px); box-shadow: 0 12px 26px rgba(8,30,50,.16); }
-.land-card:focus-visible { outline: 3px solid #f0b429; outline-offset: 3px; }
-.land-card.next { border: 2px solid #e9b93a; box-shadow: 0 0 0 4px rgba(233,185,58,.18), 0 8px 22px rgba(8,30,50,.12); }
-.land-card-top { position: relative; height: 110px; display: grid; place-items: center; background: var(--cover, linear-gradient(135deg, #eef6f9, #dcedf5)) center / cover no-repeat; }
-.land-card-icon { font-size: 44px; }
-.land-card-flag { position: absolute; left: 10px; top: 10px; font-size: 10.5px; font-weight: 800; letter-spacing: .8px; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; background: #f5c542; color: #3b2a00; }
-.land-card-body { display: flex; flex-direction: column; gap: 8px; padding: 12px 14px 14px; flex: 1; }
-.land-card-title { font-family: Georgia, 'Times New Roman', serif; font-size: 19px; font-weight: 700; color: #10294a; line-height: 1.2; }
-.land-card-clearings { display: flex; flex-wrap: wrap; gap: 4px; }
-.land-card-clearings span { font-size: 11px; font-weight: 700; color: #4a6074; background: #eef3f6; padding: 2px 8px; border-radius: 999px; }
-.land-card-go { margin-top: auto; font-size: 13.5px; font-weight: 800; color: #0f97c2; }
-.land-card.done .land-card-go { color: var(--good); }
-@media (max-width: 680px) {
-  .land-pick { display: none; }
-  .land-b-hero { margin-top: 0; min-height: 260px; }
-}
 @media (prefers-reduced-motion: reduce) { .valley-zoom, .land-arrive { transition: none; animation: none; } }
 
 /* ---- Luna's Writing Adventure logo: her artwork, given depth with light (2026-10-02) ----

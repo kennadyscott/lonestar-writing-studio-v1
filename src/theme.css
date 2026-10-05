@@ -2258,3 +2258,34 @@ body { font-size: 16px; }
   .coin-rain { display: none; }
   .coin-card, .coin-card-disc { animation: none; }
 }
+
+/* ---- Lit Labyrinth maps fit a Chromebook screen; bigger land bubbles; a bolder trail (2026-10-05) ----
+   Her note: "We need all the little land bubbles to be bigger and the font bigger to really make it
+   clear their path. I also think the path dots and the path line could be a little more vibrant or
+   obvious. Remember to keep everything in frame for a standard chromebook screen."
+   The map keeps the painting's shape (so every medallion stays on its painted spot) and is sized to the
+   height left under the top bar; on a wide screen the blurred valley shows either side. */
+.pm-immersive { --pmw: min(100vw, calc((100dvh - 64px) * 1000 / 560)); width: var(--pmw); margin: 0 0 0 calc(50% - var(--pmw) / 2); }
+.pm-immersive .pm-map { box-shadow: 0 0 0 1px rgba(255,255,255,.08), 0 12px 40px rgba(0,0,0,.35); }
+
+/* the lands on the valley map */
+.lh-strands:not(.land-view) .pm-node { --orb: clamp(52px, 8.6cqw, 96px); width: clamp(120px, 17cqw, 190px); gap: clamp(3px, .5cqw, 6px); }
+.lh-strands:not(.land-view) .pm-orb { border-width: 3px; }
+.lh-strands:not(.land-view) .pm-name { font-size: clamp(15px, 2.1cqw, 23px); line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,1), 0 0 2px rgba(0,0,0,1); }
+.lh-strands:not(.land-view) .pm-pill { font-size: clamp(11.5px, 1.45cqw, 15px); padding: 3px clamp(8px, 1.2cqw, 13px); }
+
+/* a bolder trail everywhere: brighter, thicker dots with a dark edge; a thicker gold line with a dark edge */
+.pm-trail-base { stroke: #fff6cf; stroke-width: 8; stroke-dasharray: 1 15; filter: drop-shadow(0 0 2px rgba(40,20,0,.95)) drop-shadow(0 0 6px rgba(255,214,100,.8)); }
+.pm-trail-glow { stroke: #ffc93a; stroke-width: 24; opacity: .7; }
+.pm-trail-lit { stroke: #ffd84a; stroke-width: 9; filter: drop-shadow(0 0 1.5px rgba(90,45,0,1)) drop-shadow(0 0 1px rgba(90,45,0,.9)); }
+/* the paths inside a land, to match the bigger lands on the valley map */
+.pm-node.land-mark { --orb: clamp(52px, 8.2cqw, 92px); width: clamp(120px, 18cqw, 200px); gap: clamp(3px, .5cqw, 6px); }
+.pm-node.land-mark .pm-orb { border-width: 3px; }
+.pm-node.land-mark .pm-name { font-size: clamp(15px, 1.95cqw, 21px); line-height: 1.1; text-shadow: 0 2px 10px rgba(0,0,0,.95), 0 0 4px rgba(0,0,0,1), 0 0 2px rgba(0,0,0,1); }
+.pm-node.land-mark .pm-pill { font-size: clamp(11.5px, 1.4cqw, 14.5px); padding: 3px clamp(8px, 1.2cqw, 13px); }
+/* low on the painting: the name sits above the bubble; the bubble stays on its painted spot */
+.pm-node.low { transform: translate(-50%, calc(-100% + var(--orb) / 2)); }
+.pm-node.low .pm-name { order: 1; }
+.pm-node.low .pm-pill { order: 2; }
+.pm-node.low .pm-orb { order: 3; }
+.pm-node.low .pm-lantern { top: auto; bottom: calc(var(--orb) / 2); transform: translate(-50%, 50%); }

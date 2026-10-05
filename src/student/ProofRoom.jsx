@@ -529,7 +529,7 @@ export function StrandTrail({ topics, picked, onPick, children }) {
       {info.map((x, i) => {
         const [px, py] = at(i)
         return (
-          <button key={x.d} className={`pm-node ${x.cls}${x.d === picked ? ' picked' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
+          <button key={x.d} className={`pm-node ${x.cls}${x.d === picked ? ' picked' : ''}${py > LOW_Y ? ' low' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
             onClick={() => onPick(x.d, { x: px / 10, y: (py / 560) * 100 })} aria-pressed={picked ? x.d === picked : undefined}>
             <span className="pm-orb" aria-hidden>{STRAND_ICON[x.d] || '✦'}</span>
             <span className="pm-name">{t(landName(x.d))}</span>
@@ -607,6 +607,9 @@ function trailFraction(p, k) {
   const total = seg.reduce((a, b) => a + b, 0) || 1
   return Math.max(0, Math.min(1, seg.slice(0, Math.max(0, k)).reduce((a, b) => a + b, 0) / total))
 }
+// A medallion this low on the painting wears its name above the bubble, so the bigger labels
+// (2026-10-05) never drop off the bottom of a Chromebook screen.
+const LOW_Y = 430
 const pathState = (st) => (st.finished ? 'done' : st.started ? 'here' : 'fresh')
 const nextPathOf = (list) => list.find(({ st }) => st.started && !st.finished) || list.find(({ st }) => !st.finished)
 
@@ -657,7 +660,7 @@ function LandScene({ land, onOpen }) {
           const [x, y] = at(i)
           const cls = pathState(st)
           return (
-            <button key={tp.id} className={`pm-node land-mark ${cls}`} style={{ left: `${x / 10}%`, top: `${(y / 560) * 100}%` }} onClick={() => onOpen(tp)}>
+            <button key={tp.id} className={`pm-node land-mark ${cls}${y > LOW_Y ? ' low' : ''}`} style={{ left: `${x / 10}%`, top: `${(y / 560) * 100}%` }} onClick={() => onOpen(tp)}>
               {tp === next?.tp && <span className="pm-lantern" aria-hidden />}
               <span className="pm-orb" aria-hidden>{cls === 'done' ? '✓' : tp.icon || '✦'}</span>
               <span className="pm-name">{tp.short || tp.title}</span>

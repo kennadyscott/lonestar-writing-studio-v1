@@ -102,6 +102,7 @@ const HOW_TO = {
   passage: 'Read the whole draft first. Each question names the sentence it is about — that sentence lights up when you open the question. For a "click the error" question, click the word inside the passage.',
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
   spell: 'Look at each picture and spell the word, one letter in each box. Press 🔊 to hear the word. Check when every box is filled.',
+  spellTiles: 'Look at each picture and build the word: drag the letter tiles into the boxes — or tap a tile, then tap its box. Tap a placed letter to send it back. Press 🔊 to hear the word.',
 }
 
 // Where the solution videos are served from. Unset, they come from the app's own
@@ -2260,26 +2261,44 @@ const spellShown = (w) => { const show = new Set(Array.isArray(w.show) ? w.show 
 function SpellActivity({ act, onDone, onPlay, doneLabel }) {
   const t = useT()
   const words = act.spell || []
-  const shown = useMemo(() => words.map(spellShown), [act])
+  // Tiles (mode "drag", Kennady 2026-10-06: "a little pile of tiles off to the right that they drag and drop to build the word"):
+  // each word's open letters, shuffled into its own pile; from[wi][k] is the pile tile sitting in box k, or -1.
+  const tiles = act.mode === 'drag'
+  const shown = useMemo(() => words.map((w) => spellShown(w)), [act])
+  const piles = useMemo(() => words.map((w) => shuffled([...w.word].map((ch, k) => ({ ch: ch.toLowerCase(), k })).filter((x) => !spellShown(w)[x.k]).map((x, i) => ({ id: i, ch: x.ch })))), [act])
   const [typed, setTyped] = useState(() => words.map((w) => [...w.word].map((ch, k) => (spellShown(w)[k] ? ch : ''))))
+  const [from, setFrom] = useState(() => words.map((w) => [...w.word].map(() => -1)))
+  const [held, setHeld] = useState(null)   // { wi, id } a tile picked up (dragged or tapped)
+  const [over, setOver] = useState(null)   // 'wi:k' box under a dragged tile
   const [checked, setChecked] = useState(false)
   const boxes = useRef({})
   const same = (a, b) => String(a).toLowerCase() === String(b).toLowerCase()
-  const rightOf = (wi) => [...words[wi].word].every((ch, k) => same(typed[wi][k], ch))
+  const tileAt = (wi, k) => (from[wi][k] >= 0 ? piles[wi].find((p) => p.id === from[wi][k]) : null)
+  const letterAt = (wi, k) => (shown[wi][k] ? words[wi].word[k] : tiles ? (tileAt(wi, k)?.ch || '') : typed[wi][k])
+  const rightOf = (wi) => [...words[wi].word].every((ch, k) => same(letterAt(wi, k), ch))
   const score = words.filter((_, wi) => rightOf(wi)).length
-  const full = typed.every((row) => row.every((c) => c))
+  const full = words.every((w, wi) => [...w.word].every((_, k) => letterAt(wi, k)))
   const open = (wi, k) => !shown[wi][k]
   const focus = (wi, k) => { const el = boxes.current[wi + ':' + k]; if (el) el.focus() }
   const step = (wi, k, by) => { for (let j = k + by; j >= 0 && j < words[wi].word.length; j += by) if (open(wi, j)) return j; return -1 }
   const put = (wi, k, v) => setTyped((all) => all.map((row, i) => (i !== wi ? row : row.map((c, j) => (j === k ? v : c)))))
+  // A tile dropped on a box leaves wherever it was; a tile already in that box goes back to the pile.
+  const drop = (wi, k, id) => setFrom((all) => all.map((row, i) => (i !== wi ? row : row.map((v, j) => (j === k ? id : v === id ? -1 : v)))))
+  const unplace = (wi, id) => setFrom((all) => all.map((row, i) => (i !== wi ? row : row.map((v) => (v === id ? -1 : v)))))
   const say = canSpeak()
+  const boxStyle = (given, ok, hot) => ({ width: 44, height: 52, textAlign: 'center', fontSize: 26, fontWeight: 800, borderRadius: 9, padding: 0, outline: 'none',
+    color: given ? '#5b7083' : checked ? (ok ? 'var(--good)' : '#c0392b') : NAVY,
+    background: given ? '#eef3f7' : checked ? (ok ? '#e6f6ee' : '#fdecea') : hot ? '#eaf4f9' : '#fff',
+    border: `2px ${hot ? 'dashed' : 'solid'} ${given ? '#d5e0e8' : checked ? (ok ? 'var(--good)' : '#f3c4bf') : hot ? CYAN : '#bcd0de'}`, caretColor: CYAN })
   return (
     <WithArt act={act} art="" side="right">
-      <Directions text={act.directions || HOW_TO.spell} />
+      <Directions text={act.directions || (tiles ? HOW_TO.spellTiles : HOW_TO.spell)} />
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
       {words.map((w, wi) => {
         const pic = artSrc(w.picture)
         const good = checked && rightOf(wi)
+        const pile = tiles ? piles[wi].filter((p) => !from[wi].includes(p.id)) : []
+        const holding = held && held.wi === wi
         return (
           <div key={wi} style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', border: '1.5px solid #e3edf4', borderRadius: 14, padding: '12px 14px', marginBottom: 10, background: checked ? (good ? '#f1faf5' : '#fff8f7') : '#fbfdfe' }}>
             <span style={{ fontSize: 13, fontWeight: 800, color: '#93a3b3', width: 18 }}>{wi + 1}.</span>
@@ -2293,7 +2312,23 @@ function SpellActivity({ act, onDone, onPlay, doneLabel }) {
             <div role="group" aria-label={t('Letter boxes')} style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {[...w.word].map((ch, k) => {
                 if (!/[A-Za-z]/.test(ch)) return <span key={k} style={{ width: ch === ' ' ? 18 : 12, alignSelf: 'center', textAlign: 'center', fontSize: 26, fontWeight: 800, color: NAVY }}>{ch === ' ' ? '' : ch}</span>
-                const given = !open(wi, k), ok = checked && same(typed[wi][k], ch)
+                const given = !open(wi, k), ok = checked && same(letterAt(wi, k), ch)
+                if (tiles) {
+                  const tile = tileAt(wi, k), hot = !given && !checked && over === wi + ':' + k
+                  return (
+                    <button key={k} type="button" aria-label={t('Letter') + ' ' + (k + 1)} disabled={given || checked}
+                      draggable={!!tile && !checked}
+                      onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', tile.ch); setHeld({ wi, id: tile.id }) }}
+                      onDragEnd={() => { setHeld(null); setOver(null) }}
+                      onDragOver={(e) => { if (holding && !given && !checked) { e.preventDefault(); setOver(wi + ':' + k) } }}
+                      onDragLeave={() => setOver(null)}
+                      onDrop={(e) => { e.preventDefault(); if (holding && !given && !checked) drop(wi, k, held.id); setHeld(null); setOver(null) }}
+                      onClick={() => { if (holding) { drop(wi, k, held.id); setHeld(null) } else if (tile) unplace(wi, tile.id) }}
+                      style={{ ...boxStyle(given, ok, hot || (holding && !tile)), cursor: given || checked ? 'default' : 'pointer' }}>
+                      {letterAt(wi, k)}
+                    </button>
+                  )
+                }
                 return (
                   <input key={k} ref={(el) => { boxes.current[wi + ':' + k] = el }}
                     value={typed[wi][k]} readOnly={given || checked} maxLength={2} inputMode="text" autoCapitalize="off" autoComplete="off" spellCheck={false}
@@ -2315,13 +2350,34 @@ function SpellActivity({ act, onDone, onPlay, doneLabel }) {
                       else if (e.key === 'ArrowRight') { const n = step(wi, k, 1); if (n >= 0) { e.preventDefault(); focus(wi, n) } }
                     }}
                     onFocus={(e) => e.target.select()}
-                    style={{ width: 44, height: 52, textAlign: 'center', fontSize: 26, fontWeight: 800, borderRadius: 9, padding: 0, outline: 'none',
-                      color: given ? '#5b7083' : checked ? (ok ? 'var(--good)' : '#c0392b') : NAVY,
-                      background: given ? '#eef3f7' : checked ? (ok ? '#e6f6ee' : '#fdecea') : '#fff',
-                      border: `2px solid ${given ? '#d5e0e8' : checked ? (ok ? 'var(--good)' : '#f3c4bf') : '#bcd0de'}`, caretColor: CYAN }} />
+                    style={boxStyle(given, ok, false)} />
                 )
               })}
             </div>
+            {tiles && !checked && (
+              <div aria-label={t('Letter tiles')}
+                onDragOver={(e) => { if (holding) e.preventDefault() }}
+                onDrop={(e) => { e.preventDefault(); if (holding) unplace(wi, held.id); setHeld(null); setOver(null) }}
+                style={{ marginLeft: 'auto', flex: '1 1 140px', display: 'flex', flexWrap: 'wrap', alignContent: 'flex-start', gap: 6, padding: 8, minWidth: 104, maxWidth: 240, minHeight: 56, border: '2px dashed #cfe0ea', borderRadius: 12, background: '#f7fbfd' }}>
+                {pile.map((p) => {
+                  const lifted = holding && held.id === p.id
+                  return (
+                    <button key={p.id} type="button" draggable
+                      onDragStart={(e) => { e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', p.ch); setHeld({ wi, id: p.id }) }}
+                      onDragEnd={() => { setHeld(null); setOver(null) }}
+                      onClick={() => setHeld(lifted ? null : { wi, id: p.id })}
+                      aria-pressed={lifted} aria-label={t('Tile') + ' ' + p.ch}
+                      style={{ width: 38, height: 42, borderRadius: 8, fontSize: 22, fontWeight: 800, cursor: 'grab', userSelect: 'none', color: NAVY,
+                        background: lifted ? '#fff7d6' : '#fff', border: `2px solid ${lifted ? '#f2b705' : '#bcd0de'}`,
+                        boxShadow: lifted ? '0 4px 12px rgba(242,183,5,.35)' : '0 2px 0 #d5e0e8', transform: lifted ? 'translateY(-2px)' : 'none' }}>
+                      {p.ch}
+                    </button>
+                  )
+                })}
+                {!pile.length && <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 700, alignSelf: 'center' }}>{t('All tiles placed')}</span>}
+              </div>
+            )}
+            {tiles && holding && !checked && <div style={{ flexBasis: '100%', paddingLeft: 32, fontSize: 12, color: 'var(--muted)', fontWeight: 700 }}>{t('Now tap the box where it goes.')}</div>}
             {checked && !good && (
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexBasis: '100%', paddingLeft: 32, flexWrap: 'wrap' }}>
                 <span style={{ fontSize: 13, color: '#8a4b12', fontWeight: 800 }}>{t('Right spelling')}: {w.word}</span>
@@ -2333,7 +2389,7 @@ function SpellActivity({ act, onDone, onPlay, doneLabel }) {
       })}
       <Footer hint={act.hint}>
         {!checked
-          ? <button className="btn" disabled={!full} title={full ? '' : t('Fill every box first')} onClick={() => setChecked(true)}>{t('Check my spelling ✓')}</button>
+          ? <button className="btn" disabled={!full} title={full ? '' : t('Fill every box first')} onClick={() => { setHeld(null); setChecked(true) }}>{t('Check my spelling ✓')}</button>
           : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}
       </Footer>
     </WithArt>

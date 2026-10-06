@@ -678,6 +678,8 @@ function normalizeActivity(a) {
     quiz: list(a.quiz).map((q) => ({ ...q, options: list(q && q.options) })),
     order: list(a.order).map((o) => ({ ...o, steps: list(o && o.steps) })),
     pairs: list(a.pairs), groups: list(a.groups), words: list(a.words),
+    // Spell (2026-10-06): letter-box words, each with its picture.
+    spell: list(a.spell).filter((w) => w && typeof w.word === 'string' && w.word.trim()).map((w) => ({ ...w, word: w.word.trim() })),
   }
 }
 
@@ -694,6 +696,7 @@ export function prepare(ws) {
       : a.kind === 'order' ? a.order.length
       : a.kind === 'match' ? a.pairs.length
       : a.kind === 'sort' ? a.words.length
+      : a.kind === 'spell' ? a.spell.length
       : a.items.length), 0)
   return { ...ws, activities, points }
 }

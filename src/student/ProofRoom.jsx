@@ -7,6 +7,7 @@ import { useT } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.jsx'
 import SHEET_ART from '../lib/sheetArt.json'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
+import { canSpeak, pickVoice } from '../lib/readAloud.js'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -100,6 +101,7 @@ const HOW_TO = {
   drag: 'Drag each word from the bank into the blank where it belongs — or tap a word, then tap its blank. Drop it back in the bank to change your mind.',
   passage: 'Read the whole draft first. Each question names the sentence it is about — that sentence lights up when you open the question. For a "click the error" question, click the word inside the passage.',
   maze: 'Move with the arrow keys, or click a square next to you. Every verb blocking the path is written wrong — fix it to walk through. Get it right the first time to earn the point.',
+  spell: 'Look at each picture and spell the word, one letter in each box. Press 🔊 to hear the word. Check when every box is filled.',
 }
 
 // Where the solution videos are served from. Unset, they come from the app's own
@@ -112,6 +114,10 @@ const MEDIA_BASE = import.meta.env.VITE_MEDIA_BASE || ((import.meta.env.BASE_URL
 const KNOWN_MEDIA = {}
 export function registerMedia(map) { Object.assign(KNOWN_MEDIA, map || {}) }
 const SOLUTION = (id) => KNOWN_MEDIA[id] || (MEDIA_BASE.replace(/\/?$/, '/') + id + '.mp4')
+// Pictures the CMS stores (worksheet characters, Spell pictures, uploads) live under its proof-room folder by media id; a path's
+// own media map wins when it names one, and the shipped art keeps its own folder.
+const CMS_ART = (id) => 'https://assets.cleark12.com/proof-room/v1/' + id + '.webp'
+const artSrc = (id) => (!id ? null : KNOWN_MEDIA[id] || ART_SRC[id] || (/^art-[A-Za-z0-9_-]+$/.test(id) ? CMS_ART(id) : null))
 // A topic's cover picture. The CMS stores it as a media id (topic.cover, an "art"
 // row in CRProofRoomMedia); a full URL (topic.coverUrl) or a path's own media map
 // also works. No cover: the card keeps its icon.
@@ -175,6 +181,7 @@ export function ActivityPreview({ act, onPlay, onDone, doneLabel }) {
   if (ready.kind === 'order') return <OrderActivity {...props} />
   if (ready.kind === 'match') return <MatchActivity {...props} />
   if (ready.kind === 'sort') return <SortActivity {...props} />
+  if (ready.kind === 'spell') return <SpellActivity {...props} />
   return <FixActivity {...props} />
 }
 
@@ -196,7 +203,7 @@ function Beside({ src, children, flip, mirror }) {
  * nothing changes nothing. */
 function WithArt({ act, art: fallback, side: fallbackSide, children }) {
   const id = act.art === undefined ? fallback : act.art
-  const src = ART_SRC[id]
+  const src = artSrc(id)
   if (!src) return children
   const side = act.artSide || fallbackSide
   return <Beside src={src} flip={side === 'left'} mirror={!!act.artMirror}>{children}</Beside>
@@ -1132,7 +1139,7 @@ function Stop({ stop, onPlay }) {
 // What each activity kind is called on the worksheet's step chips (and the Practice peek).
 export const kindLabel = (kind, t) => kind === 'hunt' ? t('Error hunt') : kind === 'maze' ? t('Verb maze') : kind === 'compose' ? t('Write it')
   : kind === 'passage' ? t('Read & answer') : kind === 'quiz' ? t('Quiz') : kind === 'order' ? t('Put in order') : kind === 'match' ? t('Match')
-  : kind === 'sort' ? t('Sort') : t('Fill it in')
+  : kind === 'sort' ? t('Sort') : kind === 'spell' ? t('Spell it') : t('Fill it in')
 
 export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext, preview }) {
   const t = useT()
@@ -1243,6 +1250,7 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
         : act.kind === 'order' ? <OrderActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'match' ? <MatchActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : act.kind === 'sort' ? <SortActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
+        : act.kind === 'spell' ? <SpellActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />
         : <FixActivity key={step} act={act} onDone={finishActivity} onPlay={setVideo} />}
       </ActivityBoundary>
     </Shell>
@@ -2224,6 +2232,108 @@ function MatchActivity({ act, onDone, doneLabel }) {
         {!checked && Object.keys(made).length > 0 && <button className="btn ghost" onClick={() => setMade({})}>{t('Start over')}</button>}
         {!checked
           ? <button className="btn" disabled={Object.keys(made).length < pairs.length} onClick={() => setChecked(true)}>{t('Check my answers ✓')}</button>
+          : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}
+      </Footer>
+    </WithArt>
+  )
+}
+
+/* Say one word with the browser's own voice (the same engine as Read-aloud): US English, a little slow for young readers. */
+function sayWord(word) {
+  if (!canSpeak()) return
+  try {
+    window.speechSynthesis.cancel()
+    const u = new SpeechSynthesisUtterance(word)
+    u.lang = 'en-US'
+    u.rate = 0.8
+    const v = pickVoice('en-US')
+    if (v) u.voice = v
+    window.speechSynthesis.speak(u)
+  } catch {}
+}
+/* The letters printed in a Spell word's boxes: the listed ones (the first when unset) plus every space, hyphen and apostrophe. */
+const spellShown = (w) => { const show = new Set(Array.isArray(w.show) ? w.show : [0]); return [...String(w.word || '')].map((ch, i) => show.has(i) || !/[A-Za-z]/.test(ch)) }
+
+/* Spell: each word's picture beside a row of letter boxes (Lit Lab, 2026-10-06: "students fill in the letters to build the word"
+ * and "an audio button that says a word"). Typing moves to the next box; Backspace on an empty box goes back. Check marks every
+ * box; a word counts when all its letters are right. */
+function SpellActivity({ act, onDone, onPlay, doneLabel }) {
+  const t = useT()
+  const words = act.spell || []
+  const shown = useMemo(() => words.map(spellShown), [act])
+  const [typed, setTyped] = useState(() => words.map((w) => [...w.word].map((ch, k) => (spellShown(w)[k] ? ch : ''))))
+  const [checked, setChecked] = useState(false)
+  const boxes = useRef({})
+  const same = (a, b) => String(a).toLowerCase() === String(b).toLowerCase()
+  const rightOf = (wi) => [...words[wi].word].every((ch, k) => same(typed[wi][k], ch))
+  const score = words.filter((_, wi) => rightOf(wi)).length
+  const full = typed.every((row) => row.every((c) => c))
+  const open = (wi, k) => !shown[wi][k]
+  const focus = (wi, k) => { const el = boxes.current[wi + ':' + k]; if (el) el.focus() }
+  const step = (wi, k, by) => { for (let j = k + by; j >= 0 && j < words[wi].word.length; j += by) if (open(wi, j)) return j; return -1 }
+  const put = (wi, k, v) => setTyped((all) => all.map((row, i) => (i !== wi ? row : row.map((c, j) => (j === k ? v : c)))))
+  const say = canSpeak()
+  return (
+    <WithArt act={act} art="" side="right">
+      <Directions text={act.directions || HOW_TO.spell} />
+      <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
+      {words.map((w, wi) => {
+        const pic = artSrc(w.picture)
+        const good = checked && rightOf(wi)
+        return (
+          <div key={wi} style={{ display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', border: '1.5px solid #e3edf4', borderRadius: 14, padding: '12px 14px', marginBottom: 10, background: checked ? (good ? '#f1faf5' : '#fff8f7') : '#fbfdfe' }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#93a3b3', width: 18 }}>{wi + 1}.</span>
+            {pic
+              ? <img src={pic} alt="" style={{ width: 88, height: 88, objectFit: 'contain', flexShrink: 0 }} />
+              : <span style={{ width: 88, height: 88, flexShrink: 0 }} />}
+            {say && (
+              <button type="button" onClick={() => sayWord(w.word)} aria-label={t('Hear the word')} title={t('Hear the word')}
+                style={{ width: 44, height: 44, borderRadius: 999, border: '1.5px solid #cfe6f0', background: '#eef6f9', fontSize: 20, cursor: 'pointer', flexShrink: 0 }}>🔊</button>
+            )}
+            <div role="group" aria-label={t('Letter boxes')} style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+              {[...w.word].map((ch, k) => {
+                if (!/[A-Za-z]/.test(ch)) return <span key={k} style={{ width: ch === ' ' ? 18 : 12, alignSelf: 'center', textAlign: 'center', fontSize: 26, fontWeight: 800, color: NAVY }}>{ch === ' ' ? '' : ch}</span>
+                const given = !open(wi, k), ok = checked && same(typed[wi][k], ch)
+                return (
+                  <input key={k} ref={(el) => { boxes.current[wi + ':' + k] = el }}
+                    value={typed[wi][k]} readOnly={given || checked} maxLength={2} inputMode="text" autoCapitalize="off" autoComplete="off" spellCheck={false}
+                    aria-label={t('Letter') + ' ' + (k + 1)}
+                    onChange={(e) => {
+                      const v = (e.target.value.match(/[A-Za-z]/g) || []).pop() || ''
+                      put(wi, k, v.toLowerCase())
+                      if (v) { const n = step(wi, k, 1); if (n >= 0) focus(wi, n) }
+                    }}
+                    onKeyDown={(e) => {
+                      // A letter is placed on the key press itself, so quick typing walks along the boxes rather than piling into one.
+                      if (/^[A-Za-z]$/.test(e.key) && !e.metaKey && !e.ctrlKey && !e.altKey) {
+                        e.preventDefault()
+                        if (given || checked) return
+                        put(wi, k, e.key.toLowerCase())
+                        const n = step(wi, k, 1); if (n >= 0) focus(wi, n)
+                      } else if (e.key === 'Backspace' && !typed[wi][k] && !given) { const p = step(wi, k, -1); if (p >= 0) { e.preventDefault(); put(wi, p, ''); focus(wi, p) } }
+                      else if (e.key === 'ArrowLeft') { const p = step(wi, k, -1); if (p >= 0) { e.preventDefault(); focus(wi, p) } }
+                      else if (e.key === 'ArrowRight') { const n = step(wi, k, 1); if (n >= 0) { e.preventDefault(); focus(wi, n) } }
+                    }}
+                    onFocus={(e) => e.target.select()}
+                    style={{ width: 44, height: 52, textAlign: 'center', fontSize: 26, fontWeight: 800, borderRadius: 9, padding: 0, outline: 'none',
+                      color: given ? '#5b7083' : checked ? (ok ? 'var(--good)' : '#c0392b') : NAVY,
+                      background: given ? '#eef3f7' : checked ? (ok ? '#e6f6ee' : '#fdecea') : '#fff',
+                      border: `2px solid ${given ? '#d5e0e8' : checked ? (ok ? 'var(--good)' : '#f3c4bf') : '#bcd0de'}`, caretColor: CYAN }} />
+                )
+              })}
+            </div>
+            {checked && !good && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexBasis: '100%', paddingLeft: 32, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 13, color: '#8a4b12', fontWeight: 800 }}>{t('Right spelling')}: {w.word}</span>
+                <WatchButton id={w.video} onPlay={onPlay} label="Why?" />
+              </div>
+            )}
+          </div>
+        )
+      })}
+      <Footer hint={act.hint}>
+        {!checked
+          ? <button className="btn" disabled={!full} title={full ? '' : t('Fill every box first')} onClick={() => setChecked(true)}>{t('Check my spelling ✓')}</button>
           : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}
       </Footer>
     </WithArt>

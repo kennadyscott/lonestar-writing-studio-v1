@@ -2193,15 +2193,22 @@ function OrderActivity({ act, onDone, onPlay, doneLabel }) {
 }
 
 /* Match: tap a card on the left, then its partner on the right. */
-function MatchActivity({ act, onDone, doneLabel }) {
+function MatchActivity({ act, onDone, onPlay, doneLabel }) {
   const t = useT()
   const pairs = act.pairs || []
+  // A card B can be a picture (`bImage`, Lit Lab 2026-10-06: "Draw a line from the word to the picture it matches").
+  const pic = (p) => (p && p.bImage ? artSrc(p.bImage) : null)
   const right = useMemo(() => shuffled(pairs.map((p, i) => ({ text: p.b, i }))), [act])
   const [held, setHeld] = useState(null)
   const [made, setMade] = useState({})   // left index -> right index chosen
   const [checked, setChecked] = useState(false)
   const score = pairs.filter((_, i) => made[i] === i).length
   const taken = new Set(Object.values(made))
+  const pictures = pairs.some((p) => pic(p))
+  const cardB = (p, size) => {
+    const src = pic(p)
+    return src ? <img src={src} alt={p.b} style={{ height: size, width: size, objectFit: 'contain', display: 'block' }} /> : p.b
+  }
   return (
     <WithArt act={act} art="" side="right">
       <Directions text={act.directions || 'Tap a card on the left, then the card on the right that goes with it.'} />
@@ -2211,20 +2218,30 @@ function MatchActivity({ act, onDone, doneLabel }) {
           {pairs.map((p, i) => {
             const good = checked && made[i] === i, bad = checked && made[i] !== undefined && made[i] !== i
             return (
-              <button key={i} disabled={checked} onClick={() => setHeld(held === i ? null : i)}
-                style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 10, fontSize: 14, fontWeight: 700, color: good ? 'var(--good)' : bad ? '#c0392b' : NAVY,
-                  background: good ? '#e6f6ee' : bad ? '#fdecea' : held === i ? '#eaf4f9' : '#fff', border: `1.5px solid ${good ? 'var(--good)' : bad ? '#c0392b' : held === i ? CYAN : '#e3edf4'}` }}>
-                {p.a}{made[i] !== undefined && <span style={{ color: '#93a3b3', fontWeight: 600 }}> → {pairs[made[i]].b}</span>}
-              </button>
+              <div key={i}>
+                <button disabled={checked} onClick={() => setHeld(held === i ? null : i)}
+                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', padding: '9px 12px', minHeight: pictures ? 58 : undefined, borderRadius: 10, fontSize: pictures ? 17 : 14, fontWeight: 700, color: good ? 'var(--good)' : bad ? '#c0392b' : NAVY,
+                    background: good ? '#e6f6ee' : bad ? '#fdecea' : held === i ? '#eaf4f9' : '#fff', border: `1.5px solid ${good ? 'var(--good)' : bad ? '#c0392b' : held === i ? CYAN : '#e3edf4'}` }}>
+                  <span style={{ flex: 1 }}>{p.a}</span>
+                  {made[i] !== undefined && <span style={{ color: '#93a3b3', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>→ {cardB(pairs[made[i]], 36)}</span>}
+                </button>
+                {bad && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 12.5, color: '#8a4b12', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: 6 }}>{t('Right match')}: {cardB(p, 36)}</span>
+                    <WatchButton id={p.video} onPlay={onPlay} label="Why?" />
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+        <div style={{ display: pictures ? 'grid' : 'flex', gridTemplateColumns: pictures ? 'repeat(auto-fill, minmax(96px, 1fr))' : undefined, flexDirection: 'column', gap: 7, alignContent: 'start' }}>
           {right.map((r) => (
             <button key={r.i} disabled={checked || held === null || taken.has(r.i)} onClick={() => { setMade((m) => ({ ...m, [held]: r.i })); setHeld(null) }}
-              style={{ textAlign: 'left', padding: '9px 12px', borderRadius: 10, fontSize: 14, fontWeight: 600, color: NAVY, opacity: taken.has(r.i) ? 0.45 : 1,
-                background: '#fbfdfe', border: '1.5px solid #e3edf4', cursor: held === null || taken.has(r.i) ? 'default' : 'pointer' }}>
-              {r.text}
+              aria-label={pic(pairs[r.i]) ? pairs[r.i].b : undefined}
+              style={{ textAlign: 'left', padding: pic(pairs[r.i]) ? 8 : '9px 12px', display: pic(pairs[r.i]) ? 'grid' : 'block', placeItems: 'center', borderRadius: 10, fontSize: 14, fontWeight: 600, color: NAVY, opacity: taken.has(r.i) ? 0.45 : 1,
+                background: '#fbfdfe', border: `1.5px solid ${held !== null && !taken.has(r.i) && !checked ? '#cfe6f0' : '#e3edf4'}`, cursor: held === null || taken.has(r.i) ? 'default' : 'pointer' }}>
+              {cardB(pairs[r.i], 80)}
             </button>
           ))}
         </div>

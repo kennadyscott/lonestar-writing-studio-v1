@@ -8,6 +8,8 @@ import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.js
 import SHEET_ART from '../lib/sheetArt.json'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { canSpeak, pickVoice } from '../lib/readAloud.js'
+import StudentPathway from './StudentPathway.jsx'
+import { pathwayDemoFor } from '../lib/studentPathwayDemo.mjs'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -345,6 +347,7 @@ export default function ProofRoom({ band = '4-5', initialTopicId = null, initial
     if (!topicId || !raw) return null
     return prepareTopic(raw.find((tp) => tp.id === topicId))
   }, [topicId, raw])
+  const pathwayContent = useMemo(() => pathwayDemoFor(topic), [topic])
   // Started from the Practice page on one clearing: open it straight away, once.
   // Quitting it lands on the path map, so the map is one step in.
   // every way in from Practice plays the gate, Start this clearing included (her call, 2026-10-01)
@@ -352,12 +355,12 @@ export default function ProofRoom({ band = '4-5', initialTopicId = null, initial
 
   const startedWs = React.useRef(false)
   useEffect(() => {
-    if (startedWs.current || !initialWsId || !topic) return
+    if (startedWs.current || !initialWsId || !topic || pathwayContent) return
     startedWs.current = true
     const all = [...(topic.core || []), topic.full, ...Object.values(topic.skillBuilders || {})].filter(Boolean)
     const ws = all.find((w) => w.id === initialWsId)
     if (ws) setRunning(ws)
-  }, [topic, initialWsId])
+  }, [topic, initialWsId, pathwayContent])
 
   useEffect(() => {
     try { setProgress(JSON.parse(localStorage.getItem('proofProgress') || '{}')) } catch { setProgress({}) }
@@ -380,6 +383,9 @@ export default function ProofRoom({ band = '4-5', initialTopicId = null, initial
     body = <Worksheet ws={running} onQuit={() => setRunning(null)}
       onDone={(pct) => { record(running.id, pct); onChange && onChange() }}
       onClose={() => setRunning(null)} topic={topic} progress={progress} onNext={(ws) => setRunning(ws)} />
+  } else if (topic && pathwayContent) {
+    body = <StudentPathway key={topic.id} topic={topic} content={pathwayContent} Worksheet={Worksheet}
+      onBackToMap={() => { setTopicId(null); setLand(null) }} />
   } else if (topic) {
     body = <TopicPath topic={topic} progress={progress} onPlay={setRunning} onBack={() => setTopicId(null)} onClose={() => setTopicId(null)} />
   } else {
@@ -403,11 +409,11 @@ export default function ProofRoom({ band = '4-5', initialTopicId = null, initial
     <PageMode.Provider value={true}>
       {/* the dashboard's enchanted-forest painting, just as soft (22%) */}
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        ...((topic && !running) || (!topic && !running && raw)
+        ...(pathwayContent ? { background: '#f1f5f0' } : (topic && !running) || (!topic && !running && raw)
           ? { background: `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg) center / cover no-repeat, #0b2a22`, filter: 'blur(8px) brightness(.55)', transform: 'scale(1.06)' }
           : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
       {/* on the map, Back and the prototype pill float over the valley instead of taking a row (her note, 2026-10-01) */}
-      <div className={'proof-page' + (!running && raw ? ' on-map' : '')}>
+      <div className={'proof-page' + (!running && raw && !pathwayContent ? ' on-map' : '')}>
         {onBack && <Crumbs t={t} onBack={onBack} land={land} topic={topic} running={running}
           toMap={() => { setRunning(null); setTopicId(null); setLand(null) }}
           toLand={(d) => { setRunning(null); setTopicId(null); setLand(d) }}
@@ -1132,10 +1138,14 @@ export const kindLabel = (kind, t) => kind === 'hunt' ? t('Error hunt') : kind =
   : kind === 'passage' ? t('Read & answer') : kind === 'quiz' ? t('Quiz') : kind === 'order' ? t('Put in order') : kind === 'match' ? t('Match')
   : kind === 'sort' ? t('Sort') : kind === 'spell' ? t('Spell it') : t('Fill it in')
 
-export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext, preview }) {
+export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext, preview, pathwayMode = false, resume, onProgress }) {
   const t = useT()
-  const [step, setStep] = useState(0)
-  const [scores, setScores] = useState([])     // points earned per activity
+  // Resume at an activity boundary. An unfinished activity starts fresh, and a
+  // malformed or outdated draft cannot skip beyond this worksheet's contents.
+  const resumable = Number.isInteger(resume?.step) && resume.step >= 0 && resume.step < ws.activities.length
+    && Array.isArray(resume.scores) && resume.scores.length === resume.step && resume.scores.every(Number.isFinite)
+  const [step, setStep] = useState(() => resumable ? resume.step : 0)
+  const [scores, setScores] = useState(() => resumable ? [...resume.scores] : [])     // points earned per activity
   const [result, setResult] = useState(null)
   const [video, setVideo] = useState(null)
   const act = ws.activities[step]
@@ -1143,9 +1153,14 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
   function finishActivity(earned) {
     const next = [...scores, earned]
     setScores(next)
-    if (step + 1 < ws.activities.length) { setStep(step + 1); return }
+    if (step + 1 < ws.activities.length) {
+      setStep(step + 1)
+      onProgress?.({ step: step + 1, scores: next })
+      return
+    }
     const got = next.reduce((a, b) => a + b, 0)
     const pct = Math.max(0, Math.round((got / ws.points) * 100))
+    onProgress?.(null)
     onDone(pct)
     // A publisher proofing a worksheet is not a student earning coins.
     if (preview) { setResult({ pct, got }); return }
@@ -1198,17 +1213,18 @@ export function Worksheet({ ws, topic, progress, onQuit, onDone, onClose, onNext
           )}
 
           <div style={{ display: 'flex', gap: 10, justifyContent: 'center', marginTop: 20, flexWrap: 'wrap' }}>
-            {passed && nextCore && (
+            {pathwayMode && <button className="btn" onClick={onQuit}>{t('Continue my pathway')}</button>}
+            {!pathwayMode && passed && nextCore && (
               <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(nextCore) }}>
                 {t('Next clearing: {title} →', { title: clearingTitle(nextCore) })}
               </button>
             )}
-            {!passed && sb && (
+            {!pathwayMode && !passed && sb && (
               <button className="btn" onClick={() => { setResult(null); setStep(0); setScores([]); onNext(sb) }}>
                 {t('🌿 Take the branch: {title} →', { title: clearingTitle(sb) })}
               </button>
             )}
-            <button className={passed && nextCore ? 'btn ghost' : !passed && sb ? 'btn ghost' : 'btn'} onClick={onQuit}>{t('Back to the path')}</button>
+            {!pathwayMode && <button className={passed && nextCore ? 'btn ghost' : !passed && sb ? 'btn ghost' : 'btn'} onClick={onQuit}>{t('Back to the path')}</button>}
           </div>
         </div>
       </Shell>

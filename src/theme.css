@@ -2290,22 +2290,49 @@ body { font-size: 16px; }
 .pm-node.low .pm-orb { order: 3; }
 .pm-node.low .pm-lantern { top: auto; bottom: calc(var(--orb) / 2); transform: translate(-50%, 50%); }
 
-/* ---- valley + lands fill the whole screen (2026-10-05: "Can the map fill the full screen?") ----
-   .pm-art holds the painting, its loop, the trail and the medallions in the painting's own shape;
-   it covers the frame (full width, the height under the top bar) and the frame clips the overflow,
-   about 90px of painting top + bottom at 1366x670. Everything on the painting moves with it, so
-   medallions stay on their painted spots. The title and side card stay pinned to the frame.
-   Path maps fill too (2026-10-05, "Make the path map fill the full screen too"); their two edge
-   branch spots moved in so nothing is trimmed. */
+/* Scenery fills the viewport; the interactive layer keeps its entire authored shape.
+   The frame must not be a scroll container: focusing a landmark should never move the HUD. */
 .pm-art { position: absolute; inset: 0; }
-.pm-immersive.pm-fill { width: auto; margin: 0 calc(50% - 50vw); }
-.pm-fill .pm-map { aspect-ratio: auto; height: calc(100dvh - 64px); background: #0b2a22; }
-.pm-fill .pm-art { --iw: max(100cqw, calc((100dvh - 64px) * 1000 / 560)); inset: auto; width: var(--iw); height: calc(var(--iw) * .56);
-  left: calc(50% - var(--iw) / 2); top: clamp(calc(100% - var(--iw) * .56), calc(50% - var(--iw) * .29), 0px); background: var(--pm-img) center / cover no-repeat; }
-/* (top is clamped so the painting always covers the frame, whichever way the screen is shaped) */
+.content:has(.proof-page.on-map) { padding-top: 0; padding-bottom: 0; }
+.proof-page.on-map > .pm-immersive, .proof-page.on-map > .lh-strands { margin-top: 0; }
+.proof-page.on-map > .backlink { top: 16px; }
+.pm-immersive.pm-fill { --map-height: max(440px, calc(100dvh - 64px)); width: auto; margin: 0 calc(50% - 50vw); }
+.pm-fill .pm-map { aspect-ratio: auto; height: var(--map-height); overflow: clip;
+  background: linear-gradient(180deg, rgba(4,20,28,.2), rgba(4,20,28,.12)), var(--pm-img) center / cover no-repeat, #0b2a22; }
+.pm-fill .pm-art { --iw: min(calc(100cqw - 48px), calc((var(--map-height) - 48px) * 1000 / 560));
+  container-type: inline-size; inset: auto; width: var(--iw); height: calc(var(--iw) * .56);
+  left: calc(50% - var(--iw) / 2); top: calc(50% - var(--iw) * .28); }
+.proof-page.on-map .pm-hud { z-index: 2; max-width: min(36%, 380px); }
+.pm-fill .pm-hud-title { font-size: clamp(26px, 3cqw, 38px); }
+.pm-fill .pm-side { max-height: calc(100% - 48px); }
+.pm-fill .pm-trail-base { stroke-width: 5; }
+.pm-fill .pm-trail-glow { stroke-width: 14; opacity: .5; }
+.pm-fill .pm-trail-lit { stroke-width: 5; }
+.lh-strands .pm-fill .pm-node { --orb: clamp(48px, 7.8cqw, 78px); width: clamp(110px, 17cqw, 170px); gap: 4px; }
+.lh-strands .pm-fill .pm-name { font-size: clamp(14px, 1.9cqw, 20px); line-height: 1.15; }
+.lh-strands .pm-fill .pm-pill { font-size: clamp(11px, 1.3cqw, 13px); padding: 3px 9px; }
+@media (max-width: 1100px) {
+  .pm-fill .pm-side { max-height: none; padding-bottom: 16px; }
+  .pm-fill .pm-side > :only-child { grid-column: 1 / -1; }
+}
+@media (max-width: 680px) {
+  .content:has(.proof-page.on-map) { padding: 16px; }
+  .proof-page.on-map > .backlink { position: relative; top: auto; left: auto; max-width: 100%; }
+  .pm-immersive.pm-fill { width: auto; margin: 0; }
+  .lh-strands .pm-fill .pm-map { display: flex; flex-direction: column; height: auto; border-radius: 18px; }
+  .lh-strands .pm-fill .pm-hud { position: relative; order: -1; top: auto; left: auto; max-width: none; padding: 20px 20px 8px; }
+  .lh-strands .pm-fill .pm-art { position: relative; inset: auto; width: 100%; height: auto; padding: 16px;
+    display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; }
+  .lh-strands .pm-fill .pm-svg { display: none; }
+  .lh-strands .pm-fill .pm-node { position: relative; inset: auto !important; transform: none; width: 100%; --orb: 56px; }
+  .lh-strands .pm-fill .pm-node .pm-orb { order: 0; }
+  .lh-strands .pm-fill .pm-node .pm-name { order: 1; }
+  .lh-strands .pm-fill .pm-node .pm-pill { order: 2; }
+  .pm-fill .pm-side { margin: 12px 0 0; }
+}
 
 /* ---- Lit Labyrinth breadcrumb trail (2026-10-05): one click to the map, the land or Practice ---- */
-.backlink.crumbs { gap: 2px; padding: 5px 8px; flex-wrap: nowrap; max-width: calc(100vw - 32px); overflow: hidden; }
+.backlink.crumbs { gap: 2px; padding: 5px 8px; flex-wrap: wrap; max-width: calc(100vw - 32px); }
 .crumbs .crumb { border: 0; background: none; font: inherit; font-size: 13.5px; font-weight: 800; color: #0f6f99; padding: 3px 7px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
 .crumbs .crumb:hover { background: rgba(15,111,153,.1); color: #0b5577; }
 .crumbs .crumb:focus-visible { outline: 2px solid #0f97c2; outline-offset: 1px; }

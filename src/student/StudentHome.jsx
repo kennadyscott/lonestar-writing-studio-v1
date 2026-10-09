@@ -905,7 +905,10 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           <span className="prf-c-title">{studio ? t('Your growth report') : t('The Lit Labyrinth')}</span>
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
-          <button className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
+          <div className="prf-c-actions">
+            <button type="button" className="prf-c-all" onClick={() => onOpen('topic_pos', null, { skipGate: true })}>Parts of Speech</button>
+            <button type="button" className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
+          </div>
         </div>
         <div className="prf-body">
           {!topics && <div className="prf-empty">{t('Loading…')}</div>}

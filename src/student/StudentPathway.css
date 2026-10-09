@@ -279,6 +279,169 @@
   .student-pathway .sp-example blockquote { font-size: 18px; }
   .student-pathway .sp-completion h1, .student-pathway .sp-completion h2 { font-size: 26px; }
 }
+
+/* End of a path, one A/B switcher per grade band. A is the current ending. */
+.student-pathway .sp-end-lead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.student-pathway .sp-end-lead p { margin: 0; color: #3e5c55; font-size: 14px; line-height: 1.45; }
+.student-pathway .sp-end-work {
+  border: 1px solid #b7cdc4;
+  border-radius: 999px;
+  background: #fff;
+  color: #1d4f48;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+.student-pathway .sp-end-block { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; padding-top: 18px; border-top: 1px solid #d5e3dc; scroll-margin-top: 80px; }
+.student-pathway .sp-end-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 8px 6px 14px;
+  border: 1px solid #d3e0da;
+  border-radius: 999px;
+  background: #fff;
+  box-shadow: 0 4px 14px rgba(20, 50, 40, .06);
+}
+.student-pathway .sp-end-switch b { margin-right: 4px; color: #1d4a44; font-size: 14px; }
+.student-pathway .sp-end-switch button {
+  min-width: 36px;
+  border: 1px solid #d5e0da;
+  border-radius: 999px;
+  background: #f4f7f5;
+  color: #3d5870;
+  padding: 5px 12px;
+  font-size: 14px;
+  font-weight: 800;
+}
+.student-pathway .sp-end-switch button.on { background: #0d2f55; border-color: #0d2f55; color: #fff; }
+
+.student-pathway .sp-x { border-radius: 18px; }
+.student-pathway .sp-x h2, .student-pathway .sp-x h3 { margin: 0; line-height: 1.2; }
+.student-pathway .sp-x p { margin: 8px 0 0; }
+.student-pathway .sp-x-kicker { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.student-pathway .sp-x-lead { max-width: 640px; }
+.student-pathway .sp-x-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.student-pathway .sp-x.is-23 { padding: 26px 22px 22px; background: linear-gradient(180deg, #fff6d8, #fff 180px); border: 2px solid #f0d48a; }
+.student-pathway .sp-x.is-23 .sp-x-kicker { color: #8a6200; }
+.student-pathway .sp-x.is-23 h2 { color: #0d2f55; font-size: 40px; font-weight: 800; }
+.student-pathway .sp-x.is-23 .sp-x-lead { color: #3d5870; font-size: 22px; }
+.student-pathway .sp-x-trail { list-style: none; margin: 22px 0 8px; padding: 0; }
+.student-pathway .sp-x-trail li { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 14px; position: relative; padding-bottom: 18px; }
+.student-pathway .sp-x-trail li::before { content: ""; position: absolute; left: 34px; top: 68px; bottom: 0; width: 4px; border-radius: 4px; background: #f0d48a; }
+.student-pathway .sp-x-trail li:last-child::before { display: none; }
+.student-pathway .sp-x-num { display: grid; place-items: center; width: 68px; height: 68px; border-radius: 50%; background: #fff; border: 4px solid #e0a106; color: #0d2f55; font-size: 26px; font-weight: 800; }
+.student-pathway .sp-x.is-23 h3 { color: #0d2f55; font-size: 26px; font-weight: 800; }
+.student-pathway .sp-x.is-23 .sp-x-trail p { color: #3d5870; font-size: 18px; }
+.student-pathway .sp-x.is-23 .sp-x-trail b { display: inline-block; margin-top: 8px; color: #0e6b62; font-size: 20px; }
+.student-pathway .sp-x-do { display: flex; gap: 10px; margin-top: 12px; }
+.student-pathway .sp-x-do button { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; border-radius: 14px; background: #fff; border: 2px solid #b7e0d4; color: #0e6b62; font-size: 20px; font-weight: 800; }
+.student-pathway .sp-x-do button.is-done::before { content: "✓"; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #0e8b7a; color: #fff; font-size: 16px; }
+.student-pathway .sp-x-do button.is-now { border-color: #e0a106; box-shadow: 0 0 0 3px #f0d48a; }
+.student-pathway .sp-x.is-23 .sp-x-go { width: min(420px, 100%); margin-top: 4px; background: #e09a32; color: #1d2d12; }
+
+.student-pathway .sp-x.is-45 { padding: 26px 22px 20px; background: #f3faf6; border: 1px solid #c5ddd0; }
+.student-pathway .sp-x.is-45 .sp-x-kicker { color: #1f7a62; }
+.student-pathway .sp-x.is-45 h2 { color: #14324a; font-size: 36px; font-weight: 800; }
+.student-pathway .sp-x.is-45 .sp-x-lead { color: #3d5870; font-size: 18px; }
+.student-pathway .sp-x-walk { list-style: none; margin: 20px 0 8px; padding: 0; }
+.student-pathway .sp-x-walk li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 14px; position: relative; padding-bottom: 16px; }
+.student-pathway .sp-x-walk li::before { content: ""; position: absolute; left: 26px; top: 52px; bottom: 0; width: 3px; border-radius: 3px; background: #b7dfd2; }
+.student-pathway .sp-x-walk li:last-child::before { display: none; }
+.student-pathway .sp-x-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #fff; border: 3px solid #1f8a5a; color: #145c43; font-size: 20px; font-weight: 800; }
+.student-pathway .sp-x.is-45 h3 { color: #14324a; font-size: 22px; font-weight: 800; }
+.student-pathway .sp-x.is-45 .sp-x-walk p { color: #3d5870; font-size: 16px; }
+.student-pathway .sp-x.is-45 .sp-x-walk > li > div > b { display: inline-block; margin-top: 6px; color: #0e6b62; font-size: 16px; }
+.student-pathway .sp-x-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.student-pathway .sp-x-pair button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 64px; justify-content: center; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid #c5ddd0; text-align: left; }
+.student-pathway .sp-x-pair small { color: #1f7a62; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.student-pathway .sp-x-pair button.is-done small::before { content: "✓ "; }
+.student-pathway .sp-x-pair b { color: #14324a; font-size: 16px; }
+.student-pathway .sp-x-pair button.is-now { border-color: #1f8a5a; box-shadow: 0 0 0 3px #b7dfd2; }
+.student-pathway .sp-x.is-45 .sp-x-go { background: #0c6e74; color: #fff; }
+
+.student-pathway .sp-x.is-67 { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; padding: 22px; background: #f7fbf6; border: 1px solid #cfe0d4; }
+.student-pathway .sp-x.is-67 .sp-x-kicker { color: #3e6b4e; }
+.student-pathway .sp-x.is-67 h2 { color: #224b41; font-family: Georgia, 'Times New Roman', serif; font-size: 32px; }
+.student-pathway .sp-x.is-67 .sp-x-lead { color: #3d5648; font-size: 17px; }
+.student-pathway .sp-x-clearings { list-style: none; margin: 16px 0 0; padding: 0; }
+.student-pathway .sp-x-clearings li { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; padding: 12px 14px; border-radius: 12px; background: #fff; border: 1px solid #d5e4d6; }
+.student-pathway .sp-x-clearings b { flex: 1 1 100%; color: #16324a; font-size: 17px; }
+.student-pathway .sp-x-clearings span, .student-pathway .sp-x-clearings em { color: #3d5648; font-size: 14px; font-style: normal; font-weight: 700; }
+.student-pathway .sp-x.is-67 aside { display: flex; flex-direction: column; gap: 8px; padding: 16px; border-radius: 14px; background: #fff; border: 1px solid #d5e4d6; }
+.student-pathway .sp-x.is-67 aside small { color: #607167; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.student-pathway .sp-x.is-67 aside h3 { color: #224b41; font-family: Georgia, 'Times New Roman', serif; font-size: 26px; }
+.student-pathway .sp-x.is-67 aside p { color: #3d5648; font-size: 16px; }
+.student-pathway .sp-x.is-67 aside div { display: flex; justify-content: space-between; align-items: baseline; padding-top: 8px; border-top: 1px solid #e3eee4; }
+.student-pathway .sp-x.is-67 aside div span { color: #607167; font-size: 14px; font-weight: 700; }
+.student-pathway .sp-x.is-67 aside div b { color: #224b41; font-family: Georgia, 'Times New Roman', serif; font-size: 28px; }
+.student-pathway .sp-x.is-67 .sp-x-go { width: 100%; margin-top: auto; background: #086472; color: #fff; font-size: 15px; }
+
+.student-pathway .sp-x.is-8 { padding: 24px 22px 18px; background: #fff; border: 1px solid #d5deea; border-left: 8px solid #16324f; }
+.student-pathway .sp-x.is-8 .sp-x-kicker { color: #5c6f86; }
+.student-pathway .sp-x.is-8 h2 { color: #14283f; font-size: 30px; font-weight: 800; }
+.student-pathway .sp-x.is-8 .sp-x-lead { color: #3d5168; font-size: 16px; }
+.student-pathway .sp-x.is-8 ol { list-style: none; margin: 16px 0; padding: 0; }
+.student-pathway .sp-x.is-8 li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 16px; padding: 12px 0; border-top: 1px solid #e4ebf3; }
+.student-pathway .sp-x.is-8 li b { color: #14283f; font-size: 16px; }
+.student-pathway .sp-x.is-8 li span { grid-column: 1; color: #5c6f86; font-size: 14px; }
+.student-pathway .sp-x.is-8 li em, .student-pathway .sp-x.is-8 li .sp-x-score { grid-row: 1 / span 2; align-self: center; justify-self: end; border: 0; background: transparent; color: #16324f; font-size: 18px; font-style: normal; font-weight: 800; }
+.student-pathway .sp-x.is-8 li .sp-x-score.is-now { color: #0c6e74; }
+.student-pathway .sp-x.is-8 .sp-x-go { background: #16324f; color: #fff; }
+
+.student-pathway .sp-x.is-912 { max-width: 740px; padding: 8px 8px 18px; }
+.student-pathway .sp-x.is-912 .sp-x-kicker { color: #527461; }
+.student-pathway .sp-x.is-912 h2 { color: #244e3c; font-family: Georgia, 'Times New Roman', serif; font-size: 40px; font-weight: 700; }
+.student-pathway .sp-x.is-912 .sp-x-lead { color: #5b7377; font-size: 17px; line-height: 1.55; }
+.student-pathway .sp-x.is-912 section { margin-top: 18px; padding-top: 14px; border-top: 1px solid #d7e3d3; }
+.student-pathway .sp-x.is-912 h3 { display: flex; justify-content: space-between; gap: 12px; color: #244e3c; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; font-weight: 700; }
+.student-pathway .sp-x.is-912 h3 em { color: #326347; font-size: 22px; font-style: normal; }
+.student-pathway .sp-x.is-912 section p { color: #3e5c55; font-size: 16px; line-height: 1.5; }
+.student-pathway .sp-x.is-912 ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.student-pathway .sp-x.is-912 li { padding: 6px 0; color: #2c4a40; font-size: 15px; }
+.student-pathway .sp-x.is-912 li button { display: flex; justify-content: space-between; gap: 12px; width: 100%; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; }
+.student-pathway .sp-x.is-912 li em { color: #326347; font-style: normal; font-weight: 700; }
+.student-pathway .sp-x.is-912 li button.is-now em { text-decoration: underline; }
+.student-pathway .sp-x.is-912 .sp-button { margin-top: 18px; }
+.student-pathway .sp-x-start { min-height: 44px; margin-top: 10px; border: 0; border-radius: 12px; padding: 8px 14px; background: #0c6e74; color: #fff; font-size: 16px; font-weight: 800; }
+.student-pathway .sp-x.is-23 .sp-x-start { background: #e09a32; color: #1d2d12; }
+.student-pathway .sp-x-start:disabled { background: #e7eeea; color: #6d7f78; }
+.student-pathway .sp-x-extra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.student-pathway .sp-x-extra b { color: #3d5870; font-size: 14px; }
+.student-pathway .sp-x-extra-go { border: 1px solid #c5ddd0; border-radius: 999px; background: #fff; padding: 6px 10px; color: #14324a; font-size: 14px; font-weight: 800; }
+.student-pathway .sp-x-clearings button.sp-x-line { border: 0; background: transparent; padding: 0; color: #3d5648; font-size: 14px; font-weight: 700; }
+.student-pathway .sp-x-clearings button.sp-x-line.is-now { color: #086472; text-decoration: underline; }
+.student-pathway .sp-x button { font-family: inherit; }
+.student-pathway .sp-x.is-8 li .sp-x-extra { grid-column: 1 / -1; }
+.student-pathway .sp-x button:disabled { cursor: default; }
+.student-pathway .sp-x button:not(:disabled) { cursor: pointer; }
+
+@media (max-width: 800px) {
+  .student-pathway .sp-x.is-67 { grid-template-columns: 1fr; }
+  .student-pathway .sp-x.is-23 h2, .student-pathway .sp-x.is-912 h2 { font-size: 32px; }
+  .student-pathway .sp-x-do { flex-direction: column; }
+  .student-pathway .sp-x-pair { grid-template-columns: 1fr; }
+}
 @media (prefers-reduced-motion: reduce) {
   .student-pathway *, .student-pathway *::before, .student-pathway *::after { transition: none !important; animation: none !important; }
 }

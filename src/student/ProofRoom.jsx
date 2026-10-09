@@ -536,28 +536,13 @@ export function StrandTrail({ topics, picked, onPick, children }) {
   const at = (i) => (slots ? SLOTS[slots[i]].at : pointAt(0.04 + (0.92 * i) / Math.max(1, n - 1)))
   const lastLit = info.map((x) => x.cls !== 'fresh').lastIndexOf(true)
   const glow = lastLit < 0 ? 0 : slots ? SLOT_F[slots[lastLit]] : 0.04 + (0.92 * lastLit) / Math.max(1, n - 1)
-  // her note (2026-10-02): "wherever the student is, it should start them there" -
-  // if the land they are working in sits below the fold, the page opens on it.
-  // A beat later than the page's own scroll-to-top, and only if it's off screen.
-  const mapRef = React.useRef(null)
-  const here = info.find((x) => x.cls === 'here')?.d
-  React.useEffect(() => {
-    if (!here) return
-    const id = setTimeout(() => {
-      const el = mapRef.current?.querySelector('.pm-node.here')
-      if (!el) return
-      const r = el.getBoundingClientRect()
-      // only when it is really off screen (her note 2026-10-05: "it's weird when the bubble fits on the screen to push it")
-      if (r.top < 64 || r.bottom > window.innerHeight - 8) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
-    }, 350)
-    return () => clearTimeout(id)
-  }, [here])
+  // The immersive map fits every landmark; moving focus must not scroll the scene.
   return (
-    <div ref={mapRef} className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
-      {/* the painting and everything placed on it move together (see .pm-fill in theme.css) */}
-      <div className="pm-art">
+    <div className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
+      {/* Scenery fills the frame; landmarks fit independently inside it. */}
       <video ref={livingRef} className="pm-living-video" src={LIVING_SRC} poster={`${BASE}lit-valley.jpg`} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1}
         onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />
+      <div className="pm-art">
       <div className="pm-fireflies" aria-hidden="true">
         {FIREFLIES.map(([x, y, d], i) => <span key={i} style={{ left: x + '%', top: y + '%', animationDelay: `${d}s, ${d / 2}s` }} />)}
       </div>
@@ -571,7 +556,12 @@ export function StrandTrail({ topics, picked, onPick, children }) {
         const [px, py] = at(i)
         return (
           <button key={x.d} className={`pm-node ${x.cls}${x.d === picked ? ' picked' : ''}${py > LOW_Y ? ' low' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
-            onClick={() => onPick(x.d, { x: px / 10, y: (py / 560) * 100 })} aria-pressed={picked ? x.d === picked : undefined}>
+            onClick={(e) => {
+              const frame = (e.currentTarget.closest('.pm-immersive') || e.currentTarget.closest('.pm-map')).getBoundingClientRect()
+              const orb = e.currentTarget.querySelector('.pm-orb').getBoundingClientRect()
+              onPick(x.d, { x: ((orb.x + orb.width / 2 - frame.x) / frame.width) * 100,
+                y: ((orb.y + orb.height / 2 - frame.y) / frame.height) * 100 })
+            }} aria-pressed={picked ? x.d === picked : undefined}>
             <span className="pm-orb" aria-hidden>{STRAND_ICON[x.d] || '✦'}</span>
             <span className="pm-name">{t(landName(x.d))}</span>
             <span className="pm-pill">{x.list.length === 1 ? t('{a} of 1 path', { a: x.done }) : t('{a} of {b} paths', { a: x.done, b: x.list.length })}</span>
@@ -675,10 +665,10 @@ function LandScene({ land, onOpen }) {
   return (
     <div className="pm-immersive pm-fill land-arrive">
       <div className="pm-map land-map pm-living" style={{ '--pm-img': `url(${landImg(land.d)})` }}>
-        <div className="pm-art">
         {loopOk && <video ref={livingRef} className="pm-living-video" src={`${import.meta.env.BASE_URL || '/'}lands/${key}-loop.mp4`} poster={landImg(land.d)}
           autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1} onError={() => setLoopOk(false)}
           onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />}
+        <div className="pm-art">
         <div className="pm-fireflies" aria-hidden="true">
           {FIREFLIES.map(([x, y, d], i) => <span key={i} style={{ left: x + '%', top: y + '%', animationDelay: `${d}s, ${d / 2}s` }} />)}
         </div>
@@ -1000,9 +990,9 @@ export function PathMap({ stops, onPlay, children }) {
   })
   return (
     <div className="pm-map pm-living" style={{ '--pm-img': `url(${BASE}lit-valley.jpg)` }}>
-      <div className="pm-art">
       <video ref={livingRef} className="pm-living-video" src={LIVING_SRC} poster={`${BASE}lit-valley.jpg`} autoPlay muted loop playsInline aria-hidden="true" tabIndex={-1}
         onPause={(e) => { const v = e.currentTarget; if (!v.ended && !document.hidden) v.play().catch(() => {}) }} />
+      <div className="pm-art">
       <div className="pm-fireflies" aria-hidden="true">
         {FIREFLIES.map(([x, y, d], i) => <span key={i} style={{ left: x + '%', top: y + '%', animationDelay: `${d}s, ${d / 2}s` }} />)}
       </div>

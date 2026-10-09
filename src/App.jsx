@@ -21,17 +21,23 @@ import { clearQuickWriteDrafts } from './student/QuickWritePage.jsx'
 import CoinBurst, { useCoinWatch } from './components/CoinBurst.jsx'
 
 const ME_STUDENT = 'stu_kscott'
+const END_TOPIC = 'topic_pos'
+
+function wantsEndings() {
+  try { return new URLSearchParams(location.search).get('end') === '1' } catch { return false }
+}
 
 export default function App() {
   const [state, setState] = useState(null)
   const [health, setHealth] = useState({ hasKey: false })
-  const [view, setView] = useState('home')
+  const [view, setView] = useState(() => wantsEndings() ? 'proof' : 'home')
   const [lesson, setLesson] = useState(null)
   // which Luna module is open: any order (her note, 2026-10-02); kept so Back from a lesson returns to it
   const [lunaModule, setLunaModule] = useState(null)
   // a Proof Room path opened straight from the Practice tab (null = the whole room)
-  const [proofTopic, setProofTopic] = useState(null)
+  const [proofTopic, setProofTopic] = useState(() => wantsEndings() ? END_TOPIC : null)
   const [proofWs, setProofWs] = useState(null) // a clearing to start straight away
+  const [skipGate, setSkipGate] = useState(() => wantsEndings())
   const [openSub, setOpenSub] = useState(null) // submission id for the studio
   const [reviewSub, setReviewSub] = useState(null) // completed submission being reviewed
   const [publisher, setPublisher] = useState(false)
@@ -80,6 +86,13 @@ export default function App() {
   const who = { name: me.name, sub: school, initials: me.initials }
 
   const goHome = () => { setView('home'); setOpenSub(null); setReviewSub(null) }
+  // opts.skipGate is the direct way to the Parts of Speech ending comparison.
+  const openProof = (topicId, wsId, opts) => {
+    setProofTopic(topicId || null)
+    setProofWs(wsId || null)
+    setSkipGate(!!opts?.skipGate)
+    setView('proof')
+  }
 
   async function resetDemo() {
     clearQuickWriteDrafts()
@@ -101,7 +114,7 @@ export default function App() {
       ? <RevisionStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
       : <WritingStudio state={state} sub={sub} health={health} onChange={refresh} onBack={backFromStudio} />
   } else if (view === 'home') {
-    body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={(id) => { setLunaModule(id || null); setView('luna') }} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onProofRoom={(topicId, wsId) => { setProofTopic(topicId || null); setProofWs(wsId || null); setView('proof') }} onChange={refresh} />
+    body = <StudentHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onLuna={(id) => { setLunaModule(id || null); setView('luna') }} onQuickWrite={() => setView('quickwrite')} onBank={() => setView('bank')} onWall={() => setView('wall')} onProofRoom={openProof} onChange={refresh} />
   } else if (view === 'luna') {
     body = <LunaPage state={state} me={me} initialModuleId={lunaModule} onPickModule={setLunaModule} onBack={goHome} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />
   } else if (view === 'lesson' && lesson) {
@@ -112,7 +125,7 @@ export default function App() {
     body = <ShareWallTab state={state} me={me} onChange={refresh} onBack={goHome} />
   } else if (view === 'proof') {
     // Students see only their own grade; the prototype band switch picks it.
-    body = <ProofRoom key={(proofTopic || 'room') + (proofWs || '') + band} band={band} initialTopicId={proofTopic} initialWsId={proofWs} onBack={goHome} onChange={refresh} />
+    body = <ProofRoom key={(proofTopic || 'room') + (proofWs || '') + band} band={band} initialTopicId={proofTopic} initialWsId={proofWs} skipGate={skipGate} onBack={goHome} onChange={refresh} />
   } else if (view === 'bank') {
     body = <WritingBankPage state={state} me={me} onBack={goHome} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onWall={() => setView('wall')} onChange={refresh} />
   } else {
@@ -130,11 +143,11 @@ export default function App() {
   // Grades 9-12 mockup (2026-10-02): Home and the Writing Course get the
   // Writer's Studio layout; every other view still renders its 2-8 page.
   if (studio && (view === 'home' || view === 'luna') && !sub && !reviewing) {
-    const nav = (k) => { setOpenSub(null); setReviewSub(null); if (k === 'proof') { setProofTopic(null); setProofWs(null) } setView(k) }
+    const nav = (k) => { setOpenSub(null); setReviewSub(null); if (k === 'proof') { setProofTopic(null); setProofWs(null); setSkipGate(false) } setView(k) }
     body = (
       <HSLayout view={view} onNav={nav} me={me} grade={band === '8' ? 8 : 10} theme={hsTheme} setTheme={setHsTheme} palette={hsPalette} setPalette={setHsPalette}>
         {view === 'home'
-          ? <HSHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onNav={nav} onProofRoom={(topicId, wsId) => { setProofTopic(topicId || null); setProofWs(wsId || null); setView('proof') }} />
+          ? <HSHome state={state} me={me} onOpen={openSubmission} onReview={(id) => setReviewSub(id)} onNav={nav} onProofRoom={openProof} />
           : <HSCourse state={state} grade={band === '8' ? 8 : 10} onOpenLesson={(a, moduleLabel) => { setLesson({ a, moduleLabel }); setView('lesson') }} />}
       </HSLayout>
     )

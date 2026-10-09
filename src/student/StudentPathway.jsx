@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { buildStudentPathway, recordWorksheet, scoreAssessment } from '../lib/studentPathway.mjs'
+import { useBandValue } from '../lib/gradeBand.js'
 import './StudentPathway.css'
 
 const names = { pre: 'Pre-test', lesson: 'Lesson', practice: 'Practice', post: 'Post-test' }
@@ -29,6 +30,7 @@ function loadRecord(key) {
 // This is an isolated, explicitly labeled sample journey. It neither awards
 // coins nor writes to the learner's existing worksheet or assessment records.
 export default function StudentPathway({ topic, content, Worksheet, onBackToMap }) {
+  const band = useBandValue()
   const storageKey = `lscr.pathway-preview.v1.${topic.id}`
   const [record, setRecord] = useState(() => loadRecord(storageKey))
   const [active, setActive] = useState(null)
@@ -39,12 +41,7 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   }, [storageKey, record])
   useEffect(() => { window.scrollTo(0, 0) }, [active?.id])
 
-  const steps = buildStudentPathway(topic, record, content)
-  const next = steps.find((step) => step.state === 'current' || step.state === 'unavailable')
-  const finished = steps.length > 0 && steps.every(done)
-  const completed = steps.filter(done).length
   const open = (step) => { if (available(step)) setActive(step) }
-  const sheets = [...topic.core, ...(topic.full ? [topic.full] : [])]
   const completeLesson = (step) => {
     const updated = { ...record, lessons: { ...record.lessons, [step.worksheetId]: true } }
     setRecord(updated)
@@ -81,8 +78,21 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
           )}
         </>
       ) : (
-        <>
-          <header className="sp-hero" style={{ '--path-art': `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg)` }}>
+        <PathForGrade band={band} topic={topic} content={content} record={record} onOpen={open} onBack={onBackToMap} />
+      )}
+    </section>
+  )
+}
+
+function PathwayBoard({ topic, content, record, onOpen, onBackToMap }) {
+  const steps = buildStudentPathway(topic, record, content)
+  const next = steps.find((step) => step.state === 'current' || step.state === 'unavailable')
+  const finished = steps.length > 0 && steps.every(done)
+  const completed = steps.filter(done).length
+  const sheets = [...topic.core, ...(topic.full ? [topic.full] : [])]
+  return (
+    <>
+      <header className="sp-hero" style={{ '--path-art': `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg)` }}>
             <div className="sp-eyebrow">Your learning path · Grade {topic.grade}</div>
             <h1>{topic.short || topic.title}</h1>
             <p>Learn a skill. Put it into practice. See how much you grow.</p>
@@ -95,7 +105,7 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
           </div>
           <div className="sp-layout">
             <div className="sp-journey">
-              <TestCard step={steps.find((s) => s.type === 'pre')} onOpen={open} />
+              <TestCard step={steps.find((s) => s.type === 'pre')} onOpen={onOpen} />
               {sheets.map((sheet, i) => {
                 const own = steps.filter((s) => s.worksheetId === sheet.id)
                 const builder = topic.skillBuilders?.[sheet.id]
@@ -110,20 +120,20 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
                       <div className="sp-step-copy"><small>{sheet === topic.full ? 'Bring it all together' : `Skill ${i + 1}`}</small><h2>{titleOf(sheet)}</h2><p>{sheet.skill}</p></div>
                       {isComplete && <span className="sp-status">Complete</span>}
                     </div>
-                    <div className="sp-skill-actions">{own.filter((s) => s !== retry).map((s) => <WorkStep key={s.id} step={s} onOpen={open} />)}</div>
-                    {!!branch.length && <div className="sp-branch"><b>A little extra practice</b><p>Your Skill Builder helps with this skill before you try again.</p><div className="sp-skill-actions">{branch.map((s) => <WorkStep key={s.id} step={s} onOpen={open} />)}</div></div>}
-                    {retry && <div className="sp-skill-actions"><WorkStep step={retry} onOpen={open} retry /></div>}
+                    <div className="sp-skill-actions">{own.filter((s) => s !== retry).map((s) => <WorkStep key={s.id} step={s} onOpen={onOpen} />)}</div>
+                    {!!branch.length && <div className="sp-branch"><b>A little extra practice</b><p>Your Skill Builder helps with this skill before you try again.</p><div className="sp-skill-actions">{branch.map((s) => <WorkStep key={s.id} step={s} onOpen={onOpen} />)}</div></div>}
+                    {retry && <div className="sp-skill-actions"><WorkStep step={retry} onOpen={onOpen} retry /></div>}
                   </section>
                 )
               })}
-              <TestCard step={steps.find((s) => s.type === 'post')} onOpen={open} />
+              <TestCard step={steps.find((s) => s.type === 'post')} onOpen={onOpen} />
             </div>
             <aside className="sp-sidebar">
               <div className="sp-next-card">
                 <div className="sp-next-label">{finished ? 'Path complete' : 'Your next step'}</div>
                 <h2>{finished ? 'Look how far you’ve come!' : next?.type === 'pre' ? 'Start with what you know' : next?.type === 'post' ? 'Show your growth' : next?.type === 'lesson' ? 'Learn the skill' : 'Put it into practice'}</h2>
                 <p>{finished ? 'You finished your lessons, practice, and post-test.' : next?.type === 'pre' ? 'A short pre-test gives you a starting point. You don’t need to know everything yet.' : next?.type === 'post' ? 'You’ve put in the work. Now see what you can do on your own.' : next?.title}</p>
-                {next && <button className="sp-button" disabled={!available(next)} onClick={() => open(next)}>{next.state === 'unavailable' ? 'Content coming soon' : `${record.drafts?.[next.id] ? 'Continue' : 'Start'} ${names[next.type].toLowerCase()}`}</button>}
+                {next && <button className="sp-button" disabled={!available(next)} onClick={() => onOpen(next)}>{next.state === 'unavailable' ? 'Content coming soon' : `${record.drafts?.[next.id] ? 'Continue' : 'Start'} ${names[next.type].toLowerCase()}`}</button>}
                 {finished && <><div className="sp-score-pair"><span>Pre-test<b>{record.pre?.score}%</b></span><span>Post-test<b>{record.post?.score}%</b></span></div><button className="sp-button" onClick={onBackToMap}>Back to the Labyrinth</button></>}
                 <div className="sp-progress-track" role="progressbar" aria-label="Pathway progress" aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={completed}><span style={{ width: `${steps.length ? completed / steps.length * 100 : 0}%` }} /></div>
                 <small>{completed} of {steps.length} steps complete</small>
@@ -132,9 +142,280 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
               </div>
             </aside>
           </div>
-        </>
-      )}
-    </section>
+    </>
+  )
+}
+
+function pathModel(topic, content, record) {
+  const steps = buildStudentPathway(topic, record, content)
+  const sheets = [...(topic.core || []), topic.full].filter(Boolean)
+  const skills = sheets.map((sheet, i) => {
+    const own = steps.filter((step) => step.worksheetId === sheet.id && !step.skillBuilder)
+    const lesson = own.find((step) => step.type === 'lesson')
+    const practice = own.find((step) => step.type === 'practice' && !step.retry)
+    const extra = [
+      ...steps.filter((step) => step.skillBuilder && step.forId === sheet.id),
+      ...own.filter((step) => step.retry),
+    ]
+    return {
+      id: sheet.id,
+      n: i + 1,
+      title: titleOf(sheet),
+      skill: sheet.skill,
+      lesson,
+      practice,
+      extra,
+      lessonSteps: lesson?.lesson?.steps?.length || 0,
+      activities: practice?.sheet?.activities?.length || 0,
+    }
+  })
+  const pre = steps.find((step) => step.type === 'pre')
+  const post = steps.find((step) => step.type === 'post')
+  const current = steps.find((step) => step.state === 'current' || step.state === 'unavailable')
+  return {
+    title: topic.short || topic.title,
+    steps,
+    pre,
+    post,
+    skills,
+    current,
+    finished: steps.length > 0 && steps.every(done),
+    gained: done(pre) && done(post) && pre.score != null && post.score != null ? post.score - pre.score : null,
+  }
+}
+
+function PathForGrade({ band, topic, content, record, onOpen, onBack }) {
+  const model = pathModel(topic, content, record)
+  if (band === '2-3') return <Path23 model={model} onOpen={onOpen} onBack={onBack} />
+  if (band === '4-5') return <Path45 model={model} onOpen={onOpen} onBack={onBack} />
+  if (band === '6-7') return <Path67 model={model} onOpen={onOpen} onBack={onBack} />
+  if (band === '8') return <Path8 model={model} onOpen={onOpen} onBack={onBack} />
+  return <Path912 model={model} onOpen={onOpen} onBack={onBack} />
+}
+
+function Go({ step, onOpen, doneLabel, nowLabel, laterLabel, className = '' }) {
+  if (!step) return null
+  const ready = available(step)
+  const label = done(step) ? doneLabel : step.state === 'current' ? nowLabel : step.state === 'unavailable' ? 'Coming soon' : laterLabel
+  return (
+    <button type="button" className={`${className}${done(step) ? ' is-done' : ''}${step.state === 'current' ? ' is-now' : ''}`} disabled={!ready} onClick={() => onOpen(step)}>
+      {label}
+    </button>
+  )
+}
+
+function Extra({ steps, onOpen }) {
+  if (!steps?.length) return null
+  return (
+    <div className="sp-x-extra">
+      <b>Extra practice</b>
+      {steps.map((step) => (
+        <Go key={step.id} step={step} onOpen={onOpen} className="sp-x-extra-go" doneLabel={`${step.type === 'lesson' ? 'Lesson' : 'Practice'} · Done`} nowLabel={step.type === 'lesson' ? 'Start the extra lesson' : 'Start the extra practice'} laterLabel="Later" />
+      ))}
+    </div>
+  )
+}
+
+function Path23({ model, onOpen, onBack }) {
+  return (
+    <div className="sp-x is-23">
+      <p className="sp-x-kicker">Your path</p>
+      <h2>{model.title}</h2>
+      <p className="sp-x-lead">Do one part. Then the next.</p>
+      <ol className="sp-x-trail">
+        <li>
+          <span className="sp-x-num">1</span>
+          <div>
+            <h3>Try first</h3>
+            <p>A short try. You do not need to know it yet.</p>
+            {done(model.pre) ? <b>Done · {model.pre.score}</b> : <Go step={model.pre} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start" laterLabel="Later" />}
+          </div>
+        </li>
+        {model.skills.map((skill) => (
+          <li key={skill.id}>
+            <span className="sp-x-num">{skill.n + 1}</span>
+            <div>
+              <h3>{skill.title}</h3>
+              <p>{skill.skill}</p>
+              <div className="sp-x-do">
+                <Go step={skill.lesson} onOpen={onOpen} doneLabel="Learn it" nowLabel="Learn it" laterLabel="Learn it" />
+                <Go step={skill.practice} onOpen={onOpen} doneLabel="Try it" nowLabel="Try it" laterLabel="Try it" />
+              </div>
+              <Extra steps={skill.extra} onOpen={onOpen} />
+            </div>
+          </li>
+        ))}
+        <li>
+          <span className="sp-x-num">{done(model.post) ? '✓' : model.skills.length + 2}</span>
+          <div>
+            <h3>Show what you know</h3>
+            <p>One more try, on your own.</p>
+            {done(model.post) ? <b>Done · {model.post.score}</b> : <Go step={model.post} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start" laterLabel="Later" />}
+          </div>
+        </li>
+      </ol>
+      <button type="button" className="sp-x-go" onClick={onBack}>Pick a new path</button>
+    </div>
+  )
+}
+
+function Path45({ model, onOpen, onBack }) {
+  return (
+    <div className="sp-x is-45">
+      <p className="sp-x-kicker">Your path</p>
+      <h2>{model.title}</h2>
+      <p className="sp-x-lead">Learn the skill. Then practice it. Then go on to the next one.</p>
+      <ol className="sp-x-walk">
+        <li>
+          <span className="sp-x-mark">1</span>
+          <div>
+            <h3>Pre-test</h3>
+            <p>See what you already know. {model.pre?.assessment?.items?.length || 0} questions.</p>
+            {done(model.pre) ? <b>Done · {model.pre.score}%</b> : <Go step={model.pre} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start the pre-test" laterLabel="Later" />}
+          </div>
+        </li>
+        {model.skills.map((skill) => (
+          <li key={skill.id}>
+            <span className="sp-x-mark">{skill.n + 1}</span>
+            <div>
+              <h3>{skill.title}</h3>
+              <p>{skill.skill}</p>
+              <div className="sp-x-pair">
+                <Go step={skill.lesson} onOpen={onOpen} doneLabel={<><small>Lesson</small><b>{skill.lessonSteps} short steps</b></>} nowLabel={<><small>Lesson</small><b>Start</b></>} laterLabel={<><small>Lesson</small><b>{skill.lessonSteps} short steps</b></>} />
+                <Go step={skill.practice} onOpen={onOpen} doneLabel={<><small>Practice</small><b>{skill.activities} activities</b></>} nowLabel={<><small>Practice</small><b>Start</b></>} laterLabel={<><small>Practice</small><b>{skill.activities} activities</b></>} />
+              </div>
+              <Extra steps={skill.extra} onOpen={onOpen} />
+            </div>
+          </li>
+        ))}
+        <li>
+          <span className="sp-x-mark">{done(model.post) ? '✓' : model.skills.length + 2}</span>
+          <div>
+            <h3>Post-test</h3>
+            <p>Show what you learned, on your own.</p>
+            {done(model.post) ? <b>Done · {model.post.score}%</b> : <Go step={model.post} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start the post-test" laterLabel="Later" />}
+          </div>
+        </li>
+      </ol>
+      <button type="button" className="sp-x-go" onClick={onBack}>Back to the map</button>
+    </div>
+  )
+}
+
+function ClearingLine({ step, onOpen, children }) {
+  return <Go step={step} onOpen={onOpen} className="sp-x-line" doneLabel={children} nowLabel={children} laterLabel={children} />
+}
+
+function Path67({ model, onOpen, onBack }) {
+  const here = model.finished ? 'End of the path' : model.current?.type === 'pre' ? 'Pre-test' : model.current?.type === 'post' ? 'Post-test' : model.current?.title || 'This path'
+  return (
+    <div className="sp-x is-67">
+      <div>
+        <p className="sp-x-kicker">The path</p>
+        <h2>{model.title}</h2>
+        <p className="sp-x-lead">Each skill is a clearing. Learn it, then practice it, before the path goes on.</p>
+        <ol className="sp-x-clearings">
+          <li>
+            <b>First clearing · Pre-test</b>
+            <ClearingLine step={model.pre} onOpen={onOpen}>{done(model.pre) ? `${model.pre.score}% · ${model.pre.assessment?.items?.length || 0} questions` : model.pre?.state === 'current' ? 'Start here' : `${model.pre?.assessment?.items?.length || 0} questions`}</ClearingLine>
+          </li>
+          {model.skills.map((skill) => (
+            <li key={skill.id}>
+              <b>{skill.title}</b>
+              <span>{skill.skill}</span>
+              <ClearingLine step={skill.lesson} onOpen={onOpen}>{`Lesson · ${skill.lessonSteps} steps`}</ClearingLine>
+              <ClearingLine step={skill.practice} onOpen={onOpen}>{done(skill.practice) ? `Practice · ${skill.activities} activities · ${skill.practice.score}%` : `Practice · ${skill.activities} activities`}</ClearingLine>
+              <Extra steps={skill.extra} onOpen={onOpen} />
+            </li>
+          ))}
+          <li>
+            <b>Last clearing · Post-test</b>
+            <ClearingLine step={model.post} onOpen={onOpen}>{done(model.post) ? `${model.post.score}%` : model.post?.state === 'current' ? 'Start here' : 'After every skill'}</ClearingLine>
+          </li>
+        </ol>
+      </div>
+      <aside>
+        <small>Where you are</small>
+        <h3>{here}</h3>
+        {model.gained != null ? <p>You gained {model.gained} points.</p> : <p>{model.finished ? 'This path is finished.' : 'Do this step, then the path goes on.'}</p>}
+        <div><span>Pre-test</span><b>{done(model.pre) ? `${model.pre.score}%` : 'Not yet'}</b></div>
+        <div><span>Post-test</span><b>{done(model.post) ? `${model.post.score}%` : 'Not yet'}</b></div>
+        {model.current && available(model.current) && <Go step={model.current} onOpen={onOpen} className="sp-x-go" doneLabel="Review" nowLabel={`Start ${names[model.current.type].toLowerCase()}`} laterLabel="Later" />}
+        <button type="button" className="sp-x-go" onClick={onBack}>Back to the Labyrinth</button>
+      </aside>
+    </div>
+  )
+}
+
+function RowMark({ step }) {
+  if (!step) return 'Later'
+  if (done(step) && step.score != null) return `${step.score}%`
+  if (done(step)) return 'Done'
+  if (step.state === 'current') return 'Up next'
+  if (step.state === 'unavailable') return 'Soon'
+  return 'Later'
+}
+
+function Path8({ model, onOpen, onBack }) {
+  return (
+    <div className="sp-x is-8">
+      <p className="sp-x-kicker">Learning path</p>
+      <h2>{model.title}</h2>
+      <p className="sp-x-lead">Work the rows in order. The next row opens when the one above it is done.</p>
+      <ol>
+        <li>
+          <b>Pre-test</b>
+          <span>{model.pre?.assessment?.items?.length || 0} questions</span>
+          <Go step={model.pre} onOpen={onOpen} className="sp-x-score" doneLabel={RowMark(model.pre)} nowLabel="Start" laterLabel={RowMark(model.pre)} />
+        </li>
+        {model.skills.map((skill) => (
+          <li key={skill.id}>
+            <b>{skill.n}. {skill.title}</b>
+            <span>Lesson · {skill.lessonSteps} steps · Practice · {skill.activities} activities</span>
+            <Go step={skill.lesson?.state === 'current' ? skill.lesson : skill.practice?.state === 'current' ? skill.practice : done(skill.practice) ? skill.practice : skill.lesson} onOpen={onOpen} className="sp-x-score" doneLabel={RowMark(skill.practice?.state === 'complete' ? skill.practice : skill.lesson)} nowLabel="Start" laterLabel={RowMark(skill.lesson)} />
+            <Extra steps={skill.extra} onOpen={onOpen} />
+          </li>
+        ))}
+        <li>
+          <b>Post-test</b>
+          <span>After every skill</span>
+          <Go step={model.post} onOpen={onOpen} className="sp-x-score" doneLabel={RowMark(model.post)} nowLabel="Start" laterLabel={RowMark(model.post)} />
+        </li>
+      </ol>
+      <button type="button" className="sp-x-go" onClick={onBack}>Back to your paths</button>
+    </div>
+  )
+}
+
+function Path912({ model, onOpen, onBack }) {
+  return (
+    <div className="sp-x is-912">
+      <p className="sp-x-kicker">Path</p>
+      <h2>{model.title}</h2>
+      <p className="sp-x-lead">A pre-test, then the lesson and the practice for each skill, then a post-test.</p>
+      <section>
+        <h3>Pre-test {done(model.pre) && <em>{model.pre.score}%</em>}</h3>
+        <p>{model.pre?.assessment?.items?.length || 0} questions. A starting point, before the lessons.</p>
+        {!done(model.pre) && <Go step={model.pre} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start the pre-test" laterLabel="Later" />}
+      </section>
+      {model.skills.map((skill) => (
+        <section key={skill.id}>
+          <h3>{skill.title}</h3>
+          <p>{skill.skill}</p>
+          <ul>
+            <li><Go step={skill.lesson} onOpen={onOpen} className="sp-x-line" doneLabel={<>Lesson <em>{skill.lessonSteps} steps</em></>} nowLabel={<>Lesson <em>Start</em></>} laterLabel={<>Lesson <em>{skill.lessonSteps} steps</em></>} /></li>
+            <li><Go step={skill.practice} onOpen={onOpen} className="sp-x-line" doneLabel={<>Practice <em>{skill.activities} activities · {skill.practice?.score}%</em></>} nowLabel={<>Practice <em>Start</em></>} laterLabel={<>Practice <em>{skill.activities} activities</em></>} /></li>
+          </ul>
+          <Extra steps={skill.extra} onOpen={onOpen} />
+        </section>
+      ))}
+      <section>
+        <h3>Post-test {done(model.post) && <em>{model.post.score}%</em>}</h3>
+        <p>The same kind of work, after the path.</p>
+        {!done(model.post) && <Go step={model.post} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start the post-test" laterLabel="Later" />}
+      </section>
+      <button type="button" className="sp-button" onClick={onBack}>Back to the studio</button>
+    </div>
   )
 }
 

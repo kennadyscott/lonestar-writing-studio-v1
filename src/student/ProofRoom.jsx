@@ -311,7 +311,7 @@ function Crumbs({ t, onBack, land, topic, running, toMap, toLand, toPath }) {
   )
 }
 
-export default function ProofRoom({ band = '4-5', initialTopicId = null, initialWsId = null, onBack, onChange }) {
+export default function ProofRoom({ band = '4-5', initialTopicId = null, initialWsId = null, skipGate = false, onBack, onChange }) {
   const t = useT()
   const say = useSay()
   // Opened from the Practice tab on one path, the page starts on that path.
@@ -351,7 +351,7 @@ export default function ProofRoom({ band = '4-5', initialTopicId = null, initial
   // Started from the Practice page on one clearing: open it straight away, once.
   // Quitting it lands on the path map, so the map is one step in.
   // every way in from Practice plays the gate, Start this clearing included (her call, 2026-10-01)
-  const [gate, setGate] = useState(() => gateWanted())
+  const [gate, setGate] = useState(() => !skipGate && gateWanted())
 
   const startedWs = React.useRef(false)
   useEffect(() => {

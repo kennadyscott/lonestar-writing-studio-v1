@@ -1161,6 +1161,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
         )}
 
         <div className="bingo-card">
+          <div className="bingo-board">
           <div className="bingo-grid">
             {tiles.map((tile) => {
               const soon = tile.options.length === 0
@@ -1180,13 +1181,14 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                   role={!soon ? 'button' : undefined} tabIndex={!soon ? 0 : -1} aria-disabled={done || undefined}
                   aria-label={done ? `${tile.title}: ${t('stamped')} +${tile.done.coins}` : tile.title}
                   onClick={activate} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), activate())}>
-                  <div className="bingo-art" aria-hidden style={{ backgroundImage: `url(${BASE}zone/${tile.id}-forest3.webp)` }} />
-                  {done && (
-                    <span className="bingo-stamp" aria-hidden>
-                      <span className="bingo-stamp-check">✓</span>
-                      <span className="bingo-stamp-coins">+{tile.done.coins}</span>
-                    </span>
-                  )}
+                  <div className="bingo-art" aria-hidden style={{ backgroundImage: `url(${BASE}zone/${tile.id}-forest3.webp)` }}>
+                    {done && (
+                      <span className="bingo-stamp" aria-hidden>
+                        <span className="bingo-stamp-check">✓</span>
+                        <span className="bingo-stamp-coins">+{tile.done.coins}</span>
+                      </span>
+                    )}
+                  </div>
                   {miss && <span className="bingo-flag" aria-hidden>{t('Try again')}</span>}
                   {soon && <span className="bingo-flag lock" aria-hidden>🔒 {t('Soon')}</span>}
                   <div className="bingo-label">
@@ -1208,6 +1210,7 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
               <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} pathLength="1" className={fresh.has(i) ? 'fresh' : ''} />
             ) })}
           </svg>
+          </div>
         </div>
 
         <div className="bingo-foot">
@@ -1467,8 +1470,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     <div>
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`,
-        // Practice already carries five paintings, so the forest behind it steps back.
-        opacity: tab === 'practice' ? .1 : .22, transition: 'opacity .3s' }} />
+        // Same lightening as Home (22% → 14%). Practice steps back a little further
+        // (10% → 6%) because that tab already carries its own paintings.
+        opacity: tab === 'practice' ? .06 : .14, transition: 'opacity .3s' }} />
       {game?.key === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} payHere={!game?.category} />
         : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}

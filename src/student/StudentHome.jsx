@@ -1401,8 +1401,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
-  const [sideLook, setSideLookState] = useState(() => { try { const v = localStorage.getItem('lscr.sideLook'); return v === 'c' ? 'c' : 'a' } catch { return 'a' } })
-  const setSideLook = (v) => { setSideLookState(v); try { localStorage.setItem('lscr.sideLook', v) } catch { /* fine */ } }
+  const [calm, setCalm] = useState('a')
+  const CALM = [['a', 'A'], ['b', 'B'], ['c', 'C']]
 
   // A grid game finished: record the clear, reveal the coins, refresh state.
   // Closing a zone game before it is finished forfeits the round: ask first.
@@ -1530,13 +1530,14 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
         // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
-        <div className="practice-view" data-clean="" data-side={sideLook} style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
-          {/* prototype side cards (2026-10-02): A paintings; C the three white cards + Pip's painted Daily Challenge. B and D were dropped. */}
-          <div className="side-abc" role="group" aria-label="Side cards (prototype)">
-            <span>{t('Side cards')}</span>
-            {[['a', 'A'], ['c', 'C']].map(([k, l]) => <button key={k} className={sideLook === k ? 'on' : ''} aria-pressed={sideLook === k} onClick={() => setSideLook(k)}>{l}</button>)}
+        <div className={'practice-view' + (calm === 'b' ? ' calm-plain' : '')} data-clean="" data-side={calm === 'c' ? 'c' : 'a'} style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+          <div className="prac-calm" role="group" aria-label={t('Practice pages')}>
+            {CALM.map(([k, label]) => (
+              <button key={k} type="button" className={calm === k ? 'on' : ''} aria-pressed={calm === k} onClick={() => setCalm(k)}>{t(label)}</button>
+            ))}
           </div>
+          {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
+          {/* Side cards A wears the paintings. Side cards C is the three white cards, and the Daily Challenge keeps its painting. */}
           <div className="practice-split">
             <ProofRoomFeature onOpen={onProofRoom} />
             <div className="practice-side">

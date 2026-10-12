@@ -58,9 +58,19 @@ const lessons = {
   ]),
 }
 
+// Two picture questions shown first in the pre-test, so the question screen can be seen with real scene art (Kennady, October 12,
+// 2026: "Put these two samples in as demo content so I can see them in the platform"). A tall picture sits beside the question and a
+// wide one on top. They are layout samples, not Parts of Speech items.
+const picture = (file, alt) => ({ src: `scenes/${file}`, alt })
+const samples = [
+  { id: 'pre-sample-opposite', kind: 'single', sample: true, picture: picture('art-scene-s1-adorable-robotic-satellite-in-space.webp', 'A cartoon satellite with big eyes floating above Earth'), prompt: 'Which word means the opposite of big?', options: options('huge', 'large', 'giant', 'small'), correct: ['d'] },
+  { id: 'pre-sample-abc', kind: 'sort', sample: true, picture: picture('art-scene-s1-astronaut-enjoying-tacos-on-alien-planet.webp', 'A cartoon astronaut eating a taco on an alien planet beside a little rover'), prompt: 'Sort the words by their first letter.', groups: ['A to M', 'N to Z'], options: options('ant', 'bike', 'sun', 'zoo'), correct: ['a:0', 'b:0', 'c:1', 'd:1'] },
+]
+
 const pre = {
   title: 'Before you begin: Parts of Speech',
   items: [
+    ...samples,
     { id: 'pre-verbs', kind: 'inline', prompt: 'Yesterday, Lena ____ a bright feather beside the pond.', options: options('found', 'finded', 'finds'), correct: ['a'] },
     { id: 'pre-adjectives', kind: 'multi', prompt: 'Select both sentences that correctly compare exactly two things.', options: options('Mira’s kite is higher than Ben’s.', 'This puzzle is more difficult than the last one.', 'This is the most colorful of all five kites.', 'The blue kite is high than the red kite.'), correct: ['a', 'b'] },
     { id: 'pre-conjunctions', kind: 'order', prompt: 'Build a sentence that starts with the picnic being ready and then shows a contrast.', options: options('The picnic was ready;', 'however,', 'rain kept us indoors.'), correct: ['a', 'b', 'c'] },

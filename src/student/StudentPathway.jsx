@@ -459,20 +459,53 @@ function Assessment({ step, result, draft, onDraft, onDone, onBack }) {
   const options = (order[item.id] || []).map((id) => item.options.find((o) => o.id === id)).filter(Boolean)
   const change = (value) => { const next = { ...answers, [item.id]: value }; setAnswers(next); onDraft({ index, answers: next, order }) }
   const go = (i) => { setIndex(i); onDraft({ index: i, answers, order }); window.scrollTo(0, 0) }
-  const ready = item.kind === 'order' ? answer.length === item.options.length : answer.length > 0
+  const ready = item.kind === 'order' || item.kind === 'sort' ? answer.length === item.options.length : answer.length > 0
+  // A picture question (October 12, 2026): a tall picture sits beside the question, a wide one on top; measured when it loads.
+  const [shapes, setShapes] = useState({})
+  const pic = item.picture, beside = !!pic && (item.layout ? item.layout === 'side' : shapes[item.id] === 'tall')
+  const src = pic ? `${import.meta.env.BASE_URL || '/'}${pic.src}` : ''
   const submit = () => {
     const correct = items.filter((it) => scoreAssessment(it, answers[it.id])).length
     onDone({ complete: true, score: Math.round(correct / items.length * 100), correct, total: items.length, answers })
     window.scrollTo(0, 0)
   }
   if (result?.complete) return <article className="sp-player-card sp-completion"><div className="sp-eyebrow">{names[step.type]} complete</div><h1>{step.type === 'pre' ? 'Your starting point is set.' : 'You finished your pathway!'}</h1><div className="sp-result-score">{result.score}%</div><p>{result.correct} of {result.total} correct</p><p>{step.type === 'pre' ? 'Now learn each skill, then put it into practice. Your pre-test score won’t hold you back.' : 'You’ve worked through the lessons and practice. Take a look at how far you’ve come.'}</p><button className="sp-button" onClick={onBack}>{step.type === 'pre' ? 'Continue to my lessons' : 'See my completed path'}</button></article>
-  return <article className="sp-player-card">
+  return <article className={'sp-player-card' + (pic ? ' has-pic' : '')}>
     <div className="sp-player-head"><div><div className="sp-eyebrow">{names[step.type]} · {step.type === 'pre' ? 'Try your best' : 'Show what you know'}</div><h1>{step.assessment.title}</h1></div><span className="sp-counter">{index + 1} / {items.length}</span></div>
-    <div className="sp-question"><h2>{item.prompt}</h2>
-      {item.kind === 'inline' ? <div className="sp-inline"><label htmlFor="sp-inline-answer">Choose the missing word</label><select id="sp-inline-answer" value={answer[0] || ''} onChange={(e) => change(e.target.value ? [e.target.value] : [])}><option value="">Choose an answer…</option>{options.map((o) => <option key={o.id} value={o.id}>{o.text}</option>)}</select></div>
+    <div className={'sp-question' + (pic ? ` sp-q-pic ${beside ? 'beside' : 'above'}` : '')}>
+      {pic && <figure className="sp-q-figure">
+        {!beside && <img className="sp-q-fill" src={src} alt="" aria-hidden="true" />}
+        <img className="sp-q-main" src={src} alt={pic.alt || ''} onLoad={(e) => { const im = e.currentTarget, shape = im.naturalHeight > im.naturalWidth * 1.1 ? 'tall' : 'wide'; if (shapes[item.id] !== shape) setShapes((s) => ({ ...s, [item.id]: shape })) }} />
+      </figure>}
+      <div className="sp-q-body"><h2>{item.prompt}</h2>
+      {item.kind === 'sort' ? <SortQuestion key={item.id} item={item} options={options} answer={answer} change={change} />
+        : item.kind === 'inline' ? <div className="sp-inline"><label htmlFor="sp-inline-answer">Choose the missing word</label><select id="sp-inline-answer" value={answer[0] || ''} onChange={(e) => change(e.target.value ? [e.target.value] : [])}><option value="">Choose an answer…</option>{options.map((o) => <option key={o.id} value={o.id}>{o.text}</option>)}</select></div>
         : item.kind === 'order' ? <><p>Tap the pieces in order to build the sentence. Tap a chosen piece to remove it.</p><div className="sp-order-answer" aria-label="Your sentence">{answer.length ? answer.map((id, i) => <button key={id} onClick={() => change(answer.filter((x) => x !== id))} aria-label={`Remove ${item.options.find((o) => o.id === id)?.text}`}><b>{i + 1}</b> {item.options.find((o) => o.id === id)?.text}</button>) : <span>Your sentence will appear here.</span>}</div><div className="sp-order-pool" aria-label="Sentence pieces">{options.map((o) => <button key={o.id} disabled={answer.includes(o.id)} onClick={() => change([...answer, o.id])}>{o.text}</button>)}</div></>
           : <><p>{item.kind === 'multi' ? 'Choose all that apply.' : 'Choose one answer.'}</p><div className="sp-options" role={item.kind === 'multi' ? 'group' : 'radiogroup'} aria-label={item.prompt}>{options.map((o, i) => <button key={o.id} role={item.kind === 'multi' ? 'checkbox' : 'radio'} aria-checked={answer.includes(o.id)} className={`sp-option ${answer.includes(o.id) ? 'selected' : ''}`} onClick={() => change(item.kind === 'multi' ? answer.includes(o.id) ? answer.filter((id) => id !== o.id) : [...answer, o.id] : [o.id])}><span className="sp-choice-marker">{item.kind === 'multi' ? answer.includes(o.id) ? '✓' : '' : String.fromCharCode(65 + i)}</span>{o.text}</button>)}</div></>}
+      </div>
     </div>
     <div className="sp-player-footer"><button className="sp-button secondary" disabled={index === 0} onClick={() => go(index - 1)}>Previous</button><span className="sp-counter">{index + 1} of {items.length} questions</span><button className="sp-button" disabled={!ready} onClick={index + 1 === items.length ? submit : () => go(index + 1)}>{index + 1 === items.length ? 'Finish test' : 'Next question'}</button></div>
   </article>
+}
+
+/* Sort (October 12, 2026): tap a word, then tap the group it belongs in. Tap a placed word to send it back. Answers are "wordId:group". */
+function SortQuestion({ item, options, answer, change }) {
+  const [held, setHeld] = useState(null)
+  const placed = Object.fromEntries(answer.map((x) => { const [id, g] = x.split(':'); return [id, Number(g)] }))
+  const pool = options.filter((o) => placed[o.id] === undefined)
+  const put = (g) => { if (!held) return; change([...answer.filter((x) => !x.startsWith(held + ':')), `${held}:${g}`]); setHeld(null) }
+  const label = (id) => options.find((o) => o.id === id)?.text
+  return <>
+    <p>Tap a word, then tap its group.</p>
+    <div className="sp-sort-pool" aria-label="Words to sort">
+      {pool.map((o) => <button key={o.id} className={'sp-sort-word' + (held === o.id ? ' held' : '')} aria-pressed={held === o.id} onClick={() => setHeld(held === o.id ? null : o.id)}>{o.text}</button>)}
+      {!pool.length && <span className="sp-sort-done">Every word is sorted.</span>}
+    </div>
+    <div className="sp-sort-groups">
+      {item.groups.map((g, gi) => <div key={gi} className={'sp-sort-group' + (held ? ' open' : '')}>
+        <button className="sp-sort-drop" disabled={!held} onClick={() => put(gi)}>{held ? `Put “${label(held)}” in ${g}` : g}</button>
+        <div className="sp-sort-placed">{options.filter((o) => placed[o.id] === gi).map((o) => <button key={o.id} className="sp-sort-word placed" aria-label={`Take ${o.text} out of ${g}`} onClick={() => change(answer.filter((x) => !x.startsWith(o.id + ':')))}>{o.text}</button>)}</div>
+      </div>)}
+    </div>
+  </>
 }

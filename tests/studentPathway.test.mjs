@@ -112,8 +112,10 @@ test('the explicit sample covers every Parts of Speech lesson and both forms wit
     assert.ok(demo.lessons[ws.id].steps.length <= 3)
   }
   for (const form of [demo.pre, demo.post]) {
-    assert.equal(form.items.length, 5)
-    assert.deepEqual(new Set(form.items.map((i) => i.kind)), new Set(['single', 'multi', 'inline', 'order']))
+    // The pre-test opens with two picture samples (layout demos, October 12, 2026); the skill questions are the rest.
+    const skill = form.items.filter((i) => !i.sample)
+    assert.equal(skill.length, 5)
+    assert.deepEqual(new Set(skill.map((i) => i.kind)), new Set(['single', 'multi', 'inline', 'order']))
     for (const item of form.items) assert.equal(scoreAssessment(item, item.correct), true)
   }
   demo.lessons.ws_verbs.steps[0].title = 'Changed locally'
@@ -129,7 +131,7 @@ test('a full sample journey resumes through pre-test, every lesson and practice,
   assert.equal(next().id, 'pre')
   const preAnswers = Object.fromEntries(demo.pre.items.map((item, i) => [item.id, i === 0 ? ['b'] : item.correct]))
   const preScore = demo.pre.items.filter((item) => scoreAssessment(item, preAnswers[item.id])).length / demo.pre.items.length * 100
-  assert.equal(preScore, 80)
+  assert.equal(preScore, 600 / 7) // 6 of 7: one wrong; the pre-test holds 2 picture samples and 5 skill questions
   record = { ...record, pre: { score: preScore, complete: true, answers: preAnswers } }
   resume()
   for (const sheet of [...parts.core, parts.full]) {
@@ -149,6 +151,21 @@ test('a full sample journey resumes through pre-test, every lesson and practice,
   assert.equal(completed.length, 14)
   assert.ok(completed.every((step) => step.state === 'complete'))
   assert.equal(next(), undefined)
-  assert.equal(record.pre.score, 80)
+  assert.equal(record.pre.score, 600 / 7)
   assert.equal(record.post.score, 100)
+})
+
+test('sort questions score when every word is in its own group; the pre-test opens with two picture samples', () => {
+  const item = { kind: 'sort', groups: ['A to M', 'N to Z'], options: [{ id: 'a', text: 'ant' }, { id: 'b', text: 'zoo' }], correct: ['a:0', 'b:1'] }
+  assert.equal(scoreAssessment(item, ['b:1', 'a:0']), true)
+  assert.equal(scoreAssessment(item, ['a:1', 'b:0']), false)
+  assert.equal(scoreAssessment(item, ['a:0']), false)
+  assert.equal(scoreAssessment(item, ['a:0', 'a:0']), false)
+  const demo = pathwayDemoFor({ id: 'topic_pos' })
+  const [tall, wide] = demo.pre.items
+  assert.deepEqual([tall.id, tall.kind, wide.id, wide.kind], ['pre-sample-opposite', 'single', 'pre-sample-abc', 'sort'])
+  assert.match(tall.picture.src, /^scenes\/.*satellite.*\.webp$/)
+  assert.match(wide.picture.src, /^scenes\/.*astronaut.*\.webp$/)
+  assert.equal(scoreAssessment(tall, ['d']), true)
+  assert.equal(scoreAssessment(wide, ['a:0', 'b:0', 'c:1', 'd:1']), true)
 })

@@ -102,6 +102,12 @@ export function recordWorksheet(record = {}, id, pct) {
 
 /** Answer option ids, not display positions, determine correctness. */
 export function scoreAssessment(item, answer) {
+  // Sort: each word placed in a group, kept as "wordId:groupIndex". Right when every word is in its own group.
+  if (item?.kind === 'sort') {
+    const got = Array.isArray(answer) ? answer : [], want = item.correct
+    if (!Array.isArray(want) || !want.length || got.length !== want.length || new Set(got).size !== got.length) return false
+    return want.every((x) => got.includes(x))
+  }
   if (!item || !['single', 'multi', 'inline', 'order'].includes(item.kind)) return false
   const got = Array.isArray(answer) ? answer : answer == null ? [] : [answer]
   const correct = item.correct

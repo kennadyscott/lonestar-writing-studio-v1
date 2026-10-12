@@ -50,17 +50,21 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   }
   const saveDraft = (id, draft) => setRecord((r) => ({ ...r, drafts: { ...r.drafts, [id]: draft } }))
 
+  // A pre-test or post-test gets the whole screen (October 12, 2026: on a Chromebook "There is SO MUCH space not being utilized well
+  // at the top and then the student has to scroll to see the whole question"): no breadcrumb, note or toolbar row; the way back sits
+  // in the test card's own header.
+  const testing = !!active && (active.type === 'pre' || active.type === 'post')
   return (
-    <section className="student-pathway" aria-label={`${topic.short || topic.title} pathway`}>
-      <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span></div>
+    <section className={'student-pathway' + (testing ? ' sp-testing' : '')} aria-label={`${topic.short || topic.title} pathway`}>
+      {!testing && <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span></div>}
       {saveFailed && <p role="status">Progress is kept for this visit, but this browser could not save it for later.</p>}
       {active ? (
         <>
-          <div className="sp-player-toolbar">
+          {!testing && <div className="sp-player-toolbar">
             <button className="sp-button secondary" onClick={() => setActive(null)}>Back to my pathway</button>
             <span>{names[active.type]} · {topic.short || topic.title}</span>
             {active.type === 'practice' && <small style={{ flexBasis: '100%' }}>Finished activities are saved. Your current activity restarts if you leave.</small>}
-          </div>
+          </div>}
           {active.type === 'practice' ? (
             <Worksheet key={active.id} ws={active.sheet} topic={topic} progress={record.worksheets || {}} preview pathwayMode
               resume={record.drafts?.[active.id]} onProgress={(draft) => saveDraft(active.id, draft)}
@@ -471,7 +475,12 @@ function Assessment({ step, result, draft, onDraft, onDone, onBack }) {
   }
   if (result?.complete) return <article className="sp-player-card sp-completion"><div className="sp-eyebrow">{names[step.type]} complete</div><h1>{step.type === 'pre' ? 'Your starting point is set.' : 'You finished your pathway!'}</h1><div className="sp-result-score">{result.score}%</div><p>{result.correct} of {result.total} correct</p><p>{step.type === 'pre' ? 'Now learn each skill, then put it into practice. Your pre-test score won’t hold you back.' : 'You’ve worked through the lessons and practice. Take a look at how far you’ve come.'}</p><button className="sp-button" onClick={onBack}>{step.type === 'pre' ? 'Continue to my lessons' : 'See my completed path'}</button></article>
   return <article className={'sp-player-card' + (pic ? ' has-pic' : '')}>
-    <div className="sp-player-head"><div><div className="sp-eyebrow">{names[step.type]} · {step.type === 'pre' ? 'Try your best' : 'Show what you know'}</div><h1>{step.assessment.title}</h1></div><span className="sp-counter">{index + 1} / {items.length}</span></div>
+    <div className="sp-player-head sp-test-head">
+      <button className="sp-test-back" onClick={onBack}>← My pathway</button>
+      <div className="sp-test-title"><span className="sp-eyebrow">{names[step.type]} · {step.type === 'pre' ? 'Try your best' : 'Show what you know'}</span><h1>{step.assessment.title}</h1></div>
+      <span className="sp-test-dots" aria-hidden="true">{items.map((it, i) => <i key={it.id} className={i === index ? 'on' : answers[it.id]?.length ? 'done' : ''} />)}</span>
+      <span className="sp-counter">{index + 1} / {items.length}</span>
+    </div>
     <div className={'sp-question' + (pic ? ` sp-q-pic ${beside ? 'beside' : 'above'}` : '')}>
       {pic && <figure className="sp-q-figure">
         {!beside && <img className="sp-q-fill" src={src} alt="" aria-hidden="true" />}

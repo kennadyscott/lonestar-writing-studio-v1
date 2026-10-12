@@ -453,9 +453,10 @@
 .student-pathway .sp-q-figure { margin: 0; position: relative; overflow: hidden; border-radius: 18px; background: #0d1430; display: grid; place-items: center; }
 .student-pathway .sp-q-pic.beside .sp-q-figure { min-height: 440px; }
 .student-pathway .sp-q-pic.beside .sp-q-main { width: 100%; height: 100%; object-fit: cover; }
-.student-pathway .sp-q-pic.above .sp-q-figure { height: 360px; }
+.student-pathway .sp-q-pic.above { --sp-banner: 360px; }
+.student-pathway .sp-q-pic.above .sp-q-figure { height: var(--sp-banner); }
 .student-pathway .sp-q-fill { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(22px) saturate(1.1); transform: scale(1.15); opacity: .75; }
-.student-pathway .sp-q-pic.above .sp-q-main { position: relative; height: 100%; width: auto; max-width: 100%; object-fit: contain; }
+.student-pathway .sp-q-pic.above .sp-q-main { position: relative; height: var(--sp-banner); width: auto; max-width: 100%; object-fit: contain; }
 .student-pathway .sp-q-body { min-width: 0; display: flex; flex-direction: column; }
 .student-pathway .sp-q-pic .sp-q-body h2 { font-size: 28px; line-height: 1.3; text-wrap: balance; }
 .student-pathway .sp-q-pic .sp-options { grid-template-columns: 1fr 1fr; gap: 12px; }
@@ -475,7 +476,47 @@
 @media (max-width: 860px) {
   .student-pathway .sp-q-pic.beside { grid-template-columns: 1fr; }
   .student-pathway .sp-q-pic.beside .sp-q-figure { min-height: 0; max-height: 300px; }
-  .student-pathway .sp-q-pic.above .sp-q-figure { height: 220px; }
+  .student-pathway .sp-q-pic.above { --sp-banner: 220px; }
   .student-pathway .sp-q-pic .sp-q-body h2 { font-size: 22px; }
   .student-pathway .sp-q-pic .sp-options, .student-pathway .sp-sort-groups { grid-template-columns: 1fr; }
 }
+
+/* A pre-test or post-test fits a Chromebook screen (1366 × ~650) without scrolling (October 12, 2026). The page's breadcrumb, the
+   preview note and the toolbar row give way to one slim header inside the card; the picture is sized to the screen's height. */
+.proof-page:has(.sp-testing) .crumbs { display: none; }
+.student-pathway.sp-testing { gap: 0; }
+.student-pathway.sp-testing .sp-player-card { max-width: 1180px; padding: 14px 22px 14px; }
+.student-pathway .sp-test-head { gap: 14px; padding-bottom: 10px; margin-bottom: 14px; }
+.student-pathway .sp-test-back { flex: none; min-height: 34px; padding: 5px 12px; border: 1px solid #cfdfd6; border-radius: 999px; background: #fff; color: #315e56; font-size: 12px; font-weight: 800; }
+.student-pathway .sp-test-back:focus-visible { outline: 3px solid #478c76; outline-offset: 2px; }
+.student-pathway .sp-test-title { flex: 1; min-width: 0; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.student-pathway .sp-test-title .sp-eyebrow { margin: 0; }
+.student-pathway .sp-test-title h1 { font-size: 16px; }
+.student-pathway .sp-test-dots { display: flex; gap: 4px; flex: none; }
+.student-pathway .sp-test-dots i { width: 16px; height: 5px; border-radius: 99px; background: #e1e8df; }
+.student-pathway .sp-test-dots i.done { background: #9cc9b0; }
+.student-pathway .sp-test-dots i.on { background: #33755f; }
+.student-pathway.sp-testing .sp-player-footer { padding-top: 10px; margin-top: 12px; }
+.student-pathway.sp-testing .sp-question h2 { font-size: clamp(20px, 1vw + 12px, 26px); margin-bottom: 8px; }
+.student-pathway.sp-testing .sp-question > p, .student-pathway.sp-testing .sp-q-body > p { margin: 0 0 8px; }
+/* A tall picture: as tall as the screen allows, its width following its shape. */
+.student-pathway.sp-testing .sp-q-pic { gap: 22px; }
+.student-pathway.sp-testing .sp-q-pic.beside { grid-template-columns: auto minmax(0, 1fr); align-items: start; }
+.student-pathway.sp-testing .sp-q-pic.beside .sp-q-figure { min-height: 0; height: auto; display: block; background: transparent; }
+.student-pathway.sp-testing .sp-q-pic.beside .sp-q-main { display: block; width: auto; height: clamp(240px, calc(100dvh - 260px), 560px); max-width: 42vw; object-fit: cover; }
+/* A wide picture: a banner on top, shorter on a short screen, so the question below still fits. */
+.student-pathway.sp-testing .sp-q-pic.above { gap: 14px; }
+.student-pathway.sp-testing .sp-q-pic.above { --sp-banner: clamp(140px, calc(100dvh - 505px), 360px); }
+.student-pathway.sp-testing .sp-q-pic .sp-options { margin: 10px 0 0; }
+.student-pathway.sp-testing .sp-q-pic .sp-option { min-height: 60px; font-size: 19px; }
+.student-pathway.sp-testing .sp-sort-pool { min-height: 46px; margin: 4px 0 10px; }
+.student-pathway.sp-testing .sp-sort-word { padding: 8px 16px; font-size: 18px; }
+.student-pathway.sp-testing .sp-sort-group { min-height: 108px; padding: 10px; gap: 8px; }
+@media (max-width: 860px) {
+  .student-pathway .sp-test-dots { display: none; }
+  .student-pathway.sp-testing .sp-q-pic.beside { grid-template-columns: 1fr; }
+  .student-pathway.sp-testing .sp-q-pic.beside .sp-q-figure { justify-self: center; }
+  .student-pathway.sp-testing .sp-q-pic.beside .sp-q-main { height: 260px; max-width: 100%; }
+}
+/* The page keeps 70px under its content for the floating demo button; a test card does not need it. */
+.content:has(.sp-testing) { padding-bottom: 4px; }

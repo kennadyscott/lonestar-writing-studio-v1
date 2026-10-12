@@ -130,18 +130,7 @@ function Answer({ item, options, answer, set, checked }) {
     </>
   }
 
-  if (item.kind === 'order') {
-    const text = (id) => options.find((o) => o.id === id)?.text
-    return <>
-      <p className="stc-how">Tap the pieces in order. Tap a chosen piece to take it back.</p>
-      <div className={'stc-order-answer' + (checked ? (answer.every((id, i) => id === want[i]) ? ' right' : ' wrong') : '')} aria-label="Your order">
-        {answer.length ? answer.map((id, i) => <button key={id} type="button" disabled={checked} onClick={() => set(answer.filter((x) => x !== id))}><b>{i + 1}</b>{text(id)}</button>) : <span>Your order will appear here.</span>}
-      </div>
-      <div className="stc-order-pool" aria-label="Pieces">
-        {options.map((o) => <button key={o.id} type="button" disabled={checked || answer.includes(o.id)} onClick={() => set([...answer, o.id])}>{o.text}</button>)}
-      </div>
-    </>
-  }
+  if (item.kind === 'order') return <OrderAnswer options={options} answer={answer} set={set} checked={checked} want={want} />
 
   if (item.kind === 'sort') return <SortAnswer item={item} options={options} answer={answer} set={set} checked={checked} />
   if (item.kind === 'match') return <MatchAnswer item={item} answer={answer} set={set} checked={checked} />
@@ -196,6 +185,57 @@ function SortAnswer({ item, options, answer, set, checked }) {
       </div>)}
     </div>
     {drag?.moved && <span className="stc-word stc-ghost" aria-hidden="true" style={{ left: drag.x - drag.dx, top: drag.y - drag.dy, width: drag.w }}>{text(drag.id)}</span>}
+  </>
+}
+
+// Ordering is drag and drop too (Kennady, October 12, 2026: "Yes to ordering questions"): the pieces stand in a numbered list, shuffled,
+// and a student drags each one up or down; the others make room as it moves. The first move makes the whole list the answer.
+// Keyboard: Enter picks a piece up, the arrow keys move it, Enter puts it down.
+function OrderAnswer({ options, answer, set, checked, want }) {
+  const [drag, setDrag] = useState(null)
+  const [held, setHeld] = useState(null)
+  const byId = Object.fromEntries(options.map((o) => [o.id, o]))
+  const ids = answer.length === options.length && answer.every((id) => byId[id]) ? answer : options.map((o) => o.id)
+  const moved = (list, id, to) => { const rest = list.filter((x) => x !== id); return [...rest.slice(0, to), id, ...rest.slice(to)] }
+  const shown = drag?.moved && drag.to !== null ? moved(ids, drag.id, drag.to) : ids
+  const slotAt = (x, y) => { const el = document.elementFromPoint(x, y)?.closest('[data-stc-order]'); return el ? Number(el.getAttribute('data-stc-order')) : null }
+  const down = (e, id) => {
+    if (checked || e.button > 0) return
+    const r = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    setHeld(null)
+    setDrag({ id, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, w: r.width, moved: false, to: null })
+  }
+  const move = (e) => {
+    if (!drag) return
+    const isMoved = drag.moved || Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 4
+    const to = isMoved ? slotAt(e.clientX, e.clientY) : null
+    setDrag({ ...drag, x: e.clientX, y: e.clientY, moved: isMoved, to: to ?? drag.to })
+  }
+  const up = () => { if (!drag) return; if (drag.moved && drag.to !== null) set(moved(ids, drag.id, drag.to)); setDrag(null) }
+  const key = (e, id, i) => {
+    if (checked) return
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setHeld(held === id ? null : id); return }
+    if (held === id && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+      e.preventDefault()
+      const to = Math.min(ids.length - 1, Math.max(0, i + (e.key === 'ArrowUp' ? -1 : 1)))
+      if (to !== i) { set(moved(ids, id, to)); requestAnimationFrame(() => document.querySelector(`[data-stc-piece="${id}"]`)?.focus()) }
+    }
+  }
+  const allRight = checked && ids.every((id, i) => id === want[i])
+  return <>
+    <p className="stc-how">Drag the pieces into order, first at the top.</p>
+    <ol className={'stc-order' + (checked ? (allRight ? ' right' : ' wrong') : '')} aria-label="Put these in order">
+      {shown.map((id, i) => <li key={id} data-stc-order={i}>
+        <button type="button" data-stc-piece={id} disabled={checked} aria-pressed={held === id}
+          aria-label={`${i + 1}: ${byId[id]?.text}${held === id ? '. Moving: use the arrow keys, then Enter.' : ''}`}
+          className={'stc-piece stc-drag' + (held === id ? ' held' : '') + (drag?.moved && drag.id === id ? ' lifted' : '') + (checked ? (id === want[i] ? ' right' : ' wrong') : '')}
+          onPointerDown={(e) => down(e, id)} onPointerMove={move} onPointerUp={up} onPointerCancel={() => setDrag(null)} onKeyDown={(e) => key(e, id, i)}>
+          <b className="stc-piece-n">{i + 1}</b><span className="stc-piece-text">{byId[id]?.text}</span><span className="stc-grip" aria-hidden="true">⋮⋮</span>
+        </button>
+      </li>)}
+    </ol>
+    {drag?.moved && <span className="stc-piece stc-ghost" aria-hidden="true" style={{ left: drag.x - drag.dx, top: drag.y - drag.dy, width: drag.w }}><span className="stc-piece-text">{byId[drag.id]?.text}</span><span className="stc-grip">⋮⋮</span></span>}
   </>
 }
 

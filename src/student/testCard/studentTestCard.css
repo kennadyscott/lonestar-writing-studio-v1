@@ -2,7 +2,7 @@
    --stc-avail is the height the card may use; the picture and passage take what the question leaves. */
 .stc {
   --stc-ink: #153d43; --stc-muted: #5b7377; --stc-line: #e1e8df; --stc-teal: #086472; --stc-green: #33755f; --stc-soft: #f4f9f1;
-  --stc-avail: calc(100dvh - 90px);
+  --stc-avail: calc(100dvh - 94px);
   width: 100%; max-width: 1180px; margin: 0 auto; padding: 14px 22px; box-sizing: border-box;
   border: 1px solid #d5e3d9; border-radius: 15px; background: #fffefa; box-shadow: 0 10px 28px rgba(19, 59, 45, .055);
   color: var(--stc-ink); font-family: 'Manrope', system-ui, sans-serif; line-height: 1.5; text-align: left;
@@ -36,10 +36,12 @@
 .stc-figure { margin: 0; position: relative; overflow: hidden; border-radius: 18px; background: #0d1430; display: grid; place-items: center; }
 .stc-body.beside .stc-figure { display: block; background: transparent; }
 .stc-body.beside .stc-pic { display: block; width: auto; height: clamp(240px, calc(var(--stc-avail) - 170px), 560px); max-width: 42vw; object-fit: cover; border-radius: 18px; }
-.stc-body.above { --stc-banner: clamp(140px, calc(var(--stc-avail) - 415px), 360px); }
-.stc-body.above .stc-figure { height: var(--stc-banner); }
-.stc-body.above .stc-pic { position: relative; height: var(--stc-banner); width: auto; max-width: 100%; object-fit: contain; }
-.stc-fill { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: blur(22px) saturate(1.1); transform: scale(1.15); opacity: .75; }
+/* A wide picture on top: the card fills the screen's height and the picture takes whatever the question leaves, shown whole. */
+.stc.stc-above { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: var(--stc-avail); }
+.stc-body.above { grid-template-rows: minmax(150px, 1fr) auto; }
+.stc-body.above .stc-figure { position: relative; display: block; min-height: 0; height: 100%; overflow: hidden; background: none; border-radius: 0; }
+/* Out of the flow, so the picture never pushes the question down: it fills the space left over, whole, from the left. */
+.stc-body.above .stc-pic { position: absolute; left: 0; top: 0; height: 100%; max-height: 560px; width: auto; max-width: 100%; object-fit: contain; object-position: left top; border-radius: 18px; }
 
 .stc-passage { max-height: calc(var(--stc-avail) - 150px); overflow: auto; padding: 4px 16px 4px 2px; border-right: 1px solid var(--stc-line); }
 .stc-body.with-passage.stack .stc-passage { max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--stc-line); padding-bottom: 12px; }
@@ -84,7 +86,7 @@
 .stc-word.placed { font-size: 16px; padding: 7px 13px; }
 .stc-done { align-self: center; color: #5b7a72; font-size: 14px; font-weight: 700; }
 .stc-sort-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.stc-group { display: grid; gap: 8px; align-content: start; min-height: 108px; padding: 10px; border: 2px dashed #c9d9cf; border-radius: 14px; background: #fbfdfb; }
+.stc-group { display: grid; gap: 8px; align-content: start; min-height: 88px; padding: 10px; border: 2px dashed #c9d9cf; border-radius: 14px; background: #fbfdfb; }
 .stc-group.open { border-color: #478c76; background: #f2f9f4; }
 .stc-drop { justify-self: stretch; padding: 8px 10px; border: 0; border-radius: 10px; background: transparent; color: #5b7a72; font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; text-align: left; }
 .stc-group.open .stc-drop { background: var(--stc-green); color: #fff; text-transform: none; letter-spacing: 0; font-size: 15px; }
@@ -116,7 +118,8 @@
   .stc-body.beside, .stc-body.with-passage.side { grid-template-columns: 1fr; }
   .stc-body.beside .stc-figure { justify-self: center; }
   .stc-body.beside .stc-pic { height: 260px; max-width: 100%; }
-  .stc-body.above { --stc-banner: 220px; }
+  .stc.stc-above { display: block; min-height: 0; }
+  .stc-body.above .stc-figure { height: 220px; }
   .stc-passage { max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--stc-line); }
   .stc-options.grid, .stc-sort-groups, .stc-match { grid-template-columns: 1fr; }
 }

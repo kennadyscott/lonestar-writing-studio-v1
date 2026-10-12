@@ -4,8 +4,9 @@
 // looks different to a student (Kennady, October 12, 2026).
 //
 // The flow is the approved mockup's: answer, Check my answer, then right or "Not quite" with the hint (one try), then Next.
-// A tall picture sits beside the question and a wide one on top; a passage sits beside (layout "side") or above ("stack").
-// Sized for a Chromebook: --stc-avail is the height below the app's top bar (default: the screen less 90px).
+// A tall picture sits beside the question. A wide one sits on top, whole and as large as the question leaves room for (Kennady,
+// October 12, 2026: "can we not get this format to sit like this with the whole picture?"). A passage sits beside or above.
+// Sized for a Chromebook: --stc-avail is the height below the app's top bar (default: the screen less 94px).
 import { useMemo, useState } from 'react'
 import { readyToCheck, scoreStudentItem, seededOrder } from './studentTestItem.mjs'
 import './studentTestCard.css'
@@ -25,7 +26,7 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
   const media = item.passage ? `with-passage ${item.layout === 'stack' ? 'stack' : 'side'}` : pic ? (beside ? 'beside' : 'above') : ''
 
   return (
-    <article className={'stc' + (pic || item.passage ? ' has-media' : '')}>
+    <article className={'stc' + (pic || item.passage ? ' has-media' : '') + (pic && !beside ? ' stc-above' : '')}>
       <header className="stc-head">
         {onBack && <button type="button" className="stc-back" onClick={onBack}>← My pathway</button>}
         <div className="stc-title">{eyebrow && <span className="stc-eyebrow">{eyebrow}</span>}<h1>{title}</h1></div>
@@ -42,7 +43,6 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
         )}
         {pic && (
           <figure className="stc-figure">
-            {!beside && <img className="stc-fill" src={pic.src} alt="" aria-hidden="true" />}
             <img className="stc-pic" src={pic.src} alt={pic.alt || ''} onLoad={(e) => { const im = e.currentTarget; const s = im.naturalHeight > im.naturalWidth * 1.1 ? 'tall' : 'wide'; if (s !== shape) { setShape(s); onShape?.(s) } }} />
           </figure>
         )}

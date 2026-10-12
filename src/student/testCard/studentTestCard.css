@@ -47,14 +47,22 @@
 .stc-body.with-passage.stack .stc-passage { max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--stc-line); padding-bottom: 12px; }
 .stc-passage h2 { margin: 0 0 10px; font-size: 18px; color: var(--stc-ink); text-wrap: balance; }
 .stc-passage p { margin: 0 0 10px; font-size: 15px; line-height: 1.65; max-width: 64ch; }
-/* A passage question's wide picture tops the question column and takes the height the question leaves (80-240px), so a Chromebook
-   screen holds passage, picture, and answers without scrolling. Its answers are a little more compact. */
+/* A passage question's wide picture tops the question column, spanning its full width (Kennady, October 12, 2026: "Make sure that
+   picture spans the whole section there - not just tiny and centered"). It takes the height the question leaves (80-240px), trimmed
+   top and bottom to fit, so a Chromebook screen holds passage, picture, and answers without scrolling. Answers are a little compact. */
 .stc.stc-qpic-on { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: var(--stc-avail); }
 .stc.stc-qpic-on .stc-body { align-items: stretch; }
 .stc.stc-qpic-on .stc-body.stack { grid-template-rows: auto minmax(0, 1fr); }
 .stc-qpic { position: relative; flex: 1 1 0; min-height: 80px; max-height: 240px; margin: 0 0 12px; }
 .stc-qpic[hidden] { display: none; }
-.stc-qpic img { position: absolute; top: 0; left: 50%; transform: translateX(-50%); display: block; height: 100%; width: auto; max-width: 100%; object-fit: contain; border-radius: 14px; }
+/* Or above the passage, when the publisher puts it there: a fixed share of the height, and the passage scrolls below it. */
+.stc-pcol { display: flex; flex-direction: column; min-width: 0; max-height: calc(var(--stc-avail) - 160px); }
+.stc-pcol .stc-passage { flex: 1 1 auto; min-height: 0; max-height: none; }
+.stc-body.with-passage.stack .stc-pcol { max-height: none; }
+.stc-body.with-passage.stack .stc-pcol .stc-passage { max-height: 34vh; }
+.stc-qpic.at-passage { flex: none; height: clamp(120px, calc(var(--stc-avail) * 0.34), 260px); min-height: 0; max-height: none; }
+.stc-body.with-passage.side .stc-qpic.at-passage { margin-right: 18px; }
+.stc-qpic img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 14px; }
 .stc-pn { display: inline-grid; place-items: center; width: 21px; height: 21px; margin-right: 8px; border-radius: 999px; background: #eef4ef; border: 1px solid var(--stc-line); font-size: 11px; font-weight: 800; color: #5b7377; vertical-align: 2px; }
 
 .stc-options { display: grid; gap: 10px; margin: 6px 0 0; }
@@ -136,7 +144,8 @@ span.stc-drop { display: block; }
   .stc-body.beside .stc-figure { justify-self: center; }
   .stc-body.beside .stc-pic { height: 260px; max-width: 100%; }
   .stc.stc-above, .stc.stc-qpic-on { display: block; min-height: 0; }
-  .stc-qpic { flex: none; height: 180px; }
+  .stc-qpic, .stc-qpic.at-passage { flex: none; height: 180px; }
+  .stc-pcol { max-height: none; }
   .stc-body.above .stc-figure { height: 220px; }
   .stc-passage { max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--stc-line); }
   .stc-options.grid, .stc-sort-groups, .stc-match { grid-template-columns: 1fr; }

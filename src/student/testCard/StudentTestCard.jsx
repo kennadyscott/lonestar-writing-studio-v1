@@ -6,8 +6,9 @@
 // The flow is the approved mockup's: answer, Check my answer, then right or "Not quite" with the hint (one try), then Next.
 // A tall picture sits beside the question. A wide one sits on top, whole and as large as the question leaves room for (Kennady,
 // October 12, 2026: "can we not get this format to sit like this with the whole picture?"). A passage sits beside or above.
-// A passage question's picture must be wide and sits above its question, never above the passage; any other shape is not shown
-// (Kennady, October 12, 2026: "only allow horizontal layout images and put it above the directions, not above the passage").
+// A passage question's picture must be wide; any other shape is not shown (Kennady, October 12, 2026: "only allow horizontal layout
+// images"). It spans the question column above the question, or, when the publisher puts it there (`pictureAt: 'passage'`), the
+// passage column above the passage ("give the publisher the ability to move the picture above the passage or above the question").
 // Sized for a Chromebook: --stc-avail is the height below the app's top bar (default: the screen less 94px).
 import { useMemo, useState } from 'react'
 import { readyToCheck, scoreStudentItem, seededOrder, unnumbered } from './studentTestItem.mjs'
@@ -23,15 +24,21 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
   const ready = readyToCheck(item, answer)
   const set = (next) => { if (!checked && !previewOnly && onAnswer) onAnswer(next) }
   const pic = item.passage ? null : item.picture
+  const measured = (s) => { if (s !== shape) { setShape(s); onShape?.(s) } }
   const passagePic = item.passage ? item.picture : null
+  const picAtPassage = !!passagePic && item.pictureAt === 'passage'
+  const passageFigure = passagePic && (
+    <figure className={'stc-qpic' + (picAtPassage ? ' at-passage' : '')} hidden={shape !== 'wide'}>
+      <img src={passagePic.src} alt={passagePic.alt || ''} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
+    </figure>
+  )
   const beside = !!pic && (item.layout ? item.layout === 'side' : shape === 'tall')
   // A dropdown question whose own wording holds the blank shows the dropdown in that sentence.
   const inlineInAsk = item.kind === 'inline' && !item.text && /_{2,}/.test(item.prompt || '')
-  const measured = (s) => { if (s !== shape) { setShape(s); onShape?.(s) } }
   const media = item.passage ? `with-passage ${item.layout === 'stack' ? 'stack' : 'side'}` : pic ? (beside ? 'beside' : 'above') : ''
 
   return (
-    <article className={'stc' + (pic || item.passage ? ' has-media' : '') + (pic && !beside ? ' stc-above' : '') + (passagePic && shape === 'wide' ? ' stc-qpic-on' : '')}>
+    <article className={'stc' + (pic || item.passage ? ' has-media' : '') + (pic && !beside ? ' stc-above' : '') + (passagePic && !picAtPassage && shape === 'wide' ? ' stc-qpic-on' : '')}>
       <header className="stc-head">
         {onBack && <button type="button" className="stc-back" onClick={onBack}>← My pathway</button>}
         <div className="stc-title">{eyebrow && <span className="stc-eyebrow">{eyebrow}</span>}<h1>{title}</h1></div>
@@ -40,23 +47,22 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
       </header>
 
       <div className={'stc-body ' + media}>
-        {item.passage && (
-          <article className="stc-passage" aria-label="Passage">
-            <h2>{item.passage.title}</h2>
-            {item.passage.paragraphs.map((p, i) => <p key={i}><span className="stc-pn">{i + 1}</span>{unnumbered(p, i)}</p>)}
-          </article>
-        )}
+        {item.passage && (() => {
+          const passage = (
+            <article className="stc-passage" aria-label="Passage">
+              <h2>{item.passage.title}</h2>
+              {item.passage.paragraphs.map((p, i) => <p key={i}><span className="stc-pn">{i + 1}</span>{unnumbered(p, i)}</p>)}
+            </article>
+          )
+          return picAtPassage ? <div className="stc-pcol">{passageFigure}{passage}</div> : passage
+        })()}
         {pic && (
           <figure className="stc-figure">
             <img className="stc-pic" src={pic.src} alt={pic.alt || ''} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
           </figure>
         )}
         <div className="stc-q">
-          {passagePic && (
-            <figure className="stc-qpic" hidden={shape !== 'wide'}>
-              <img src={passagePic.src} alt={passagePic.alt || ''} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
-            </figure>
-          )}
+          {!picAtPassage && passageFigure}
           {inlineInAsk
             ? <h2 className="stc-ask stc-ask-inline">{item.prompt.split(/_{2,}/)[0]}<InlineSelect item={item} options={options} answer={answer} set={set} checked={checked} />{item.prompt.split(/_{2,}/).slice(1).join(' ')}</h2>
             : <h2 className="stc-ask">{item.prompt}</h2>}

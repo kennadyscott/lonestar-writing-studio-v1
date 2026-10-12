@@ -3,7 +3,8 @@
 // 2026: "I want the preview box to be the same as what it would look like on the student screen").
 //
 // An item: { id, kind, prompt, text?, options: [{ id, text }], correct, groups?, left?, right?, picture?: { src, alt },
-//            passage?: { title, paragraphs }, layout?: 'side' | 'stack', hint? }
+//            passage?: { title, paragraphs }, layout?: 'side' | 'stack', pictureAt?: 'question' | 'passage', hint? }
+// A passage question's picture sits above the question unless pictureAt is 'passage'.
 // Answers are arrays of strings:
 //   single / inline   one option id                multi / hotspot   option ids
 //   order             option ids in order          sort              "optionId:groupIndex" for every option

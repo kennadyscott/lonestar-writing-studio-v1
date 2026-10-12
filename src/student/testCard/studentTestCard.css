@@ -40,8 +40,8 @@
 .stc.stc-above { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: var(--stc-avail); }
 .stc-body.above { grid-template-rows: minmax(150px, 1fr) auto; }
 .stc-body.above .stc-figure { position: relative; display: block; min-height: 0; height: 100%; overflow: hidden; background: none; border-radius: 0; }
-/* Out of the flow, so the picture never pushes the question down: it fills the space left over, whole, from the left. */
-.stc-body.above .stc-pic { position: absolute; left: 0; top: 0; height: 100%; max-height: 560px; width: auto; max-width: 100%; object-fit: contain; object-position: left top; border-radius: 18px; }
+/* Out of the flow, so the picture never pushes the question down: it fills the space left over, whole and centered. */
+.stc-body.above .stc-pic { position: absolute; left: 50%; top: 0; transform: translateX(-50%); height: 100%; max-height: 560px; width: auto; max-width: 100%; object-fit: contain; object-position: center top; border-radius: 18px; }
 
 .stc-passage { max-height: calc(var(--stc-avail) - 150px); overflow: auto; padding: 4px 16px 4px 2px; border-right: 1px solid var(--stc-line); }
 .stc-body.with-passage.stack .stc-passage { max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--stc-line); padding-bottom: 12px; }

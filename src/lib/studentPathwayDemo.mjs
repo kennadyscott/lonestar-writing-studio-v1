@@ -63,19 +63,19 @@ const lessons = {
 // wide one on top. They are layout samples, not Parts of Speech items.
 const picture = (file, alt) => ({ src: `scenes/${file}`, alt })
 const samples = [
-  { id: 'pre-sample-opposite', kind: 'single', sample: true, picture: picture('art-scene-s1-adorable-robotic-satellite-in-space.webp', 'A cartoon satellite with big eyes floating above Earth'), prompt: 'Which word means the opposite of big?', options: options('huge', 'large', 'giant', 'small'), correct: ['d'] },
-  { id: 'pre-sample-abc', kind: 'sort', sample: true, picture: picture('art-scene-s1-astronaut-enjoying-tacos-on-alien-planet.webp', 'A cartoon astronaut eating a taco on an alien planet beside a little rover'), prompt: 'Sort the words by their first letter.', groups: ['A to M', 'N to Z'], options: options('ant', 'bike', 'sun', 'zoo'), correct: ['a:0', 'b:0', 'c:1', 'd:1'] },
+  { id: 'pre-sample-opposite', kind: 'single', hint: 'Opposite means the reverse. Huge, large, and giant all mean big, so small is the opposite.', sample: true, picture: picture('art-scene-s1-adorable-robotic-satellite-in-space.webp', 'A cartoon satellite with big eyes floating above Earth'), prompt: 'Which word means the opposite of big?', options: options('huge', 'large', 'giant', 'small'), correct: ['d'] },
+  { id: 'pre-sample-abc', kind: 'sort', hint: 'Look at the first letter. A through M come in the first half of the alphabet; N through Z come in the second half.', sample: true, picture: picture('art-scene-s1-astronaut-enjoying-tacos-on-alien-planet.webp', 'A cartoon astronaut eating a taco on an alien planet beside a little rover'), prompt: 'Sort the words by their first letter.', groups: ['A to M', 'N to Z'], options: options('ant', 'bike', 'sun', 'zoo'), correct: ['a:0', 'b:0', 'c:1', 'd:1'] },
 ]
 
 const pre = {
   title: 'Before you begin: Parts of Speech',
   items: [
     ...samples,
-    { id: 'pre-verbs', kind: 'inline', prompt: 'Yesterday, Lena ____ a bright feather beside the pond.', options: options('found', 'finded', 'finds'), correct: ['a'] },
-    { id: 'pre-adjectives', kind: 'multi', prompt: 'Select both sentences that correctly compare exactly two things.', options: options('Mira’s kite is higher than Ben’s.', 'This puzzle is more difficult than the last one.', 'This is the most colorful of all five kites.', 'The blue kite is high than the red kite.'), correct: ['a', 'b'] },
-    { id: 'pre-conjunctions', kind: 'order', prompt: 'Build a sentence that starts with the picnic being ready and then shows a contrast.', options: options('The picnic was ready;', 'however,', 'rain kept us indoors.'), correct: ['a', 'b', 'c'] },
-    { id: 'pre-prepositions', kind: 'single', prompt: 'The ball rolled ____ the bed. We had to reach beneath the bed to get it. Which word fits?', options: options('under', 'above', 'onto'), correct: ['a'] },
-    { id: 'pre-pronouns', kind: 'single', prompt: 'Which sentence has the correct verb?', options: options('Everyone is ready for the trip.', 'Everyone are ready for the trip.', 'Everyone be ready for the trip.'), correct: ['a'] },
+    { id: 'pre-verbs', kind: 'inline', hint: 'Yesterday means the past. The past form of find is found, not finded.', prompt: 'Yesterday, Lena ____ a bright feather beside the pond.', options: options('found', 'finded', 'finds'), correct: ['a'] },
+    { id: 'pre-adjectives', kind: 'multi', hint: 'When you compare exactly two things, use -er or more, but never both.', prompt: 'Select both sentences that correctly compare exactly two things.', options: options('Mira’s kite is higher than Ben’s.', 'This puzzle is more difficult than the last one.', 'This is the most colorful of all five kites.', 'The blue kite is high than the red kite.'), correct: ['a', 'b'] },
+    { id: 'pre-conjunctions', kind: 'order', hint: 'Start with the first complete idea and its semicolon, then however and a comma, then the second idea.', prompt: 'Build a sentence that starts with the picnic being ready and then shows a contrast.', options: options('The picnic was ready;', 'however,', 'rain kept us indoors.'), correct: ['a', 'b', 'c'] },
+    { id: 'pre-prepositions', kind: 'single', hint: 'We reached beneath the bed, so the ball is under it.', prompt: 'The ball rolled ____ the bed. We had to reach beneath the bed to get it. Which word fits?', options: options('under', 'above', 'onto'), correct: ['a'] },
+    { id: 'pre-pronouns', kind: 'single', hint: 'Everyone means one group, so it takes is, not are.', prompt: 'Which sentence has the correct verb?', options: options('Everyone is ready for the trip.', 'Everyone are ready for the trip.', 'Everyone be ready for the trip.'), correct: ['a'] },
   ],
 }
 

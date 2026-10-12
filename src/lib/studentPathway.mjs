@@ -1,3 +1,4 @@
+import { scoreStudentItem } from '../student/testCard/studentTestItem.mjs'
 // The student workflow is separate from worksheet practice scores. Completing
 // practice can never manufacture a pre-test, lesson, or post-test result.
 export const PATHWAY_PASS_MARK = 85
@@ -101,19 +102,7 @@ export function recordWorksheet(record = {}, id, pct) {
 }
 
 /** Answer option ids, not display positions, determine correctness. */
+/** Right or wrong for one test question: the shared student test card's rule (src/student/testCard/studentTestItem.mjs). */
 export function scoreAssessment(item, answer) {
-  // Sort: each word placed in a group, kept as "wordId:groupIndex". Right when every word is in its own group.
-  if (item?.kind === 'sort') {
-    const got = Array.isArray(answer) ? answer : [], want = item.correct
-    if (!Array.isArray(want) || !want.length || got.length !== want.length || new Set(got).size !== got.length) return false
-    return want.every((x) => got.includes(x))
-  }
-  if (!item || !['single', 'multi', 'inline', 'order'].includes(item.kind)) return false
-  const got = Array.isArray(answer) ? answer : answer == null ? [] : [answer]
-  const correct = item.correct
-  if (!Array.isArray(correct) || !correct.length || !Array.isArray(item.options)) return false
-  const allowed = new Set(item.options.map((option) => option.id))
-  if (new Set(got).size !== got.length || new Set(correct).size !== correct.length || got.length !== correct.length) return false
-  if (got.some((id) => !allowed.has(id)) || correct.some((id) => !allowed.has(id))) return false
-  return item.kind === 'order' ? got.every((id, i) => id === correct[i]) : correct.every((id) => got.includes(id))
+  return scoreStudentItem(item, answer)
 }

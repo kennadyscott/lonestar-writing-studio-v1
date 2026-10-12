@@ -84,6 +84,13 @@
 .stc-word { padding: 8px 16px; border: 2px solid #d5e1d9; border-radius: 12px; background: #fff; color: #274b42; font-size: 18px; font-weight: 800; box-shadow: 0 2px 0 #d5e1d9; }
 .stc-word.held { border-color: var(--stc-green); background: #eaf5ed; box-shadow: 0 0 0 2px var(--stc-green); }
 .stc-word.placed { font-size: 16px; padding: 7px 13px; }
+.stc-drag { touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+.stc-drag:disabled { cursor: default; }
+.stc-word.lifted { opacity: .35; }
+.stc-ghost { position: fixed; z-index: 1000; pointer-events: none; cursor: grabbing; text-align: center; box-shadow: 0 10px 24px rgba(19, 59, 45, .22); border-color: var(--stc-green); transform: rotate(-2deg); }
+.stc-sort-pool.over { outline: 2px dashed #478c76; outline-offset: 4px; border-radius: 12px; }
+.stc-group.over { border-color: var(--stc-green); border-style: solid; background: #eaf5ed; }
+span.stc-drop { display: block; }
 .stc-done { align-self: center; color: #5b7a72; font-size: 14px; font-weight: 700; }
 .stc-sort-groups { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .stc-group { display: grid; gap: 8px; align-content: start; min-height: 88px; padding: 10px; border: 2px dashed #c9d9cf; border-radius: 14px; background: #fbfdfb; }

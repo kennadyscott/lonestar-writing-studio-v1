@@ -136,25 +136,46 @@ function InlineSelect({ item, options, answer, set, checked }) {
   </select>
 }
 
+// Sort is drag and drop (Kennady, October 12, 2026: "a sort should truly be drag and drop not tap and tap"). Pointer events, so a
+// mouse, a trackpad and a Chromebook touchscreen all drag the same way; a word can go back to the pile or to the other group.
+// Keyboard: Enter on a word picks it up, Enter on a group puts it there.
 function SortAnswer({ item, options, answer, set, checked }) {
   const [held, setHeld] = useState(null)
+  const [drag, setDrag] = useState(null)
   const placed = Object.fromEntries(answer.map((x) => { const [id, g] = x.split(':'); return [id, Number(g)] }))
   const pool = options.filter((o) => placed[o.id] === undefined)
-  const put = (g) => { if (!held) return; set([...answer.filter((x) => !x.startsWith(held + ':')), `${held}:${g}`]); setHeld(null) }
   const text = (id) => options.find((o) => o.id === id)?.text
   const ok = (id, g) => (item.correct || []).includes(`${id}:${g}`)
+  const putIn = (id, g) => set(g === 'pool' ? answer.filter((x) => !x.startsWith(id + ':')) : [...answer.filter((x) => !x.startsWith(id + ':')), `${id}:${g}`])
+  const dropAt = (x, y) => { const el = document.elementFromPoint(x, y)?.closest('[data-stc-drop]'); if (!el) return null; const v = el.getAttribute('data-stc-drop'); return v === 'pool' ? 'pool' : Number(v) }
+  const down = (e, id) => {
+    if (checked || e.button > 0) return
+    const r = e.currentTarget.getBoundingClientRect()
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    setHeld(null)
+    setDrag({ id, x: e.clientX, y: e.clientY, sx: e.clientX, sy: e.clientY, dx: e.clientX - r.left, dy: e.clientY - r.top, w: r.width, moved: false, over: null })
+  }
+  const move = (e) => { if (!drag) return; const moved = drag.moved || Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) > 4; setDrag({ ...drag, x: e.clientX, y: e.clientY, moved, over: moved ? dropAt(e.clientX, e.clientY) : null }) }
+  const up = (e) => { if (!drag) return; if (drag.moved) { const to = dropAt(e.clientX, e.clientY); if (to !== null) putIn(drag.id, to) } setDrag(null) }
+  const word = (o, extra = '') => <button key={o.id} type="button" disabled={checked} aria-pressed={held === o.id}
+    className={'stc-word stc-drag' + extra + (held === o.id ? ' held' : '') + (drag?.moved && drag.id === o.id ? ' lifted' : '')}
+    onPointerDown={(e) => down(e, o.id)} onPointerMove={move} onPointerUp={up} onPointerCancel={() => setDrag(null)}
+    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setHeld(held === o.id ? null : o.id) } }}>{o.text}</button>
   return <>
-    <p className="stc-how">Tap a word, then tap its group.</p>
-    <div className="stc-sort-pool" aria-label="Words to sort">
-      {pool.map((o) => <button key={o.id} type="button" className={'stc-word' + (held === o.id ? ' held' : '')} aria-pressed={held === o.id} disabled={checked} onClick={() => setHeld(held === o.id ? null : o.id)}>{o.text}</button>)}
+    <p className="stc-how">Drag each word into its group.</p>
+    <div className={'stc-sort-pool' + (drag?.moved && drag.over === 'pool' ? ' over' : '')} data-stc-drop="pool" aria-label="Words to sort">
+      {pool.map((o) => word(o))}
       {!pool.length && <span className="stc-done">Every word is sorted.</span>}
     </div>
     <div className="stc-sort-groups">
-      {(item.groups || []).map((g, gi) => <div key={gi} className={'stc-group' + (held ? ' open' : '')}>
-        <button type="button" className="stc-drop" disabled={!held || checked} onClick={() => put(gi)}>{held ? `Put “${text(held)}” in ${g}` : g}</button>
-        <div className="stc-placed">{options.filter((o) => placed[o.id] === gi).map((o) => <button key={o.id} type="button" className={'stc-word placed' + (checked ? (ok(o.id, gi) ? ' right' : ' wrong') : '')} disabled={checked} aria-label={`Take ${o.text} out of ${g}`} onClick={() => set(answer.filter((x) => !x.startsWith(o.id + ':')))}>{o.text}</button>)}</div>
+      {(item.groups || []).map((g, gi) => <div key={gi} data-stc-drop={gi} className={'stc-group' + (held ? ' open' : '') + (drag?.moved && drag.over === gi ? ' over' : '')}>
+        {held
+          ? <button type="button" className="stc-drop" onClick={() => { putIn(held, gi); setHeld(null) }}>Put “{text(held)}” in {g}</button>
+          : <span className="stc-drop">{g}</span>}
+        <div className="stc-placed">{options.filter((o) => placed[o.id] === gi).map((o) => word(o, ' placed' + (checked ? (ok(o.id, gi) ? ' right' : ' wrong') : '')))}</div>
       </div>)}
     </div>
+    {drag?.moved && <span className="stc-word stc-ghost" aria-hidden="true" style={{ left: drag.x - drag.dx, top: drag.y - drag.dy, width: drag.w }}>{text(drag.id)}</span>}
   </>
 }
 

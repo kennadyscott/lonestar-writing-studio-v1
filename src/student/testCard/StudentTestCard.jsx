@@ -26,10 +26,14 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
   const pic = item.passage ? null : item.picture
   const measured = (s) => { if (s !== shape) { setShape(s); onShape?.(s) } }
   const passagePic = item.passage ? item.picture : null
+  // Where a trimmed picture is centred: the publisher's chosen spot (Kennady, October 12, 2026: "Can we 'edit' the image so we can
+  // determine where we want to center it in the box?"). A whole picture (wide, on top) is never trimmed, so it ignores the spot.
+  const focus = item.picture?.focus
+  const focusStyle = focus ? { objectPosition: `${focus.x}% ${focus.y}%` } : undefined
   const picAtPassage = !!passagePic && item.pictureAt === 'passage'
   const passageFigure = passagePic && (
     <figure className={'stc-qpic' + (picAtPassage ? ' at-passage' : '')} hidden={shape !== 'wide'}>
-      <img src={passagePic.src} alt={passagePic.alt || ''} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
+      <img src={passagePic.src} alt={passagePic.alt || ''} style={focusStyle} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
     </figure>
   )
   const beside = !!pic && (item.layout ? item.layout === 'side' : shape === 'tall')
@@ -58,7 +62,7 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
         })()}
         {pic && (
           <figure className="stc-figure">
-            <img className="stc-pic" src={pic.src} alt={pic.alt || ''} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
+            <img className="stc-pic" src={pic.src} alt={pic.alt || ''} style={beside ? focusStyle : undefined} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
           </figure>
         )}
         <div className="stc-q">

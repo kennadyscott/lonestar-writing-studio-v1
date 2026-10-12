@@ -67,7 +67,7 @@ const samples = [
   { id: 'pre-sample-opposite', kind: 'single', hint: 'Opposite means the reverse. Huge, large, and giant all mean big, so small is the opposite.', sample: true, picture: picture('art-scene-s1-adorable-robotic-satellite-in-space.webp', 'A cartoon satellite with big eyes floating above Earth'), prompt: 'Which word means the opposite of big?', options: options('huge', 'large', 'giant', 'small'), correct: ['d'] },
   { id: 'pre-sample-abc', kind: 'sort', hint: 'Look at the first letter. A through M come in the first half of the alphabet; N through Z come in the second half.', sample: true, picture: picture('art-scene-s1-astronaut-enjoying-tacos-on-alien-planet.webp', 'A cartoon astronaut eating a taco on an alien planet beside a little rover'), prompt: 'Sort the words by their first letter.', groups: ['A to M', 'N to Z'], options: options('ant', 'bike', 'sun', 'zoo'), correct: ['a:0', 'b:0', 'c:1', 'd:1'] },
   { id: 'pre-sample-passage', kind: 'single', hint: 'Paragraph 2 says the pancakes "came out flat as paper" because Mia forgot the baking powder.', sample: true, layout: 'side',
-    picture: picture('art-scene-s1-baking-joy-in-a-cozy-kitchen.webp', 'A cartoon kitchen with a child baking'),
+    picture: { ...picture('art-scene-s1-baking-joy-in-a-cozy-kitchen.webp', 'A cartoon kitchen with a child baking'), focus: { x: 50, y: 22 } },
     passage: { title: 'The Pancake Morning', paragraphs: [
       'Mia woke up early on Saturday. She wanted to surprise her dad with pancakes before he got out of bed.',
       'She mixed the flour, milk, and eggs in a big bowl. But she forgot the baking powder, and the first pancakes came out flat as paper.',

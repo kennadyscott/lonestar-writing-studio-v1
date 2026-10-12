@@ -2,9 +2,10 @@
 // ck12-CMS-V2 src/components/student-test-card/), so a question approved in the CMS plays the same for a student (Kennady, October 12,
 // 2026: "I want the preview box to be the same as what it would look like on the student screen").
 //
-// An item: { id, kind, prompt, text?, options: [{ id, text }], correct, groups?, left?, right?, picture?: { src, alt },
+// An item: { id, kind, prompt, text?, options: [{ id, text }], correct, groups?, left?, right?, picture?: { src, alt, focus?: { x, y } },
 //            passage?: { title, paragraphs }, layout?: 'side' | 'stack', pictureAt?: 'question' | 'passage', hint? }
-// A passage question's picture sits above the question unless pictureAt is 'passage'.
+// A passage question's picture sits above the question unless pictureAt is 'passage'. A trimmed picture is centred on focus
+// (percentages across and down; default the middle).
 // Answers are arrays of strings:
 //   single / inline   one option id                multi / hotspot   option ids
 //   order             option ids in order          sort              "optionId:groupIndex" for every option

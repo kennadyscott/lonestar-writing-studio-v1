@@ -6,12 +6,15 @@
 // The flow is the approved mockup's: answer, Check my answer, then right or "Not quite" with the hint (one try), then Next.
 // A tall picture sits beside the question. A wide one sits on top, whole and as large as the question leaves room for (Kennady,
 // October 12, 2026: "can we not get this format to sit like this with the whole picture?"). A passage sits beside or above.
+// A passage question's picture must be wide and sits above its question, never above the passage; any other shape is not shown
+// (Kennady, October 12, 2026: "only allow horizontal layout images and put it above the directions, not above the passage").
 // Sized for a Chromebook: --stc-avail is the height below the app's top bar (default: the screen less 94px).
 import { useMemo, useState } from 'react'
-import { readyToCheck, scoreStudentItem, seededOrder } from './studentTestItem.mjs'
+import { readyToCheck, scoreStudentItem, seededOrder, unnumbered } from './studentTestItem.mjs'
 import './studentTestCard.css'
 
 const letter = (i) => String.fromCharCode(65 + i)
+const shapeOf = (im) => (im.naturalHeight > im.naturalWidth * 1.1 ? 'tall' : im.naturalWidth > im.naturalHeight * 1.1 ? 'wide' : 'square')
 
 export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), onAnswer, checked = false, onCheck, eyebrow, title, index = 0, total = 1, progress = /** @type {string[]} */ ([]), onBack, onPrev, onNext, nextLabel = 'Next question', seed = '', previewOnly = false, onShape }) {
   const [shape, setShape] = useState(null)
@@ -20,13 +23,15 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
   const ready = readyToCheck(item, answer)
   const set = (next) => { if (!checked && !previewOnly && onAnswer) onAnswer(next) }
   const pic = item.passage ? null : item.picture
+  const passagePic = item.passage ? item.picture : null
   const beside = !!pic && (item.layout ? item.layout === 'side' : shape === 'tall')
   // A dropdown question whose own wording holds the blank shows the dropdown in that sentence.
   const inlineInAsk = item.kind === 'inline' && !item.text && /_{2,}/.test(item.prompt || '')
+  const measured = (s) => { if (s !== shape) { setShape(s); onShape?.(s) } }
   const media = item.passage ? `with-passage ${item.layout === 'stack' ? 'stack' : 'side'}` : pic ? (beside ? 'beside' : 'above') : ''
 
   return (
-    <article className={'stc' + (pic || item.passage ? ' has-media' : '') + (pic && !beside ? ' stc-above' : '')}>
+    <article className={'stc' + (pic || item.passage ? ' has-media' : '') + (pic && !beside ? ' stc-above' : '') + (passagePic && shape === 'wide' ? ' stc-qpic-on' : '')}>
       <header className="stc-head">
         {onBack && <button type="button" className="stc-back" onClick={onBack}>← My pathway</button>}
         <div className="stc-title">{eyebrow && <span className="stc-eyebrow">{eyebrow}</span>}<h1>{title}</h1></div>
@@ -38,15 +43,20 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
         {item.passage && (
           <article className="stc-passage" aria-label="Passage">
             <h2>{item.passage.title}</h2>
-            {item.passage.paragraphs.map((p, i) => <p key={i}><span className="stc-pn">{i + 1}</span>{p}</p>)}
+            {item.passage.paragraphs.map((p, i) => <p key={i}><span className="stc-pn">{i + 1}</span>{unnumbered(p, i)}</p>)}
           </article>
         )}
         {pic && (
           <figure className="stc-figure">
-            <img className="stc-pic" src={pic.src} alt={pic.alt || ''} onLoad={(e) => { const im = e.currentTarget; const s = im.naturalHeight > im.naturalWidth * 1.1 ? 'tall' : 'wide'; if (s !== shape) { setShape(s); onShape?.(s) } }} />
+            <img className="stc-pic" src={pic.src} alt={pic.alt || ''} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
           </figure>
         )}
         <div className="stc-q">
+          {passagePic && (
+            <figure className="stc-qpic" hidden={shape !== 'wide'}>
+              <img src={passagePic.src} alt={passagePic.alt || ''} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
+            </figure>
+          )}
           {inlineInAsk
             ? <h2 className="stc-ask stc-ask-inline">{item.prompt.split(/_{2,}/)[0]}<InlineSelect item={item} options={options} answer={answer} set={set} checked={checked} />{item.prompt.split(/_{2,}/).slice(1).join(' ')}</h2>
             : <h2 className="stc-ask">{item.prompt}</h2>}

@@ -131,7 +131,7 @@ test('a full sample journey resumes through pre-test, every lesson and practice,
   assert.equal(next().id, 'pre')
   const preAnswers = Object.fromEntries(demo.pre.items.map((item, i) => [item.id, i === 0 ? ['b'] : item.correct]))
   const preScore = demo.pre.items.filter((item) => scoreAssessment(item, preAnswers[item.id])).length / demo.pre.items.length * 100
-  assert.equal(preScore, 600 / 7) // 6 of 7: one wrong; the pre-test holds 2 picture samples and 5 skill questions
+  assert.equal(preScore, 700 / 8) // 7 of 8: one wrong; the pre-test holds 3 picture samples and 5 skill questions
   record = { ...record, pre: { score: preScore, complete: true, answers: preAnswers } }
   resume()
   for (const sheet of [...parts.core, parts.full]) {
@@ -151,21 +151,34 @@ test('a full sample journey resumes through pre-test, every lesson and practice,
   assert.equal(completed.length, 14)
   assert.ok(completed.every((step) => step.state === 'complete'))
   assert.equal(next(), undefined)
-  assert.equal(record.pre.score, 600 / 7)
+  assert.equal(record.pre.score, 700 / 8)
   assert.equal(record.post.score, 100)
 })
 
-test('sort questions score when every word is in its own group; the pre-test opens with two picture samples', () => {
+test('sort questions score when every word is in its own group; the pre-test opens with three picture samples', () => {
   const item = { kind: 'sort', groups: ['A to M', 'N to Z'], options: [{ id: 'a', text: 'ant' }, { id: 'b', text: 'zoo' }], correct: ['a:0', 'b:1'] }
   assert.equal(scoreAssessment(item, ['b:1', 'a:0']), true)
   assert.equal(scoreAssessment(item, ['a:1', 'b:0']), false)
   assert.equal(scoreAssessment(item, ['a:0']), false)
   assert.equal(scoreAssessment(item, ['a:0', 'a:0']), false)
   const demo = pathwayDemoFor({ id: 'topic_pos' })
-  const [tall, wide] = demo.pre.items
-  assert.deepEqual([tall.id, tall.kind, wide.id, wide.kind], ['pre-sample-opposite', 'single', 'pre-sample-abc', 'sort'])
+  const [tall, wide, read] = demo.pre.items
+  assert.deepEqual([tall.id, tall.kind, wide.id, wide.kind, read.id, read.kind], ['pre-sample-opposite', 'single', 'pre-sample-abc', 'sort', 'pre-sample-passage', 'single'])
+  assert.match(read.picture.src, /^scenes\/.*kitchen.*\.webp$/)
+  assert.ok(read.passage.paragraphs.every((p) => !/^\d/.test(p)))
+  assert.equal(scoreAssessment(read, ['a']), true)
   assert.match(tall.picture.src, /^scenes\/.*satellite.*\.webp$/)
   assert.match(wide.picture.src, /^scenes\/.*astronaut.*\.webp$/)
   assert.equal(scoreAssessment(tall, ['d']), true)
   assert.equal(scoreAssessment(wide, ['a:0', 'b:0', 'c:1', 'd:1']), true)
+})
+
+test('a passage paragraph loses only its own typed number, so the screen does not number it twice', async () => {
+  const { unnumbered } = await import('../src/student/testCard/studentTestItem.mjs')
+  assert.equal(unnumbered('1. Mia woke up early.', 0), 'Mia woke up early.')
+  assert.equal(unnumbered('(2) She mixed the flour.', 1), 'She mixed the flour.')
+  assert.equal(unnumbered('3) Then it rained.', 2), 'Then it rained.')
+  assert.equal(unnumbered('5. Mia counted.', 0), '5. Mia counted.')
+  assert.equal(unnumbered('12 eggs sat in the box.', 11), '12 eggs sat in the box.')
+  assert.equal(unnumbered('Mia woke up.', 0), 'Mia woke up.')
 })

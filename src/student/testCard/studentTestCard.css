@@ -47,12 +47,22 @@
 .stc-body.with-passage.stack .stc-passage { max-height: 34vh; border-right: 0; border-bottom: 1px solid var(--stc-line); padding-bottom: 12px; }
 .stc-passage h2 { margin: 0 0 10px; font-size: 18px; color: var(--stc-ink); text-wrap: balance; }
 .stc-passage p { margin: 0 0 10px; font-size: 15px; line-height: 1.65; max-width: 64ch; }
+/* A passage question's wide picture tops the question column and takes the height the question leaves (80-240px), so a Chromebook
+   screen holds passage, picture, and answers without scrolling. Its answers are a little more compact. */
+.stc.stc-qpic-on { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; min-height: var(--stc-avail); }
+.stc.stc-qpic-on .stc-body { align-items: stretch; }
+.stc.stc-qpic-on .stc-body.stack { grid-template-rows: auto minmax(0, 1fr); }
+.stc-qpic { position: relative; flex: 1 1 0; min-height: 80px; max-height: 240px; margin: 0 0 12px; }
+.stc-qpic[hidden] { display: none; }
+.stc-qpic img { position: absolute; top: 0; left: 50%; transform: translateX(-50%); display: block; height: 100%; width: auto; max-width: 100%; object-fit: contain; border-radius: 14px; }
 .stc-pn { display: inline-grid; place-items: center; width: 21px; height: 21px; margin-right: 8px; border-radius: 999px; background: #eef4ef; border: 1px solid var(--stc-line); font-size: 11px; font-weight: 800; color: #5b7377; vertical-align: 2px; }
 
 .stc-options { display: grid; gap: 10px; margin: 6px 0 0; }
 .stc-options.grid { grid-template-columns: 1fr 1fr; }
 .stc-option { display: flex; align-items: center; gap: 13px; width: 100%; min-height: 58px; padding: 12px 15px; border: 2px solid #d5e1d9; border-radius: 14px; background: #fff; color: #274b42; font-size: 18px; font-weight: 700; text-align: left; transition: border-color .15s ease, background .15s ease; }
 .stc.has-media .stc-option { font-size: 19px; min-height: 60px; }
+.stc.stc-qpic-on .stc-options { gap: 8px; }
+.stc.stc-qpic-on .stc-option { font-size: 17px; min-height: 48px; padding-block: 8px; }
 .stc-option:hover:not(:disabled) { background: var(--stc-soft); border-color: #8bae9b; }
 .stc-option.selected { background: #eaf5ed; border-color: #478c76; box-shadow: 0 0 0 1px #478c76; }
 .stc-marker { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 30px; height: 30px; border: 1px solid #d6e0d7; border-radius: 50%; color: #64776b; background: #f9fbf7; font-size: 12px; font-weight: 800; }
@@ -125,7 +135,8 @@ span.stc-drop { display: block; }
   .stc-body.beside, .stc-body.with-passage.side { grid-template-columns: 1fr; }
   .stc-body.beside .stc-figure { justify-self: center; }
   .stc-body.beside .stc-pic { height: 260px; max-width: 100%; }
-  .stc.stc-above { display: block; min-height: 0; }
+  .stc.stc-above, .stc.stc-qpic-on { display: block; min-height: 0; }
+  .stc-qpic { flex: none; height: 180px; }
   .stc-body.above .stc-figure { height: 220px; }
   .stc-passage { max-height: 40vh; border-right: 0; border-bottom: 1px solid var(--stc-line); }
   .stc-options.grid, .stc-sort-groups, .stc-match { grid-template-columns: 1fr; }

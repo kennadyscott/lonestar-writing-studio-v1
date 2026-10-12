@@ -41,6 +41,12 @@ export function scoreStudentItem(item, answer) {
   return sameSet(got, want)
 }
 
+/** A passage paragraph without the number typed at its start: the screen numbers paragraphs, so "1. Mia woke up" would show the 1
+ *  twice (Kennady, October 12, 2026: "There is also double numbering coming through"). Only the paragraph's own number goes. */
+export function unnumbered(text, index) {
+  return String(text ?? '').replace(/^\s*\(?(\d{1,3})[.)]\s+/, (all, n) => (Number(n) === index + 1 ? '' : all))
+}
+
 /** A stable shuffle: the same seed gives the same order (a student's draft keeps its seed; the CMS uses the question id). */
 export function seededOrder(list, seed) {
   const h = (t) => { let n = 2166136261; for (const c of String(t)) n = Math.imul(n ^ c.charCodeAt(0), 16777619); return n >>> 0 }

@@ -1,4 +1,4 @@
-/* The map is for exploring. Inside a path, a quiet trail keeps the work legible. */
+/* Pathway screens keep the work legible while the Grade 4–5 trail carries the Labyrinth setting through. */
 .student-pathway {
   --sp-ink: #153d43;
   --sp-muted: #5b7377;
@@ -360,25 +360,103 @@
 .student-pathway .sp-x-do button.is-now { border-color: #e0a106; box-shadow: 0 0 0 3px #f0d48a; }
 .student-pathway .sp-x.is-23 .sp-x-go { width: min(420px, 100%); margin-top: 4px; background: #e09a32; color: #1d2d12; }
 
-.student-pathway .sp-x.is-45 { padding: 26px 22px 20px; background: #f3faf6; border: 1px solid #c5ddd0; }
-.student-pathway .sp-x.is-45 .sp-x-kicker { color: #1f7a62; }
-.student-pathway .sp-x.is-45 h2 { color: #14324a; font-size: 36px; font-weight: 800; }
-.student-pathway .sp-x.is-45 .sp-x-lead { color: #3d5870; font-size: 18px; }
-.student-pathway .sp-x-walk { list-style: none; margin: 20px 0 8px; padding: 0; }
-.student-pathway .sp-x-walk li { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 14px; position: relative; padding-bottom: 16px; }
-.student-pathway .sp-x-walk li::before { content: ""; position: absolute; left: 26px; top: 52px; bottom: 0; width: 3px; border-radius: 3px; background: #b7dfd2; }
-.student-pathway .sp-x-walk li:last-child::before { display: none; }
-.student-pathway .sp-x-mark { display: grid; place-items: center; width: 52px; height: 52px; border-radius: 50%; background: #fff; border: 3px solid #1f8a5a; color: #145c43; font-size: 20px; font-weight: 800; }
-.student-pathway .sp-x.is-45 h3 { color: #14324a; font-size: 22px; font-weight: 800; }
-.student-pathway .sp-x.is-45 .sp-x-walk p { color: #3d5870; font-size: 16px; }
-.student-pathway .sp-x.is-45 .sp-x-walk > li > div > b { display: inline-block; margin-top: 6px; color: #0e6b62; font-size: 16px; }
-.student-pathway .sp-x-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
-.student-pathway .sp-x-pair button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 64px; justify-content: center; padding: 10px 12px; border-radius: 12px; background: #fff; border: 1px solid #c5ddd0; text-align: left; }
-.student-pathway .sp-x-pair small { color: #1f7a62; font-size: 13px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
-.student-pathway .sp-x-pair button.is-done small::before { content: "✓ "; }
-.student-pathway .sp-x-pair b { color: #14324a; font-size: 16px; }
-.student-pathway .sp-x-pair button.is-now { border-color: #1f8a5a; box-shadow: 0 0 0 3px #b7dfd2; }
-.student-pathway .sp-x.is-45 .sp-x-go { background: #0c6e74; color: #fff; }
+.student-pathway .sp-x.is-45 { --sp45-ink: #15344a; --sp45-teal: #075f63; --sp45-gold: #f6cb65; max-width: 1200px; margin: 0 auto; }
+.student-pathway .sp45-hero { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 310px); gap: 30px; align-items: center; min-height: 260px; overflow: hidden; border: 2px solid #ead7a1; border-radius: 24px; padding: 30px clamp(22px, 3vw, 40px); background: linear-gradient(90deg, rgba(7, 38, 42, .96) 0%, rgba(7, 38, 42, .86) 36%, rgba(7, 38, 42, .28) 74%), var(--sp45-art) center 53% / cover no-repeat, #163c42; box-shadow: 0 12px 30px rgba(26, 53, 48, .14); }
+.student-pathway .sp45-intro { position: relative; z-index: 1; max-width: 540px; color: #fff; }
+.student-pathway .sp45-overline, .student-pathway .sp45-next-kicker, .student-pathway .sp45-stage-label, .student-pathway .sp45-trail-heading span { display: block; font-size: 12px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.student-pathway .sp45-overline { color: #f9dda1; }
+.student-pathway .sp45-intro h2 { margin: 8px 0; color: #fff; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(38px, 4vw, 56px); line-height: 1.04; text-wrap: balance; text-shadow: 0 2px 10px rgba(0, 0, 0, .25); }
+.student-pathway .sp45-intro p { max-width: 450px; margin: 8px 0 20px; color: #edf5ed; font-size: 17px; line-height: 1.4; }
+.student-pathway .sp45-progress-copy { font-size: 13px; font-weight: 700; color: #ebf1df; }
+.student-pathway .sp45-progress-copy strong { color: #ffe3a5; font-size: 18px; }
+.student-pathway .sp45-progress-track { width: min(370px, 100%); height: 11px; margin-top: 8px; overflow: hidden; border: 1px solid rgba(255, 255, 255, .55); border-radius: 99px; background: rgba(6, 27, 30, .55); }
+.student-pathway .sp45-progress-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f2ba48, #fff0af); transition: width .25s ease; }
+.student-pathway .sp45-next { position: relative; z-index: 1; align-self: stretch; display: flex; flex-direction: column; justify-content: center; border: 2px solid #ffe6a1; border-radius: 18px; padding: 20px; background: rgba(255, 251, 238, .95); box-shadow: 0 12px 26px rgba(11, 38, 38, .2); }
+.student-pathway .sp45-next-kicker { color: #8a5a12; }
+.student-pathway .sp45-next h3 { margin: 8px 0 0; color: var(--sp45-ink); font-family: Georgia, 'Times New Roman', serif; font-size: 28px; line-height: 1.12; }
+.student-pathway .sp45-next p { margin: 8px 0 16px; color: #48606a; font-size: 14px; line-height: 1.45; }
+.student-pathway .sp45-next-button { display: flex; align-items: center; justify-content: space-between; gap: 16px; width: 100%; min-height: 48px; border: 0; border-radius: 11px; padding: 9px 15px; background: var(--sp45-teal); color: #fff; font-size: 15px; font-weight: 800; text-align: left; cursor: pointer; }
+.student-pathway .sp45-next-button:hover:not(:disabled), .student-pathway .sp45-stage-button:hover:not(:disabled) { background: #06494d; }
+.student-pathway .sp45-trail-heading { display: flex; align-items: end; justify-content: space-between; gap: 16px; margin: 20px 12px 6px; }
+.student-pathway .sp45-trail-heading span { color: #1b7c70; }
+.student-pathway .sp45-trail-heading h3 { margin: 2px 0 0; color: var(--sp45-ink); font-family: Georgia, 'Times New Roman', serif; font-size: 26px; }
+.student-pathway .sp45-trail-heading p { margin: 0 0 3px; color: #607675; font-size: 14px; }
+.student-pathway .sp45-trail { position: relative; display: flex; flex-direction: column; gap: 17px; margin: 0; padding: 8px 0 8px; list-style: none; }
+.student-pathway .sp45-trail::before { content: ''; position: absolute; top: 30px; bottom: 35px; left: 38px; width: 5px; border-radius: 99px; background: repeating-linear-gradient(180deg, #dba94e 0 12px, #e8d3a4 12px 20px); }
+.student-pathway .sp45-clearing { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 12px; align-items: start; }
+.student-pathway .sp45-clearing:nth-child(even) { margin-left: clamp(0px, 3vw, 42px); }
+.student-pathway .sp45-marker { position: relative; z-index: 1; display: grid; place-items: center; width: 76px; height: 76px; border: 4px solid #f5d487; border-radius: 50%; background: radial-gradient(circle at 35% 25%, #fff9df, #e7c77e); box-shadow: 0 3px 0 #bd9547, 0 6px 14px rgba(66, 61, 37, .18); }
+.student-pathway .sp45-marker img { width: 54px; height: 54px; object-fit: contain; }
+.student-pathway .sp45-clearing.is-complete .sp45-marker { border-color: #9bd8bd; background: #e5f5e8; }
+.student-pathway .sp45-clearing.is-locked .sp45-marker { filter: saturate(.56); opacity: .8; }
+.student-pathway .sp45-clearing-content { min-height: 108px; border: 1px solid #d7e2db; border-radius: 18px; padding: 18px 22px; background: #fffefa; box-shadow: 0 4px 15px rgba(24, 58, 51, .06); }
+.student-pathway .sp45-clearing.is-current .sp45-clearing-content { border: 2px solid #e0ad53; background: linear-gradient(125deg, #fffdf3, #f4faf5); box-shadow: 0 5px 18px rgba(110, 81, 36, .13); }
+.student-pathway .sp45-clearing.is-complete .sp45-clearing-content { background: #f6fbf5; }
+.student-pathway .sp45-clearing.is-locked .sp45-clearing-content { background: #f8faf7; }
+.student-pathway .sp45-stage-label { color: #96702c; font-size: 11px; }
+.student-pathway .sp45-clearing h3 { margin: 3px 0 0; color: var(--sp45-ink); font-family: Georgia, 'Times New Roman', serif; font-size: 25px; line-height: 1.2; }
+.student-pathway .sp45-clearing p { margin: 5px 0 0; color: #516872; font-size: 15px; }
+.student-pathway .sp45-clearing-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.student-pathway .sp45-clearing-title span { flex-shrink: 0; border-radius: 99px; padding: 4px 9px; background: #e9eee9; color: #536864; font-size: 11px; font-weight: 900; }
+.student-pathway .sp45-clearing.is-current .sp45-clearing-title span { background: #fff0be; color: #775013; }
+.student-pathway .sp45-clearing.is-complete .sp45-clearing-title span { background: #d7f2dd; color: #206044; }
+.student-pathway .sp45-tasks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-top: 13px; }
+.student-pathway .sp45-task { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; min-width: 0; min-height: 82px; border: 1px solid #d3dfd8; border-radius: 12px; padding: 10px 14px; background: #fff; text-align: left; }
+.student-pathway .sp45-task > span { color: #297967; font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.student-pathway .sp45-task strong { color: var(--sp45-ink); font-size: 18px; line-height: 1.25; }
+.student-pathway .sp45-task small { color: #5f7474; font-size: 12px; line-height: 1.25; }
+.student-pathway .sp45-task.is-now { border: 2px solid #dfa94b; background: #fff9e8; box-shadow: 0 0 0 3px rgba(239, 207, 140, .24); cursor: pointer; }
+.student-pathway .sp45-task.is-now small { color: #825312; font-weight: 900; }
+.student-pathway .sp45-task.is-done { border-color: #b6d9c5; background: #effaf0; cursor: pointer; }
+.student-pathway .sp45-task.is-done small { color: #24664a; font-weight: 800; }
+.student-pathway .sp45-task:disabled { opacity: .72; }
+.student-pathway .sp45-task:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(26, 69, 54, .12); }
+.student-pathway .sp45-result { display: inline-flex; align-items: center; gap: 9px; margin-top: 11px; border-radius: 99px; padding: 5px 11px; background: #dff1df; color: #1b6344; font-size: 14px; font-weight: 800; }
+.student-pathway .sp45-result strong { font-size: 17px; }
+.student-pathway .sp45-stage-button { min-height: 42px; margin-top: 12px; border: 0; border-radius: 10px; padding: 8px 15px; background: var(--sp45-teal); color: #fff; font-size: 14px; font-weight: 800; cursor: pointer; }
+.student-pathway .sp45-stage-button:disabled { background: #e5ebe5; color: #5b706b; }
+.student-pathway .sp45-back { margin: 10px 0 0 88px; border: 0; background: transparent; color: var(--sp45-teal); font-size: 14px; font-weight: 800; cursor: pointer; }
+.student-pathway .sp45-back:hover { text-decoration: underline; }
+.student-pathway .sp45-clearing .sp-x-extra { border-top: 1px solid #e8e2d6; padding-top: 12px; }
+
+/* School Chromebooks commonly leave less vertical room than a desktop browser. */
+@media (max-height: 800px) and (min-width: 801px) {
+  .student-pathway .sp45-hero { min-height: 220px; padding: 18px 28px; }
+  .student-pathway .sp45-intro h2 { font-size: clamp(34px, 3.4vw, 46px); }
+  .student-pathway .sp45-intro p { margin: 6px 0 12px; font-size: 15px; }
+  .student-pathway .sp45-next { padding: 14px 17px; }
+  .student-pathway .sp45-next h3 { margin-top: 5px; font-size: 24px; }
+  .student-pathway .sp45-next p { margin: 6px 0 10px; font-size: 13px; }
+  .student-pathway .sp45-next-button { min-height: 42px; }
+  .student-pathway .sp45-trail-heading { margin-top: 12px; margin-bottom: 2px; }
+  .student-pathway .sp45-trail-heading h3 { font-size: 23px; }
+  .student-pathway .sp45-gateway .sp45-clearing-content { padding: 12px 18px; }
+  .student-pathway .sp45-gateway .sp45-stage-button { min-height: 38px; margin-top: 8px; }
+}
+
+@media (max-width: 800px) {
+  .student-pathway .sp45-hero { grid-template-columns: 1fr; gap: 16px; padding: 24px; background-position: 57% center; }
+  .student-pathway .sp45-next { max-width: 520px; }
+  .student-pathway .sp45-clearing:nth-child(even) { margin-left: 0; }
+}
+@media (max-width: 560px) {
+  .student-pathway .sp45-hero { border-radius: 18px; padding: 20px 18px; }
+  .student-pathway .sp45-intro h2 { font-size: 38px; }
+  .student-pathway .sp45-intro p { font-size: 15px; }
+  .student-pathway .sp45-trail-heading { display: block; }
+  .student-pathway .sp45-trail-heading p { margin-top: 3px; }
+  .student-pathway .sp45-trail::before { left: 28px; }
+  .student-pathway .sp45-clearing { grid-template-columns: 56px minmax(0, 1fr); gap: 8px; }
+  .student-pathway .sp45-marker { width: 56px; height: 56px; border-width: 3px; }
+  .student-pathway .sp45-marker img { width: 40px; height: 40px; }
+  .student-pathway .sp45-clearing-content { padding: 14px; }
+  .student-pathway .sp45-clearing h3 { font-size: 21px; }
+  .student-pathway .sp45-clearing-title { display: block; }
+  .student-pathway .sp45-clearing-title span { display: inline-block; margin-top: 5px; }
+  .student-pathway .sp45-tasks { grid-template-columns: 1fr; }
+  .student-pathway .sp45-task { min-height: 70px; }
+  .student-pathway .sp45-back { margin-left: 64px; }
+}
 
 .student-pathway .sp-x.is-67 { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; padding: 22px; background: #f7fbf6; border: 1px solid #cfe0d4; }
 .student-pathway .sp-x.is-67 .sp-x-kicker { color: #3e6b4e; }
@@ -451,3 +529,244 @@
 .proof-page:has(.sp-testing) .crumbs { display: none; }
 .student-pathway.sp-testing { gap: 0; }
 .content:has(.sp-testing) { padding-bottom: 4px; }
+
+/* Focused Grade 4–5 pathway */
+.proof-page:has(.student-pathway .sp-x.is-45) { max-width: none; width: 100%; }
+.student-pathway .sp-x.is-45 { max-width: none; width: 100%; }
+.student-pathway .sp45-hero { grid-template-columns: 1fr; min-height: 124px; gap: 0; padding: 17px clamp(22px, 3vw, 42px); border-radius: 18px; background: linear-gradient(90deg, rgba(7, 38, 42, .98), rgba(7, 38, 42, .88) 42%, rgba(7, 38, 42, .4)), var(--sp45-art) center 53% / cover no-repeat, #163c42; }
+.student-pathway .sp45-intro { max-width: none; }
+.student-pathway .sp45-intro h2 { margin: 4px 0 9px; font-size: clamp(29px, 3vw, 40px); }
+.student-pathway .sp45-progress-track { height: 7px; margin-top: 4px; }
+.student-pathway .sp45-progress-copy strong { font-size: 15px; }
+.student-pathway .sp45-next { align-self: center; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.student-pathway .sp45-next-kicker { color: #ffe3a5; }
+.student-pathway .sp45-next h3 { margin: 4px 0 8px; color: #fff; font-size: 21px; }
+.student-pathway .sp45-next-button { min-height: 40px; width: fit-content; max-width: 100%; padding: 8px 14px; background: #fff8e7; color: #164145; font-size: 13px; }
+.student-pathway .sp45-next-button:hover:not(:disabled) { background: #f7d77d; color: #133c40; }
+.student-pathway .sp45-route { display: flex; gap: 7px; margin: 18px 2px 0; }
+.student-pathway .sp45-route span { display: grid; place-items: center; flex: 1; height: 22px; border-radius: 99px; background: #e3eae5; color: #607570; font-size: 11px; font-weight: 900; }
+.student-pathway .sp45-route span.is-complete { background: #288765; color: #fff; }
+.student-pathway .sp45-route span.is-current { background: #e8bb59; color: #173747; }
+.student-pathway .sp45-trail-heading { align-items: center; margin: 15px 0 8px; }
+.student-pathway .sp45-trail-heading h3 { font-size: 22px; }
+.student-pathway .sp45-route-toggle { border: 1px solid #bfd6ca; border-radius: 9px; padding: 9px 12px; background: #fff; color: #075f63; font-size: 13px; font-weight: 800; cursor: pointer; }
+.student-pathway .sp45-route-toggle:hover { background: #ebf5ef; }
+.student-pathway .sp45-trail.is-focused { gap: 0; padding: 0; }
+.student-pathway .sp45-trail.is-focused::before { display: none; }
+.student-pathway .sp45-trail.is-focused .sp45-clearing:not(.is-focus) { display: none; }
+.student-pathway .sp45-trail.is-focused .sp45-clearing { margin-left: 0; grid-template-columns: 58px minmax(0, 1fr); }
+.student-pathway .sp45-trail.is-focused .sp45-marker { width: 58px; height: 58px; }
+.student-pathway .sp45-trail.is-focused .sp45-marker img { width: 40px; height: 40px; }
+.student-pathway .sp45-trail.is-focused .sp45-clearing-content { min-height: 0; padding: 16px 20px; }
+.student-pathway .sp45-up-ahead { display: flex; align-items: center; gap: 12px; margin: 12px 0 0 70px; border: 1px dashed #bdd4c6; border-radius: 12px; padding: 10px 14px; background: #f9fcf7; color: #526c64; }
+.student-pathway .sp45-up-ahead span { color: #30816e; font-size: 10px; font-weight: 900; letter-spacing: .1em; }
+.student-pathway .sp45-up-ahead strong { color: #203f48; font-size: 14px; }
+.student-pathway .sp45-up-ahead small { margin-left: auto; font-size: 12px; }
+@media (max-width: 800px) {
+  .student-pathway .sp45-hero { grid-template-columns: 1fr; gap: 10px; }
+  .student-pathway .sp45-next { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+  .student-pathway .sp45-next-kicker { width: 100%; }
+  .student-pathway .sp45-next h3 { margin: 0; }
+}
+@media (max-width: 560px) {
+  .student-pathway .sp45-up-ahead { margin-left: 0; flex-wrap: wrap; }
+  .student-pathway .sp45-up-ahead small { margin-left: 0; }
+  .student-pathway .sp45-trail-heading { align-items: flex-start; gap: 8px; }
+  .student-pathway .sp45-route-toggle { margin-top: 8px; }
+}
+
+/* A complete route beside one clear action, sized for classroom Chromebooks. */
+.student-pathway .sp45-board { display: grid; grid-template-columns: minmax(280px, .9fr) minmax(0, 1.35fr); gap: 18px; margin-top: 18px; align-items: start; }
+.student-pathway .sp45-map, .student-pathway .sp45-now { min-width: 0; border: 1px solid #d6e3d8; border-radius: 18px; box-shadow: 0 7px 22px rgba(25, 60, 47, .06); }
+.student-pathway .sp45-map { padding: 20px 22px; background: #fffefa; }
+.student-pathway .sp45-board-eyebrow { color: #317966; font-size: 11px; font-weight: 900; letter-spacing: .11em; }
+.student-pathway .sp45-map h3 { margin: 3px 0 14px; color: #173748; font-family: Georgia, 'Times New Roman', serif; font-size: 24px; }
+.student-pathway .sp45-map-list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
+.student-pathway .sp45-map-list li { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 9px; min-height: 40px; border-radius: 9px; padding: 5px 9px; color: #506971; }
+.student-pathway .sp45-map-list li.is-current { background: #fff1ca; color: #213c46; }
+.student-pathway .sp45-map-list li.is-complete { color: #215e4b; }
+.student-pathway .sp45-map-number { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #e9efec; color: #667b74; font-size: 12px; font-weight: 900; }
+.student-pathway .is-current .sp45-map-number { background: #e4ad40; color: #173748; }
+.student-pathway .is-complete .sp45-map-number { background: #2e946a; color: #fff; }
+.student-pathway .sp45-map-name { overflow: hidden; font-size: 13px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.student-pathway .sp45-map-list small { font-size: 11px; font-weight: 800; white-space: nowrap; }
+.student-pathway .sp45-now { display: flex; flex-direction: column; min-height: 414px; padding: clamp(22px, 3vw, 36px); background: linear-gradient(135deg, #fffefa, #eef8f0); border-color: #bdd6c3; }
+.student-pathway .sp45-now h3 { margin: 10px 0 6px; color: #14394a; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(32px, 3.5vw, 48px); line-height: 1.1; }
+.student-pathway .sp45-now > p { margin: 0 0 22px; color: #536f75; font-size: 17px; }
+.student-pathway .sp45-now-skill { display: flex; flex-direction: column; gap: 4px; margin: -7px 0 22px; color: #526d70; font-size: 14px; }
+.student-pathway .sp45-now-skill strong { color: #194051; font-size: 19px; }
+.student-pathway .sp45-now-button { display: flex; align-items: center; justify-content: space-between; gap: 20px; width: min(100%, 430px); min-height: 64px; margin-top: auto; border: 0; border-radius: 12px; padding: 14px 22px; background: #086770; color: #fff; font-size: 20px; font-weight: 900; text-align: left; cursor: pointer; box-shadow: 0 5px 0 #06454b; }
+.student-pathway .sp45-now-button:hover:not(:disabled) { background: #07535b; }
+.student-pathway .sp45-now-button:disabled { background: #dbe6e0; color: #56716b; box-shadow: none; cursor: default; }
+.student-pathway .sp45-now-stages { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 22px; }
+.student-pathway .sp45-now-stages span { border: 1px solid #d1ded5; border-radius: 99px; padding: 6px 11px; background: #fff; color: #657a75; font-size: 12px; font-weight: 800; }
+.student-pathway .sp45-now-stages span.is-now { border-color: #e5bd61; background: #fff0c8; color: #765118; }
+.student-pathway .sp45-now-stages span.is-done { border-color: #a8d5b6; background: #e2f4e5; color: #226747; }
+.student-pathway .sp45-review { margin-top: 18px; color: #296e62; font-size: 13px; }
+.student-pathway .sp45-review summary { cursor: pointer; font-weight: 800; }
+.student-pathway .sp45-review > div { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 10px; }
+.student-pathway .sp45-review > div > div { display: flex; align-items: center; gap: 6px; }
+.student-pathway .sp45-review-button { border: 1px solid #b9d4c3; border-radius: 8px; padding: 6px 9px; background: #fff; color: #185b52; font-weight: 800; }
+.student-pathway .sp45-back { margin: 12px 0 0; }
+@media (max-height: 800px) and (min-width: 801px) {
+  .student-pathway .sp45-map { padding: 15px 20px; }
+  .student-pathway .sp45-map h3 { margin-bottom: 8px; }
+  .student-pathway .sp45-map-list { gap: 3px; }
+  .student-pathway .sp45-map-list li { min-height: 35px; padding-top: 3px; padding-bottom: 3px; }
+  .student-pathway .sp45-now { min-height: 395px; }
+}
+@media (max-width: 800px) {
+  .student-pathway .sp45-board { grid-template-columns: 1fr; }
+  .student-pathway .sp45-now { order: -1; min-height: 300px; }
+}
+
+/* Turn the route into a little expedition map and the next step into a quest. */
+.student-pathway .sp45-board { gap: 16px; }
+.student-pathway .sp45-map, .student-pathway .sp45-now { position: relative; overflow: hidden; border-radius: 22px; box-shadow: 0 10px 0 rgba(23, 41, 58, .08), 0 18px 34px rgba(23, 41, 58, .12); }
+.student-pathway .sp45-map { border: 2px solid #5365a2; background: radial-gradient(circle at 7% 9%, rgba(122, 139, 237, .27), transparent 36%), radial-gradient(circle at 92% 90%, rgba(74, 202, 191, .16), transparent 42%), #182c5b; }
+.student-pathway .sp45-map::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .25; background-image: radial-gradient(#fff 1px, transparent 1.5px); background-size: 42px 42px; }
+.student-pathway .sp45-map > * { position: relative; z-index: 1; }
+.student-pathway .sp45-map .sp45-board-eyebrow { color: #a9dcff; }
+.student-pathway .sp45-map h3 { color: #fff; font-size: 27px; text-shadow: 0 2px 7px rgba(0, 0, 0, .2); }
+.student-pathway .sp45-map-list::before { content: ''; position: absolute; top: 18px; bottom: 18px; left: 22px; width: 3px; border-radius: 99px; background: repeating-linear-gradient(to bottom, #64c8d8 0 9px, transparent 9px 16px); opacity: .65; }
+.student-pathway .sp45-map-list li { position: relative; color: #d7e5ff; }
+.student-pathway .sp45-map-list li:nth-child(3n + 2) .sp45-map-number { background: #3d68bd; color: #fff; }
+.student-pathway .sp45-map-list li:nth-child(3n + 3) .sp45-map-number { background: #4b8397; color: #fff; }
+.student-pathway .sp45-map-list li.is-current { border: 1px solid #ffe4a0; background: linear-gradient(90deg, #ffe39a, #fff1c4); color: #253150; box-shadow: 0 3px 10px rgba(9, 23, 53, .22); }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #e57738; color: #fff; box-shadow: 0 0 0 3px #fff3cf; }
+.student-pathway .sp45-map-list li.is-complete { color: #d5ffe9; }
+.student-pathway .sp45-map-list li.is-complete .sp45-map-number { background: #30a774; color: #fff; }
+.student-pathway .sp45-map-list small { color: inherit; opacity: .8; }
+.student-pathway .sp45-map-list li.is-current small { opacity: 1; }
+.student-pathway .sp45-now { isolation: isolate; border: 2px solid #f4c65f; background: linear-gradient(95deg, rgba(9, 62, 82, .98) 0%, rgba(7, 62, 85, .94) 50%, rgba(16, 73, 85, .48) 100%), var(--sp45-art) center / cover no-repeat, #103f59; }
+.student-pathway .sp45-now::after { content: ''; position: absolute; z-index: -1; right: -30px; bottom: -75px; width: 300px; height: 220px; border-radius: 50%; background: rgba(255, 200, 91, .19); filter: blur(38px); pointer-events: none; }
+.student-pathway .sp45-now-emblem { position: absolute; right: clamp(24px, 3vw, 46px); top: clamp(24px, 3vw, 40px); display: grid; place-items: center; width: 100px; height: 100px; border: 5px solid #fff1bd; border-radius: 50%; background: radial-gradient(circle at 30% 20%, #ffe8a1, #f3a542 60%, #aa521b); box-shadow: 0 7px 0 #8e511e, 0 14px 22px rgba(0, 20, 28, .4); transform: rotate(9deg); }
+.student-pathway .sp45-now-emblem img { width: 70px; height: 70px; object-fit: contain; }
+.student-pathway .sp45-now .sp45-board-eyebrow { width: fit-content; border: 1px solid #ffda80; border-radius: 99px; padding: 7px 11px; background: #ffda80; color: #563817; letter-spacing: .06em; }
+.student-pathway .sp45-now h3 { max-width: calc(100% - 112px); margin-top: 20px; color: #fff; font-size: clamp(38px, 4vw, 54px); text-shadow: 0 3px 12px rgba(0, 20, 30, .4); }
+.student-pathway .sp45-now > p { max-width: 420px; color: #e7f5f2; font-size: 18px; }
+.student-pathway .sp45-now-skill { color: #e1f1ee; }
+.student-pathway .sp45-now-skill strong { color: #fff1bd; }
+.student-pathway .sp45-now-button { width: min(100%, 450px); min-height: 68px; background: linear-gradient(#ffdb77, #ffae43); color: #263149; box-shadow: 0 6px 0 #a95d23, 0 12px 25px rgba(0, 20, 25, .25); font-size: 21px; }
+.student-pathway .sp45-now-button:hover:not(:disabled) { background: linear-gradient(#ffe69e, #ffc15f); color: #263149; transform: translateY(-2px); }
+.student-pathway .sp45-now-button:focus-visible { outline: 4px solid #fff; outline-offset: 4px; }
+.student-pathway .sp45-now-stages span { border-color: rgba(238, 255, 250, .55); background: rgba(7, 34, 49, .65); color: #e9f8f3; }
+.student-pathway .sp45-now-stages span.is-now { border-color: #ffda80; background: #ffda80; color: #543815; }
+.student-pathway .sp45-now-stages span.is-done { border-color: #8ce1b1; background: #215c55; color: #e5fff0; }
+.student-pathway .sp45-review { color: #d8f6e9; }
+@media (max-width: 560px) {
+  .student-pathway .sp45-now-emblem { width: 68px; height: 68px; border-width: 3px; }
+  .student-pathway .sp45-now-emblem img { width: 48px; height: 48px; }
+  .student-pathway .sp45-now h3 { max-width: calc(100% - 70px); }
+}
+
+/* The learner's route and earned crystals, adapted from the supplied mockup. */
+.student-pathway .sp45-map, .student-pathway .sp45-now { border: 1px solid #d5e6db; border-radius: 18px; box-shadow: 0 9px 26px rgba(22, 66, 58, .09); }
+.student-pathway .sp45-map { background: #fffefa; }
+.student-pathway .sp45-map::before { display: none; }
+.student-pathway .sp45-map .sp45-board-eyebrow { color: #278375; }
+.student-pathway .sp45-map h3 { color: #173d42; text-shadow: none; }
+.student-pathway .sp45-map-list::before { left: 23px; top: 18px; bottom: 18px; background: repeating-linear-gradient(to bottom, #add9c8 0 8px, transparent 8px 15px); opacity: 1; }
+.student-pathway .sp45-map-list li { display: block; min-height: 0; padding: 0; color: #365e62; }
+.student-pathway .sp45-map-list li.is-current { border: 0; background: transparent; box-shadow: none; }
+.student-pathway .sp45-map-list li button { position: relative; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 39px; border: 1px solid transparent; border-radius: 10px; padding: 4px 9px; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.student-pathway .sp45-map-list li button:hover { background: #f1f8f3; }
+.student-pathway .sp45-map-list li.is-selected button { border-color: #afdbcb; background: #eaf7ef; box-shadow: inset 3px 0 0 #0b837b; }
+.student-pathway .sp45-map-list li button:focus-visible { outline: 3px solid #ebb95d; outline-offset: 2px; }
+.student-pathway .sp45-map-list .sp45-map-number { flex: none; border-radius: 9px; background: #e9f1eb; color: #5f8177; }
+.student-pathway .sp45-map-list li:nth-child(3n + 2) .sp45-map-number, .student-pathway .sp45-map-list li:nth-child(3n + 3) .sp45-map-number { background: #e9f1eb; color: #5f8177; }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #0b837b; color: #fff; box-shadow: none; }
+.student-pathway .sp45-map-list li.is-complete .sp45-map-number { background: #ccefe1; color: #176f5e; }
+.student-pathway .sp45-map-name { display: block; flex: 1; min-width: 0; color: #28545b; }
+.student-pathway .sp45-map-name small { display: block; margin-top: 1px; color: #77928b; font-size: 10px; font-weight: 700; }
+.student-pathway .sp45-now { min-height: 400px; background: radial-gradient(circle at 96% 5%, #d3f0e4 0%, #f4fbf6 39%, #fff 76%); }
+.student-pathway .sp45-now::after { right: -80px; bottom: -100px; width: 300px; height: 300px; border: 1px solid #dceee4; background: none; box-shadow: 0 0 0 34px #e8f6ee88, 0 0 0 70px #edf9f355; filter: none; }
+.student-pathway .sp45-now-emblem { width: 82px; height: 92px; border: 1px solid #c6e6d2; border-radius: 16px; background: #eaf7ee; box-shadow: none; transform: none; }
+.student-pathway .sp45-now-emblem img { width: 60px; height: 60px; }
+.student-pathway .sp45-now .sp45-board-eyebrow { border: 0; padding: 0; background: none; color: #278375; }
+.student-pathway .sp45-now h3 { margin-top: 18px; color: #173d42; font-size: clamp(34px, 3.8vw, 48px); text-shadow: none; }
+.student-pathway .sp45-now > p { min-height: 54px; max-width: 480px; color: #5b787c; font-size: 15px; line-height: 1.55; }
+.student-pathway .sp45-now-facts { display: flex; flex-wrap: wrap; gap: 9px; margin: 0 0 20px; }
+.student-pathway .sp45-now-facts span { border: 1px solid #d1e6d9; border-radius: 99px; padding: 6px 10px; background: #f0f8f2; color: #3e746c; font-size: 12px; font-weight: 800; }
+.student-pathway .sp45-now-button { min-height: 58px; width: min(100%, 360px); margin-top: auto; background: #08777d; color: #fff; font-size: 17px; box-shadow: 0 4px 0 #064e54; }
+.student-pathway .sp45-now-button:hover:not(:disabled) { background: #075e64; color: #fff; }
+.student-pathway .sp45-now-button:disabled { background: #dfe9e5; color: #5e7772; box-shadow: none; }
+.student-pathway .sp45-now-stages { margin-top: 15px; }
+.student-pathway .sp45-now-stages .sp45-review-button { border-color: #c9e1d4; border-radius: 8px; background: #f6fbf7; color: #226b62; }
+.student-pathway .sp45-now-stages .sp45-review-button:disabled { opacity: .6; }
+.student-pathway .sp45-gem-shape { position: relative; display: block; width: 42px; height: 53px; clip-path: polygon(23% 0, 77% 0, 100% 30%, 50% 100%, 0 30%); background: linear-gradient(125deg, #d5f2e5 0 24%, #77d8cb 25% 50%, #199b9a 51% 76%, #0c677e 77%); filter: grayscale(1); opacity: .32; }
+.student-pathway .sp45-gem-shape::before { content: ''; position: absolute; inset: 4px 7px 16px; clip-path: polygon(0 0, 100% 0, 70% 58%, 50% 100%, 30% 58%); background: rgba(255,255,255,.45); }
+.student-pathway .sp45-gem-shape::after { content: ''; position: absolute; left: 0; right: 0; top: 29%; height: 2px; background: rgba(255,255,255,.65); }
+.student-pathway .sp45-map-list li.is-complete .sp45-gem-shape { filter: drop-shadow(0 3px 4px rgba(10, 102, 99, .25)); opacity: 1; }
+.student-pathway .sp45-map-list li.is-complete:nth-child(2n) .sp45-gem-shape { filter: hue-rotate(48deg); }
+.student-pathway .sp45-map-list li.is-complete:nth-child(3n) .sp45-gem-shape { filter: hue-rotate(112deg); }
+.student-pathway .sp45-map-list li.is-complete:nth-child(5n) .sp45-gem-shape { filter: hue-rotate(205deg); }
+
+/* The collectible belongs to each stop on the route. */
+.student-pathway .sp45-route-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.student-pathway .sp45-route-head > span { flex: none; border-radius: 99px; padding: 6px 10px; background: #e9f5ee; color: #287368; font-size: 11px; font-weight: 900; }
+.student-pathway .sp45-map { border-color: #c4dfd2; background: radial-gradient(circle at 100% 0%, #e2f6e7, transparent 35%), #fffefa; }
+.student-pathway .sp45-map-list { gap: 4px; }
+.student-pathway .sp45-map-list li button { min-height: 41px; padding: 4px 9px; }
+.student-pathway .sp45-map-list li:nth-child(4n + 1) button { background-color: rgba(233, 247, 238, .55); }
+.student-pathway .sp45-map-list li:nth-child(4n + 2) button { background-color: rgba(232, 244, 252, .52); }
+.student-pathway .sp45-map-list li:nth-child(4n + 3) button { background-color: rgba(243, 237, 252, .54); }
+.student-pathway .sp45-map-list li:nth-child(4n + 4) button { background-color: rgba(255, 246, 227, .65); }
+.student-pathway .sp45-map-list li.is-selected button { border-color: #63b7a4; background: linear-gradient(90deg, #dcf5e6, #f0fbf2); box-shadow: inset 4px 0 0 #0b837b, 0 3px 8px rgba(18, 91, 75, .1); }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #0b837b; }
+.student-pathway .sp45-map-list li:nth-child(4n + 2) .sp45-map-number { background: #d9eafa; color: #345d97; }
+.student-pathway .sp45-map-list li:nth-child(4n + 3) .sp45-map-number { background: #e6daf9; color: #70529b; }
+.student-pathway .sp45-map-list li:nth-child(4n + 4) .sp45-map-number { background: #f9e9bb; color: #8a6326; }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #0b837b; color: #fff; }
+.student-pathway .sp45-map-list li.is-complete .sp45-map-number { background: #b9ead2; color: #176f5e; }
+.student-pathway .sp45-route-crystal { flex: none; width: 28px; height: 36px; margin-right: 3px; }
+.student-pathway .sp45-map-name { line-height: 1.12; }
+.student-pathway .sp45-map-name small { margin-top: 1px; line-height: 1.1; }
+.student-pathway .sp45-map-list li.is-current .sp45-route-crystal { opacity: .65; filter: grayscale(.35) drop-shadow(0 2px 4px rgba(14, 128, 119, .25)); }
+.student-pathway .sp45-map-list li.is-complete .sp45-route-crystal { opacity: 1; }
+.student-pathway .sp45-map-list li:nth-child(2n) .sp45-route-crystal { background: linear-gradient(125deg, #e2dcfb 0 24%, #af9ae4 25% 50%, #8060bd 51% 76%, #4c438f 77%); }
+.student-pathway .sp45-map-list li:nth-child(3n) .sp45-route-crystal { background: linear-gradient(125deg, #ffe5c3 0 24%, #ffbf72 25% 50%, #e58842 51% 76%, #a64d33 77%); }
+.student-pathway .sp45-map-list li:nth-child(5n) .sp45-route-crystal { background: linear-gradient(125deg, #d0e8ff 0 24%, #76b9f5 25% 50%, #4289cb 51% 76%, #315b9f 77%); }
+@media (max-height: 800px) and (min-width: 801px) {
+  .student-pathway .sp45-map { padding-top: 10px; padding-bottom: 10px; }
+  .student-pathway .sp45-map h3 { margin-bottom: 5px; font-size: 24px; }
+  .student-pathway .sp45-map-list { gap: 1px; }
+  .student-pathway .sp45-map-list li button { min-height: 34px; padding-top: 2px; padding-bottom: 2px; }
+  .student-pathway .sp45-route-crystal { width: 22px; height: 25px; }
+  .student-pathway .sp45-map-name small { font-size: 9px; }
+}
+
+/* Calm, opaque classroom layout: progress is conveyed by state, not a rainbow of cards. */
+.student-pathway .sp-x.is-45 { --sp45-ink: #183348; --sp45-teal: #176d70; }
+.student-pathway .sp45-hero { border: 1px solid #d5e0e5; background: #eaf1f2; box-shadow: none; }
+.student-pathway .sp45-intro, .student-pathway .sp45-intro h2 { color: #183348; text-shadow: none; }
+.student-pathway .sp45-overline, .student-pathway .sp45-progress-copy, .student-pathway .sp45-progress-copy strong { color: #37646c; }
+.student-pathway .sp45-progress-track { border-color: #c8d8db; background: #d8e4e6; }
+.student-pathway .sp45-progress-track span { background: #176d70; }
+.student-pathway .sp45-map, .student-pathway .sp45-now { border: 1px solid #d5e0e5; border-radius: 14px; background: #fff; box-shadow: 0 3px 12px rgba(24, 51, 72, .06); }
+.student-pathway .sp45-now::after, .student-pathway .sp45-map-list::before { display: none; }
+.student-pathway .sp45-map-list { gap: 5px; }
+.student-pathway .sp45-map-list li button,
+.student-pathway .sp45-map-list li:nth-child(4n + 1) button,
+.student-pathway .sp45-map-list li:nth-child(4n + 2) button,
+.student-pathway .sp45-map-list li:nth-child(4n + 3) button,
+.student-pathway .sp45-map-list li:nth-child(4n + 4) button { border: 1px solid #e0e8ea; border-radius: 9px; background: #f8fafb; }
+.student-pathway .sp45-map-list li button:hover { border-color: #aec9cb; background: #f0f6f6; }
+.student-pathway .sp45-map-list li.is-selected button { border-color: #176d70; background: #edf5f4; box-shadow: inset 3px 0 0 #176d70; }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 2).is-current .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 3).is-current .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 4).is-current .sp45-map-number { background: #176d70; color: #fff; }
+.student-pathway .sp45-map-list li .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 2) .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 3) .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 4) .sp45-map-number { background: #e5ecee; color: #526d75; }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #176d70; color: #fff; }
+.student-pathway .sp45-map-list li.is-complete .sp45-map-number { background: #dcefeb; color: #176d70; }
+.student-pathway .sp45-map-list li:nth-child(n) .sp45-route-crystal { background: linear-gradient(125deg, #d3efec 0 24%, #79c9c0 25% 50%, #218c8a 51% 76%, #176d70 77%); }
+.student-pathway .sp45-map-list li.is-current .sp45-route-crystal { filter: grayscale(1); opacity: .32; }
+.student-pathway .sp45-map-list li.is-complete .sp45-route-crystal { filter: none; opacity: 1; }
+.student-pathway .sp45-route-head > span, .student-pathway .sp45-now-facts span { border-color: #d8e6e5; background: #edf5f4; color: #35686a; }
+.student-pathway .sp45-now-emblem { border-color: #d7e5e6; background: #f3f7f7; }
+.student-pathway .sp45-now-button { background: #176d70; box-shadow: none; }
+.student-pathway .sp45-now-button:hover:not(:disabled) { background: #115a5d; }

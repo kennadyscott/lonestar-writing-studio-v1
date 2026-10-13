@@ -881,6 +881,15 @@ a { color: var(--link); }
 /* Prototype grade-band switch in the top bar (2026-09-30) */
 .band-pick button { min-width: 48px; font-variant-numeric: tabular-nums; }
 @media (max-width: 760px) { .band-pick .lbl { display: none; } }
+@media (max-width: 520px) {
+  .topbar { gap: 4px; padding: 0 6px; }
+  .topbar .logo-chip { padding: 3px 6px; }
+  .topbar .logo-chip img { height: 24px; }
+  .topbar .band-pick button { min-width: 28px; padding: 5px 3px; font-size: 11px; }
+  .topbar .cc-btn { padding: 4px 5px; }
+  .topbar .cc-btn img { width: 34px; height: auto; }
+  .topbar .who-avatar { width: 36px; height: 36px; }
+}
 
 .band-borrow { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; background: rgba(255,255,255,.16);
   border: 1px dashed rgba(255,255,255,.5); font-size: 10px; letter-spacing: .4px; text-transform: none; color: #fff; vertical-align: 1px; }

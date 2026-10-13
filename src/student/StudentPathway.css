@@ -679,7 +679,6 @@
 .student-pathway .sp45-map-list li.is-complete .sp45-map-number { background: #ccefe1; color: #176f5e; }
 .student-pathway .sp45-map-name { display: block; flex: 1; min-width: 0; color: #28545b; }
 .student-pathway .sp45-map-name small { display: block; margin-top: 1px; color: #77928b; font-size: 10px; font-weight: 700; }
-.student-pathway .sp45-map-arrow { color: #95aaa5; font-size: 20px; }
 .student-pathway .sp45-now { min-height: 400px; background: radial-gradient(circle at 96% 5%, #d3f0e4 0%, #f4fbf6 39%, #fff 76%); }
 .student-pathway .sp45-now::after { right: -80px; bottom: -100px; width: 300px; height: 300px; border: 1px solid #dceee4; background: none; box-shadow: 0 0 0 34px #e8f6ee88, 0 0 0 70px #edf9f355; filter: none; }
 .student-pathway .sp45-now-emblem { width: 82px; height: 92px; border: 1px solid #c6e6d2; border-radius: 16px; background: #eaf7ee; box-shadow: none; transform: none; }
@@ -695,23 +694,44 @@
 .student-pathway .sp45-now-stages { margin-top: 15px; }
 .student-pathway .sp45-now-stages .sp45-review-button { border-color: #c9e1d4; border-radius: 8px; background: #f6fbf7; color: #226b62; }
 .student-pathway .sp45-now-stages .sp45-review-button:disabled { opacity: .6; }
-.student-pathway .sp45-collection { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 18px; border: 1px solid #d5e6db; border-radius: 18px; padding: 19px 23px; background: #fffefa; box-shadow: 0 9px 26px rgba(22, 66, 58, .07); }
-.student-pathway .sp45-collection h3 { margin: 3px 0 2px; color: #173d42; font-family: Georgia, 'Times New Roman', serif; font-size: 23px; }
-.student-pathway .sp45-collection h3 span { color: #d5a33c; }
-.student-pathway .sp45-collection p { margin: 0; color: #6c8988; font-size: 12px; }
-.student-pathway .sp45-collection > strong { align-self: center; border: 1px solid #cce4d7; border-radius: 99px; padding: 8px 12px; background: #eaf7ef; color: #247668; font-size: 11px; white-space: nowrap; }
-.student-pathway .sp45-gem-grid { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 8px; margin-top: 5px; }
-.student-pathway .sp45-gem-slot { display: grid; place-items: center; align-content: center; gap: 5px; min-width: 0; min-height: 92px; border: 1px solid #e1ece5; border-radius: 12px; padding: 8px 4px; background: #f7faf7; text-align: center; }
-.student-pathway .sp45-gem-slot.is-current { border-color: #77bcac; box-shadow: 0 0 0 2px #d4eddf; }
-.student-pathway .sp45-gem-slot.is-earned { background: #ecf8ef; }
-.student-pathway .sp45-gem-slot span { max-width: 100%; overflow: hidden; color: #6a8784; font-size: 10px; font-weight: 800; line-height: 1.15; text-overflow: ellipsis; }
-@media (max-width: 800px) { .student-pathway .sp45-gem-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-@media (max-width: 560px) { .student-pathway .sp45-now-emblem { width: 62px; height: 68px; } .student-pathway .sp45-now-emblem img { width: 44px; height: 44px; } .student-pathway .sp45-collection { padding: 17px; } }
 .student-pathway .sp45-gem-shape { position: relative; display: block; width: 42px; height: 53px; clip-path: polygon(23% 0, 77% 0, 100% 30%, 50% 100%, 0 30%); background: linear-gradient(125deg, #d5f2e5 0 24%, #77d8cb 25% 50%, #199b9a 51% 76%, #0c677e 77%); filter: grayscale(1); opacity: .32; }
 .student-pathway .sp45-gem-shape::before { content: ''; position: absolute; inset: 4px 7px 16px; clip-path: polygon(0 0, 100% 0, 70% 58%, 50% 100%, 30% 58%); background: rgba(255,255,255,.45); }
 .student-pathway .sp45-gem-shape::after { content: ''; position: absolute; left: 0; right: 0; top: 29%; height: 2px; background: rgba(255,255,255,.65); }
-.student-pathway .sp45-gem-slot.is-earned .sp45-gem-shape { filter: drop-shadow(0 3px 4px rgba(10, 102, 99, .25)); opacity: 1; }
-.student-pathway .sp45-gem-slot.is-earned:nth-child(2n) .sp45-gem-shape { filter: hue-rotate(48deg); }
-.student-pathway .sp45-gem-slot.is-earned:nth-child(3n) .sp45-gem-shape { filter: hue-rotate(112deg); }
-.student-pathway .sp45-gem-slot.is-earned:nth-child(5n) .sp45-gem-shape { filter: hue-rotate(205deg); }
-.student-pathway .sp45-map-gem { display: grid; place-items: center; width: 25px; height: 25px; color: #239b87; font-size: 20px; }
+.student-pathway .sp45-map-list li.is-complete .sp45-gem-shape { filter: drop-shadow(0 3px 4px rgba(10, 102, 99, .25)); opacity: 1; }
+.student-pathway .sp45-map-list li.is-complete:nth-child(2n) .sp45-gem-shape { filter: hue-rotate(48deg); }
+.student-pathway .sp45-map-list li.is-complete:nth-child(3n) .sp45-gem-shape { filter: hue-rotate(112deg); }
+.student-pathway .sp45-map-list li.is-complete:nth-child(5n) .sp45-gem-shape { filter: hue-rotate(205deg); }
+
+/* The collectible belongs to each stop on the route. */
+.student-pathway .sp45-route-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.student-pathway .sp45-route-head > span { flex: none; border-radius: 99px; padding: 6px 10px; background: #e9f5ee; color: #287368; font-size: 11px; font-weight: 900; }
+.student-pathway .sp45-map { border-color: #c4dfd2; background: radial-gradient(circle at 100% 0%, #e2f6e7, transparent 35%), #fffefa; }
+.student-pathway .sp45-map-list { gap: 4px; }
+.student-pathway .sp45-map-list li button { min-height: 41px; padding: 4px 9px; }
+.student-pathway .sp45-map-list li:nth-child(4n + 1) button { background-color: rgba(233, 247, 238, .55); }
+.student-pathway .sp45-map-list li:nth-child(4n + 2) button { background-color: rgba(232, 244, 252, .52); }
+.student-pathway .sp45-map-list li:nth-child(4n + 3) button { background-color: rgba(243, 237, 252, .54); }
+.student-pathway .sp45-map-list li:nth-child(4n + 4) button { background-color: rgba(255, 246, 227, .65); }
+.student-pathway .sp45-map-list li.is-selected button { border-color: #63b7a4; background: linear-gradient(90deg, #dcf5e6, #f0fbf2); box-shadow: inset 4px 0 0 #0b837b, 0 3px 8px rgba(18, 91, 75, .1); }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #0b837b; }
+.student-pathway .sp45-map-list li:nth-child(4n + 2) .sp45-map-number { background: #d9eafa; color: #345d97; }
+.student-pathway .sp45-map-list li:nth-child(4n + 3) .sp45-map-number { background: #e6daf9; color: #70529b; }
+.student-pathway .sp45-map-list li:nth-child(4n + 4) .sp45-map-number { background: #f9e9bb; color: #8a6326; }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #0b837b; color: #fff; }
+.student-pathway .sp45-map-list li.is-complete .sp45-map-number { background: #b9ead2; color: #176f5e; }
+.student-pathway .sp45-route-crystal { flex: none; width: 28px; height: 36px; margin-right: 3px; }
+.student-pathway .sp45-map-name { line-height: 1.12; }
+.student-pathway .sp45-map-name small { margin-top: 1px; line-height: 1.1; }
+.student-pathway .sp45-map-list li.is-current .sp45-route-crystal { opacity: .65; filter: grayscale(.35) drop-shadow(0 2px 4px rgba(14, 128, 119, .25)); }
+.student-pathway .sp45-map-list li.is-complete .sp45-route-crystal { opacity: 1; }
+.student-pathway .sp45-map-list li:nth-child(2n) .sp45-route-crystal { background: linear-gradient(125deg, #e2dcfb 0 24%, #af9ae4 25% 50%, #8060bd 51% 76%, #4c438f 77%); }
+.student-pathway .sp45-map-list li:nth-child(3n) .sp45-route-crystal { background: linear-gradient(125deg, #ffe5c3 0 24%, #ffbf72 25% 50%, #e58842 51% 76%, #a64d33 77%); }
+.student-pathway .sp45-map-list li:nth-child(5n) .sp45-route-crystal { background: linear-gradient(125deg, #d0e8ff 0 24%, #76b9f5 25% 50%, #4289cb 51% 76%, #315b9f 77%); }
+@media (max-height: 800px) and (min-width: 801px) {
+  .student-pathway .sp45-map { padding-top: 10px; padding-bottom: 10px; }
+  .student-pathway .sp45-map h3 { margin-bottom: 5px; font-size: 24px; }
+  .student-pathway .sp45-map-list { gap: 1px; }
+  .student-pathway .sp45-map-list li button { min-height: 34px; padding-top: 2px; padding-bottom: 2px; }
+  .student-pathway .sp45-route-crystal { width: 22px; height: 25px; }
+  .student-pathway .sp45-map-name small { font-size: 9px; }
+}

@@ -287,13 +287,13 @@ function Path45({ model, onOpen, onBack }) {
       <div className="sp45-board">
         <section className="sp45-map" aria-label="Full pathway">
           <div className="sp45-board-eyebrow">THE FULL PATHWAY</div>
-          <h3>Your route</h3>
+          <div className="sp45-route-head"><h3>Your route</h3><span>{cleared} of {clearings} crystals</span></div>
           <ol className="sp45-map-list">
             {Array.from({ length: clearings }, (_, index) => <li key={index} className={`${clearingDone(index) ? 'is-complete' : index === currentIndex ? 'is-current' : 'is-later'} ${index === selectedIndex ? 'is-selected' : ''}`}>
               <button type="button" onClick={() => setSelectedIndex(index)} aria-current={index === selectedIndex ? 'step' : undefined}>
                 <span className="sp45-map-number">{clearingDone(index) ? '✓' : index + 1}</span>
-                <span className="sp45-map-name">{clearingName(index)}<small>{clearingDone(index) ? 'Crystal collected' : index === currentIndex ? 'Ready now' : 'Coming up'}</small></span>
-                {clearingDone(index) ? <span className="sp45-map-gem" aria-hidden>◆</span> : <span className="sp45-map-arrow" aria-hidden>›</span>}
+                <span className="sp45-map-name">{clearingName(index)}<small>{clearingDone(index) ? 'Crystal earned' : index === currentIndex ? 'Earn this crystal next' : 'Crystal ahead'}</small></span>
+                <i className="sp45-gem-shape sp45-route-crystal" aria-hidden="true" />
               </button>
             </li>)}
           </ol>
@@ -309,7 +309,6 @@ function Path45({ model, onOpen, onBack }) {
           {skill && <Extra steps={skill.extra} onOpen={onOpen} />}
         </section>
       </div>
-      <section className="sp45-collection" aria-label="Crystal collection"><div><span className="sp45-board-eyebrow">A REWARD FOR EVERY CLEARING</span><h3>Your crystal collection <span aria-hidden>✧</span></h3><p>Finish a clearing to reveal its crystal.</p></div><strong>{cleared} of {clearings} collected</strong><div className="sp45-gem-grid">{Array.from({ length: clearings }, (_, index) => <div key={index} className={`sp45-gem-slot ${clearingDone(index) ? 'is-earned' : ''} ${index === currentIndex ? 'is-current' : ''}`}><i className="sp45-gem-shape" aria-hidden="true" /><span>{clearingName(index)}</span></div>)}</div></section>
       <button type="button" className="sp45-back" onClick={onBack}>← Back to the Labyrinth</button>
     </div>
   )

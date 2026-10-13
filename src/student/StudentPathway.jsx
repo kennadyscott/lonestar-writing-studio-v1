@@ -172,6 +172,7 @@ function pathModel(topic, content, record) {
   const current = steps.find((step) => step.state === 'current' || step.state === 'unavailable')
   return {
     title: topic.short || topic.title,
+    grade: topic.grade,
     steps,
     pre,
     post,
@@ -258,44 +259,74 @@ function Path23({ model, onOpen, onBack }) {
 }
 
 function Path45({ model, onOpen, onBack }) {
+  const current = model.current
+  const clearings = model.skills.length + 2
+  const cleared = (done(model.pre) ? 1 : 0) + model.skills.filter((skill) =>
+    done(skill.lesson) && done(skill.practice) && skill.extra.every(done),
+  ).length + (done(model.post) ? 1 : 0)
+  const nextTitle = model.finished ? 'The path is yours!' : current?.type === 'pre' ? 'Find your starting point' :
+    current?.type === 'post' ? 'Show how far you’ve come' : current?.title || 'Your next stop'
+  const nextAction = current?.type === 'pre' ? 'Start the pre-test' : current?.type === 'post' ? 'Start the post-test' :
+    current?.type === 'lesson' ? 'Open the lesson' : 'Open practice'
+  const icon = (name) => `${import.meta.env.BASE_URL || '/'}icons/${name}.webp`
+  const skillIcons = ['feather', 'sparkles', 'link', 'compass', 'speech', 'flag']
   return (
     <div className="sp-x is-45">
-      <p className="sp-x-kicker">Your path</p>
-      <h2>{model.title}</h2>
-      <p className="sp-x-lead">Learn the skill. Then practice it. Then go on to the next one.</p>
-      <ol className="sp-x-walk">
-        <li>
-          <span className="sp-x-mark">1</span>
-          <div>
+      <header className="sp45-hero" style={{ '--sp45-art': `url(${import.meta.env.BASE_URL || '/'}lands/composition.jpg)` }}>
+        <div className="sp45-intro">
+          <span className="sp45-overline">The Lit Labyrinth · Grade {model.grade}</span>
+          <h2>{model.title}</h2>
+          <p>One clearing at a time. Learn a skill, try it out, and make your way to the finish.</p>
+          <div className="sp45-progress-copy"><strong>{cleared} of {clearings}</strong> clearings complete</div>
+          <div className="sp45-progress-track" role="progressbar" aria-label="Path clearings complete" aria-valuemin={0} aria-valuemax={clearings} aria-valuenow={cleared}><span style={{ width: `${cleared / clearings * 100}%` }} /></div>
+        </div>
+        <div className="sp45-next">
+          <span className="sp45-next-kicker">{model.finished ? 'Journey complete' : 'Your next stop'}</span>
+          <h3>{nextTitle}</h3>
+          <p>{model.finished ? 'You made it through every clearing.' : current?.type === 'pre' ? 'See what you already know. This first try helps you get started.' : current?.type === 'post' ? 'You have practiced every skill. Now give it one more try.' : 'Follow the trail below to see what you have finished and what comes next.'}</p>
+          {current && available(current) && <Go step={current} onOpen={onOpen} className="sp45-next-button" doneLabel="Review" nowLabel={<>{nextAction} <span aria-hidden>→</span></>} laterLabel="Coming soon" />}
+          {model.finished && <button type="button" className="sp45-next-button" onClick={onBack}>Back to the Labyrinth <span aria-hidden>→</span></button>}
+        </div>
+      </header>
+      <div className="sp45-trail-heading"><div><span>YOUR JOURNEY</span><h3>Follow the clearings</h3></div><p>Finish each stop to open the next.</p></div>
+      <ol className="sp45-trail">
+        <li className={`sp45-clearing sp45-gateway is-${model.pre?.state || 'locked'}`}>
+          <div className="sp45-marker"><img src={icon('compass')} alt="" /></div>
+          <div className="sp45-clearing-content">
+            <span className="sp45-stage-label">THE START · CLEARING 1</span>
             <h3>Pre-test</h3>
             <p>See what you already know. {model.pre?.assessment?.items?.length || 0} questions.</p>
-            {done(model.pre) ? <b>Done · {model.pre.score}%</b> : <Go step={model.pre} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start the pre-test" laterLabel="Later" />}
+            {done(model.pre) ? <div className="sp45-result">✓ Complete <strong>{model.pre.score}%</strong></div> :
+              <Go step={model.pre} onOpen={onOpen} className="sp45-stage-button" doneLabel="" nowLabel="Start the pre-test →" laterLabel="Unlocks first" />}
           </div>
         </li>
         {model.skills.map((skill) => (
-          <li key={skill.id}>
-            <span className="sp-x-mark">{skill.n + 1}</span>
-            <div>
-              <h3>{skill.title}</h3>
+          <li key={skill.id} className={`sp45-clearing ${skill.n === model.skills.length ? 'is-finale' : ''} ${done(skill.lesson) && done(skill.practice) && skill.extra.every(done) ? 'is-complete' : [skill.lesson, skill.practice, ...skill.extra].some((step) => step?.state === 'current' || step?.state === 'unavailable') ? 'is-current' : 'is-locked'}`}>
+            <div className="sp45-marker"><img src={icon(skillIcons[(skill.n - 1) % skillIcons.length])} alt="" /></div>
+            <div className="sp45-clearing-content">
+              <span className="sp45-stage-label">{skill.n === model.skills.length ? 'BRING IT ALL TOGETHER' : `CLEARING ${skill.n + 1} · SKILL ${skill.n}`}</span>
+              <div className="sp45-clearing-title"><h3>{skill.title}</h3><span>{done(skill.lesson) && done(skill.practice) && skill.extra.every(done) ? '✓ Cleared' : [skill.lesson, skill.practice, ...skill.extra].some((step) => step?.state === 'current' || step?.state === 'unavailable') ? 'You are here' : 'Up ahead'}</span></div>
               <p>{skill.skill}</p>
-              <div className="sp-x-pair">
-                <Go step={skill.lesson} onOpen={onOpen} doneLabel={<><small>Lesson</small><b>{skill.lessonSteps} short steps</b></>} nowLabel={<><small>Lesson</small><b>Start</b></>} laterLabel={<><small>Lesson</small><b>{skill.lessonSteps} short steps</b></>} />
-                <Go step={skill.practice} onOpen={onOpen} doneLabel={<><small>Practice</small><b>{skill.activities} activities</b></>} nowLabel={<><small>Practice</small><b>Start</b></>} laterLabel={<><small>Practice</small><b>{skill.activities} activities</b></>} />
+              <div className="sp45-tasks">
+                <Go step={skill.lesson} onOpen={onOpen} className="sp45-task" doneLabel={<><span>1 · LEARN</span><strong>Lesson</strong><small>✓ Complete · Review</small></>} nowLabel={<><span>1 · LEARN</span><strong>Lesson</strong><small>Start the lesson →</small></>} laterLabel={<><span>1 · LEARN</span><strong>Lesson</strong><small>{skill.lessonSteps} short steps · Later</small></>} />
+                <Go step={skill.practice} onOpen={onOpen} className="sp45-task" doneLabel={<><span>2 · TRY</span><strong>Practice</strong><small>✓ Complete · Review</small></>} nowLabel={<><span>2 · TRY</span><strong>Practice</strong><small>Open {skill.activities} activities →</small></>} laterLabel={<><span>2 · TRY</span><strong>Practice</strong><small>{skill.activities} activities · Later</small></>} />
               </div>
               <Extra steps={skill.extra} onOpen={onOpen} />
             </div>
           </li>
         ))}
-        <li>
-          <span className="sp-x-mark">{done(model.post) ? '✓' : model.skills.length + 2}</span>
-          <div>
+        <li className={`sp45-clearing sp45-gateway is-${model.post?.state || 'locked'}`}>
+          <div className="sp45-marker"><img src={icon('trophy')} alt="" /></div>
+          <div className="sp45-clearing-content">
+            <span className="sp45-stage-label">THE FINISH LINE · CLEARING {clearings}</span>
             <h3>Post-test</h3>
             <p>Show what you learned, on your own.</p>
-            {done(model.post) ? <b>Done · {model.post.score}%</b> : <Go step={model.post} onOpen={onOpen} className="sp-x-start" doneLabel="" nowLabel="Start the post-test" laterLabel="Later" />}
+            {done(model.post) ? <div className="sp45-result">✓ Path complete <strong>{model.post.score}%</strong></div> :
+              <Go step={model.post} onOpen={onOpen} className="sp45-stage-button" doneLabel="" nowLabel="Start the post-test →" laterLabel="After every skill" />}
           </div>
         </li>
       </ol>
-      <button type="button" className="sp-x-go" onClick={onBack}>Back to the map</button>
+      <button type="button" className="sp45-back" onClick={onBack}>← Back to the Labyrinth</button>
     </div>
   )
 }

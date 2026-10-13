@@ -269,6 +269,7 @@ function Path45({ model, onOpen, onBack }) {
   const skill = model.skills[currentIndex - 1]
   const nextAction = current?.type === 'pre' ? 'Start the pre-test' : current?.type === 'post' ? 'Start the post-test' : current?.type === 'lesson' ? 'Start the lesson' : 'Start practice'
   const nextDescription = current?.type === 'pre' ? `See what you already know in ${model.pre?.assessment?.items?.length || 0} questions.` : current?.type === 'post' ? 'Show what you learned across the whole path.' : current?.type === 'lesson' ? 'Learn this skill in a few short steps.' : 'Try the activities for this skill.'
+  const stepIcon = current?.type === 'pre' ? 'compass' : current?.type === 'post' || model.finished ? 'trophy' : current?.type === 'lesson' ? 'books' : 'sparkles'
   return (
     <div className="sp-x is-45">
       <header className="sp45-hero" style={{ '--sp45-art': `url(${import.meta.env.BASE_URL || '/'}lands/composition.jpg)` }}>
@@ -291,7 +292,8 @@ function Path45({ model, onOpen, onBack }) {
             </li>)}
           </ol>
         </section>
-        <section className="sp45-now" aria-label="Your next step">
+        <section className="sp45-now" aria-label="Your next step" style={{ '--sp45-art': `url(${import.meta.env.BASE_URL || '/'}lands/composition.jpg)` }}>
+          <div className="sp45-now-emblem"><img src={`${import.meta.env.BASE_URL || '/'}icons/${stepIcon}.webp`} alt="" /></div>
           <div className="sp45-board-eyebrow">{model.finished ? 'PATH COMPLETE' : `CLEARING ${currentIndex + 1} OF ${clearings} · YOUR NEXT STEP`}</div>
           <h3>{model.finished ? 'You did it!' : clearingName(currentIndex)}</h3>
           <p>{model.finished ? 'Every clearing is complete. Take a look at how far you came.' : nextDescription}</p>

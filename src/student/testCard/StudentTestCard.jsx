@@ -69,7 +69,7 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
           {!picAtPassage && passageFigure}
           {inlineInAsk
             ? <h2 className="stc-ask stc-ask-inline">{item.prompt.split(/_{2,}/)[0]}<InlineSelect item={item} options={options} answer={answer} set={set} checked={checked} />{item.prompt.split(/_{2,}/).slice(1).join(' ')}</h2>
-            : <h2 className="stc-ask">{item.prompt}</h2>}
+            : <h2 className={'stc-ask' + (String(item.prompt || '').length > 110 ? ' long' : '')}>{item.prompt}</h2>}
           {inlineInAsk ? <p className="stc-how">Choose the missing word.</p> : <Answer item={item} options={options} answer={answer} set={set} checked={checked} />}
           {checked && (
             <div className={'stc-feedback' + (right ? ' right' : '')} role="status">

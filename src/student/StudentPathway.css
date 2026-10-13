@@ -735,3 +735,38 @@
   .student-pathway .sp45-route-crystal { width: 22px; height: 25px; }
   .student-pathway .sp45-map-name small { font-size: 9px; }
 }
+
+/* Calm, opaque classroom layout: progress is conveyed by state, not a rainbow of cards. */
+.student-pathway .sp-x.is-45 { --sp45-ink: #183348; --sp45-teal: #176d70; }
+.student-pathway .sp45-hero { border: 1px solid #d5e0e5; background: #eaf1f2; box-shadow: none; }
+.student-pathway .sp45-intro, .student-pathway .sp45-intro h2 { color: #183348; text-shadow: none; }
+.student-pathway .sp45-overline, .student-pathway .sp45-progress-copy, .student-pathway .sp45-progress-copy strong { color: #37646c; }
+.student-pathway .sp45-progress-track { border-color: #c8d8db; background: #d8e4e6; }
+.student-pathway .sp45-progress-track span { background: #176d70; }
+.student-pathway .sp45-map, .student-pathway .sp45-now { border: 1px solid #d5e0e5; border-radius: 14px; background: #fff; box-shadow: 0 3px 12px rgba(24, 51, 72, .06); }
+.student-pathway .sp45-now::after, .student-pathway .sp45-map-list::before { display: none; }
+.student-pathway .sp45-map-list { gap: 5px; }
+.student-pathway .sp45-map-list li button,
+.student-pathway .sp45-map-list li:nth-child(4n + 1) button,
+.student-pathway .sp45-map-list li:nth-child(4n + 2) button,
+.student-pathway .sp45-map-list li:nth-child(4n + 3) button,
+.student-pathway .sp45-map-list li:nth-child(4n + 4) button { border: 1px solid #e0e8ea; border-radius: 9px; background: #f8fafb; }
+.student-pathway .sp45-map-list li button:hover { border-color: #aec9cb; background: #f0f6f6; }
+.student-pathway .sp45-map-list li.is-selected button { border-color: #176d70; background: #edf5f4; box-shadow: inset 3px 0 0 #176d70; }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 2).is-current .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 3).is-current .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 4).is-current .sp45-map-number { background: #176d70; color: #fff; }
+.student-pathway .sp45-map-list li .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 2) .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 3) .sp45-map-number,
+.student-pathway .sp45-map-list li:nth-child(4n + 4) .sp45-map-number { background: #e5ecee; color: #526d75; }
+.student-pathway .sp45-map-list li.is-current .sp45-map-number { background: #176d70; color: #fff; }
+.student-pathway .sp45-map-list li.is-complete .sp45-map-number { background: #dcefeb; color: #176d70; }
+.student-pathway .sp45-map-list li:nth-child(n) .sp45-route-crystal { background: linear-gradient(125deg, #d3efec 0 24%, #79c9c0 25% 50%, #218c8a 51% 76%, #176d70 77%); }
+.student-pathway .sp45-map-list li.is-current .sp45-route-crystal { filter: grayscale(1); opacity: .32; }
+.student-pathway .sp45-map-list li.is-complete .sp45-route-crystal { filter: none; opacity: 1; }
+.student-pathway .sp45-route-head > span, .student-pathway .sp45-now-facts span { border-color: #d8e6e5; background: #edf5f4; color: #35686a; }
+.student-pathway .sp45-now-emblem { border-color: #d7e5e6; background: #f3f7f7; }
+.student-pathway .sp45-now-button { background: #176d70; box-shadow: none; }
+.student-pathway .sp45-now-button:hover:not(:disabled) { background: #115a5d; }

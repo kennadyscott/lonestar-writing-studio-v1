@@ -419,6 +419,21 @@
 .student-pathway .sp45-back:hover { text-decoration: underline; }
 .student-pathway .sp45-clearing .sp-x-extra { border-top: 1px solid #e8e2d6; padding-top: 12px; }
 
+/* School Chromebooks commonly leave less vertical room than a desktop browser. */
+@media (max-height: 800px) and (min-width: 801px) {
+  .student-pathway .sp45-hero { min-height: 220px; padding: 18px 28px; }
+  .student-pathway .sp45-intro h2 { font-size: clamp(34px, 3.4vw, 46px); }
+  .student-pathway .sp45-intro p { margin: 6px 0 12px; font-size: 15px; }
+  .student-pathway .sp45-next { padding: 14px 17px; }
+  .student-pathway .sp45-next h3 { margin-top: 5px; font-size: 24px; }
+  .student-pathway .sp45-next p { margin: 6px 0 10px; font-size: 13px; }
+  .student-pathway .sp45-next-button { min-height: 42px; }
+  .student-pathway .sp45-trail-heading { margin-top: 12px; margin-bottom: 2px; }
+  .student-pathway .sp45-trail-heading h3 { font-size: 23px; }
+  .student-pathway .sp45-gateway .sp45-clearing-content { padding: 12px 18px; }
+  .student-pathway .sp45-gateway .sp45-stage-button { min-height: 38px; margin-top: 8px; }
+}
+
 @media (max-width: 800px) {
   .student-pathway .sp45-hero { grid-template-columns: 1fr; gap: 16px; padding: 24px; background-position: 57% center; }
   .student-pathway .sp45-next { max-width: 520px; }

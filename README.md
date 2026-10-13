@@ -52,6 +52,8 @@ Restart `npm run dev`. The conference badge flips from "● scripted" to "● li
 
 ## Architecture
 
+Student-facing screens should be reviewed at Chromebook sizes first: 1366×768 and 1280×720, including a short browser viewport around 650px high. Check that the next action is visible without scrolling and that the page does not overflow horizontally. Phone and large desktop checks come after that.
+
 | Layer | What |
 |------|------|
 | Frontend | React + Vite (`src/`) |

@@ -529,3 +529,48 @@
 .proof-page:has(.sp-testing) .crumbs { display: none; }
 .student-pathway.sp-testing { gap: 0; }
 .content:has(.sp-testing) { padding-bottom: 4px; }
+
+/* Focused Grade 4–5 pathway */
+.proof-page:has(.student-pathway .sp-x.is-45) { max-width: none; width: 100%; }
+.student-pathway .sp-x.is-45 { max-width: none; width: 100%; }
+.student-pathway .sp45-hero { grid-template-columns: 1fr; min-height: 124px; gap: 0; padding: 17px clamp(22px, 3vw, 42px); border-radius: 18px; background: linear-gradient(90deg, rgba(7, 38, 42, .98), rgba(7, 38, 42, .88) 42%, rgba(7, 38, 42, .4)), var(--sp45-art) center 53% / cover no-repeat, #163c42; }
+.student-pathway .sp45-intro { max-width: none; }
+.student-pathway .sp45-intro h2 { margin: 4px 0 9px; font-size: clamp(29px, 3vw, 40px); }
+.student-pathway .sp45-progress-track { height: 7px; margin-top: 4px; }
+.student-pathway .sp45-progress-copy strong { font-size: 15px; }
+.student-pathway .sp45-next { align-self: center; padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; }
+.student-pathway .sp45-next-kicker { color: #ffe3a5; }
+.student-pathway .sp45-next h3 { margin: 4px 0 8px; color: #fff; font-size: 21px; }
+.student-pathway .sp45-next-button { min-height: 40px; width: fit-content; max-width: 100%; padding: 8px 14px; background: #fff8e7; color: #164145; font-size: 13px; }
+.student-pathway .sp45-next-button:hover:not(:disabled) { background: #f7d77d; color: #133c40; }
+.student-pathway .sp45-route { display: flex; gap: 7px; margin: 18px 2px 0; }
+.student-pathway .sp45-route span { display: grid; place-items: center; flex: 1; height: 22px; border-radius: 99px; background: #e3eae5; color: #607570; font-size: 11px; font-weight: 900; }
+.student-pathway .sp45-route span.is-complete { background: #288765; color: #fff; }
+.student-pathway .sp45-route span.is-current { background: #e8bb59; color: #173747; }
+.student-pathway .sp45-trail-heading { align-items: center; margin: 15px 0 8px; }
+.student-pathway .sp45-trail-heading h3 { font-size: 22px; }
+.student-pathway .sp45-route-toggle { border: 1px solid #bfd6ca; border-radius: 9px; padding: 9px 12px; background: #fff; color: #075f63; font-size: 13px; font-weight: 800; cursor: pointer; }
+.student-pathway .sp45-route-toggle:hover { background: #ebf5ef; }
+.student-pathway .sp45-trail.is-focused { gap: 0; padding: 0; }
+.student-pathway .sp45-trail.is-focused::before { display: none; }
+.student-pathway .sp45-trail.is-focused .sp45-clearing:not(.is-focus) { display: none; }
+.student-pathway .sp45-trail.is-focused .sp45-clearing { margin-left: 0; grid-template-columns: 58px minmax(0, 1fr); }
+.student-pathway .sp45-trail.is-focused .sp45-marker { width: 58px; height: 58px; }
+.student-pathway .sp45-trail.is-focused .sp45-marker img { width: 40px; height: 40px; }
+.student-pathway .sp45-trail.is-focused .sp45-clearing-content { min-height: 0; padding: 16px 20px; }
+.student-pathway .sp45-up-ahead { display: flex; align-items: center; gap: 12px; margin: 12px 0 0 70px; border: 1px dashed #bdd4c6; border-radius: 12px; padding: 10px 14px; background: #f9fcf7; color: #526c64; }
+.student-pathway .sp45-up-ahead span { color: #30816e; font-size: 10px; font-weight: 900; letter-spacing: .1em; }
+.student-pathway .sp45-up-ahead strong { color: #203f48; font-size: 14px; }
+.student-pathway .sp45-up-ahead small { margin-left: auto; font-size: 12px; }
+@media (max-width: 800px) {
+  .student-pathway .sp45-hero { grid-template-columns: 1fr; gap: 10px; }
+  .student-pathway .sp45-next { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+  .student-pathway .sp45-next-kicker { width: 100%; }
+  .student-pathway .sp45-next h3 { margin: 0; }
+}
+@media (max-width: 560px) {
+  .student-pathway .sp45-up-ahead { margin-left: 0; flex-wrap: wrap; }
+  .student-pathway .sp45-up-ahead small { margin-left: 0; }
+  .student-pathway .sp45-trail-heading { align-items: flex-start; gap: 8px; }
+  .student-pathway .sp45-route-toggle { margin-top: 8px; }
+}

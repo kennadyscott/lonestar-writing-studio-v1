@@ -193,12 +193,6 @@ html[data-band="2-3"] .assign-list-b .assign-go .btn, html[data-band="4-5"] .ass
   background: rgba(255,255,255,.82); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(13,47,85,.12);
   font-size: 11.5px; font-weight: 800; color: var(--muted); opacity: .7; transition: opacity .15s; }
 .demo-reset:hover, .demo-reset:focus-visible { opacity: 1; background: #fff; }
-/* A / B page versions, beside Reset (2026-10-14). */
-.demo-look { position: fixed; left: 150px; bottom: 11px; z-index: 30; display: flex; padding: 3px; gap: 2px; border-radius: 999px;
-  background: rgba(255,255,255,.9); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(13,47,85,.12); }
-.demo-look button { padding: 5px 11px; border: 0; border-radius: 999px; background: transparent; font-size: 11.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
-.demo-look button.on { background: var(--scene-navy, #0d2f55); color: #fff; }
-.demo-look button:focus-visible { outline: 2px solid var(--scene-sky, #8fd3f0); outline-offset: 1px; }
 
 /* ===== cards / buttons ===== */
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }

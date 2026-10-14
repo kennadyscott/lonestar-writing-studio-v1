@@ -3,19 +3,6 @@ import { BRAND } from '../lib/brand.js'
 import { useLang, useT, LANGS } from '../lib/i18n/index.jsx'
 import { LEVELS } from '../lib/languageBridge.js'
 import { BANDS } from '../lib/gradeBand.js'
-import { setLook, useLook } from '../lib/look.js'
-
-/** A (today's pages) or B (simpler), shown beside Reset demo data. */
-function LookSwitch() {
-  const look = useLook()
-  return (
-    <div className="demo-look" role="group" aria-label="Compare page versions">
-      {[['a', 'A · Current'], ['b', 'B · Simpler']].map(([k, label]) => (
-        <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => setLook(k)}>{label}</button>
-      ))}
-    </div>
-  )
-}
 
 export function TopBar({ who, onArcade, onLogo, band, onBand }) {
   const t = useT()
@@ -96,14 +83,11 @@ export function DemoTools({ onResetDemo, onPublisher, settings, onSettings }) {
   const showBridge = showTools
 
   if (!showTools) {
-    return <>
-      <LookSwitch />
-      {onResetDemo && (
-        <button className="demo-reset" onClick={onResetDemo} title={t('Reset demo data')}>
-          ↺ {t('Reset demo data')}
-        </button>
-      )}
-    </>
+    return onResetDemo ? (
+      <button className="demo-reset" onClick={onResetDemo} title={t('Reset demo data')}>
+        ↺ {t('Reset demo data')}
+      </button>
+    ) : null
   }
 
   return (

@@ -7,11 +7,11 @@ import { landImg } from './ProofRoom.jsx'
  * what she picked on the Practice card: the domain's land art, the trail of stones with each score, a Skill Builder as its own
  * purple ⚡ stop, growth as a percent.
  *   A  Trail       the land-art header holds the trail; one "next step" panel underneath (tap any stone to see it)
- *   B  Quest board every stop is a card; the one you are on glows; a big Continue button
  *   C  One step    just the step you are on, big, with a slim row of dots for the whole path
  */
 
-export const PATH45_LOOKS = [['a', 'Trail'], ['b', 'Quest board'], ['c', 'One step']]
+// the Quest board came out (2026-10-14: "I prefer A or C - remove B")
+export const PATH45_LOOKS = [['a', 'Trail'], ['c', 'One step']]
 
 const isDone = (s) => s?.state === 'complete'
 const isNow = (s) => s?.state === 'current' || s?.state === 'unavailable'
@@ -139,60 +139,6 @@ function TrailLook({ model, record, topic, onOpen, onBack }) {
   )
 }
 
-/* ---------- B · Quest board ---------- */
-function BoardLook({ model, record, topic, onOpen, onBack }) {
-  const stops = stopsOf(model, record)
-  const now = stops.find((s) => s.state === 'now')
-  const nowPart = now?.parts.find((p) => isNow(p.step))
-  const doneSkills = stops.filter((s) => s.kind !== 'test' && s.state === 'done').length
-  const skills = stops.filter((s) => s.kind !== 'test').length
-  return (
-    <div className="p45 p45-b">
-      <header className="p45-hero slim" style={{ '--p45-land': `url(${landImg(topic.domain)})` }}>
-        <div className="p45-hero-top">
-          <div>
-            <p className="p45-kicker">Your path · Grade {topic.grade}</p>
-            <h2>{model.title}</h2>
-          </div>
-          <div className="p45-hero-mid">
-            <Growth model={model} />
-            <span className="p45-count"><b>{doneSkills}</b> of {skills} skills done</span>
-          </div>
-          <span style={{ flex: 1 }} />
-          {nowPart
-            ? <button type="button" className="p45-continue" disabled={!canOpen(nowPart.step)} onClick={() => onOpen(nowPart.step)}>Continue: {now.label}{now.kind !== 'test' ? ` · ${nowPart.label}` : ''} →</button>
-            : <Back onBack={onBack} />}
-        </div>
-      </header>
-      <div className="p45-grid" style={{ '--cols': Math.min(4, Math.ceil(stops.length / 2)) }}>
-        {stops.map((s) => {
-          const go = s.parts.find((p) => isNow(p.step)) || s.parts[0]
-          return (
-            <article key={s.key} className={'p45-card ' + s.state + (s.kind === 'test' ? ' test' : '')}>
-              <div className="p45-card-top">
-                <span className={'p45-badge ' + s.state}>{s.key === 'pre' ? '🚩' : s.key === 'post' ? '🏆' : s.state === 'done' ? '✓' : s.state === 'later' ? '🔒' : s.n - 1}</span>
-                <span className={'p45-chip ' + s.state}>{s.state === 'done' ? 'Done' : s.state === 'now' ? 'You are here' : 'Later'}</span>
-              </div>
-              <h3>{s.label}</h3>
-              <p className="p45-line">{s.line}</p>
-              <div className="p45-card-rows">
-                {s.kind === 'test'
-                  ? <span className="p45-row"><span>{s.parts[0].sub}</span><b>{s.score != null && s.state === 'done' ? s.score + '%' : ''}</b></span>
-                  : <>
-                    <span className={'p45-row' + (isDone(s.parts[0]?.step) ? ' ok' : '')}><span>Lesson</span><b>{isDone(s.parts[0]?.step) ? '✓' : ''}</b></span>
-                    <span className={'p45-row' + (isDone(s.parts[1]?.step) ? ' ok' : '')}><span>Practice</span><b>{s.first != null ? s.first + '%' : s.score != null && isDone(s.parts[1]?.step) ? s.score + '%' : ''}</b></span>
-                    {s.sb && <span className="p45-row sb"><span>⚡ Skill Builder</span><b>{s.sb.score != null ? s.sb.score + '%' : ''}</b></span>}
-                  </>}
-              </div>
-              {s.state === 'now' && <button type="button" className="p45-card-go" disabled={!canOpen(go.step)} onClick={() => onOpen(go.step)}>{go.label === 'Learn it' ? 'Start the lesson' : 'Start ' + go.label.toLowerCase()} →</button>}
-            </article>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 /* ---------- C · One step ---------- */
 function FocusLook({ model, record, topic, onOpen, onBack }) {
   const stops = stopsOf(model, record)
@@ -252,7 +198,6 @@ function FocusLook({ model, record, topic, onOpen, onBack }) {
 
 export function Path45Look({ look, model, record, topic, onOpen, onBack }) {
   const props = { model, record, topic, onOpen, onBack }
-  if (look === 'b') return <BoardLook {...props} />
   if (look === 'c') return <FocusLook {...props} />
   return <TrailLook {...props} />
 }

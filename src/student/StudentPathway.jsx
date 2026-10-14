@@ -59,7 +59,7 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
     <section className={'student-pathway' + (testing ? ' sp-testing' : '')} aria-label={`${topic.short || topic.title} pathway`}>
       {!testing && <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span>
         {is45 && !active && <span className="sp-proto">
-          <span className="style-pick" role="group" aria-label="Prototype: pathway look">{PATH45_LOOKS.map(([k, n], i) => <button key={k} className={look === k ? 'on' : ''} onClick={() => setLook(k)}>{'ABC'[i]}<small>{n}</small></button>)}</span>
+          <span className="style-pick" role="group" aria-label="Prototype: pathway look">{PATH45_LOOKS.map(([k, n], i) => <button key={k} className={look === k ? 'on' : ''} onClick={() => setLook(k)}>{'AB'[i]}<small>{n}</small></button>)}</span>
           <span className="style-pick" role="group" aria-label="Prototype: sample progress"><span className="lbl">Sample</span>{[['new', 'New'], ['partway', 'Partway'], ['done', 'Done'], ['mine', 'Mine']].map(([k, n]) => <button key={k} className={sample === k ? 'on' : ''} onClick={() => setSample(k)}>{n}</button>)}</span>
         </span>}
       </div>}

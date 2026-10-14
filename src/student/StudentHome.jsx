@@ -983,6 +983,7 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
 function DailyBanner({ dc, busy, onGo }) {
   const t = useT()
   const say = useSay()
+  const simple = useLook() === 'b'
   // Pip the squirrel reading in the crystal forest (her mockup, 2026-09-24) sits
   // on the left; the words sit on the navy beside Pip. daily-bg.jpg was the robot.
   return (
@@ -1013,7 +1014,7 @@ function DailyBanner({ dc, busy, onGo }) {
 
       {/* glowing CTA */}
       <button disabled={busy} onClick={onGo} className="daily-cta">
-        {dc?.done ? t('Review →') : dc?.started ? t('Keep going →') : t('Start Revising →')}
+        {simple ? (dc?.done ? t('Review') : dc?.started ? t('Keep going') : t('Start')) : dc?.done ? t('Review →') : dc?.started ? t('Keep going →') : t('Start Revising →')}
       </button>
     </div>
   )
@@ -1526,6 +1527,14 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
+        {/* Practice's card styles sit in the tab row, not a row of their own, so the page starts higher (2026-10-14). */}
+        {tab === 'practice' && (
+          <div className="prac-calm" role="group" aria-label={t('Practice pages')} style={{ marginRight: 'auto' }}>
+            {CALM.map(([k, label]) => (
+              <button key={k} type="button" className={calm === k ? 'on' : ''} aria-pressed={calm === k} onClick={() => setCalm(k)}>{t(label)}</button>
+            ))}
+          </div>
+        )}
         <div className="seg nav-tabs" role="tablist" aria-label={t('Dashboard sections')} style={{ position: 'relative', zIndex: 2 }}>
           {TABS.map(([k, label]) => (
             <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
@@ -1553,11 +1562,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
         // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
         // B (simpler, 2026-10-14: "Now let's simplify the Practice page on the AB"): look-simple hides the extra words (theme.css).
         <div className={'practice-view' + (simpleLook ? ' look-simple' : '')} data-clean="" data-side={calm === 'c' ? 'c' : 'a'} style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div className="prac-calm" role="group" aria-label={t('Practice pages')}>
-            {CALM.map(([k, label]) => (
-              <button key={k} type="button" className={calm === k ? 'on' : ''} aria-pressed={calm === k} onClick={() => setCalm(k)}>{t(label)}</button>
-            ))}
-          </div>
           {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
           {/* Side cards A wears the paintings. Side cards C is the three white cards, and the Daily Challenge keeps its painting. */}
           <div className="practice-split">

@@ -2454,11 +2454,17 @@ body { font-size: 16px; }
 .dg-goal-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 2px; font-size: 13px; }
 .dg-link { background: none; border: 0; padding: 0; font: inherit; font-weight: 800; color: var(--link); cursor: pointer; }
 .dg-won { font-weight: 700; color: #1f7a4d; }
-.dg-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-.dg-stat { padding: 14px 18px; }
-.dg-stat .v { font-size: 30px; font-weight: 800; color: #0d2f55; line-height: 1.1; }
-.dg-stat .v small { font-size: 16px; color: var(--muted); font-weight: 700; }
-.dg-stat .k { font-size: 13.5px; font-weight: 700; color: var(--muted); margin-top: 2px; }
+.dg-glance { padding: 14px 16px 16px; }
+.dg-glance-title { display: block; margin: 0 2px 10px; font-size: 15px; color: #0d2f55; }
+.dg-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.dg-stat { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 16px; background: var(--tint); border: 1.5px solid var(--edge); }
+.dg-stat.teal { --tint: #e3f5f4; --edge: #b6e3df; --ink2: #0e7c78; }
+.dg-stat.violet { --tint: #efeafd; --edge: #d4c8f6; --ink2: #5a45c4; }
+.dg-stat.orange { --tint: #fff1e0; --edge: #f6d2a6; --ink2: #b8620e; }
+.dg-stat-icon { width: 46px; height: 46px; flex-shrink: 0; display: grid; place-items: center; border-radius: 14px; background: #fff; font-size: 22px; box-shadow: 0 2px 6px rgba(13,47,85,.08); }
+.dg-stat .v { font-size: 30px; font-weight: 800; color: var(--ink2); line-height: 1.1; }
+.dg-stat .v small { font-size: 16px; color: var(--ink2); opacity: .65; font-weight: 700; }
+.dg-stat .k { font-size: 13.5px; font-weight: 700; color: #3d5670; margin-top: 2px; }
 .dg-stat .up { font-size: 12.5px; font-weight: 800; color: #1f7a4d; margin-top: 2px; }
 .dg-main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
 .dg-chart, .dg-race { padding: 16px 20px; }
@@ -2468,4 +2474,4 @@ body { font-size: 16px; }
 .dg-race-row { display: flex; align-items: center; gap: 10px; }
 .dg-race-word { width: 64px; font-size: 13.5px; font-weight: 700; }
 .dg-race-pct { width: 40px; text-align: right; font-size: 13px; font-weight: 800; }
-@media (max-width: 900px) { .dg-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dg-main { grid-template-columns: 1fr; } }
+@media (max-width: 900px) { .dg-stats { grid-template-columns: 1fr; } .dg-main { grid-template-columns: 1fr; } }

@@ -761,16 +761,23 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           {lookSwitch}
         </div>
 
-        <div className="dg-stats">
-          {[
-            { v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
-            { v: revisions, k: t('Revisions made') },
-            { v: finished, k: t('Pieces finished') },
-            { v: growthCoins.toLocaleString(), k: t('Coins earned') },
-          ].map((x, i) => (
-            <div key={i} className="card dg-stat"><div className="v">{x.v}</div><div className="k">{x.k}</div>{x.up && <div className="up">{x.up}</div>}</div>
-          ))}
-        </div>
+        {/* At a Glance (her note, 2026-10-14: "We don't need the coins earned. They earn coins from all over. Let's make that whole
+            section 'At a Glance' and make it a little more colorful") */}
+        <section className="card dg-glance" aria-label={t('At a Glance')}>
+          <b className="dg-glance-title">{t('At a Glance')}</b>
+          <div className="dg-stats">
+            {[
+              { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
+              { tone: 'violet', icon: '✏️', v: revisions, k: t('Revisions made') },
+              { tone: 'orange', icon: '✅', v: finished, k: t('Pieces finished') },
+            ].map((x, i) => (
+              <div key={i} className={'dg-stat ' + x.tone}>
+                <span className="dg-stat-icon" aria-hidden>{x.icon}</span>
+                <div><div className="v">{x.v}</div><div className="k">{x.k}</div>{x.up && <div className="up">{x.up}</div>}</div>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="dg-main">
           <div className="card dg-chart">

@@ -70,39 +70,12 @@ const ANCHOR_COLORS = {
   Restate: '#e668c9', Answer: '#6db7f2', Cite: '#7fd483', Explain: '#f2b27e',
   Claim: '#e668c9', Evidence: '#7fd483', Reasoning: '#f2b27e',
 }
-const ANCHOR_MEANING = {
-  Restate: 'Restate the question', Answer: 'Answer completely', Cite: 'Cite evidence', Explain: 'Explain your thinking',
-  Claim: 'Make a clear claim', Evidence: 'Support it with evidence', Reasoning: 'Explain your reasoning',
-}
 
 function DataBar({ pct }) {
   const fill = pct >= 80 ? 'var(--good)' : pct > 0 ? 'var(--gold)' : 'transparent'
   return (
     <div className="data-bar">
       <i style={{ width: `${pct}%`, background: fill }} />
-    </div>
-  )
-}
-
-function ScrPanel({ rows }) {
-  const t = useT()
-  const say = useSay()
-  return (
-    <div>
-      <div className="eyebrow" style={{ marginBottom: 6 }}><Glossed text={t('Strategy')} /></div>
-      {/* say() so a Beginning rewrite can be added in SIMPLE without touching this file */}
-      <div style={{ fontSize: 15, fontWeight: 700, letterSpacing: '-.02em', marginBottom: 14 }}><Glossed text={say('Anchor adherence')} /></div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {rows.map((r) => (
-          <div key={r.label} title={`${r.k} = ${t(ANCHOR_MEANING[r.label] || r.label)}`} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span className="anchor-k" style={{ color: ANCHOR_COLORS[r.label] || 'var(--navy)' }}>{r.k}</span>
-            <span style={{ width: 42, fontSize: 13, fontWeight: 700 }}>{r.pct}%</span>
-            <DataBar pct={r.pct} />
-            <span style={{ width: 16, fontSize: 11.5, color: 'var(--muted)', fontWeight: 600, textAlign: 'right' }} title={r.n === 1 ? t('{n} response assessed', { n: r.n }) : t('{n} responses assessed', { n: r.n })}>{r.n}</span>
-          </div>
-        ))}
-      </div>
-      <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 14 }}>{t('R-A-C-E — Restate, Answer, Cite, Explain')}</div>
     </div>
   )
 }
@@ -130,119 +103,6 @@ function EcrCombined({ org, conv }) {
         <div style={{ borderTop: '1px solid var(--line)', margin: '6px 0' }} />
         {section(<Glossed text={t('Conventions')} />, conv)}
       </div>
-    </div>
-  )
-}
-
-function RecentResults({ state, me, onReview }) {
-  const locale = useLocale()
-  const t = useT()
-  const say = useSay()
-  const rows = state.submissions
-    .filter((s) => s.studentId === me.id && s.completedAt && !s.isPeerRevision)
-    .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
-    .filter(({ a }) => a && !['free', 'quick'].includes(a.genre))
-    .sort((x, y) => (x.s.completedAt < y.s.completedAt ? 1 : -1))
-    .slice(0, 5)
-
-  if (!rows.length) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f9fc', borderRadius: 10, padding: '14px 16px', fontSize: 13, color: 'var(--muted)' }}>
-        <Glossed text={say('🌵 Nothing turned in yet — finished assignments and their feedback land here.')} />
-      </div>
-    )
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      {rows.map(({ s, a }) => {
-        const sc = scoreSubmission(a, s)
-        const strong = sc.pct >= 75
-        const mid = sc.pct >= 50
-        const tone = strong ? 'var(--good)' : mid ? '#c99312' : '#c0392b'
-        const missed = sc.questions[0].anchors.filter((x) => !x.hit)
-        return (
-          <div key={s.id} style={{ border: '1px solid var(--line)', borderRadius: 12, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
-            <div style={{ flex: '1 1 220px', minWidth: 0 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .4, color: '#fff', background: a.format === 'ECR' ? 'var(--ecr)' : 'var(--scr)', padding: '3px 8px', borderRadius: 7 }}>{a.format || 'SCR'}</span>
-                <b style={{ fontSize: 14.5 }}>{a.title}</b>
-              </div>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
-                {t('Turned in {date}', { date: fmtDate(s.completedAt, locale) })} · {a.teacher?.name}
-                {missed.length > 0 && <> · {t('next step:')} <b style={{ color: tone }}>{t(missed[0].label).toLowerCase()}</b></>}
-              </div>
-            </div>
-            <div style={{ textAlign: 'center', minWidth: 78 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}><Glossed text={t('RUBRIC')} /></div>
-              <b style={{ fontSize: 16, color: tone }}>{sc.rubricScore}<span style={{ fontSize: 12, color: 'var(--muted)' }}>/{sc.rubricMax}</span></b>
-            </div>
-            <div style={{ textAlign: 'center', minWidth: 78 }}>
-              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)' }}>{sc.strategyName}</div>
-              <b style={{ fontSize: 16, color: tone }}>{sc.pct}%</b>
-            </div>
-            <button className="btn ghost" style={{ padding: '8px 16px', whiteSpace: 'nowrap' }} onClick={() => onReview && onReview(s.id)}>{t('See feedback →')}</button>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function WritingDataCard({ writingData, state, me, onReview }) {
-  const t = useT()
-  const say = useSay()
-  const [top, setTop] = useState('data')
-  const [subject, setSubject] = useState('ELA')
-  const [fmt, setFmt] = useState('SCR')
-  const d = writingData[subject]
-  const hasEcr = subject === 'ELA' // Science & Social Studies collect SCR only
-  const view = hasEcr ? fmt : 'SCR'
-  const scrEmpty = d.scr.every((r) => r.pct === 0 && !r.n)
-
-  return (
-    <div className="card gold-edge" style={{ padding: '18px 20px', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
-        <div className="data-title">{t('My writing data')}</div>
-        <div className="seg">
-          <button className={top === 'recent' ? 'on' : ''} onClick={() => setTop('recent')}>{t('Recently completed')}</button>
-          {writingData.subjects.map((sub) => (
-            <button key={sub} className={top === 'data' && subject === sub ? 'on' : ''} onClick={() => { setTop('data'); setSubject(sub) }}>{t(sub)}</button>
-          ))}
-        </div>
-      </div>
-
-      {top === 'recent' ? (
-        <div style={{ marginTop: 14 }}>
-          <div style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 12 }}><Directions text="Your most recent finished assignments — open one to see the feedback again." /></div>
-          <RecentResults state={state} me={me} onReview={onReview} />
-        </div>
-      ) : (<>
-
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '14px 0 16px' }}>
-        {hasEcr ? (
-          <div className="seg">
-            <button className={view === 'SCR' ? 'on' : ''} onClick={() => setFmt('SCR')}>SCR</button>
-            <button className={view === 'ECR' ? 'on' : ''} onClick={() => setFmt('ECR')}>ECR</button>
-          </div>
-        ) : (
-          <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--scr)' }}>{t('{subject} collects SCR data only', { subject: t(subject) })}</span>
-        )}
-        <span style={{ fontSize: 12, color: 'var(--muted)', marginLeft: 'auto' }}><Glossed text={t('vs. the grading rubric')} /></span>
-      </div>
-
-      {view === 'SCR' ? (
-        scrEmpty ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#f4f9fc', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: 'var(--muted)' }}>
-            <Glossed text={say('🌵 Nothing here yet — data appears when Kayla answers {subject} prompts.', { subject: t(subject) })} />
-          </div>
-        ) : (
-          <ScrPanel rows={d.scr} />
-        )
-      ) : (
-        <EcrCombined org={d.ecrOrg} conv={d.ecrConv} />
-      )}
-      </>)}
     </div>
   )
 }
@@ -683,8 +543,11 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const [conferring, setConferring] = useState(false)
   // A (today's page) or B (simpler), to compare (Kennady, 2026-10-14: "Next, let's clean up the Data & Goals page. Give me an
   // AB option"). B: the goal on one line, four numbers, the chart beside R-A-C-E under one SCR / ECR switch, then the growth story.
-  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.dataLook') || 'b' } catch { return 'b' } })
-  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.dataLook', k) } catch { /* fine */ } }
+  // B is the page now ("I like B over A, so we can get rid of A"); C is a new layout to compare ("make me a new version where we
+  // have 'At a Glance' on the same line as 'My Goal' and then Conference with my teacher is a separate bar ... keep count of how
+  // many goals they reach").
+  const [look, setLook] = useState(() => { try { const v = localStorage.getItem('lscr.dataLook2'); return v === 'b' || v === 'c' ? v : 'c' } catch { return 'c' } })
+  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.dataLook2', k) } catch { /* fine */ } }
 
   async function choose(g) { await api.setGoal(g); setPicking(false); onChange && onChange() }
   async function setCustomGoal() { if (!custom.trim()) return; await api.setGoal({ text: custom.trim(), trait: null }); setCustom(''); setPicking(false); onChange && onChange() }
@@ -693,11 +556,10 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
 
   const revisions = subs.reduce((a, s) => a + Math.max(0, s.drafts.length - 1), 0)
   const finished = subs.filter((s) => s.completedAt).length
-  const growthCoins = state.coinEvents.filter((e) => e.studentId === me.id).reduce((a, e) => a + e.coins, 0)
 
   const lookSwitch = (
     <div className="dg-looks" role="group" aria-label={t('Page versions')}>
-      {[['a', 'A · Current'], ['b', 'B · Simpler']].map(([k, label]) => <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => pickLook(k)}>{label}</button>)}
+      {[['b', 'B · Current'], ['c', 'C · New']].map(([k, label]) => <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => pickLook(k)}>{label}</button>)}
     </div>
   )
   const stories = subs.filter((s) => s.drafts.filter((d) => d.traits).length > 1 && !s.isPeerRevision)
@@ -726,26 +588,72 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
     )
   })
 
-  if (look === 'b' && me.goal && !picking) {
+  const modals = <>
+    {toast != null && (
+      <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={() => setToast(null)}>
+        <div className="card" style={{ padding: 28, width: 380, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+          <div style={{ fontSize: 46 }}>🏆</div>
+          <h2 style={{ margin: '6px 0' }}>{t('Goal reached!')}</h2>
+          <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>{say('Amazing work sticking with it. You earned')}</p>
+          <div className="coin" style={{ fontSize: 22, justifyContent: 'center' }}><span className="disc" style={{ width: 20, height: 20 }} />+{toast}</div>
+          <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Pick my next goal')}</button>
+        </div>
+      </div>
+    )}
+    {conferring && <ConferenceProtocol teacher={state.teacher?.name || t('your teacher')} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />}
+  </>
+
+  if (me.goal && !picking) {
     const d = state.writingData?.ELA
     const series = mpTab === 'scr' ? mp.scr : mp.ecr
     const now = series[series.length - 1], grew = Math.round((now - series[0]) * 10) / 10
     const RACE = [['R', 'Restate'], ['A', 'Answer'], ['C', 'Cite'], ['E', 'Explain']]
     return (
       <div className="dg-b">
-        {toast != null && (
-          <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={() => setToast(null)}>
-            <div className="card" style={{ padding: 28, width: 380, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-              <div style={{ fontSize: 46 }}>🏆</div>
-              <h2 style={{ margin: '6px 0' }}>{t('Goal reached!')}</h2>
-              <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>{say('Amazing work sticking with it. You earned')}</p>
-              <div className="coin" style={{ fontSize: 22, justifyContent: 'center' }}><span className="disc" style={{ width: 20, height: 20 }} />+{toast}</div>
-              <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Pick my next goal')}</button>
-            </div>
-          </div>
-        )}
-        {conferring && <ConferenceProtocol teacher={state.teacher?.name || t('your teacher')} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />}
+        {modals}
 
+        {look === 'c' ? <>
+          <div className="dg-top">
+            <div className="card dg-goal c">
+              <div className="dg-row">
+                <span className="dg-kicker">🎯 {t('My goal')}</span>
+                {lookSwitch}
+              </div>
+              <b className="dg-goal-text">{t(me.goal.text)}</b>
+              <div className="dg-goal-acts">
+                <button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button>
+                <button type="button" className="dg-link" onClick={() => setPicking(true)}>{t('Change goal')}</button>
+              </div>
+              {me.goalHistory?.length > 0 && (
+                <div className="dg-trophies" aria-label={t("Goals you've reached")}>
+                  {me.goalHistory.map((g, i) => <span key={i} className="dg-trophy" title={`${t(g.text)} · ${fmtDate(g.achievedOn, locale)}`}>🏆</span>)}
+                  <span className="dg-trophy-label">{t("Goals you've reached")}</span>
+                </div>
+              )}
+            </div>
+            <section className="card dg-glance c" aria-label={t('At a Glance')}>
+              <b className="dg-glance-title">{t('At a Glance')}</b>
+              <div className="dg-stats four">
+                {[
+                  { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
+                  { tone: 'violet', icon: '✏️', v: revisions, k: t('Revisions made') },
+                  { tone: 'orange', icon: '✅', v: finished, k: t('Pieces finished') },
+                  { tone: 'gold', icon: '🏆', v: me.goalHistory?.length || 0, k: t('Goals reached') },
+                ].map((x, i) => (
+                  <div key={i} className={'dg-stat ' + x.tone}>
+                    <span className="dg-stat-icon" aria-hidden>{x.icon}</span>
+                    <div><div className="v">{x.v}</div><div className="k">{x.k}</div>{x.up && <div className="up">{x.up}</div>}</div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          </div>
+          <div className="dg-confer">
+            <span className="dg-confer-icon" aria-hidden>🤝</span>
+            <div className="dg-confer-words"><b>{t('Ready to talk about your writing?')}</b><span>{say('Meet with your teacher to look at your work and pick your next goal together.')}</span></div>
+            <button className="btn" onClick={() => setConferring(true)}>{t('Conference with my teacher →')}</button>
+          </div>
+        </> : <>
         <div className="card dg-goal">
           <span className="dg-goal-icon" aria-hidden>{PRESET_GOALS.find((g) => g.id === me.goal.id)?.icon || '🎯'}</span>
           <div className="dg-goal-words">
@@ -778,6 +686,8 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
             ))}
           </div>
         </section>
+
+        </>}
 
         <div className="dg-main">
           <div className="card dg-chart">
@@ -814,58 +724,15 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
     )
   }
 
+  // No goal yet, or changing it: pick one (or plan it with the teacher).
   return (
     <div>
-      {/* A, and B while a goal is being picked */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>{lookSwitch}</div>
-      {toast != null && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={() => setToast(null)}>
-          <div className="card" style={{ padding: 28, width: 380, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
-            <div style={{ fontSize: 46 }}>🏆</div>
-            <h2 style={{ margin: '6px 0' }}>{t('Goal reached!')}</h2>
-            <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>{say('Amazing work sticking with it. You earned')}</p>
-            <div className="coin" style={{ fontSize: 22, justifyContent: 'center' }}><span className="disc" style={{ width: 20, height: 20 }} />+{toast}</div>
-            <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Pick my next goal')}</button>
-          </div>
-        </div>
-      )}
-
-      {conferring && (
-        <ConferenceProtocol teacher={state.teacher?.name || t('your teacher')} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />
-      )}
-
-      {/* focus goal */}
+      {modals}
       <div className="card" style={{ padding: 22, marginBottom: 18 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
-          <b style={{ fontSize: 17 }}>{t('🎯 My Focus Goal')}</b>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            {me.goal && !picking && <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(true)}>{t('Change goal')}</button>}
-            <button onClick={() => setConferring(true)}
-              style={{ padding: '9px 18px', borderRadius: 11, fontWeight: 800, fontSize: 13.5, color: '#fff', cursor: 'pointer',
-                background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.42)' }}>
-              {t('🤝 Conference with my teacher')}
-            </button>
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <b style={{ fontSize: 17 }}>{t('🎯 Pick my goal')}</b>
+          {me.goal && <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(false)}>{t('Keep my goal')}</button>}
         </div>
-
-        {me.goal && !picking ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: 'linear-gradient(120deg,#eef6f9,#fff)', border: '1px solid var(--line)', borderRadius: 12, padding: 18, marginTop: 10 }}>
-            <div style={{ fontSize: 34 }}>{PRESET_GOALS.find((g) => g.id === me.goal.id)?.icon || '✍️'}</div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 17, fontWeight: 700 }}>{t(me.goal.text)}</div>
-              <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 3 }}>
-                {me.goal.trait ? `${t('Trait: {trait}', { trait: t(TRAIT_LABELS[me.goal.trait]) })} · ` : ''}{t('Set {date}', { date: fmtDate(me.goal.setOn, locale) })} · <Glossed text={say('your coach will keep this in mind when you confer')} />
-              </div>
-              {me.goal.source === 'conference' && (
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap', marginTop: 7 }}>
-                  <span className="pill" style={{ background: '#e9f5fb', color: '#0f97c2' }}>{t('🤝 Set in a writing conference')}</span>
-                  {me.goal.strength && <span style={{ fontSize: 12, color: 'var(--muted)' }}><b>{t('What I did well:')}</b> {me.goal.strength}</span>}
-                </div>
-              )}
-            </div>
-            <button className="btn gold" onClick={achieve}>{t('🎉 I reached this goal!')}</button>
-          </div>
-        ) : (
           <div style={{ marginTop: 10 }}>
             <div style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap' }}>
               {/* the sentence is three fragments around a live button, so it is glossed piecewise and read aloud as one */}
@@ -898,61 +765,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
               </div>
             </div>
           </div>
-        )}
-
-        {me.goalHistory?.length > 0 && (
-          <div style={{ marginTop: 16, borderTop: '1px solid var(--line)', paddingTop: 12 }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--muted)' }}>{t("🏆 Goals you've conquered")}</span>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-              {me.goalHistory.map((g, i) => (
-                <span key={i} className="pill green" style={{ padding: '6px 12px' }}>✓ {t(g.text)} <span style={{ opacity: .7, marginLeft: 4 }}>{fmtDate(g.achievedOn, locale)}</span></span>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
-
-      {/* writing data + monthly/habits — one balanced row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1.15fr 1fr', gap: 18, marginBottom: 18, alignItems: 'start' }}>
-        <WritingDataCard writingData={state.writingData} state={state} me={me} onReview={onReview} />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div className="card gold-edge" style={{ padding: '18px 20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14, gap: 10, flexWrap: 'wrap' }}>
-              <div>
-                <div className="data-title">{t('Monthly progress')}</div>
-                <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{mp.year} · {t('average score /4')}</div>
-              </div>
-              <div className="seg">
-                <button className={mpTab === 'scr' ? 'on' : ''} onClick={() => setMpTab('scr')}>SCR</button>
-                <button className={mpTab === 'ecr' ? 'on' : ''} onClick={() => setMpTab('ecr')}>ECR</button>
-              </div>
-            </div>
-            {mpTab === 'scr'
-              ? <MonthChart label="SCR — Short response" months={mp.months} data={mp.scr} color="var(--scr)" height={88} />
-              : <MonthChart label="ECR — Extended response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={88} />}
-          </div>
-
-          <div className="card gold-edge" style={{ padding: '18px 20px' }}>
-            <div className="data-title">{t('Writing habits')}</div>
-            <div className="habit-grid">
-              {[
-                { k: 'Revisions made', v: revisions, sub: 'Each one makes you stronger' },
-                { k: 'Pieces finished', v: finished, sub: 'Start to polished' },
-                { k: 'Coins earned', v: growthCoins.toLocaleString(), sub: 'For how you write' },
-              ].map((s) => (
-                <div key={s.k} className="habit-tile">
-                  <div className="v">{s.v}</div>
-                  <div className="k">{t(s.k)}</div>
-                  <div className="s">{t(s.sub)}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* growth stories */}
-      {growthStories}
     </div>
   )
 }

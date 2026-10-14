@@ -1093,6 +1093,9 @@ function Coin({ size = 14 }) {
 const ZONE_LINES = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6]]
 const ZONE_LINE_BONUS = 15
 
+// Each tile's own color for its finished side (her pick, 2026-10-14: "Fade in name and C2 for when they are done").
+const ZONE_COLOR = { sentences: '#0e9aa7', flow: '#6c5ce7', wordswap: '#e67e22', context: '#27ae60', thisvsthat: '#2f80ed', wordwork: '#d6457a', spelling: '#d4a017', conventions: '#e04848', typing: '#3d4fd6' }
+
 function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal, lastLines }) {
   const t = useT()
   const say = useSay()
@@ -1188,14 +1191,14 @@ function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onRese
                   role={!soon ? 'button' : undefined} tabIndex={!soon ? 0 : -1} aria-disabled={done || undefined}
                   aria-label={done ? `${tile.title}: ${t('stamped')} +${tile.done.coins}` : tile.title}
                   onClick={activate} onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), activate())}>
-                  <div className="bingo-art" aria-hidden style={{ backgroundImage: `url(${BASE}zone/${tile.id}-forest3.webp)` }}>
-                    {done && (
-                      <span className="bingo-stamp" aria-hidden>
-                        <span className="bingo-stamp-check">✓</span>
-                        <span className="bingo-stamp-coins">+{tile.done.coins}</span>
-                      </span>
-                    )}
-                  </div>
+                  <div className="bingo-art" aria-hidden style={{ backgroundImage: `url(${BASE}zone/${tile.id}-forest3.webp)` }} />
+                  {/* A finished tile turns over to its own color: the name, a check, the score and the coins (C2, 2026-10-14). */}
+                  {done && (
+                    <div className="bingo-doneface" aria-hidden style={{ '--zc': ZONE_COLOR[tile.id] || '#2f80ed', '--zimg': `url(${BASE}zone/${tile.id}-forest3.webp)` }}>
+                      <span className="bingo-done-name">{tile.title}</span>
+                      <span className="bingo-done-score">✓ {tile.done.pct != null ? `${tile.done.pct}% · ` : ''}<Coin size={12} /> +{tile.done.coins}</span>
+                    </div>
+                  )}
                   {miss && <span className="bingo-flag" aria-hidden>{t('Try again')}</span>}
                   {soon && <span className="bingo-flag lock" aria-hidden>🔒 {t('Soon')}</span>}
                   <div className="bingo-label">
@@ -1421,10 +1424,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
-  const [calm, setCalm] = useState('a')
   const simpleLook = useLook() === 'b'
-  // B (colored cards, no paintings) came out (Kennady, 2026-10-14: "Remove option 'B' from the ABC switcher at the top").
-  const CALM = [['a', 'A'], ['c', 'C']]
+  // Practice's A / B / C card styles came out (2026-10-14): she kept A, the painted cards ("I like A, so we can take out C").
 
   // A grid game finished: record the clear, reveal the coins, refresh state.
   // Closing a zone game before it is finished forfeits the round: ask first.
@@ -1527,14 +1528,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
-        {/* Practice's card styles sit in the tab row, not a row of their own, so the page starts higher (2026-10-14). */}
-        {tab === 'practice' && (
-          <div className="prac-calm" role="group" aria-label={t('Practice pages')} style={{ marginRight: 'auto' }}>
-            {CALM.map(([k, label]) => (
-              <button key={k} type="button" className={calm === k ? 'on' : ''} aria-pressed={calm === k} onClick={() => setCalm(k)}>{t(label)}</button>
-            ))}
-          </div>
-        )}
         <div className="seg nav-tabs" role="tablist" aria-label={t('Dashboard sections')} style={{ position: 'relative', zIndex: 2 }}>
           {TABS.map(([k, label]) => (
             <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
@@ -1561,7 +1554,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {tab === 'practice' && (
         // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
         // B (simpler, 2026-10-14: "Now let's simplify the Practice page on the AB"): look-simple hides the extra words (theme.css).
-        <div className={'practice-view' + (simpleLook ? ' look-simple' : '')} data-clean="" data-side={calm === 'c' ? 'c' : 'a'} style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div className={'practice-view' + (simpleLook ? ' look-simple' : '')} data-clean="" data-side="a" style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
           {/* Side cards A wears the paintings. Side cards C is the three white cards, and the Daily Challenge keeps its painting. */}
           <div className="practice-split">

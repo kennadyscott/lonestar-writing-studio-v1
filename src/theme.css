@@ -2158,18 +2158,7 @@ body { font-size: 16px; }
 /* ---- side cards switch (prototype, 2026-10-02); C's rules are below ---- */
 .prac-icon-white { display: none; }
 .practice-view { position: relative; max-width: 1560px; }
-.prac-calm { display: flex; gap: 6px; flex-wrap: wrap; }
-.prac-calm button { border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 800; color: #3d5870; background: #f4f7fa; border: 1px solid var(--line); }
-.prac-calm button.on { background: #0d2f55; color: #fff; border-color: #0d2f55; }
 
-/* side cards C (2026-10-02): Free Write / Fluency Zone / Writing Bank white, Pip's Daily Challenge keeps its painting */
-.practice-view[data-side="c"] .prac-tile { padding: 12px 16px; min-height: 0; color: #10294a; background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
-.practice-view[data-side="c"] .prac-art { display: none; }
-.practice-view[data-side="c"] .prac-icon-white { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 12px; flex-shrink: 0; background: #eef6f9; font-size: 17px; }
-.practice-view[data-side="c"] .prac-icon-white .lit-ico { width: 30px; height: 30px; }
-.practice-view[data-side="c"] .prac-title { text-shadow: none; color: #10294a; }
-.practice-view[data-side="c"] .prac-sub { color: var(--muted); text-shadow: none; }
-.practice-view[data-side="c"] .prac-chev { color: #9db0c0; }
 
 /* domain tile bars by state (her note: all-green bars next to the green Start read as one thing) */
 .gre-tile.m-prog .gre-meter i { background: linear-gradient(90deg, #e9a812, #f5c542); }
@@ -2228,7 +2217,6 @@ body { font-size: 16px; }
 .bingo-tile.soon { cursor: default; }
 /* The tile is the picture. The name fills in on hover. */
 .bingo-art { position: absolute; inset: 0; background-size: cover; background-position: center 42%; }
-.bingo-tile.done .bingo-art { filter: saturate(.35) brightness(.8); }
 .bingo-tile.soon .bingo-art { filter: saturate(.4); opacity: .7; }
 .bingo-label { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; padding: 16px; text-align: center; background: rgba(8,22,36,.82); opacity: 0; transition: opacity .18s ease; }
 .bingo-tile:hover .bingo-label,
@@ -2240,13 +2228,18 @@ body { font-size: 16px; }
 .bingo-flag { position: absolute; top: 7px; left: 7px; background: #e08a2b; color: #fff; font-size: 11px; font-weight: 800; border-radius: 999px; padding: 3px 9px; border: 2px solid #fff; }
 .bingo-flag.lock { background: rgba(13,47,85,.8); }
 
-/* the dauber stamp on a cleared tile */
-.bingo-stamp { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%) rotate(-8deg); width: clamp(48px, 6.5vh, 68px); aspect-ratio: 1; border-radius: 50%;
-  display: grid; place-items: center; align-content: center; background: radial-gradient(circle at 35% 30%, #ffe27a, #f5b400 55%, #d99a00); border: 3px solid #fff;
-  box-shadow: 0 4px 14px rgba(0,0,0,.35), inset 0 0 0 3px rgba(255,255,255,.35); color: #5c3d00; animation: bingoStamp .45s cubic-bezier(.2,1.5,.4,1) both; }
-.bingo-stamp-check { font-size: clamp(16px, 2.4vh, 24px); font-weight: 900; line-height: 1; }
-.bingo-stamp-coins { font-size: 11.5px; font-weight: 900; line-height: 1; margin-top: 1px; }
-@keyframes bingoStamp { from { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(1.8); } to { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); } }
+/* a finished tile: turned over to its own color, with the name, the score and the coins (her pick C2, 2026-10-14) */
+.bingo-doneface { position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 10px; text-align: center; color: #fff;
+  background: var(--zc); box-shadow: inset 0 0 0 3px rgba(255,255,255,.9); border-radius: 12px; }
+.bingo-doneface::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--zimg) center 42% / cover; opacity: .16; mix-blend-mode: luminosity; }
+.bingo-doneface > * { position: relative; }
+.bingo-done-name { font-weight: 800; font-size: clamp(16px, 2.6vh, 22px); line-height: 1.15; letter-spacing: -.01em; text-wrap: balance; text-shadow: 0 2px 6px rgba(0,0,0,.25); }
+.bingo-done-score { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; font-weight: 800; white-space: nowrap; background: rgba(255,255,255,.22); border-radius: 999px; padding: 2px 10px; }
+/* the tile just finished turns over */
+.bingo-tile.just .bingo-doneface { animation: bingoTurn .55s cubic-bezier(.3,.7,.3,1) both; }
+@keyframes bingoTurn { from { transform: perspective(700px) rotateY(-90deg); opacity: .4; } to { transform: perspective(700px) rotateY(0); opacity: 1; } }
+/* a finished tile keeps its color on hover: no name layer over it */
+.bingo-tile.done .bingo-label { display: none; }
 
 /* completed lines, struck through */
 .bingo-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
@@ -2263,7 +2256,7 @@ body { font-size: 16px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .bingo-call, .bingo-stamp { animation: none; }
+  .bingo-call, .bingo-tile.just .bingo-doneface { animation: none; }
   .bingo-lines line.fresh { animation: none; stroke-dashoffset: 0; }
   .bingo-label { transition: none; }
 }

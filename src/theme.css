@@ -2391,6 +2391,8 @@ body { font-size: 16px; }
 
 /* ---- Share Wall: three layouts to compare (2026-10-14: "my least favorite UI of the entire platform") ---- */
 .sw2 .wall-inner { max-width: 1180px; }
+/* the forest soft behind the page, as on the other screens ("make the background opaque like the other screens") */
+.sw2 .wall-backdrop { background: var(--wall-bg) center / cover no-repeat; opacity: .22; }
 .sw2-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 20px; margin: 4px 0 12px; border-radius: 18px; background: rgba(255,255,255,.9); border: 1px solid var(--line); box-shadow: var(--shadow); }
 .sw2-hint { font-size: 14px; font-weight: 700; color: var(--muted); }
 .sw2-looks { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #eef3f7; border: 1px solid var(--line); }

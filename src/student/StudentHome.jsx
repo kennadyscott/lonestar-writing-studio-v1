@@ -1360,6 +1360,12 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
             </button>
           ))}
         </div>
+        {simple && filtered.length > 3 && (
+          // In the header, not under the list, so the row stays short enough to keep Luna's banner on screen (2026-10-14).
+          <button type="button" className="assign-more-b" onClick={() => setShowAll(!showAll)}>
+            {showAll ? t('Show fewer') : t('See all {n}', { n: filtered.length })}
+          </button>
+        )}
         {headerAction}
       </div>
       {!simple && <div className="assign-filters">
@@ -1382,11 +1388,6 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
       </div>}
       {simple ? <>
         <div className="assign-list-b">{listBody}</div>
-        {filtered.length > 3 && (
-          <button type="button" className="assign-more-b" onClick={() => setShowAll(!showAll)}>
-            {showAll ? t('Show fewer') : t('See all {n}', { n: filtered.length })}
-          </button>
-        )}
       </> : <div style={{ position: 'relative', flex: 1, minHeight: 246 }}>
         <div ref={listRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>{listBody}</div>
       </div>}

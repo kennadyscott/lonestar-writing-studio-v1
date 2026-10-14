@@ -1287,8 +1287,10 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
   const [typeFilter, setTypeFilter] = useState('all')
   const [formatFilter, setFormatFilter] = useState('all')
   const [query, setQuery] = useState('')
-  // B (simpler, 2026-10-14): no search, filters or sort; each row is one click, and only the next one due has a button.
+  // B (simpler, 2026-10-14): no search, filters or sort, and at most the 3 due soonest ("I just want to show 3 assignments max"),
+  // on A's cards ("I like the assignment cards on version A better"), bigger and spaced apart for grades 2-5 (theme.css).
   const simple = useLook() === 'b'
+  const [showAll, setShowAll] = useState(false)
 
   const types = ['all', ...Array.from(new Set(rows.map((r) => r.a.type)))]
   const filtered = rows
@@ -1316,20 +1318,13 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
     return () => ro.disconnect()
   }, [filtered.length, tab, simple])
   const hidden = Math.max(0, filtered.length - visible)
+  const shown = simple && !showAll ? filtered.slice(0, 3) : filtered
 
   const listBody = (
     <>
         {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>{say('Nothing here — try the other tab or clear filters.')}</div>}
-        {filtered.map((row, i) => {
+        {shown.map((row) => {
           const s = STATUS_CHIP[row.status]
-          const verb = row.status === 'completed' ? t('Review') : row.status === 'in_progress' ? t('Continue') : t('Begin')
-          if (simple) return (
-            <button key={row.a.id} type="button" className="assign-row assign-row-b" disabled={busy} onClick={() => begin(row)}>
-              <span className="assign-main"><span className="assign-title">{row.a.title}</span></span>
-              <span className="assign-due"><DueChip dueDate={row.a.dueDate} status={row.status} /></span>
-              {i === 0 && tab === 'active' ? <span className="btn">{verb}</span> : <span className="assign-chev" aria-hidden>›</span>}
-            </button>
-          )
           return (
             <div key={row.a.id} className="assign-row">
               <div className="assign-main">
@@ -1385,10 +1380,17 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
           <option value="teacher">{t('Sort: Teacher')}</option>
         </select>
       </div>}
-      <div style={{ position: 'relative', flex: 1, minHeight: 246 }}>
+      {simple ? <>
+        <div className="assign-list-b">{listBody}</div>
+        {filtered.length > 3 && (
+          <button type="button" className="assign-more-b" onClick={() => setShowAll(!showAll)}>
+            {showAll ? t('Show fewer') : t('See all {n}', { n: filtered.length })}
+          </button>
+        )}
+      </> : <div style={{ position: 'relative', flex: 1, minHeight: 246 }}>
         <div ref={listRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>{listBody}</div>
-      </div>
-      {hidden > 0 && (
+      </div>}
+      {!simple && hidden > 0 && (
         <div style={{ padding: '8px 16px', borderTop: '1px solid var(--line)', fontSize: 11.5, fontWeight: 700, color: 'var(--muted)', textAlign: 'center' }}>
           ↕ {t('{n} more — scroll the list', { n: hidden })}
         </div>

@@ -121,13 +121,16 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .assign-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
 .assign-due { width: 112px; text-align: right; }
 .assign-go { width: 104px; text-align: right; }
-/* B (simpler): the whole row is the button. */
-.assign-row-b { width: 100%; background: none; border: 0; border-bottom: 1px solid var(--line); text-align: left; font: inherit; color: inherit; cursor: pointer; }
-.assign-row-b:hover:not(:disabled) { background: #f5f9fc; }
-.assign-row-b:focus-visible { outline: 2px solid var(--scene-sky, #8fd3f0); outline-offset: -2px; }
-.assign-row-b .assign-title { display: block; }
-.assign-row-b .btn { pointer-events: none; }
-.assign-chev { width: 18px; text-align: center; font-size: 22px; line-height: 1; color: #9bb0bf; }
+/* B (simpler): at most 3 of A's cards. Grades 2-5 get bigger cards with room between them (2026-10-14). */
+.assign-list-b { flex: 1; }
+.assign-more-b { align-self: center; margin: 2px 0 10px; padding: 4px 10px; border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
+.assign-more-b:hover { color: var(--ink); text-decoration: underline; }
+html[data-band="2-3"] .assign-list-b, html[data-band="4-5"] .assign-list-b { display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; }
+html[data-band="2-3"] .assign-list-b .assign-row, html[data-band="4-5"] .assign-list-b .assign-row {
+  padding: 18px 20px; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(13,47,85,.07); }
+html[data-band="2-3"] .assign-list-b .assign-title, html[data-band="4-5"] .assign-list-b .assign-title { font-size: 18px; }
+html[data-band="2-3"] .assign-list-b .assign-meta, html[data-band="4-5"] .assign-list-b .assign-meta { margin-top: 9px; }
+html[data-band="2-3"] .assign-list-b .assign-go .btn, html[data-band="4-5"] .assign-list-b .assign-go .btn { padding: 11px 20px; font-size: 15px; border-radius: 12px; }
 
 .luna-bar-mods { display: flex; align-items: flex-start; gap: 4px; flex-shrink: 0; }
 .luna-mod { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 62px; padding: 5px 2px; border-radius: 10px; cursor: pointer; }

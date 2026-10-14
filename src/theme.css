@@ -2440,4 +2440,14 @@ body { font-size: 16px; }
 .sw2-row-words span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
 .sw2-row-n { font-size: 12px; font-weight: 800; color: var(--muted); white-space: nowrap; }
 @media (max-width: 860px) { .sw2-spot { grid-template-columns: 1fr; } }
+/* reading a whole piece */
+.sw2-open { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
+.sw2-open:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sw2-readmore { align-self: flex-start; background: none; border: 0; padding: 0; font: inherit; font-size: 13px; font-weight: 800; color: var(--link); cursor: pointer; }
+.sw2-full { display: flex; flex-direction: column; gap: 12px; max-height: min(52vh, 460px); overflow-y: auto; padding-right: 4px; }
+.sw2-reader .sw2-full { max-height: none; overflow: visible; }
+.sw2-reader-back { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 20px; background: rgba(6,24,44,.45); }
+.sw2-reader { position: relative; display: flex; flex-direction: column; gap: 14px; width: min(720px, 100%); max-height: calc(100dvh - 40px); overflow-y: auto; padding: 28px 32px 24px; background: #fffdf8; border-radius: 20px; box-shadow: 0 24px 60px rgba(2,20,50,.35); }
+.sw2-reader-x { position: absolute; top: 14px; right: 14px; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: #fff; font-size: 20px; line-height: 1; color: var(--muted); cursor: pointer; }
+.sw2-reader .sw2-title.huge { padding-right: 40px; }
 @media (prefers-reduced-motion: reduce) { .sw2-note { transition: none; } }

@@ -37,6 +37,7 @@ function load() {
 { const fresh = seedState(); let filled = false
   for (const k of ['fluencyGames', 'fluencyCategories', 'fluencyGrid']) if (state[k] == null) { state[k] = fresh[k]; filled = true }
   if (!state.wallDemoV2 && Array.isArray(state.shareWall)) { const have = new Set(state.shareWall.map((e) => e.id)); state.shareWall = [...state.shareWall, ...fresh.shareWall.filter((e) => !have.has(e.id))]; state.wallDemoV2 = true; filled = true }
+  if (!state.wallDemoV3 && Array.isArray(state.shareWall)) { const byId = Object.fromEntries(fresh.shareWall.map((e) => [e.id, e])); state.shareWall = state.shareWall.map((e) => (e.body || !byId[e.id]?.body ? e : { ...e, body: byId[e.id].body })); state.wallDemoV3 = true; filled = true }
   // Once: a Fluency card with nothing finished gets the sample finished tiles (2026-10-14), as the browser demo does.
   if (!state.fluencyDemoSeeded) { if (!Object.keys(state.fluencyGrid?.cleared || {}).length) state.fluencyGrid = fresh.fluencyGrid; state.fluencyDemoSeeded = true; filled = true }
   // The roster and its categories are product config, not student data: keep them current.

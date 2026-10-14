@@ -905,6 +905,23 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
   const cheers = (e) => Object.values(e.reactions || {}).reduce((a, n) => a + n, 0)
   const [spotId, setSpotId] = useState(null)
   const spot = shareWall.find((e) => e.id === spotId) || shareWall[0]
+  // The whole piece, not just its opening (2026-10-14: "Some of their writing should be longer than what just fits on a post-it.
+  // How do we see their full piece?"): a shared piece of your own reads from its latest draft; a classmate's from the wall post.
+  const fullOf = (e) => {
+    if (Array.isArray(e.body) && e.body.length) return e.body
+    const sub = e.submissionId && state.submissions.find((x) => x.id === e.submissionId)
+    const text = sub ? (sub.drafts[sub.drafts.length - 1]?.content || '') : ''
+    const paras = text.split(/\n\s*\n|\n/).map((x) => x.trim()).filter(Boolean)
+    return paras.length ? paras : [e.excerpt]
+  }
+  const [readId, setReadId] = useState(null)
+  const reading = readId && shareWall.find((e) => e.id === readId)
+  useEffect(() => {
+    if (!reading) return
+    const onKey = (ev) => { if (ev.key === 'Escape') setReadId(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [reading])
   const LOOKS = [['a', 'A · Board'], ['b', 'B · Feed'], ['c', 'C · Spotlight']]
   const NOTE = ['#fff4c2', '#dff1ff', '#ffe3ec', '#e3f7e6', '#efe6ff', '#ffeedd']
   const who = (e, big) => (
@@ -943,8 +960,9 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
             {shareWall.map((e, i) => (
               <article key={e.id} className="sw2-note" style={{ '--note': NOTE[i % NOTE.length], '--tilt': `${[-1.6, 1.2, -0.6, 1.6, -1.1, 0.7][i % 6]}deg` }}>
                 <span className="sw2-pin" aria-hidden />
-                <h2 className="sw2-title">{e.title}</h2>
+                <h2 className="sw2-title"><button type="button" className="sw2-open" onClick={() => setReadId(e.id)}>{e.title}</button></h2>
                 <p className="sw2-ex clamp">{e.excerpt}</p>
+                <button type="button" className="sw2-readmore" onClick={() => setReadId(e.id)}>{t('Read it all →')}</button>
                 {who(e)}
                 <ReactionBar entry={e} onReact={react} size="sm" />
               </article>
@@ -957,8 +975,9 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
             {shareWall.map((e) => (
               <article key={e.id} className="card sw2-post">
                 {who(e, true)}
-                <h2 className="sw2-title big">{e.title}</h2>
+                <h2 className="sw2-title big"><button type="button" className="sw2-open" onClick={() => setReadId(e.id)}>{e.title}</button></h2>
                 <p className="sw2-ex">{e.excerpt}{e.excerpt.length >= 180 ? '…' : ''}</p>
+                {fullOf(e).length > 1 && <button type="button" className="sw2-readmore" onClick={() => setReadId(e.id)}>{t('Read the whole piece →')}</button>}
                 <ReactionBar entry={e} onReact={react} />
               </article>
             ))}
@@ -971,7 +990,7 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
               <span className="sw2-kicker">{t('In the spotlight')}</span>
               <h2 className="sw2-title huge">{spot.title}</h2>
               {who(spot, true)}
-              <p className="sw2-ex big">{spot.excerpt}{spot.excerpt.length >= 180 ? '…' : ''}</p>
+              <div className="sw2-full">{fullOf(spot).map((para, i) => <p key={i} className="sw2-ex big">{para}</p>)}</div>
               <ReactionBar entry={spot} onReact={react} size="lg" />
             </article>
             <nav className="card sw2-list" aria-label={t('More from your class')}>
@@ -986,6 +1005,18 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
           </div>
         )}
       </div>
+
+      {reading && (
+        <div className="sw2-reader-back" onClick={() => setReadId(null)}>
+          <article className="sw2-reader" role="dialog" aria-modal="true" aria-labelledby="sw2-reader-title" onClick={(ev) => ev.stopPropagation()}>
+            <button type="button" className="sw2-reader-x" onClick={() => setReadId(null)} aria-label={t('Close')}>×</button>
+            <h2 id="sw2-reader-title" className="sw2-title huge">{reading.title}</h2>
+            {who(reading, true)}
+            <div className="sw2-full">{fullOf(reading).map((para, i) => <p key={i} className="sw2-ex big">{para}</p>)}</div>
+            <ReactionBar entry={reading} onReact={react} size="lg" />
+          </article>
+        </div>
+      )}
     </div>
   )
 }

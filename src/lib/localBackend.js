@@ -66,6 +66,12 @@ function loadState() {
     saved.shareWall = [...saved.shareWall, ...(fresh.shareWall || []).filter((e) => !have.has(e.id))]
     saved.wallDemoV2 = true
   }
+  // Once: sample wall posts get their full pieces (2026-10-14: "How do we see their full piece?").
+  if (!saved.wallDemoV3 && Array.isArray(saved.shareWall)) {
+    const byId = Object.fromEntries((fresh.shareWall || []).map((e) => [e.id, e]))
+    saved.shareWall = saved.shareWall.map((e) => (e.body || !byId[e.id]?.body ? e : { ...e, body: byId[e.id].body }))
+    saved.wallDemoV3 = true
+  }
   // Once: a saved demo whose Fluency card has nothing finished gets the sample finished tiles (2026-10-14).
   if (!saved.fluencyDemoSeeded) {
     if (!Object.keys(saved.fluencyGrid?.cleared || {}).length) saved.fluencyGrid = fresh.fluencyGrid

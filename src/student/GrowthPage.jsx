@@ -896,15 +896,9 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
   async function share(subId) { await api.share(subId); onChange && onChange() }
   async function react(id, type) { await api.react(id, type); onChange && onChange() }
 
-  // Three directions to compare (Kennady, 2026-10-14: "the share wall, which is my least favorite UI of the entire platform ...
-  // Give me 3 options in an ABC switcher"). A: a bulletin board of pinned notes. B: one reading column, like a class magazine.
-  // C: one piece in the spotlight with the rest listed beside it. All three share a plain header and a slim "share yours" bar.
+  // A bulletin board of pinned notes (Kennady, 2026-10-14: "I like the board - it's very cute. Let's stick with that."; she had
+  // called the old wall "my least favorite UI of the entire platform"). A plain header and a slim "share yours" bar.
   const title = shareable.length ? (state.assignments.find((a) => a.id === shareable[0].assignmentId)?.title || '').trim() || t('Untitled') : ''
-  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.wallLook') || 'a' } catch { return 'a' } })
-  const pick = (k) => { setLook(k); try { localStorage.setItem('lscr.wallLook', k) } catch { /* fine */ } }
-  const cheers = (e) => Object.values(e.reactions || {}).reduce((a, n) => a + n, 0)
-  const [spotId, setSpotId] = useState(null)
-  const spot = shareWall.find((e) => e.id === spotId) || shareWall[0]
   // The whole piece, not just its opening (2026-10-14: "Some of their writing should be longer than what just fits on a post-it.
   // How do we see their full piece?"): a shared piece of your own reads from its latest draft; a classmate's from the wall post.
   const fullOf = (e) => {
@@ -922,7 +916,6 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [reading])
-  const LOOKS = [['a', 'A · Board'], ['b', 'B · Feed'], ['c', 'C · Spotlight']]
   const NOTE = ['#fff4c2', '#dff1ff', '#ffe3ec', '#e3f7e6', '#efe6ff', '#ffeedd']
   const who = (e, big) => (
     <div className="sw2-who">
@@ -939,10 +932,6 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
         <div className="sw2-head">
           <h1 className="page" style={{ margin: 0 }}>{t('Share Wall')}</h1>
           <span className="sw2-hint">{say('Cheer with')} 👍 ❤️ 🎉</span>
-          <span style={{ flex: 1 }} />
-          <div className="sw2-looks" role="group" aria-label={t('Wall layouts')}>
-            {LOOKS.map(([k, label]) => <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => pick(k)}>{label}</button>)}
-          </div>
         </div>
 
         {shareable.length > 0 && (
@@ -955,7 +944,7 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
 
         {!shareWall.length && <div className="card sw2-empty">{t('Nothing on the wall yet. Finish a piece and be the first to share!')}</div>}
 
-        {shareWall.length > 0 && look === 'a' && (
+        {shareWall.length > 0 && (
           <div className="sw2-board">
             {shareWall.map((e, i) => (
               <article key={e.id} className="sw2-note" style={{ '--note': NOTE[i % NOTE.length], '--tilt': `${[-1.6, 1.2, -0.6, 1.6, -1.1, 0.7][i % 6]}deg` }}>
@@ -970,40 +959,6 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
           </div>
         )}
 
-        {shareWall.length > 0 && look === 'b' && (
-          <div className="sw2-feed">
-            {shareWall.map((e) => (
-              <article key={e.id} className="card sw2-post">
-                {who(e, true)}
-                <h2 className="sw2-title big"><button type="button" className="sw2-open" onClick={() => setReadId(e.id)}>{e.title}</button></h2>
-                <p className="sw2-ex">{e.excerpt}{e.excerpt.length >= 180 ? '…' : ''}</p>
-                {fullOf(e).length > 1 && <button type="button" className="sw2-readmore" onClick={() => setReadId(e.id)}>{t('Read the whole piece →')}</button>}
-                <ReactionBar entry={e} onReact={react} />
-              </article>
-            ))}
-          </div>
-        )}
-
-        {shareWall.length > 0 && look === 'c' && spot && (
-          <div className="sw2-spot">
-            <article className="card sw2-feature">
-              <span className="sw2-kicker">{t('In the spotlight')}</span>
-              <h2 className="sw2-title huge">{spot.title}</h2>
-              {who(spot, true)}
-              <div className="sw2-full">{fullOf(spot).map((para, i) => <p key={i} className="sw2-ex big">{para}</p>)}</div>
-              <ReactionBar entry={spot} onReact={react} size="lg" />
-            </article>
-            <nav className="card sw2-list" aria-label={t('More from your class')}>
-              {shareWall.map((e) => (
-                <button key={e.id} type="button" className={'sw2-row' + (e === spot ? ' on' : '')} aria-pressed={e === spot} onClick={() => setSpotId(e.id)}>
-                  <span className="sw2-av" aria-hidden>{e.avatar}</span>
-                  <span className="sw2-row-words"><b>{e.title}</b><span>{e.studentName} · {t(e.genre)}</span></span>
-                  <span className="sw2-row-n">{t('{n} cheers', { n: cheers(e) })}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
       </div>
 
       {reading && (

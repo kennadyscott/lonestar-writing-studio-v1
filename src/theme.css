@@ -659,46 +659,11 @@ a { color: var(--link); }
 .proof-card-art.icon-only { align-items: center; justify-content: center; }
 .proof-card-art.icon-only .proof-card-icon { position: static; width: 76px; height: 76px; border-radius: 20px; font-size: 40px; }
 
-/* ---- Share Wall page (2026-09-24, her mockup): night forest, parchment board, storybook type ---- */
+/* ---- Share Wall page frame (the bulletin board's styles are with .sw2 below) ---- */
 .wall-page { margin: -26px calc(50% - 50vw) -70px; padding: 22px clamp(18px, 3vw, 56px) 48px; min-height: calc(100vh - 64px); box-sizing: border-box; position: relative; }
 .wall-backdrop { position: fixed; inset: 0; z-index: 0; pointer-events: none;
   background: linear-gradient(rgba(4,18,36,.28), rgba(4,18,36,.42)), var(--wall-bg) center / cover no-repeat, #06203a; }
 .wall-inner { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; }
-.wall-back { color: #fff !important; font-family: Georgia, 'Times New Roman', serif; font-size: 15px; margin-bottom: 12px; text-shadow: 0 1px 6px rgba(0,0,0,.5); }
-.wall-board { position: relative; border-radius: 24px; padding: 26px clamp(18px, 2.4vw, 34px) 30px;
-  background: radial-gradient(120% 90% at 50% 0%, #fffdf8 0%, #f8f3e8 60%, #f2ead9 100%);
-  border: 1.5px solid rgba(201,160,70,.45); box-shadow: 0 18px 50px rgba(2,12,28,.45), inset 0 0 40px rgba(201,160,70,.08); }
-.wall-head { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
-.wall-gem { height: 96px; width: auto; flex-shrink: 0; filter: drop-shadow(0 4px 14px rgba(92,160,230,.45)); }
-.wall-title { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(32px, 3.4vw, 46px); line-height: 1.05; color: #10294a; }
-.wall-sub { font-family: Georgia, 'Times New Roman', serif; font-size: clamp(17px, 1.6vw, 22px); color: #2b4a66; margin-top: 4px; }
-.wall-dir { font-family: Georgia, 'Times New Roman', serif; font-size: 15px; color: #3d5670; margin-top: 6px; }
-.wall-share { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; border-radius: 16px; overflow: hidden; margin-bottom: 22px; padding-right: 18px;
-  background: linear-gradient(100deg, #cfdcf4 0%, #e9eefb 38%, #eef1fb 70%, #dfe7f8 100%); border: 1px solid rgba(160,180,220,.55); }
-.wall-owl { width: 200px; height: 98px; object-fit: cover; flex-shrink: 0; -webkit-mask-image: linear-gradient(90deg, #000 70%, transparent); mask-image: linear-gradient(90deg, #000 70%, transparent); }
-.wall-share-words { flex: 1; min-width: 220px; padding: 12px 0; }
-.wall-share-title { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: clamp(18px, 1.8vw, 24px); color: #10294a; }
-.wall-share-sub { font-family: Georgia, 'Times New Roman', serif; font-size: 16px; color: #3d5670; margin-top: 2px; }
-.wall-share-btn { font-family: Georgia, 'Times New Roman', serif; font-size: 18px; font-weight: 700; color: #fff; padding: 12px 24px; border-radius: 999px; cursor: pointer; white-space: nowrap;
-  background: linear-gradient(180deg, #16587a 0%, #0b3a58 100%); border: 2px solid #e9b93a; box-shadow: 0 0 0 3px rgba(233,185,58,.18), 0 6px 16px rgba(8,40,70,.3); }
-.wall-share-btn:hover { background: linear-gradient(180deg, #1b6690 0%, #0d4466 100%); }
-.wall-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
-.wall-card { display: flex; flex-direction: column; gap: 8px; background: #fffdf8; border: 1px solid #ece2cc; border-radius: 18px; padding: 18px 20px 18px; box-shadow: 0 4px 14px rgba(60,45,15,.07); }
-.wall-card-who { display: flex; align-items: center; gap: 12px; }
-.wall-avatar { width: 54px; height: 54px; border-radius: 50%; flex-shrink: 0; display: grid; place-items: center; font-size: 28px;
-  background: radial-gradient(circle at 40% 35%, #fff 0%, #eef3e4 70%); border: 2px solid #e2d6b8; box-shadow: 0 2px 8px rgba(60,45,15,.12); }
-.wall-name { font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 17px; color: #10294a; }
-.wall-genre { font-family: Georgia, 'Times New Roman', serif; font-size: 14.5px; color: #5c6f80; }
-.wall-card-title { margin: 6px 0 0; font-family: Georgia, 'Times New Roman', serif; font-weight: 700; font-size: 22px; line-height: 1.2; color: #10294a; }
-.wall-excerpt { margin: 0 0 10px; font-family: Georgia, 'Times New Roman', serif; font-size: 16px; line-height: 1.6; color: #3a4a58; }
-.wall-empty { grid-column: 1 / -1; padding: 28px; text-align: center; font-family: Georgia, 'Times New Roman', serif; color: #5c6f80; }
-@media (max-width: 720px) {
-  .wall-head { align-items: flex-start; }
-  .wall-gem { height: 64px; }
-  .wall-owl { width: 100%; height: 110px; -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent); mask-image: linear-gradient(180deg, #000 70%, transparent); }
-  .wall-share { padding: 0 16px 16px; }
-  .wall-share-btn { width: 100%; }
-}
 
 /* Free Write: the title is required to finish or publish (2026-09-24) */
 .piece-title.empty { border-bottom: 1.5px dashed #b8c8d6; }
@@ -2389,15 +2354,12 @@ body { font-size: 16px; }
 .crumbs .crumb-sep { color: #8aa0b0; font-weight: 800; font-size: 14px; }
 @media (max-width: 680px) { .crumbs .crumb { padding: 3px 4px; font-size: 12.5px; } }
 
-/* ---- Share Wall: three layouts to compare (2026-10-14: "my least favorite UI of the entire platform") ---- */
+/* ---- Share Wall: the bulletin board (2026-10-14) ---- */
 .sw2 .wall-inner { max-width: 1180px; }
 /* the forest soft behind the page, as on the other screens ("make the background opaque like the other screens") */
 .sw2 .wall-backdrop { background: var(--wall-bg) center / cover no-repeat; opacity: .22; }
 .sw2-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 20px; margin: 4px 0 12px; border-radius: 18px; background: rgba(255,255,255,.9); border: 1px solid var(--line); box-shadow: var(--shadow); }
 .sw2-hint { font-size: 14px; font-weight: 700; color: var(--muted); }
-.sw2-looks { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #eef3f7; border: 1px solid var(--line); }
-.sw2-looks button { padding: 6px 13px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
-.sw2-looks button.on { background: #0d2f55; color: #fff; }
 .sw2-sharebar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 18px; margin-bottom: 14px; border-radius: 14px; background: #fff8e1; border: 1.5px solid var(--gold-line); font-size: 14.5px; color: #10294a; }
 .sw2-sharebar > span:nth-child(2) { flex: 1; min-width: 220px; }
 .sw2-sharebar .btn { padding: 8px 16px; font-size: 14px; }
@@ -2415,7 +2377,7 @@ body { font-size: 16px; }
 .sw2-ex.big { font-size: 18px; line-height: 1.65; }
 .sw2-ex.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
 
-/* A · bulletin board: pinned paper notes, a little crooked */
+/* the bulletin board: pinned paper notes, a little crooked (her pick, 2026-10-14) */
 .sw2-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px 18px; padding: 22px; border-radius: 22px;
   background: radial-gradient(circle at 20% 10%, rgba(255,255,255,.35), transparent 40%), #c9a272; box-shadow: inset 0 0 0 10px #8a6238, inset 0 0 30px rgba(60,35,10,.35), 0 10px 28px rgba(2,20,50,.25); }
 .sw2-note { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 20px 18px 16px; background: var(--note); border-radius: 4px;
@@ -2423,23 +2385,7 @@ body { font-size: 16px; }
 .sw2-note:hover { transform: rotate(0deg) scale(1.02); z-index: 1; }
 .sw2-pin { position: absolute; top: -7px; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a8a, #d23a3a 60%, #8f1d1d); box-shadow: 0 3px 4px rgba(0,0,0,.35); }
 
-/* B · reading feed: one column, like a class magazine */
-.sw2-feed { display: flex; flex-direction: column; gap: 14px; max-width: 760px; margin: 0 auto; }
-.sw2-post { display: flex; flex-direction: column; gap: 10px; padding: 18px 22px 16px; }
 
-/* C · spotlight: one piece large, the rest listed beside it */
-.sw2-spot { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; align-items: start; }
-.sw2-feature { display: flex; flex-direction: column; gap: 14px; padding: 26px 30px 24px; }
-.sw2-kicker { align-self: flex-start; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #a37400; background: #fff4d6; border-radius: 999px; padding: 4px 10px; }
-.sw2-list { display: flex; flex-direction: column; padding: 6px; }
-.sw2-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 12px; background: transparent; font: inherit; text-align: left; cursor: pointer; color: inherit; }
-.sw2-row:hover { background: #f3f8fb; }
-.sw2-row.on { background: #e8f4fa; box-shadow: inset 0 0 0 1.5px #9fd3ea; }
-.sw2-row-words { flex: 1; min-width: 0; display: flex; flex-direction: column; }
-.sw2-row-words b { font-size: 14.5px; color: #10294a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.sw2-row-words span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
-.sw2-row-n { font-size: 12px; font-weight: 800; color: var(--muted); white-space: nowrap; }
-@media (max-width: 860px) { .sw2-spot { grid-template-columns: 1fr; } }
 /* reading a whole piece */
 .sw2-open { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .sw2-open:hover { text-decoration: underline; text-underline-offset: 3px; }

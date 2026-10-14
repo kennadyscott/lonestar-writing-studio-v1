@@ -681,6 +681,12 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const [toast, setToast] = useState(null)
   const [mpTab, setMpTab] = useState('scr')
   const [conferring, setConferring] = useState(false)
+  // A (today's page) or B (simpler), to compare (Kennady, 2026-10-14: "Next, let's clean up the Data & Goals page. Give me an
+  // AB option"). B: the goal on one line, four numbers, the chart beside R-A-C-E under one SCR / ECR switch, the growth story
+  // behind a button.
+  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.dataLook') || 'b' } catch { return 'b' } })
+  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.dataLook', k) } catch { /* fine */ } }
+  const [showGrowth, setShowGrowth] = useState(false)
 
   async function choose(g) { await api.setGoal(g); setPicking(false); onChange && onChange() }
   async function setCustomGoal() { if (!custom.trim()) return; await api.setGoal({ text: custom.trim(), trait: null }); setCustom(''); setPicking(false); onChange && onChange() }
@@ -691,8 +697,126 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const finished = subs.filter((s) => s.completedAt).length
   const growthCoins = state.coinEvents.filter((e) => e.studentId === me.id).reduce((a, e) => a + e.coins, 0)
 
+  const lookSwitch = (
+    <div className="dg-looks" role="group" aria-label={t('Page versions')}>
+      {[['a', 'A · Current'], ['b', 'B · Simpler']].map(([k, label]) => <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => pickLook(k)}>{label}</button>)}
+    </div>
+  )
+  const stories = subs.filter((s) => s.drafts.filter((d) => d.traits).length > 1 && !s.isPeerRevision)
+  const growthStories = stories.map((sub) => {
+    const asg = state.assignments.find((a) => a.id === sub.assignmentId)
+    const withTraits = sub.drafts.filter((d) => d.traits)
+    const first = withTraits[0], last = withTraits[withTraits.length - 1]
+    return (
+      <div key={sub.id} className="card" style={{ padding: 22, marginBottom: 18 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
+          <b style={{ fontSize: 17 }}>{t('📖 Growth Story — "{title}"', { title: asg.title })}</b>
+          <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('Draft {a} → Draft {b}', { a: first.n, b: last.n })}</span>
+        </div>
+        <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 14px' }}><Directions text="Look what revising did — same writer, {n} drafts apart." vars={{ n: withTraits.length }} /></p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {[{ d: first, tag: 'First draft', bg: '#f6f8f9' }, { d: last, tag: 'Latest draft', bg: '#eef6f2' }].map((c) => (
+            <div key={c.tag} style={{ background: c.bg, borderRadius: 12, padding: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{t(c.tag)}</div>
+              <div style={{ fontSize: 13, lineHeight: 1.5, marginTop: 6, maxHeight: 90, overflow: 'hidden', color: '#3a4149' }}>
+                {c.d.content.slice(0, 180)}{c.d.content.length > 180 ? '…' : ''}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  })
+
+  if (look === 'b' && me.goal && !picking) {
+    const d = state.writingData?.ELA
+    const series = mpTab === 'scr' ? mp.scr : mp.ecr
+    const now = series[series.length - 1], grew = Math.round((now - series[0]) * 10) / 10
+    const RACE = [['R', 'Restate'], ['A', 'Answer'], ['C', 'Cite'], ['E', 'Explain']]
+    return (
+      <div className="dg-b">
+        {toast != null && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={() => setToast(null)}>
+            <div className="card" style={{ padding: 28, width: 380, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
+              <div style={{ fontSize: 46 }}>🏆</div>
+              <h2 style={{ margin: '6px 0' }}>{t('Goal reached!')}</h2>
+              <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>{say('Amazing work sticking with it. You earned')}</p>
+              <div className="coin" style={{ fontSize: 22, justifyContent: 'center' }}><span className="disc" style={{ width: 20, height: 20 }} />+{toast}</div>
+              <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Pick my next goal')}</button>
+            </div>
+          </div>
+        )}
+        {conferring && <ConferenceProtocol teacher={state.teacher?.name || t('your teacher')} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />}
+
+        <div className="card dg-goal">
+          <span className="dg-goal-icon" aria-hidden>{PRESET_GOALS.find((g) => g.id === me.goal.id)?.icon || '🎯'}</span>
+          <div className="dg-goal-words">
+            <span className="dg-kicker">{t('My goal')}</span>
+            <b>{t(me.goal.text)}</b>
+            <span className="dg-goal-meta">
+              <button type="button" className="dg-link" onClick={() => setPicking(true)}>{t('Change goal')}</button>
+              {me.goalHistory?.length > 0 && <span className="dg-won" title={me.goalHistory.map((g) => t(g.text)).join(' · ')}>🏆 {t(me.goalHistory.length === 1 ? '{n} goal reached' : '{n} goals reached', { n: me.goalHistory.length })}</span>}
+            </span>
+          </div>
+          <button className="btn ghost" onClick={() => setConferring(true)}>{t('🤝 Talk with my teacher')}</button>
+          <button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button>
+          {lookSwitch}
+        </div>
+
+        <div className="dg-stats">
+          {[
+            { v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
+            { v: revisions, k: t('Revisions made') },
+            { v: finished, k: t('Pieces finished') },
+            { v: growthCoins.toLocaleString(), k: t('Coins earned') },
+          ].map((x, i) => (
+            <div key={i} className="card dg-stat"><div className="v">{x.v}</div><div className="k">{x.k}</div>{x.up && <div className="up">{x.up}</div>}</div>
+          ))}
+        </div>
+
+        <div className="dg-main">
+          <div className="card dg-chart">
+            <div className="dg-row">
+              <b>{t('My scores this year')}</b>
+              <div className="seg">
+                <button className={mpTab === 'scr' ? 'on' : ''} onClick={() => setMpTab('scr')}>SCR</button>
+                <button className={mpTab === 'ecr' ? 'on' : ''} onClick={() => setMpTab('ecr')}>ECR</button>
+              </div>
+            </div>
+            {mpTab === 'scr'
+              ? <MonthChart label="SCR — Short response" months={mp.months} data={mp.scr} color="var(--scr)" height={120} />
+              : <MonthChart label="ECR — Extended response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={120} />}
+          </div>
+          <div className="card dg-race">
+            {mpTab === 'scr' ? <>
+              <b>{t('How I use RACE')}</b>
+              <div className="dg-race-rows">
+                {RACE.map(([k, word]) => { const r = d?.scr.find((x) => x.k === k) || { pct: 0, label: word }; return (
+                  <div key={k} className="dg-race-row">
+                    <span className="anchor-k" style={{ color: ANCHOR_COLORS[r.label] || 'var(--navy)' }}>{k}</span>
+                    <span className="dg-race-word">{t(word)}</span>
+                    <DataBar pct={r.pct} />
+                    <span className="dg-race-pct">{r.pct}%</span>
+                  </div>) })}
+              </div>
+            </> : <EcrCombined org={d.ecrOrg} conv={d.ecrConv} />}
+          </div>
+        </div>
+
+        {stories.length > 0 && (
+          <div className="dg-growth">
+            <button type="button" className="btn ghost" aria-expanded={showGrowth} onClick={() => setShowGrowth((v) => !v)}>{showGrowth ? t('Hide my growth story') : t('📖 See how my writing grew')}</button>
+          </div>
+        )}
+        {showGrowth && growthStories}
+      </div>
+    )
+  }
+
   return (
     <div>
+      {/* A, and B while a goal is being picked */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 10 }}>{lookSwitch}</div>
       {toast != null && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 50 }} onClick={() => setToast(null)}>
           <div className="card" style={{ padding: 28, width: 380, textAlign: 'center' }} onClick={(e) => e.stopPropagation()}>
@@ -827,30 +951,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
       </div>
 
       {/* growth stories */}
-      {subs.filter((s) => s.drafts.filter((d) => d.traits).length > 1 && !s.isPeerRevision).map((sub) => {
-        const asg = state.assignments.find((a) => a.id === sub.assignmentId)
-        const withTraits = sub.drafts.filter((d) => d.traits)
-        const first = withTraits[0], last = withTraits[withTraits.length - 1]
-        return (
-          <div key={sub.id} className="card" style={{ padding: 22, marginBottom: 18 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 4 }}>
-              <b style={{ fontSize: 17 }}>{t('📖 Growth Story — "{title}"', { title: asg.title })}</b>
-              <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('Draft {a} → Draft {b}', { a: first.n, b: last.n })}</span>
-            </div>
-            <p style={{ fontSize: 13, color: 'var(--muted)', margin: '2px 0 14px' }}><Directions text="Look what revising did — same writer, {n} drafts apart." vars={{ n: withTraits.length }} /></p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              {[{ d: first, tag: 'First draft', bg: '#f6f8f9' }, { d: last, tag: 'Latest draft', bg: '#eef6f2' }].map((c) => (
-                <div key={c.tag} style={{ background: c.bg, borderRadius: 12, padding: 14 }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: .5 }}>{t(c.tag)}</div>
-                  <div style={{ fontSize: 13, lineHeight: 1.5, marginTop: 6, maxHeight: 90, overflow: 'hidden', color: '#3a4149' }}>
-                    {c.d.content.slice(0, 180)}{c.d.content.length > 180 ? '…' : ''}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )
-      })}
+      {growthStories}
     </div>
   )
 }

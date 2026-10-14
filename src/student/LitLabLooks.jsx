@@ -5,12 +5,13 @@ import { useT } from '../lib/i18n/index.jsx'
  * Three student-friendly ways to show a Lit Labyrinth path's data on the Practice card (Kennady, 2026-10-14: "What are your
  * ideas on some more student friendly ways to present data? Build me three different options for the front card of Lit Lab.
  * Use an ABC prototype picker"). Each takes the same model (pathModel in StudentHome.jsx):
- *   A  Trail        — stepping stones on a winding trail; no numbers, just done / boosted / you are here / locked
+ *   A  Trail        — stepping stones on a winding trail with each score; a Skill Builder is its own stop; land or meadow scene
  *   C  Then & Now   — two big bars, where you started and where you are, against the 85% goal
  */
 
 // Stars came out (2026-10-14: "I don't like stars - it's too busy")
-export const LIT_LOOKS = [['a', 'Trail'], ['c', 'Then & Now'], ['d', 'Donuts']]
+// Donuts came out (2026-10-14: "The donuts are awful - get rid of the donuts")
+export const LIT_LOOKS = [['a', 'Trail'], ['c', 'Then & Now']]
 
 function Carousel({ carousel }) {
   const t = useT()
@@ -69,8 +70,8 @@ function GrowthStrip({ m }) {
 /* Two prototype choices inside the trail (2026-10-14: "How do show they completed skill builder for support? Can the trail
  * have a cute little background"): the background (the domain's land art, a drawn meadow, or none) and how a Skill Builder
  * shows (a ⚡ badge on the skill's stone, or its own small stop on the trail). Kept in this browser. */
-const TRAIL_SCENES = [['land', 'Land'], ['meadow', 'Meadow'], ['none', 'None']]
-const TRAIL_SB = [['badge', 'Badge'], ['stop', 'Stop']]
+// her picks (2026-10-14): "Put Skill Builder in as a stop instead of a badge. And then the scene options are land or meadow"
+const TRAIL_SCENES = [['land', 'Land'], ['meadow', 'Meadow']]
 const useStored = (key, list) => {
   const [v, setV] = React.useState(() => { try { const x = localStorage.getItem(key); return list.some(([k]) => k === x) ? x : list[0][0] } catch { return list[0][0] } })
   return [v, (x) => { setV(x); try { localStorage.setItem(key, x) } catch { /* fine */ } }]
@@ -101,11 +102,10 @@ const STONE = { mastered: '✓', boosted: '✓', next: '', sb: '', working: '…
 function TrailLook({ m, carousel, land }) {
   const t = useT()
   const [scene, setScene] = useStored('lscr.trailScene', TRAIL_SCENES)
-  const [sbStyle, setSbStyle] = useStored('lscr.trailSb', TRAIL_SB)
   const nodes = [{ key: 'start', kind: 'start', icon: '🚩', label: t('Pre-test'), pill: m.pre + '%', pillKind: 'pre' }]
   for (const s of m.skills) {
     const usedSb = s.sb != null || s.state === 'sb'
-    if (sbStyle === 'stop' && usedSb) {
+    if (usedSb) {
       // the skill shows its first try; the Skill Builder is the next stop on the trail
       // once the Skill Builder carried it to mastery the skill is cleared (green check); its pill keeps the first try
       const cleared = s.sb != null
@@ -114,8 +114,7 @@ function TrailLook({ m, carousel, land }) {
         pill: s.sb != null ? s.sb + '%' : null, pillKind: 'good', done: s.sb != null, here: s.sb == null })
     } else {
       nodes.push({ key: s.id, kind: s.state, icon: STONE[s.state], label: s.short, full: s.title, sub: s.state === 'sb' ? t('Skill Builder') : null,
-        // how they did: the score, and when a Skill Builder helped, the first try and then the Skill Builder
-        pill: s.acts == null ? null : s.sb != null ? `${s.acts}% → ${s.sb}%` : s.acts + '%',
+        pill: s.acts == null ? null : s.acts + '%',
         pillKind: s.state === 'mastered' || s.state === 'boosted' ? 'good' : 'low',
         done: s.state === 'mastered' || s.state === 'boosted', here: s.state === 'next' || s.state === 'sb' })
     }
@@ -142,12 +141,11 @@ function TrailLook({ m, carousel, land }) {
             {nd.here && <span className="ll-here">📍 {t('You are here')}</span>}
             <span className={'ll-stone ' + nd.kind + (nd.small ? ' small' : '')} title={nd.full || nd.label}>
               {nd.icon}
-              {nd.kind === 'boosted' && <i className="ll-boost" title={t('A Skill Builder helped')}>⚡</i>}
             </span>
             {nd.growth != null && <span className={'ll-stone-growth' + (nd.growth < 0 ? ' down' : '')}>{nd.growth >= 0 ? '+' : ''}{nd.growth}%</span>}
             <span className="ll-stone-under">
               <span className={'ll-stone-label ' + nd.kind}>{nd.label}{nd.sub && <small>{nd.sub}</small>}</span>
-              {nd.pill && <span className={'ll-pill ' + nd.pillKind}>{nd.pill}{nd.kind === 'boosted' && ' ⚡'}</span>}
+              {nd.pill && <span className={'ll-pill ' + nd.pillKind}>{nd.pill}</span>}
             </span>
           </div>
         ))}
@@ -155,80 +153,12 @@ function TrailLook({ m, carousel, land }) {
       <div className="ll-foot">
         <div className="ll-key">
           <span><i className="mastered">✓</i>{t('Cleared')}</span>
-          <span><i className={sbStyle === 'stop' ? 'sbstop' : 'boosted'}>⚡</i>{sbStyle === 'stop' ? t('Skill Builder stop') : t('Skill Builder helped')}</span>
+          <span><i className="sbstop">⚡</i>{t('Skill Builder')}</span>
         </div>
         <span style={{ flex: 1 }} />
         <span className="ll-proto" role="group" aria-label="Prototype: trail background">
           <span>Scene</span>{TRAIL_SCENES.map(([k, n]) => <button key={k} className={scene === k ? 'on' : ''} onClick={() => setScene(k)}>{n}</button>)}
         </span>
-        <span className="ll-proto" role="group" aria-label="Prototype: how a Skill Builder shows">
-          <span>Skill Builder</span>{TRAIL_SB.map(([k, n]) => <button key={k} className={sbStyle === k ? 'on' : ''} onClick={() => setSbStyle(k)}>{n}</button>)}
-        </span>
-      </div>
-    </div>
-  )
-}
-
-/* ---------- C · Donuts ---------- */
-/* Each skill is a ring filled to its score (2026-10-14: "Donuts?"). When a Skill Builder helped, the ring tells it: gold up to
- * the first try, then green on to the Skill Builder's score, so the green slice is what the extra practice added. */
-function Donut({ size = 62, first = null, final = null, tone = 'good', children, cls = '' }) {
-  const r = 42, c = 2 * Math.PI * r
-  const seg = (from, to) => ({ strokeDasharray: `${(Math.max(0, to - from) / 100) * c} ${c}`, strokeDashoffset: -(from / 100) * c })
-  const twoPart = first != null && final != null && final > first
-  return (
-    <span className={'ll-donut ' + cls} style={{ width: size, height: size }}>
-      <svg viewBox="0 0 100 100" aria-hidden>
-        <circle cx="50" cy="50" r={r} className="track" />
-        {twoPart ? <>
-          <circle cx="50" cy="50" r={r} className="arc low" style={seg(0, first)} />
-          <circle cx="50" cy="50" r={r} className="arc good" style={seg(first, final)} />
-        </> : (final ?? first) != null && <circle cx="50" cy="50" r={r} className={'arc ' + tone} style={seg(0, final ?? first)} />}
-      </svg>
-      <span className="ll-donut-in">{children}</span>
-    </span>
-  )
-}
-function DonutsLook({ m, carousel }) {
-  const t = useT()
-  return (
-    <div className="ll ll-d">
-      <Head m={m} carousel={carousel}><GrowthStrip m={m} /></Head>
-      <div className="ll-donuts">
-        <div className="ll-dn big">
-          <Donut size={84} final={m.pre} tone="pre"><b>{m.pre}%</b></Donut>
-          <span className="ll-dn-l">{t('Pre-test')}</span>
-          <span className="ll-dn-s">{t('Where you started')}</span>
-        </div>
-        <span className="ll-dn-gap" aria-hidden />
-        {m.skills.map((s) => {
-          const sbUsed = s.sb != null
-          return (
-            <div key={s.id} className={'ll-dn ' + s.state} title={s.title}>
-              <Donut first={s.acts} final={sbUsed ? s.sb : s.acts} tone={s.state === 'mastered' ? 'good' : 'low'} cls={s.state}>
-                {s.score != null ? <b>{s.score}%</b> : s.state === 'locked' ? '🔒' : s.state === 'next' || s.state === 'sb' ? '📍' : ''}
-              </Donut>
-              <span className="ll-dn-l">{s.short}</span>
-              <span className={'ll-dn-s' + (sbUsed || s.state === 'sb' ? ' sb' : '')}>
-                {sbUsed ? `⚡ ${s.acts}% → ${s.sb}%` : s.state === 'sb' ? '⚡ ' + t('Skill Builder next') : s.state === 'next' ? t('Up next') : s.state === 'mastered' ? t('Mastered') : s.state === 'working' ? t('Keep going') : ''}
-              </span>
-            </div>
-          )
-        })}
-        <span className="ll-dn-gap" aria-hidden />
-        {m.post && (
-          <div className={'ll-dn big post ' + m.post.state}>
-            {m.post.score != null && <span className={'ll-stone-growth' + (m.post.score - m.pre < 0 ? ' down' : '')}>{m.post.score - m.pre >= 0 ? '+' : ''}{m.post.score - m.pre}%</span>}
-            <Donut size={84} final={m.post.score} tone="post" cls={m.post.state}>{m.post.score != null ? <b>{m.post.score}%</b> : '🏆'}</Donut>
-            <span className="ll-dn-l">{t('Post-test')}</span>
-            <span className="ll-dn-s">{m.post.score != null ? t('Where you finished') : t('Opens at the end')}</span>
-          </div>
-        )}
-      </div>
-      <div className="ll-key">
-        <span><i className="dk good" />{t('Mastered')}</span>
-        <span><i className="dk low" />{t('First try')}</span>
-        <span><i className="dk sbpair" />{t('⚡ Skill Builder added')}</span>
       </div>
     </div>
   )
@@ -278,6 +208,5 @@ function ThenNowLook({ m, carousel }) {
 export function LitLabLook({ look, model, carousel }) {
   if (!model) return null
   if (look === 'c') return <ThenNowLook m={model} carousel={carousel} />
-  if (look === 'd') return <DonutsLook m={model} carousel={carousel} />
   return <TrailLook m={model} carousel={carousel} land={model.land} />
 }

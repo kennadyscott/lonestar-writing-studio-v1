@@ -953,7 +953,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           <div className="prf-c-actions">
             {!studio && (<>
               <div className="style-pick lit-look-pick" role="group" aria-label="Prototype: how the path's data looks">
-                {LIT_LOOKS.map(([k, name], i) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{'ABC'[i]}<small>{name}</small></button>)}
+                {LIT_LOOKS.map(([k, name], i) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{'AB'[i]}<small>{name}</small></button>)}
               </div>
             </>)}
             <button type="button" className="prf-c-all prf-c-shortcut" onClick={() => onOpen('topic_pos', null, { skipGate: true })}>Parts of Speech</button>

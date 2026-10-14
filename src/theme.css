@@ -2667,33 +2667,6 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-proto button { border: 0; background: transparent; font: inherit; font-weight: 800; color: var(--muted); padding: 3px 9px; border-radius: 999px; cursor: pointer; }
 .ll-proto button.on { background: #1e2a6b; color: #fff; }
 
-/* C · Donuts */
-.ll-donuts { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 4px; min-height: 0; padding: 0 4px; }
-.ll-dn { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; flex: 1; text-align: center; }
-.ll-dn.big { flex: 1.2; }
-.ll-dn-gap { width: 1px; align-self: stretch; margin: 18px 2px; background: #cfdde9; }
-.ll-donut { position: relative; display: grid; place-items: center; flex: none; }
-.ll-donut svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
-.ll-donut circle { fill: none; stroke-width: 13; }
-.ll-donut .track { stroke: #e3ebf2; }
-.ll-donut .arc { stroke-linecap: butt; }
-.ll-donut .arc.good { stroke: #2f9e6f; }
-.ll-donut .arc.low { stroke: #f0b429; }
-.ll-donut .arc.pre { stroke: #8aa4bf; }
-.ll-donut .arc.post { stroke: #f5b400; }
-.ll-donut-in { position: relative; font-size: 18px; }
-.ll-donut-in b { font-size: 14px; font-weight: 900; color: #0d2f55; font-variant-numeric: tabular-nums; }
-.ll-dn.big .ll-donut-in b { font-size: 18px; }
-.ll-donut.next .track, .ll-donut.sb .track { stroke: #fff2c2; }
-.ll-dn.locked { opacity: .55; }
-.ll-dn-l { font-size: 12.5px; font-weight: 800; color: #0d2f55; line-height: 1.15; max-width: 100%; text-wrap: balance; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.ll-dn-s { font-size: 11.5px; font-weight: 700; color: var(--muted); min-height: 15px; white-space: nowrap; }
-.ll-dn-s.sb { color: #5b3fb0; font-weight: 800; }
-.ll-dn .ll-stone-growth { bottom: auto; top: -8px; right: 2px; z-index: 1; }
-.ll-key i.dk { width: 14px; height: 14px; border-radius: 4px; }
-.ll-key i.dk.good { background: #2f9e6f; }
-.ll-key i.dk.low { background: #f0b429; }
-.ll-key i.dk.sbpair { background: linear-gradient(90deg, #f0b429 50%, #2f9e6f 50%); }
 .ll-skill-n { font-style: normal; font-weight: 900; font-size: 12px; color: #1d6b48; margin-left: 2px; font-variant-numeric: tabular-nums; }
 .ll-skill.boosted .ll-skill-n { color: #5b3fb0; }
 .ll-skill.post-done .ll-skill-n { color: #7a5600; }

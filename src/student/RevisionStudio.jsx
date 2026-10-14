@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from 'react'
 import { api } from '../lib/api.js'
 import { useT } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
+import { PEER_TASKS, checkRule } from '../../server/peerTasks.mjs'
+import { coachFor, offending, wordsThatWork } from './revisionCoach.js'
 
 /*
  * Daily Revision Challenge — three parts:
@@ -213,6 +215,120 @@ function ChecklistPanel({ asg, sub, answers, fixed, setFixed }) {
   )
 }
 
+/*
+ * B · Guided (Kennady, 2026-10-14: "this is really confusing process to follow and kids would not know what to do here").
+ * One problem at a time, only the ones Pip's draft really has: spot it (yes / no, answered at once), then fix it right in the draft
+ * with a tip, the words to look for, and a sentence starter; a check appears the moment the change meets the rubric line.
+ */
+function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
+  const t = useT()
+  const say = useSay()
+  const task = PEER_TASKS.find((x) => x.id === sub.peerTaskId)
+  const band = task?.bands[asg.gradeBand || 'mid']
+  const rules = band?.checklist || []
+  const problems = rules.map((r, i) => ({ ...r, i })).filter((r) => r.check && !checkRule(r.check, original.content))
+  const [at, setAt] = useState(0)
+  const [spot, setSpot] = useState({}) // rubric index -> what they answered (true = "yes, it does")
+  const [summary, setSummary] = useState(false)
+  const box = useRef(null)
+  const caret = useRef(null) // where the student last left the cursor in the draft; a tapped starter or word goes there
+  const done = !!sub.completedAt
+  const fixedNow = (r) => checkRule(r.check, content, original.content)
+  const fixedCount = problems.filter(fixedNow).length
+
+  function insert(text) {
+    const el = box.current
+    const at0 = Math.min(caret.current ?? (content || '').length, (content || '').length)
+    const before = (content || '').slice(0, at0)
+    // a starter ending in ", " runs into the sentence after it: "First, solar power…", not "First, Solar power…"
+    let after = (content || '').slice(at0)
+    if (/,\s$/.test(text) && /^[A-Z][a-z]/.test(after)) after = after[0].toLowerCase() + after.slice(1)
+    const pad = before && !/\s$/.test(before) ? ' ' : ''
+    edit(before + pad + text + after)
+    const pos = (before + pad + text).length
+    caret.current = pos
+    requestAnimationFrame(() => { if (!el) return; el.focus(); el.setSelectionRange(pos, pos) })
+  }
+
+  const p = problems[at]
+  const coach = p && coachFor(p.text)
+  const answered = p && spot[p.i] !== undefined
+  const met = p && fixedNow(p)
+  const look = p ? offending(p.check, content) : []
+  const ideas = p && !coach.starter ? wordsThatWork(p.check) : []
+  const next = () => (at < problems.length - 1 ? setAt(at + 1) : setSummary(true))
+
+  return (
+    <div className="rev-guided">
+      <div className="card rev-editor">
+        <div className="rev-editor-head">
+          <b><Glossed text={t("{name}'s draft — fix it right here", { name: asg.teacher.name })} /></b>
+          <span>{t('{n} words · autosaves', { n: (content || '').split(/\s+/).filter(Boolean).length })}</span>
+        </div>
+        <textarea ref={box} value={content} onChange={(e) => { caret.current = e.target.selectionStart; edit(e.target.value) }} disabled={done}
+          onSelect={(e) => { caret.current = e.currentTarget.selectionStart }} aria-label={t("{name}'s draft — fix it right here", { name: asg.teacher.name })} />
+      </div>
+
+      <div className="card rev-coach" aria-live="polite">
+        {done ? (
+          <div className="rev-step">
+            <div className="rev-big">✓ {t('Challenge done for today!')}</div>
+            <p className="rev-tip">{say('A new draft from Pip lands tomorrow.')}</p>
+          </div>
+        ) : !problems.length ? (
+          <div className="rev-step">
+            <p className="rev-tip">{say('Read the draft, make it stronger, then get feedback.')}</p>
+            <button className="btn gold" disabled={busy} onClick={() => onFinish({})}>{t('Get feedback')}</button>
+          </div>
+        ) : summary ? (
+          <div className="rev-step">
+            <div className="rev-big">{t('You fixed {a} of {b} problems!', { a: fixedCount, b: problems.length })}</div>
+            <ul className="rev-sum">
+              {problems.map((r, k) => <li key={r.i} className={fixedNow(r) ? 'ok' : ''}><span aria-hidden>{fixedNow(r) ? '✓' : '○'}</span>
+                <button type="button" onClick={() => { setSummary(false); setAt(k) }}>{coachFor(r.text).ask}</button></li>)}
+            </ul>
+            <button className="btn gold" disabled={busy} onClick={() => onFinish(spot)}>{t('📬 Get feedback')}</button>
+          </div>
+        ) : (
+          <div className="rev-step">
+            <div className="rev-progress">
+              <span>{t('Problem {a} of {b}', { a: at + 1, b: problems.length })}</span>
+              <span className="rev-dots" aria-hidden>{problems.map((r, k) => <i key={r.i} className={(fixedNow(r) ? 'ok' : '') + (k === at ? ' on' : '')} />)}</span>
+            </div>
+            <div className="rev-label">1 · {t('Spot it')}</div>
+            <div className="rev-ask">{coach.ask}</div>
+            {!answered ? (
+              <div className="rev-yesno">
+                <button type="button" className="btn ghost" onClick={() => setSpot({ ...spot, [p.i]: true })}>{t('Yes, it does')}</button>
+                <button type="button" className="btn ghost" onClick={() => setSpot({ ...spot, [p.i]: false })}>{t("No, it doesn't")}</button>
+              </div>
+            ) : (
+              <div className={'rev-verdict' + (spot[p.i] === false ? ' right' : '')}>
+                {spot[p.i] === false ? <>🎯 {say('You spotted it! Now fix it.')}</> : <>👀 {say("Look again — Pip's draft doesn't do this yet. Let's fix it.")}</>}
+              </div>
+            )}
+            {answered && <>
+              <div className="rev-label">2 · {t('Fix it')}</div>
+              <p className="rev-tip">{say(coach.tip)}</p>
+              {look.length > 0 && <div className="rev-look">{t('Look for:')} {look.map((w) => <code key={w}>{w}</code>)}</div>}
+              {ideas.length > 0 && <div className="rev-look ideas">{t('Words that would work:')} {ideas.map((w) => <button type="button" key={w} onClick={() => insert(w + ' ')}>{w}</button>)}</div>}
+              {coach.starter && <button type="button" className="rev-starter" onClick={() => insert(coach.starter)}>+ {t('Add')} “{coach.starter.trim()}…”</button>}
+              <div className={'rev-status' + (met ? ' ok' : '')}>{met ? <>✓ {t('Fixed!')}</> : t('Not fixed yet — change the draft on the left.')}</div>
+              <div className="rev-nav">
+                {at > 0 && <button type="button" className="rev-link" onClick={() => setAt(at - 1)}>← {t('Back')}</button>}
+                <span style={{ flex: 1 }} />
+                {met
+                  ? <button type="button" className="btn" onClick={next}>{at < problems.length - 1 ? t('Next problem →') : t('Finish →')}</button>
+                  : <button type="button" className="rev-link" onClick={next}>{t('Skip for now')}</button>}
+              </div>
+            </>}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function RevisionStudio({ state, sub, health, onChange, onBack }) {
   const t = useT()
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
@@ -225,6 +341,9 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
   const timer = useRef(null)
+  // A (today's three steps) or B (guided), to compare; guided is the default.
+  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.revLook') || 'b' } catch { return 'b' } })
+  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.revLook', k) } catch { /* fine */ } }
 
   useEffect(() => { setPhase(sub.phase || 'evaluate') }, [sub.phase])
 
@@ -255,6 +374,19 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
     } finally { setBusy(false) }
   }
 
+  // Guided: record the spot-it answers as the step-1 judgments (a line Pip already meets counts as "yes"), then submit.
+  async function finishGuided(spot) {
+    setBusy(true)
+    try {
+      if (!sub.evaluation) {
+        const task = PEER_TASKS.find((x) => x.id === sub.peerTaskId)
+        const rules = task?.bands[asg.gradeBand || 'mid']?.checklist || []
+        await api.evaluate(sub.id, rules.map((r, i) => (spot[i] !== undefined ? spot[i] : !!(r.check && checkRule(r.check, original.content)))))
+      }
+    } finally { setBusy(false) }
+    await submit()
+  }
+
   const changed = content.trim() !== original.content.trim()
   const wc = (content || '').split(/\s+/).filter(Boolean).length
 
@@ -264,18 +396,26 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
       {onBack && <button className="backlink" onClick={onBack}>{t('← Back to My Writing')}</button>}
 
       {/* challenge banner */}
-      <div className="card" style={{ padding: '14px 18px', marginBottom: 4, display: 'flex', gap: 14, alignItems: 'center' }}>
+      <div className="card" style={{ padding: '14px 18px', marginBottom: look === 'b' ? 14 : 4, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
         <div style={{ fontSize: 30 }}>🤖</div>
-        <div style={{ flex: 1 }}>
-          <div className="eyebrow">{t('Daily Revision Challenge')} · {asg.genre} · {t('Grade {n} rubric', { n: asg.gradeLevel })}</div>
-          <div style={{ fontSize: 14, marginTop: 2 }}>{asg.prompt}</div>
+        <div style={{ flex: 1, minWidth: 260 }}>
+          {look === 'b'
+            ? <><div style={{ fontSize: 18, fontWeight: 800, color: '#0d2f55' }}>{t('Help {name} fix this draft', { name: asg.teacher.name })}</div>
+                <div style={{ fontSize: 14, marginTop: 2, color: 'var(--muted)', fontWeight: 600 }}>{t('One problem at a time.')} 🪙 {t('Earn 50 coins')}</div></>
+            : <><div className="eyebrow">{t('Daily Revision Challenge')} · {asg.genre} · {t('Grade {n} rubric', { n: asg.gradeLevel })}</div>
+                <div style={{ fontSize: 14, marginTop: 2 }}>{asg.prompt}</div></>}
+        </div>
+        <div className="rev-looks" role="group" aria-label={t('Challenge versions')}>
+          {[['a', 'A · Current'], ['b', 'B · Guided']].map(([k, label]) => <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => pickLook(k)}>{label}</button>)}
         </div>
       </div>
 
-      <Stepper phase={phase} />
+      {look === 'b' && <GuidedRevision asg={asg} sub={sub} original={original} content={content} edit={edit} busy={busy} onFinish={finishGuided} />}
+
+      {look === 'a' && <Stepper phase={phase} />}
 
       {/* ============ STEP 1: read + score against the rubric ============ */}
-      {phase === 'evaluate' && (
+      {look === 'a' && phase === 'evaluate' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.1fr) minmax(340px,1fr)', gap: 16, alignItems: 'start' }}>
           <div className="card" style={{ overflow: 'hidden' }}>
             <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#f6f9fb' }}>
@@ -289,7 +429,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
       )}
 
       {/* ============ STEP 2/3: revise beneath the original, checklist + coach beside ============ */}
-      {phase !== 'evaluate' && (
+      {look === 'a' && phase !== 'evaluate' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1.45fr) minmax(300px,1fr)', gap: 16, alignItems: 'stretch' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div className="card" style={{ overflow: 'hidden' }}>

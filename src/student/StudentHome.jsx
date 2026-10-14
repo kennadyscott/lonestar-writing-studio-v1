@@ -939,7 +939,7 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
   const pick = todaysQuickPrompt(state)
   const done = !!completedQuickWrite(state, me.id, pick)
   const streak = writingStreak(state.growthSummary)
-  // B (simpler): the badge, the prompt's title, and the button.
+  // B (simpler): the badge, the prompt's title, the coins it earns ("I do want to show the coin value"), and the button.
   const simple = useLook() === 'b'
   return (
     // The painting sits behind the whole block (her mockup): the wolf fills the
@@ -954,14 +954,14 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
           <div style={{ fontSize: simple ? 22 : 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
           {!simple && <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>}
         </div>
-        {!simple && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700 }}>
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          {!simple && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700 }}>
             🔥 {t('{n} day streak', { n: streak.days })}
-          </span>
+          </span>}
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,180,0,.18)', border: '1px solid rgba(245,197,66,.55)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700, color: '#ffe6a3' }}>
             🪙 +10 {t('coins')}
           </span>
-        </div>}
+        </div>
         {done && (
           <div style={{ fontSize: 12.5, color: 'var(--scene-mist)', lineHeight: 1.4 }}>{t('Done for today. A new prompt comes tomorrow.')}</div>
         )}

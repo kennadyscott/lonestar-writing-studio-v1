@@ -36,6 +36,8 @@ function load() {
 // Saved data from before a feature shipped lacks its keys; fill them from the seed.
 { const fresh = seedState(); let filled = false
   for (const k of ['fluencyGames', 'fluencyCategories', 'fluencyGrid']) if (state[k] == null) { state[k] = fresh[k]; filled = true }
+  // Once: a Fluency card with nothing finished gets the sample finished tiles (2026-10-14), as the browser demo does.
+  if (!state.fluencyDemoSeeded) { if (!Object.keys(state.fluencyGrid?.cleared || {}).length) state.fluencyGrid = fresh.fluencyGrid; state.fluencyDemoSeeded = true; filled = true }
   // The roster and its categories are product config, not student data: keep them current.
   const same = (a, b) => JSON.stringify(a || []) === JSON.stringify(b)
   if (!same(state.fluencyGames, fresh.fluencyGames)) { state.fluencyGames = fresh.fluencyGames; filled = true }

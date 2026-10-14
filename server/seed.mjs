@@ -288,7 +288,14 @@ export function seedState() {
       { id: 'conventions', title: 'Conventions', icon: '✒️', blurb: 'Capitals, commas and end marks.', games: ['conventions'] },
       { id: 'typing', title: 'Type Right', icon: '⌨️', blurb: 'Fast, accurate and correct.', games: ['typing'] },
     ],
-    fluencyGrid: { round: 1, cleared: {}, bonusPaid: false },
+    // Three tiles start finished, one bingo line (the diagonal), so the finished look shows in the demo (2026-10-14: "I'm not seeing
+    // the Fluency Zone updates").
+    fluencyGrid: { round: 1, bonusPaid: false, missed: {}, lines: [6], cleared: {
+      sentences: { game: 'combine', coins: 20, pct: 96, ts: '2026-07-01T15:00:00.000Z' },
+      thisvsthat: { game: 'thisvsthat', coins: 20, pct: 100, ts: '2026-07-01T15:10:00.000Z' },
+      typing: { game: 'typing', coins: 10, pct: 86, ts: '2026-07-01T15:20:00.000Z' },
+    } },
+    fluencyDemoSeeded: true,
     // Teacher-configured settings (from the teacher's system).
     settings: { quickWriteSeconds: 180, quickWriteSetBy: 'Mr. Nowitski' },
     // Quick Write — static prompt bank (title + prompt, like the live product).

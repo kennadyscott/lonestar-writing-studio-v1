@@ -60,6 +60,11 @@ function loadState() {
     saved = JSON.parse(raw)
   } catch { return fresh }
   if (!saved || !Array.isArray(saved.submissions) || !Array.isArray(saved.assignments) || !Array.isArray(saved.students)) return fresh
+  // Once: a saved demo whose Fluency card has nothing finished gets the sample finished tiles (2026-10-14).
+  if (!saved.fluencyDemoSeeded) {
+    if (!Object.keys(saved.fluencyGrid?.cleared || {}).length) saved.fluencyGrid = fresh.fluencyGrid
+    saved.fluencyDemoSeeded = true
+  }
   for (const key of Object.keys(fresh)) {
     if (saved[key] === undefined) saved[key] = fresh[key]
   }

@@ -41,15 +41,47 @@ if (canSpeak()) {
   try { window.speechSynthesis.addEventListener('voiceschanged', loadVoices) } catch {}
 }
 
-/* Prefer the exact locale, then any voice in that language, then nothing —
- * a null voice still speaks, using the platform default. */
+/*
+ * Pick the most natural voice this device has (Kennady, 2026-10-14: "That robot AI voice is awful"). The browser lists voices
+ * in no useful order; on a Mac the first US voice is the old compact Samantha, and the list is full of novelty voices (Zarvox,
+ * Bells, Bad News). Rank instead: the neural "Natural"/"Online" voices (Edge, Windows), then Google's (Chrome, Chromebooks),
+ * then Apple's downloaded Premium/Enhanced voices and Siri, then the plainer system voices. Novelty voices are never chosen.
+ */
+const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|grandma|grandpa|rocko|eddy|flo|reed|sandy|shelley)\b/i
+function voiceScore(v, langTag) {
+  const name = v.name || ''
+  const lang = (v.lang || '').replace('_', '-')
+  if (NOVELTY.test(name)) return -1
+  let s = 0
+  if (/natural/i.test(name)) s += 100
+  else if (/online/i.test(name) && /microsoft/i.test(name)) s += 90
+  else if (/^google/i.test(name)) s += 80
+  else if (/premium/i.test(name)) s += 75
+  else if (/enhanced|siri/i.test(name)) s += 65
+  else if (/\b(ava|zoe|allison|susan|nathan|evan|tom|aria|jenny|guy|samantha)\b/i.test(name)) s += 20
+  if (/\b(ava|aria|jenny|zoe|allison|samantha)\b/i.test(name)) s += 5 // a warm, clear voice for young readers
+  if (lang === langTag) s += 10
+  return s
+}
+const VOICE_PICK_KEY = 'lscr.voice'
 export function pickVoice(langTag) {
   if (!VOICES.length) loadVoices()
   const base = langTag.split('-')[0]
-  return VOICES.find((v) => v.lang === langTag)
-    || VOICES.find((v) => v.lang && v.lang.replace('_', '-') === langTag)
-    || VOICES.find((v) => v.lang && v.lang.toLowerCase().startsWith(base))
-    || null
+  const inLang = VOICES.filter((v) => v.lang && v.lang.toLowerCase().startsWith(base))
+  try { // a voice chosen on the voice sampler page wins, if this device has it
+    const chosen = localStorage.getItem(VOICE_PICK_KEY)
+    const hit = chosen && inLang.find((v) => v.name === chosen)
+    if (hit) return hit
+  } catch { /* fine */ }
+  let best = null, bestScore = -1
+  for (const v of inLang) { const sc = voiceScore(v, langTag); if (sc > bestScore) { best = v; bestScore = sc } }
+  return best
+}
+export const rankedVoices = (langTag = 'en-US') => {
+  if (!VOICES.length) loadVoices()
+  const base = langTag.split('-')[0]
+  return VOICES.filter((v) => v.lang && v.lang.toLowerCase().startsWith(base) && voiceScore(v, langTag) >= 0)
+    .sort((a, b) => voiceScore(b, langTag) - voiceScore(a, langTag))
 }
 
 /*

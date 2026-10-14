@@ -2525,3 +2525,20 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .g2-today-all { background: none; border: 0; padding: 0; font: inherit; font-size: 14px; font-weight: 800; color: var(--link); cursor: pointer; }
 .dg-stars { letter-spacing: 2px; color: #f5b400; }
 .dg-stars span { color: #d8dee5; }
+/* grade 2: writing help and Say a sentence */
+.g2-help { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.g2-goal { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 15px; font-weight: 700; color: #0d2f55; }
+.g2-goal b { padding: 3px 11px; border-radius: 999px; background: #eef3f7; color: var(--muted); font-size: 14px; }
+.g2-goal.ok b { background: #e9f7ef; color: #1f7a4d; }
+.g2-hints { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.g2-hints-label { font-size: 13px; font-weight: 800; color: var(--muted); margin-right: 2px; }
+.g2-chip { padding: 4px 10px; border-radius: 999px; background: #f2f7fb; border: 1px solid var(--line); font-size: 14px; font-weight: 700; color: #33506b; }
+.g2-chip.pic { background: #fff8e6; border-color: #f0dca8; }
+.g2-say { display: inline-flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.g2-say-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 999px; border: 1.5px solid #bfe0f2; background: #f2fafd; font: inherit; font-size: 13.5px; font-weight: 800; color: #0b6f95; cursor: pointer; }
+.g2-say-btn small { font-size: 11.5px; font-weight: 800; color: var(--muted); margin-left: 2px; }
+.g2-say-btn.on { background: #d84a57; border-color: #d84a57; color: #fff; animation: g2Pulse 1s ease infinite; }
+.g2-say-btn:disabled { opacity: .55; cursor: default; }
+.g2-say-note { font-size: 13px; font-weight: 700; color: #7a5600; }
+@keyframes g2Pulse { 50% { box-shadow: 0 0 0 6px rgba(216,74,87,.2); } }
+@media (prefers-reduced-motion: reduce) { .g2-say-btn.on { animation: none; } }

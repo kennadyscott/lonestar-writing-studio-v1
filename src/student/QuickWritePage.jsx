@@ -6,6 +6,8 @@ import { writingStreak } from '../lib/streak.js'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
 import { ReadAloudText } from './ReadAloud.jsx'
 import { useSay, Directions, Glossed } from './Scaffold.jsx'
+import { isGrade2, useBandValue } from '../lib/gradeBand.js'
+import { SayASentence, WritingHelp } from './Grade2Help.jsx'
 
 /*
  * Quick Write — the live product's 3-part flow, refreshed in the studio brand:
@@ -113,6 +115,13 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
   const setBy = state.settings?.quickWriteSetBy
   // rotate the static prompt bank daily
   const pick = todaysQuickPrompt(state)
+  const g2 = isGrade2(useBandValue()) // second grade: a sentence goal, typing hints, and "Say a sentence" twice
+  function addSaid(said) {
+    const el = editorRef.current; if (!el) return
+    const cur = el.innerText || ''
+    el.innerText = cur + (cur && !/\s$/.test(cur) ? ' ' : '') + said
+    setText(el.innerText); remember(el.innerText, draftRef.current.secondsLeft, 'writing')
+  }
 
   // One Quick Write a day. A finished piece for today's prompt wins over a
   // leftover draft, so there is no second try.
@@ -369,6 +378,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                     {label}
                   </button>
                 ))}
+                {g2 && stage === 'writing' && <span style={{ marginLeft: 8 }}><SayASentence pieceKey={'qw:' + (pick.title || '') + ':' + localDay()} onText={addSaid} /></span>}
                 <span style={{ marginLeft: 'auto', fontSize: 12, color: 'var(--muted)', fontWeight: 700 }}>
                   {stage === 'writing' && text.trim() ? <span style={{ marginRight: 10, color: 'var(--teal)' }}>{t('Saved')}</span> : null}
                   {t('{n} words', { n: wc })}
@@ -383,6 +393,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                 data-placeholder={t('Write your answer here…')}
                 style={{ minHeight: 260, padding: '14px 16px', fontSize: 15.5, lineHeight: 1.65, outline: 'none', color: 'var(--ink)', background: stage === 'done' ? '#fafcfd' : '#fff' }} />
             </div>
+            {g2 && stage === 'writing' && <WritingHelp text={text} />}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 14 }}>
               <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>

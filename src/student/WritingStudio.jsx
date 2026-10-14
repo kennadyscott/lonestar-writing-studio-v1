@@ -6,6 +6,8 @@ import { ReadAloudText } from './ReadAloud.jsx'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
 import { useLook } from '../lib/look.js'
+import { isGrade2, useBandValue } from '../lib/gradeBand.js'
+import { SayASentence, WritingHelp } from './Grade2Help.jsx'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
 
 function CoinToast({ data, onClose }) {
@@ -88,6 +90,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   // idea is used. A Story Spark shows above the writing; a First Line goes into an empty page.
   const simpleFree = useLook() === 'b' && isFree
   const [ideasOpen, setIdeasOpen] = useState(false)
+  const g2 = isGrade2(useBandValue()) // second grade: a sentence goal, typing hints, and "Say a sentence" twice
   const [idea, setIdea] = useState(null)
   const timer = useRef(null)
   // The bank reads React state, not the saved draft. Autosave has to push
@@ -329,6 +332,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
               {isFree && isCurrent && selected.n > 1 ? t('✏️ Revising Draft {n}', { n: selected.n }) : `${t('Draft {n}', { n: selected.n })} ${isCurrent ? t('(working copy)') : ''}`}
             </b>
             <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+              {g2 && isCurrent && !published && <SayASentence pieceKey={'ws:' + currentDraft.id} onText={(said) => edit((content || '') + ((content || '') && !/\s$/.test(content) ? ' ' : '') + said)} />}
               {simpleFree && isCurrent && !published && (
                 <button type="button" className="btn ghost" aria-expanded={ideasOpen} onClick={() => setIdeasOpen((v) => !v)} style={{ padding: '6px 12px', fontSize: 13 }}>{t('💡 Need an idea?')}</button>
               )}
@@ -353,6 +357,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
                 }} />
             </div>
           )}
+          {g2 && isCurrent && !published && <div style={{ padding: '10px 16px 0' }}><WritingHelp text={content} /></div>}
           <textarea id="ws-editor" value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? t('Start writing here…\nAnything goes.') : t('Start writing your argument here…')}
             style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           {isCurrent && !published && (

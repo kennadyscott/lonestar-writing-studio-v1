@@ -510,8 +510,7 @@ function skillOutcome(tp, ws, progress) {
 const avgOf = (xs) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null)
 
 // One path in a kid's terms, for the three Practice-card looks (LitLabLooks.jsx, 2026-10-14): each skill's state
-// (mastered / boosted by a Skill Builder / up next / Skill Builder next / tried / locked) and 0-3 stars.
-const starsOf = (score, mastered) => (mastered || score >= MASTERY ? 3 : score >= 70 ? 2 : score > 0 ? 1 : 0)
+// (mastered / boosted by a Skill Builder / up next / Skill Builder next / tried / locked) and its scores.
 function pathModel(tp, progress, next) {
   const core = tp.core || []
   const nextId = next && !next.capstone ? (next.forId || next.ws.id) : null
@@ -526,13 +525,13 @@ function pathModel(tp, progress, next) {
     const title = clearingTitle(ws)
     // "Syllable Division Patterns: VCV" -> "VCV", so neighbours on one path don't all read "Syllable Division…"
     const short = title.includes(':') ? title.split(':').slice(1).join(':').trim() || title : title
-    return { id: ws.id, n: i + 1, title, short, state, score: o.score, stars: starsOf(o.score, o.mastered) }
+    return { id: ws.id, n: i + 1, title, short, state, acts: o.acts, sb: o.sbScore, score: o.score }
   })
   const full = tp.full ? (progress[tp.full.id] || {}) : null
-  const post = tp.full ? { score: full.best > 0 ? full.best : null, state: full.passed ? 'done' : next?.capstone ? 'next' : 'locked', stars: full.best > 0 ? starsOf(full.best, full.passed) : 0 } : null
+  const post = tp.full ? { score: full.best > 0 ? full.best : null, state: full.passed ? 'done' : next?.capstone ? 'next' : 'locked' } : null
   const pre = demoPretest(tp.id)
   const tried = skills.map((x) => x.score).filter((b) => b != null)
-  return { name: tp.short || tp.title, pre, preStars: starsOf(pre, false), now: post?.score ?? avgOf(tried), post, skills,
+  return { name: tp.short || tp.title, pre, now: post?.score ?? avgOf(tried), post, skills,
     mastered: skills.filter((x) => x.state === 'mastered' || x.state === 'boosted').length, total: core.length }
 }
 
@@ -874,7 +873,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   const [pickId, setPickId] = useState(null)
   const [allProg, setAllProg] = useState(false)
   // the ABC prototype picker for the path's data (2026-10-14); kept in this browser
-  const [look, setLookRaw] = useState(() => { try { return localStorage.getItem('lscr.litLook') || 'a' } catch { return 'a' } })
+  const [look, setLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.litLook'); return LIT_LOOKS.some(([k]) => k === v) ? v : 'a' } catch { return 'a' } })
   const setLook = (v) => { setLookRaw(v); try { localStorage.setItem('lscr.litLook', v) } catch { /* fine */ } }
   const headGrowth = topics ? avgGrowthOf(mine, progress) : null
   // the path being worked on drives the next step; the chart can show another
@@ -940,7 +939,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           <div className="prf-c-actions">
             {!studio && (
               <div className="style-pick lit-look-pick" role="group" aria-label="Prototype: how the path's data looks">
-                {LIT_LOOKS.map(([k, name]) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{k.toUpperCase()}<small>{name}</small></button>)}
+                {LIT_LOOKS.map(([k, name], i) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{'AB'[i]}<small>{name}</small></button>)}
               </div>
             )}
             <button type="button" className="prf-c-all prf-c-shortcut" onClick={() => onOpen('topic_pos', null, { skipGate: true })}>Parts of Speech</button>

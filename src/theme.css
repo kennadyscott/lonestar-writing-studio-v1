@@ -2594,34 +2594,13 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-stone.post-done { background: #fff2c2; border-color: #f5b400; }
 .ll-boost { position: absolute; right: -8px; top: -8px; width: 24px; height: 24px; border-radius: 50%; background: #fff2c2; border: 2px solid #fff; font-style: normal; font-size: 13px; display: grid; place-items: center; }
 .ll-here { position: absolute; bottom: calc(100% + 4px); white-space: nowrap; font-size: 11.5px; font-weight: 800; color: #7a5600; background: #fff4d6; border-radius: 999px; padding: 2px 9px; }
-.ll-stone-label { position: absolute; top: calc(100% + 5px); width: 112px; text-align: center; font-size: 12.5px; font-weight: 800; line-height: 1.2; color: #0d2f55;
+.ll-stone-under { position: absolute; top: calc(100% + 5px); display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.ll-stone-label { width: 112px; text-align: center; font-size: 12.5px; font-weight: 800; line-height: 1.2; color: #0d2f55;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 .ll-stone-label small { display: block; font-size: 11px; color: #a37400; }
 .ll-stone-label.locked, .ll-stone-label.post-locked, .ll-stone-label.open { color: #8a99a8; font-weight: 700; }
 @keyframes ll-pulse { 50% { box-shadow: 0 0 0 11px rgba(245,180,0,.12); } }
 @media (prefers-reduced-motion: reduce) { .ll-stone { animation: none !important; } }
-
-/* B · Star cards */
-.ll-total { display: inline-flex; align-items: baseline; gap: 5px; font-size: 14px; font-weight: 700; color: #3c5a78; background: #fff8e1; border-radius: 999px; padding: 3px 12px; }
-.ll-total b { font-size: 18px; color: #a37400; }
-.ll-cards { flex: 1; display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 8px; min-height: 0; }
-.ll-card { display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 6px; text-align: center; padding: 10px 6px 9px;
-  background: #fff; border: 2px solid #dbe3ec; border-radius: 14px; min-width: 0; }
-.ll-card-k { font-size: 12px; font-weight: 900; color: #0d2f55; width: 24px; height: 24px; border-radius: 50%; background: #eaf2fa; display: grid; place-items: center; }
-.ll-card-t { font-size: 13px; line-height: 1.2; color: #0d2f55; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.ll-card.start .ll-card-k { width: auto; padding: 0 8px; border-radius: 999px; font-size: 10.5px; letter-spacing: .03em; }
-.ll-card.mastered, .ll-card.boosted { border-color: #9ad6b8; background: #f3fbf6; }
-.ll-card.next, .ll-card.sb { border-color: #f5b400; box-shadow: 0 0 0 4px rgba(245,180,0,.18); }
-.ll-card.working { border-color: #f0cf7a; background: #fffbef; }
-.ll-card.locked, .ll-card.open, .ll-card.post.locked { opacity: .6; background: #f6f8fa; }
-.ll-card.post.done { border-color: #f5b400; background: #fff8e1; }
-.ll-stars { display: inline-flex; gap: 1px; font-size: 22px; line-height: 1; }
-.ll-stars i { font-style: normal; color: #dfe5ec; }
-.ll-stars i.on { color: #f5b400; text-shadow: 0 1px 0 #c99312; }
-.ll-chip { font-size: 11px; font-weight: 800; border-radius: 999px; padding: 3px 8px; background: #eef2f6; color: #5b6b7d; line-height: 1.25; }
-.ll-chip.mastered, .ll-chip.boosted { background: #dff3e8; color: #1d6b48; }
-.ll-chip.next, .ll-chip.sb { background: #fff2c2; color: #7a5600; }
-.ll-chip.working { background: #fff4d6; color: #7a5600; }
 
 /* C · Then & Now */
 .ll-tn { flex: 1; display: flex; align-items: center; gap: 18px; min-height: 0; }
@@ -2652,3 +2631,18 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-skill.next, .ll-skill.sb, .ll-skill.post-next { border-color: #f5b400; background: #fffbef; }
 .ll-skill.locked, .ll-skill.post-locked, .ll-skill.open { color: #8a99a8; }
 .ll-skill.post-done { border-color: #f5b400; background: #fff8e1; }
+/* Trail: how they did on each stone, and the growth (2026-10-14) */
+.ll-pill { font-size: 12px; font-weight: 900; border-radius: 999px; padding: 2px 9px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ll-pill.pre { background: #e3ebf3; color: #3c5a78; }
+.ll-pill.good { background: #dff3e8; color: #1d6b48; }
+.ll-pill.low { background: #fff4d6; color: #7a5600; }
+.ll-pill.post { background: #fff2c2; color: #7a5600; }
+.ll-stone-growth { position: absolute; bottom: calc(100% + 4px); white-space: nowrap; font-size: 13px; font-weight: 900; color: #fff; background: #2f9e6f; border-radius: 999px; padding: 2px 10px; }
+.ll-stone-growth.down { background: #c0392b; }
+.ll-growth { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 700; color: #3c5a78; white-space: nowrap; }
+.ll-growth b { color: #0d2f55; font-weight: 900; font-variant-numeric: tabular-nums; }
+.ll-g-arrow { color: #8aa4bf; font-weight: 900; }
+.ll-g-now.wait b { font-size: 12px; }
+.ll-g-up { font-weight: 900; color: #fff; background: #2f9e6f; border-radius: 999px; padding: 2px 10px; }
+.ll-g-up small { font-weight: 700; opacity: .9; font-size: 11px; }
+.ll-g-up.down { background: #c0392b; }

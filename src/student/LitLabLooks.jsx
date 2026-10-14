@@ -6,11 +6,11 @@ import { useT } from '../lib/i18n/index.jsx'
  * ideas on some more student friendly ways to present data? Build me three different options for the front card of Lit Lab.
  * Use an ABC prototype picker"). Each takes the same model (pathModel in StudentHome.jsx):
  *   A  Trail        — stepping stones on a winding trail; no numbers, just done / boosted / you are here / locked
- *   B  Star cards   — every skill earns 0-3 stars; the total is the headline
  *   C  Then & Now   — two big bars, where you started and where you are, against the 85% goal
  */
 
-export const LIT_LOOKS = [['a', 'Trail'], ['b', 'Stars'], ['c', 'Then & Now']]
+// Stars came out (2026-10-14: "I don't like stars - it's too busy")
+export const LIT_LOOKS = [['a', 'Trail'], ['c', 'Then & Now']]
 
 function Carousel({ carousel }) {
   const t = useT()
@@ -28,7 +28,7 @@ function Carousel({ carousel }) {
 function cheer(m, t) {
   if (m.post?.score != null) {
     const up = m.post.score - m.pre
-    return up > 0 ? t('You finished the path and grew {n} points! 🎉', { n: up }) : t('You finished the path! 🎉')
+    return up > 0 ? t('You finished the path and grew {n}%! 🎉', { n: up }) : t('You finished the path! 🎉')
   }
   if (m.post?.state === 'next') return t('Every clearing is done. The post-test is next! 🏆')
   if (m.mastered === 0) return m.skills.some((s) => s.score != null) ? t('You have started. Keep going!') : t('Your first clearing is waiting!')
@@ -47,22 +47,44 @@ function Head({ m, carousel, children }) {
   )
 }
 
+/* Pre-test -> post-test (or -> now) with the growth, for the trail's header (2026-10-14: "it isn't clear how they did on each
+ * area or like what the growth was from pre to post"). Growth is shown as a percent, as on the rest of the card. */
+function GrowthStrip({ m }) {
+  const t = useT()
+  const done = m.post?.score != null
+  const up = m.now == null ? null : m.now - m.pre
+  return (
+    <span className="ll-growth">
+      <span className="ll-g-pre">{t('Pre-test')} <b>{m.pre}%</b></span>
+      <span className="ll-g-arrow" aria-hidden>→</span>
+      {m.now == null
+        ? <span className="ll-g-now wait">{t('Post-test')} <b>🔒</b></span>
+        : <span className="ll-g-now">{done ? t('Post-test') : t('Now')} <b>{m.now}%</b></span>}
+      {up != null && <span className={'ll-g-up' + (up < 0 ? ' down' : '')}>{up >= 0 ? '+' : ''}{up}%{!done && <small> {t('so far')}</small>}</span>}
+    </span>
+  )
+}
+
 /* ---------- A · Trail ---------- */
 const STONE = { mastered: '✓', boosted: '✓', next: '', sb: '', working: '…', locked: '🔒', open: '' }
 function TrailLook({ m, carousel }) {
   const t = useT()
   const nodes = [
-    { key: 'start', kind: 'start', icon: '🚩', label: t('Start') },
-    ...m.skills.map((s) => ({ key: s.id, kind: s.state, icon: STONE[s.state], label: s.short, full: s.title, n: s.n, sub: s.state === 'sb' ? t('Skill Builder') : null })),
-    ...(m.post ? [{ key: 'post', kind: 'post-' + m.post.state, icon: '🏆', label: t('Post-test') }] : []),
+    { key: 'start', kind: 'start', icon: '🚩', label: t('Pre-test'), pill: m.pre + '%', pillKind: 'pre' },
+    ...m.skills.map((s) => ({ key: s.id, kind: s.state, icon: STONE[s.state], label: s.short, full: s.title, n: s.n, sub: s.state === 'sb' ? t('Skill Builder') : null,
+      // how they did: the score, and when a Skill Builder helped, the first try and then the Skill Builder
+      pill: s.acts == null ? null : s.sb != null ? `${s.acts}% → ${s.sb}%` : s.acts + '%',
+      pillKind: s.state === 'mastered' || s.state === 'boosted' ? 'good' : 'low' })),
+    ...(m.post ? [{ key: 'post', kind: 'post-' + m.post.state, icon: '🏆', label: t('Post-test'),
+      pill: m.post.score != null ? m.post.score + '%' : null, pillKind: 'post', growth: m.post.score != null ? m.post.score - m.pre : null }] : []),
   ]
   const N = nodes.length
-  const yOf = (i) => (i % 2 === 0 ? 58 : 30) // percent from the top: the trail winds up and down
+  const yOf = (i) => (i % 2 === 0 ? 50 : 24) // percent from the top: the trail winds up and down
   const pts = nodes.map((_, i) => `${((i + 0.5) / N) * 1000},${yOf(i)}`)
   const doneUpTo = nodes.reduce((k, nd, i) => (nd.kind === 'start' || nd.kind === 'mastered' || nd.kind === 'boosted' || nd.kind === 'post-done' ? i : k), 0)
   return (
     <div className="ll ll-a">
-      <Head m={m} carousel={carousel} />
+      <Head m={m} carousel={carousel}><GrowthStrip m={m} /></Head>
       <div className="ll-trail">
         <svg className="ll-trail-line" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden>
           <polyline points={pts.join(' ')} className="todo" vectorEffect="non-scaling-stroke" />
@@ -75,7 +97,11 @@ function TrailLook({ m, carousel }) {
               {nd.icon}
               {nd.kind === 'boosted' && <i className="ll-boost" title={t('A Skill Builder helped')}>⚡</i>}
             </span>
-            <span className={'ll-stone-label ' + nd.kind}>{nd.label}{nd.sub && <small>{nd.sub}</small>}</span>
+            {nd.growth != null && <span className={'ll-stone-growth' + (nd.growth < 0 ? ' down' : '')}>{nd.growth >= 0 ? '+' : ''}{nd.growth}%</span>}
+            <span className="ll-stone-under">
+              <span className={'ll-stone-label ' + nd.kind}>{nd.label}{nd.sub && <small>{nd.sub}</small>}</span>
+              {nd.pill && <span className={'ll-pill ' + nd.pillKind}>{nd.pill}{nd.kind === 'boosted' && ' ⚡'}</span>}
+            </span>
           </div>
         ))}
       </div>
@@ -88,48 +114,7 @@ function TrailLook({ m, carousel }) {
   )
 }
 
-/* ---------- B · Star cards ---------- */
 const STATUS_B = { mastered: 'Mastered!', boosted: 'Mastered with practice ⚡', next: 'Up next', sb: 'Skill Builder next', working: 'Keep practicing', locked: 'Locked', open: 'Not started' }
-function Stars({ n, max = 3 }) {
-  return <span className="ll-stars" aria-label={n + ' / ' + max}>{Array.from({ length: max }, (_, i) => <i key={i} className={i < n ? 'on' : ''}>★</i>)}</span>
-}
-function StarsLook({ m, carousel }) {
-  const t = useT()
-  const earned = m.skills.reduce((a, s) => a + s.stars, 0) + (m.post?.stars || 0)
-  const possible = m.skills.length * 3 + (m.post ? 3 : 0)
-  return (
-    <div className="ll ll-b">
-      <Head m={m} carousel={carousel}>
-        <span className="ll-total"><span aria-hidden>⭐</span> <b>{earned}</b> {t('of {n} stars', { n: possible })}</span>
-      </Head>
-      <div className="ll-cards" style={{ '--cols': m.skills.length + (m.post ? 2 : 1) }}>
-        <div className="ll-card start">
-          <span className="ll-card-k">{t('When you started')}</span>
-          <b className="ll-card-t">{t('Pre-test')}</b>
-          <Stars n={m.preStars} />
-          <span className="ll-chip quiet">{t('Your starting point')}</span>
-        </div>
-        {m.skills.map((s) => (
-          <div key={s.id} className={'ll-card ' + s.state}>
-            <span className="ll-card-k">{s.state === 'locked' ? '🔒' : s.n}</span>
-            <b className="ll-card-t" title={s.title}>{s.short}</b>
-            <Stars n={s.stars} />
-            <span className={'ll-chip ' + s.state}>{t(STATUS_B[s.state])}</span>
-          </div>
-        ))}
-        {m.post && (
-          <div className={'ll-card post ' + m.post.state}>
-            <span className="ll-card-k">🏆</span>
-            <b className="ll-card-t">{t('Post-test')}</b>
-            <Stars n={m.post.stars || 0} />
-            <span className={'ll-chip ' + (m.post.state === 'done' ? 'mastered' : m.post.state)}>{m.post.state === 'done' ? t('Finished!') : m.post.state === 'next' ? t('Up next') : t('Opens at the end')}</span>
-          </div>
-        )}
-      </div>
-      <div className="ll-key"><span>★★★ {t('85% or more')}</span><span>★★ {t('70 to 84%')}</span><span>★ {t('started')}</span></div>
-    </div>
-  )
-}
 
 /* ---------- C · Then & Now ---------- */
 const CHIP_C = { mastered: '✓', boosted: '⚡', next: '📍', sb: '📍', working: '…', locked: '🔒', open: '○' }
@@ -158,7 +143,7 @@ function ThenNowLook({ m, carousel }) {
           </div>
         </div>
         <div className={'ll-bubble' + (up == null ? ' wait' : up < 0 ? ' down' : '')}>
-          {up == null ? <><span aria-hidden>🌱</span><b>{t('Ready to grow')}</b></> : up > 0 ? <><span aria-hidden>🚀</span><b>+{up}</b><small>{t('points')}</small></> : <><span aria-hidden>💪</span><b>{t('Keep going')}</b></>}
+          {up == null ? <><span aria-hidden>🌱</span><b>{t('Ready to grow')}</b></> : up > 0 ? <><span aria-hidden>🚀</span><b>+{up}%</b><small>{t('growth')}</small></> : <><span aria-hidden>💪</span><b>{t('Keep going')}</b></>}
         </div>
       </div>
       <div className="ll-chips">
@@ -172,7 +157,6 @@ function ThenNowLook({ m, carousel }) {
 
 export function LitLabLook({ look, model, carousel }) {
   if (!model) return null
-  if (look === 'b') return <StarsLook m={model} carousel={carousel} />
   if (look === 'c') return <ThenNowLook m={model} carousel={carousel} />
   return <TrailLook m={model} carousel={carousel} />
 }

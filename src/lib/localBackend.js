@@ -277,13 +277,15 @@ export const localApi = {
     stu.coins += coins; stu.goal = null
     return { coins }
   },
-  peerRevision: async () => {
+  peerRevision: async (opts = {}) => {
     const task = todaysTask()
     const today = localDay()
-    let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today)
+    const stu = findStu(ME)
+    // the grade-2 prototype asks for the grade-2 drafts; otherwise the student's own grade decides
+    const band = opts.band === 'g2' ? 'g2' : bandFor(stu?.gradeLevel ?? 6)
+    let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today
+      && (state.assignments.find((a) => a.id === x.assignmentId)?.gradeBand || 'mid') === band)
     if (!sub) {
-      const stu = findStu(ME)
-      const band = bandFor(stu?.gradeLevel ?? 6)
       const t = task.bands[band]
       const asg = { id: uid('asg'), title: `Daily Revision Challenge: help ${task.author}`, genre: task.genre, type: 'Revision Challenge',
         format: null, isPeerRevision: true, gradeLevel: stu?.gradeLevel ?? 6, gradeBand: band, teacher: { name: task.author, initials: '🤖' },

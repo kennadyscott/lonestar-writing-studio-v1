@@ -7,7 +7,7 @@ import { useT } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions as ScaffoldDirections } from './Scaffold.jsx'
 import SHEET_ART from '../lib/sheetArt.json'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
-import { canSpeak, pickVoice } from '../lib/readAloud.js'
+import { canSpeak, sayText } from '../lib/readAloud.js'
 import StudentPathway from './StudentPathway.jsx'
 import { pathwayDemoFor } from '../lib/studentPathwayDemo.mjs'
 
@@ -2262,19 +2262,8 @@ function MatchActivity({ act, onDone, onPlay, doneLabel }) {
   )
 }
 
-/* Say one word with the browser's own voice (the same engine as Read-aloud): US English, a little slow for young readers. */
-function sayWord(word) {
-  if (!canSpeak()) return
-  try {
-    window.speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(word)
-    u.lang = 'en-US'
-    u.rate = 0.8
-    const v = pickVoice('en-US')
-    if (v) u.voice = v
-    window.speechSynthesis.speak(u)
-  } catch {}
-}
+/* Say one word in the read-aloud voice (Gemini when the server has it, else the browser's): a little slow for young readers. */
+const sayWord = (word) => sayText(word, 0.8)
 /* The letters printed in a Spell word's boxes: the listed ones (the first when unset) plus every space, hyphen and apostrophe. */
 const spellShown = (w) => { const show = new Set(Array.isArray(w.show) ? w.show : [0]); return [...String(w.word || '')].map((ch, i) => show.has(i) || !/[A-Za-z]/.test(ch)) }
 

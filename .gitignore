@@ -11,3 +11,6 @@ server/library.json
 
 # ClearK12 curriculum pulled from the Studio for local preview only: never publish (public repo)
 data/studio-paths/
+
+# read-aloud clips made by Gemini (local cache)
+server/tts-cache/

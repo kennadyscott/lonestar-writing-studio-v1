@@ -10,6 +10,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink); font: 500 16px/1.5 'Plus Jakarta Sans', system-ui, sans-serif; }
   main { max-width: 760px; margin: 0 auto; padding: 32px 16px 60px; }
+  h2 { font-size: 16px; margin: 28px 0 10px; color: var(--muted); }
   h1 { margin: 0 0 6px; font-size: 30px; font-weight: 800; }
   p.lede { margin: 0 0 18px; color: var(--muted); max-width: 62ch; }
   textarea { width: 100%; font: inherit; font-size: 17px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); resize: vertical; }
@@ -32,14 +33,54 @@
 <body>
 <main>
   <h1>Read-aloud voices</h1>
-  <p class="lede">These are the best voices this computer has, best first. Press Play to hear each one. "Use this voice" makes it the read-aloud voice in LoneStar on this browser. Every computer has its own voices, so a student's device may sound different.</p>
+  <p class="lede" id="lede">Press Play to hear each voice read the sentence below. "Use this voice" makes it the read-aloud voice in LoneStar.</p>
   <textarea id="say" rows="2">Write 2 to 4 sentences about your favorite day. Start with "One day."</textarea>
   <label class="speed">Speed <input id="rate" type="range" min="0.7" max="1.1" step="0.05" value="0.9"> <span id="rateVal">0.9</span></label>
   <ul id="list"><li class="empty">Loading voices…</li></ul>
+  <h2 id="bh" hidden>Browser voices (used only when the Gemini voice is unavailable)</h2>
+  <ul id="blist" hidden></ul>
   <p class="foot" id="foot"></p>
 </main>
 <script>
-  const KEY = 'lscr.voice'
+  const GEMINI = [['Sulafat', 'Warm'], ['Achird', 'Friendly'], ['Vindemiatrix', 'Gentle'], ['Leda', 'Youthful'], ['Aoede', 'Breezy'], ['Autonoe', 'Bright'], ['Puck', 'Upbeat'], ['Achernar', 'Soft']]
+  const GKEY = 'lscr.gvoice', BKEY = 'lscr.voice'
+  const API = location.port === '4200' ? 'http://localhost:8788' : ''
+  const get = (k) => { try { return localStorage.getItem(k) } catch { return null } }
+  const set = (k, v) => { try { localStorage.setItem(k, v) } catch {} }
+  const rate = document.getElementById('rate')
+  rate.oninput = () => { document.getElementById('rateVal').textContent = rate.value }
+  const text = () => document.getElementById('say').value
+  let player = null
+  function row(name, sub, tag, on, onPlay, onUse) {
+    const li = document.createElement('li')
+    if (on) li.className = 'on'
+    li.innerHTML = '<div class="name"><b></b><small></small></div><button class="play">▶ Play</button><button class="use"></button>'
+    li.querySelector('b').textContent = name
+    if (tag) li.querySelector('b').insertAdjacentHTML('beforeend', '<span class="tag"></span>'), li.querySelector('.tag').textContent = tag
+    li.querySelector('small').textContent = sub
+    li.querySelector('.play').onclick = (e) => onPlay(e.currentTarget)
+    const use = li.querySelector('.use'); use.textContent = on ? '✓ In use' : 'Use this voice'; use.onclick = onUse
+    return li
+  }
+  async function playGemini(voice, btn) {
+    try { player?.pause() } catch {}
+    btn.textContent = '… Loading'
+    try {
+      const r = await fetch(API + '/api/tts', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: text(), voice }) })
+      if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'failed')
+      player = new Audio(URL.createObjectURL(await r.blob()))
+      player.playbackRate = Number(rate.value) < 1 ? 0.92 : 1
+      await player.play()
+      btn.textContent = '▶ Play'
+    } catch (e) { btn.textContent = '▶ Play'; document.getElementById('foot').textContent = 'Could not play: ' + e.message }
+  }
+  function renderGemini(defaultVoice) {
+    const list = document.getElementById('list'); list.innerHTML = ''
+    const pick = get(GKEY) || defaultVoice
+    for (const [v, feel] of GEMINI) list.appendChild(row(v, feel + ' · Gemini', v === defaultVoice ? 'default' : '', v === pick,
+      (btn) => playGemini(v, btn), () => { set(GKEY, v); renderGemini(defaultVoice) }))
+  }
+  /* browser voices: the fallback */
   const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|grandma|grandpa|rocko|eddy|flo|reed|sandy|shelley)\b/i
   function score(v) {
     const n = v.name || ''
@@ -55,43 +96,27 @@
     if ((v.lang || '').replace('_', '-') === 'en-US') s += 10
     return s
   }
-  const kind = (v) => /natural|online/i.test(v.name) ? 'Natural' : /^google/i.test(v.name) ? 'Google' : /premium/i.test(v.name) ? 'Premium' : /enhanced|siri/i.test(v.name) ? 'Enhanced' : ''
-  const chosen = () => { try { return localStorage.getItem(KEY) } catch { return null } }
-  const rate = document.getElementById('rate')
-  rate.oninput = () => { document.getElementById('rateVal').textContent = rate.value }
-  function play(v) {
-    speechSynthesis.cancel()
-    const u = new SpeechSynthesisUtterance(document.getElementById('say').value)
-    u.voice = v; u.lang = v.lang; u.rate = Number(rate.value)
-    speechSynthesis.speak(u)
+  function renderBrowser(target) {
+    if (!('speechSynthesis' in window)) return
+    const all = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang) && score(v) >= 0).sort((a, b) => score(b) - score(a)).slice(0, 8)
+    const list = document.getElementById(target); list.innerHTML = ''
+    const pick = get(BKEY), active = all.find((v) => v.name === pick) || all[0]
+    for (const v of all) list.appendChild(row(v.name, v.lang + ' · this computer', '', v === active,
+      () => { speechSynthesis.cancel(); const u = new SpeechSynthesisUtterance(text()); u.voice = v; u.lang = v.lang; u.rate = Number(rate.value); speechSynthesis.speak(u) },
+      () => { set(BKEY, v.name); renderBrowser(target) }))
   }
-  function render() {
-    const all = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang) && score(v) >= 0).sort((a, b) => score(b) - score(a)).slice(0, 12)
-    const list = document.getElementById('list')
-    if (!all.length) { list.innerHTML = '<li class="empty">This browser has no English voices.</li>'; return }
-    const pick = chosen()
-    const active = all.find((v) => v.name === pick) || all[0]
-    list.innerHTML = ''
-    all.forEach((v, i) => {
-      const li = document.createElement('li')
-      if (v === active) li.className = 'on'
-      const k = kind(v)
-      li.innerHTML = `<div class="name"><b></b><small></small></div><button class="play">▶ Play</button><button class="use"></button>`
-      li.querySelector('b').textContent = v.name
-      if (k) li.querySelector('b').insertAdjacentHTML('beforeend', `<span class="tag">${k}</span>`)
-      li.querySelector('small').textContent = v.lang + (v.localService ? '' : ' · needs internet') + (i === 0 && !pick ? ' · the app uses this one now' : '')
-      li.querySelector('.play').onclick = () => play(v)
-      const use = li.querySelector('.use')
-      use.textContent = v === active ? '✓ In use' : 'Use this voice'
-      use.onclick = () => { try { localStorage.setItem(KEY, v.name) } catch {} ; render() }
-      list.appendChild(li)
-    })
-    const hasGood = all.some((v) => score(v) >= 65)
-    document.getElementById('foot').textContent = hasGood ? '' :
-      'No high-quality voices are on this computer yet. Chrome adds Google voices; Edge adds Microsoft "Natural" voices. On a Mac, System Settings → Accessibility → Spoken Content → System voice → Manage Voices lets you download "Ava (Premium)" or "Zoe (Premium)".'
-  }
-  speechSynthesis.addEventListener('voiceschanged', render)
-  render()
+  fetch(API + '/api/health').then((r) => r.json()).catch(() => ({})).then((h) => {
+    if (h.tts) {
+      renderGemini(h.ttsVoice || 'Sulafat')
+      document.getElementById('bh').hidden = false; document.getElementById('blist').hidden = false
+      renderBrowser('blist'); speechSynthesis?.addEventListener?.('voiceschanged', () => renderBrowser('blist'))
+    } else {
+      document.getElementById('lede').textContent = h.ok
+        ? 'The Gemini voice is not set up yet: add GEMINI_API_KEY to the .env file in the LoneStar folder, then restart the server. Until then, these are this computer\'s voices.'
+        : 'This copy of LoneStar has no server (the GitHub demo), so it can only use this computer\'s voices.'
+      renderBrowser('list'); speechSynthesis?.addEventListener?.('voiceschanged', () => renderBrowser('list'))
+    }
+  })
 </script>
 </body>
 </html>

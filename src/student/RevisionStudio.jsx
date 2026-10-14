@@ -198,6 +198,93 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
   )
 }
 
+/*
+ * Grade 2 (Kennady, 2026-10-14, "make 2nd grade a little different"; "they need to be typing to practice"): a 2-3 sentence
+ * draft and two problems. First, tap the better word (one choice is no better than Pip's, so it is a real choice). Then type
+ * one short sentence into the draft. No spot-it step; everything on screen is read aloud.
+ */
+const swapIn = (text, word, choice) => text.replace(new RegExp('\\b' + word + '\\b', 'gi'), (m) => (m[0] === m[0].toUpperCase() ? choice[0].toUpperCase() + choice.slice(1) : choice))
+// Pip's no-better word goes in a different spot from draft to draft, but always the same spot for the same draft
+const choicesFor = (swap, seed) => { const out = [...swap.better]; out.splice(seed.length % 3, 0, swap.meh); return out }
+function Grade2Revision({ asg, sub, original, content, edit, busy, onFinish }) {
+  const t = useT()
+  const say = useSay()
+  const task = PEER_TASKS.find((x) => x.id === sub.peerTaskId)
+  const rules = task?.bands.g2?.checklist || []
+  const problems = rules.map((r, i) => ({ ...r, i })).filter((r) => r.check && !checkRule(r.check, original.content))
+  const [at, setAt] = useState(0)
+  const [miss, setMiss] = useState('')
+  const [nudge, setNudge] = useState(false)
+  const [tapCue, setTapCue] = useState(false)
+  useEffect(() => { setNudge(false); setMiss(''); setTapCue(false) }, [at])
+  useEffect(() => { setNudge(false) }, [content])
+  const box = useRef(null)
+  const done = !!sub.completedAt
+  const fixedNow = (r) => checkRule(r.check, content, original.content)
+  const allFixed = problems.length > 0 && problems.every(fixedNow)
+  const p = problems[at]
+  const met = p && fixedNow(p)
+  const last = at >= problems.length - 1
+
+  function pick(choice) {
+    setTapCue(false)
+    if (choice === p.swap.meh) { setMiss(choice); return }
+    setMiss('')
+    edit(swapIn(content, p.swap.word, choice))
+  }
+
+  return (
+    <div className="g2-rev">
+      <div className={'card g2-rev-draft' + (nudge ? ' nudge' : '')}>
+        <div className="g2-rev-head"><b>{t("Pip's draft")}</b><span>{t('{n} words', { n: (content || '').split(/\s+/).filter(Boolean).length })}</span></div>
+        {nudge && <div className="rev-cue" role="status">✏️ {t('Type in the box to fix the draft')}</div>}
+        <textarea ref={box} value={content} onChange={(e) => edit(e.target.value)} disabled={done} aria-label={t("Pip's draft")} />
+      </div>
+
+      <div className="card g2-rev-coach" aria-live="polite">
+        {done ? (
+          <div className="g2-rev-big">✓ {t('Challenge done for today!')} <small>{say('A new draft from Pip lands tomorrow.')}</small></div>
+        ) : !p ? null : (
+          <>
+            <div className="rev-progress">
+              <span>{t('Step {a} of {b}', { a: at + 1, b: problems.length })}</span>
+              <span className="rev-dots" aria-hidden>{problems.map((r, k) => <i key={r.i} className={(fixedNow(r) ? 'ok' : '') + (k === at ? ' on' : '')} />)}</span>
+            </div>
+            {p.swap ? (
+              <>
+                <div className="g2-rev-ask"><Directions inline text={`Pip used the word "${p.swap.word}". Tap a better word.`} /></div>
+                <div className={'g2-rev-choices' + (tapCue ? ' cue' : '')}>
+                  {choicesFor(p.swap, sub.peerTaskId).map((c) => (
+                    <button key={c} type="button" className={'g2-rev-choice' + (miss === c ? ' miss' : '') + (met && content.toLowerCase().includes(c) ? ' picked' : '')}
+                      disabled={done} onClick={() => pick(c)}>{c}</button>
+                  ))}
+                </div>
+                {miss && <div className="g2-rev-miss">🤔 {say('"{w}" does not tell us much more. Try another word.', { w: miss })}</div>}
+              </>
+            ) : (
+              <>
+                <div className="g2-rev-ask"><Directions inline text={coachFor(p.text).tip} /></div>
+                {coachFor(p.text).starter && <div className="rev-hint">{t('Try starting with:')} <em>{coachFor(p.text).starter.trim()}…</em></div>}
+              </>
+            )}
+            <div className={'rev-status' + (met ? ' ok' : '') + (tapCue ? ' cue' : '')}>{met ? <>✓ {t('Fixed!')}</> : p.swap ? t('Tap a word.') : t('Type your sentence at the end of the draft.')}</div>
+            <div className="rev-nav">
+              {at > 0 && <button type="button" className="rev-link" onClick={() => setAt(at - 1)}>← {t('Back')}</button>}
+              <span style={{ flex: 1 }} />
+              {last && allFixed
+                ? <button className="btn gold" disabled={busy} onClick={() => onFinish({})}>{t('📬 Get feedback')} · 🪙 50</button>
+                : <button type="button" className="btn" onClick={() => {
+                    if (!met) { if (p.swap) setTapCue(true); else { setNudge(true); box.current?.focus() } return }
+                    if (!last) setAt(at + 1); else setAt(Math.max(0, problems.findIndex((r) => !fixedNow(r))))
+                  }}>{last ? t('Finish →') : t('Next →')}</button>}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
+
 export default function RevisionStudio({ state, sub, health, onChange, onBack }) {
   const t = useT()
   const asg = state.assignments.find((a) => a.id === sub.assignmentId)
@@ -252,7 +339,9 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
         </div>
       </div>
 
-      <GuidedRevision asg={asg} sub={sub} original={original} content={content} edit={edit} busy={busy} onFinish={finishGuided} />
+      {asg.gradeBand === 'g2'
+        ? <Grade2Revision asg={asg} sub={sub} original={original} content={content} edit={edit} busy={busy} onFinish={finishGuided} />
+        : <GuidedRevision asg={asg} sub={sub} original={original} content={content} edit={edit} busy={busy} onFinish={finishGuided} />}
 
     </div>
   )

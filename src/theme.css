@@ -2542,3 +2542,22 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .g2-say-note { font-size: 13px; font-weight: 700; color: #7a5600; }
 @keyframes g2Pulse { 50% { box-shadow: 0 0 0 6px rgba(216,74,87,.2); } }
 @media (prefers-reduced-motion: reduce) { .g2-say-btn.on { animation: none; } }
+/* grade 2: Revision Challenge — the draft on top, one step under it */
+.g2-rev { display: flex; flex-direction: column; gap: 14px; }
+.g2-rev-draft { padding: 16px 20px; transition: box-shadow .2s; }
+.g2-rev-draft.nudge { box-shadow: 0 0 0 4px rgba(245,180,0,.55); }
+.g2-rev-head { display: flex; justify-content: space-between; align-items: center; font-size: 15px; color: var(--muted); margin-bottom: 8px; }
+.g2-rev-head b { color: #0d2f55; font-size: 17px; }
+.g2-rev-draft textarea { width: 100%; min-height: 130px; resize: vertical; font: inherit; font-size: 24px; line-height: 1.6; color: #0d2f55; border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 16px; background: #fff; }
+.g2-rev-coach { padding: 18px 22px; display: flex; flex-direction: column; gap: 12px; }
+.g2-rev-ask { font-size: 21px; font-weight: 800; color: #0d2f55; line-height: 1.35; }
+.g2-rev-choices { display: flex; gap: 12px; flex-wrap: wrap; border-radius: 14px; }
+.g2-rev-choices.cue { box-shadow: 0 0 0 4px rgba(245,180,0,.55); }
+.g2-rev-choice { font: inherit; font-size: 22px; font-weight: 800; min-width: 150px; padding: 14px 24px; border-radius: 16px; border: 2px solid var(--line); background: #fff; color: #0d2f55; cursor: pointer; }
+.g2-rev-choice:hover { border-color: #0d2f55; }
+.g2-rev-choice.miss { border-color: #e0a100; background: #fff7e6; }
+.g2-rev-choice.picked { border-color: var(--good); background: #f1faf4; }
+.g2-rev-miss { font-size: 17px; font-weight: 700; color: #7a5600; }
+.g2-rev-big { font-size: 22px; font-weight: 800; color: var(--good); display: flex; flex-direction: column; gap: 4px; }
+.g2-rev-big small { font-size: 15px; color: var(--muted); font-weight: 600; }
+.rev-status.cue { color: #7a5600; }

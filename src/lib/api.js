@@ -29,7 +29,7 @@ const networkApi = {
   studentSettings: (payload) => fetch(u('/api/student/settings'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),
   setGoal: (payload) => fetch(u('/api/goal'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(payload) }).then(j),
   achieveGoal: () => fetch(u('/api/goal/achieve'), { method: 'POST' }).then(j),
-  peerRevision: () => fetch(u('/api/peerrevision'), { method: 'POST' }).then(j),
+  peerRevision: (opts = {}) => fetch(u('/api/peerrevision'), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(opts) }).then(j),
   evaluate: (subId, answers) => fetch(u(`/api/submissions/${subId}/evaluate`), { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ answers }) }).then(j),
   submitRevision: (subId) => fetch(u(`/api/submissions/${subId}/submit-revision`), { method: 'POST' }).then(j),
   publish: (subId) => fetch(u(`/api/submissions/${subId}/publish`), { method: 'POST' }).then(j),

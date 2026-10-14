@@ -1500,7 +1500,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   }
   async function peer() {
     setBusy(true)
-    try { const r = await api.peerRevision(); onOpen(r.submissionId) } finally { setBusy(false) }
+    try { const r = await api.peerRevision(isGrade2(band) ? { band: 'g2' } : {}); onOpen(r.submissionId) } finally { setBusy(false) }
   }
   async function begin(row) {
     // a finished teacher assignment opens its feedback, not the draft editor

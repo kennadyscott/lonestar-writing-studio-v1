@@ -2,6 +2,7 @@ import http from 'node:http'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import crypto from 'node:crypto'
 import { seedState } from './seed.mjs'
 import { conferenceSystemPrompt, traitsSystemPrompt } from './prompts.mjs'
 import { fallbackConference, fallbackTraits, isBegging } from './fallback.mjs'
@@ -27,6 +28,41 @@ const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-5'
 const PORT = Number(process.env.PORT || 8788)
 const HAS_KEY = API_KEY.trim().length > 0
 const COIN_CAP = 150
+
+// --- read-aloud voice: Gemini speech (Kennady, 2026-10-14: "That robot AI voice is awful"; chose a live voice service on the
+// ClearK12 Google account). The key lives in .env as GEMINI_API_KEY and never leaves this server. Every clip is kept in
+// server/tts-cache, so a direction that is read a hundred times is paid for once.
+const GEMINI_KEY = () => (process.env.GEMINI_API_KEY || '').trim()
+const TTS_MODEL = process.env.GEMINI_TTS_MODEL || 'gemini-3.8-flash-tts'
+const TTS_VOICE = process.env.GEMINI_TTS_VOICE || 'Sulafat'
+const TTS_STYLE = 'Warm and friendly, like a teacher reading to a young child. Speaking slowly and clearly.'
+const TTS_DIR = path.join(__dirname, 'tts-cache')
+const TTS_VOICES = ['Sulafat', 'Achird', 'Vindemiatrix', 'Leda', 'Aoede', 'Autonoe', 'Puck', 'Achernar']
+async function speakWithGemini(text, voice) {
+  const v = TTS_VOICES.includes(voice) ? voice : TTS_VOICE
+  const clean = String(text || '').replace(/\s+/g, ' ').trim().slice(0, 600)
+  if (!clean) throw Object.assign(new Error('Nothing to read.'), { status: 400 })
+  const file = path.join(TTS_DIR, crypto.createHash('sha1').update(TTS_MODEL + '|' + v + '|' + TTS_STYLE + '|' + clean).digest('hex') + '.wav')
+  try { return fs.readFileSync(file) } catch { /* not made yet */ }
+  if (!GEMINI_KEY()) throw Object.assign(new Error('The GEMINI_API_KEY setting is missing from .env.'), { status: 503 })
+  const r = await fetch('https://generativelanguage.googleapis.com/v1beta/interactions', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', 'x-goog-api-key': GEMINI_KEY() },
+    body: JSON.stringify({
+      model: TTS_MODEL,
+      input: [{ type: 'user_input', content: [{ type: 'text', text: clean, annotations: [{ type: 'speech_metadata', style: TTS_STYLE }] }] }],
+      response_format: { type: 'audio' },
+      generation_config: { speech_config: [{ voice: v }] },
+    }),
+  })
+  const body = await r.json().catch(() => ({}))
+  if (!r.ok) throw Object.assign(new Error('Gemini speech failed: ' + (body?.error?.message || r.status)), { status: 502 })
+  const audio = (body.steps || []).filter((x) => x.type === 'model_output').flatMap((x) => x.content || []).filter((c) => c.type === 'audio').pop()
+  if (!audio?.data) throw Object.assign(new Error('Gemini sent no audio back.'), { status: 502 })
+  const buf = Buffer.from(audio.data, 'base64')
+  try { fs.mkdirSync(TTS_DIR, { recursive: true }); fs.writeFileSync(file, buf) } catch { /* still play it */ }
+  return buf
+}
 
 // --- state ---
 let state
@@ -206,7 +242,17 @@ const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x')
   const parts = url.pathname.split('/').filter(Boolean) // e.g. ['api','state']
   try {
-    if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, hasKey: HAS_KEY, model: HAS_KEY ? MODEL : null })
+    if (req.method === 'GET' && url.pathname === '/api/health') return send(res, 200, { ok: true, hasKey: HAS_KEY, model: HAS_KEY ? MODEL : null, tts: !!GEMINI_KEY(), ttsVoice: TTS_VOICE, ttsVoices: TTS_VOICES })
+
+    // POST /api/tts { text, voice? } -> audio/wav, read by Gemini
+    if (req.method === 'POST' && url.pathname === '/api/tts') {
+      const body = await readBody(req)
+      try {
+        const wav = await speakWithGemini(body.text, body.voice)
+        res.writeHead(200, { 'content-type': 'audio/wav', 'cache-control': 'private, max-age=86400', 'access-control-allow-origin': '*' })
+        return res.end(wav)
+      } catch (e) { return send(res, e.status || 500, { error: e.message }) }
+    }
     if (req.method === 'GET' && url.pathname === '/api/state') {
       const task = todaysTask()
       const stu = findStu(ME)
@@ -283,10 +329,13 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'POST' && url.pathname === '/api/peerrevision') {
       const task = todaysTask()
       const today = localDay()
-      let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today)
+      const body = await readBody(req)
+      const stu = findStu(ME)
+      // the grade-2 prototype asks for the grade-2 drafts; otherwise the student's own grade decides
+      const band = body.band === 'g2' ? 'g2' : bandFor(stu?.gradeLevel ?? 6)
+      let sub = state.submissions.find((x) => x.isPeerRevision && x.peerTaskId === task.id && x.peerDate === today
+        && (findAsg(x.assignmentId)?.gradeBand || 'mid') === band)
       if (!sub) {
-        const stu = findStu(ME)
-        const band = bandFor(stu?.gradeLevel ?? 6)
         const t = task.bands[band]
         const asg = { id: uid('asg'), title: `Daily Revision Challenge: help ${task.author}`, genre: task.genre, type: 'Revision Challenge',
           format: null, isPeerRevision: true, gradeLevel: stu?.gradeLevel ?? 6, gradeBand: band, teacher: { name: task.author, initials: '🤖' },

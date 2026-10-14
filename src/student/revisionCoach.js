@@ -42,6 +42,10 @@ export const COACH = {
   'Varies sentence length and beginnings': { ask: 'Do the sentences start in different ways?', tip: 'Change how some sentences begin, so they don\'t all start the same way.', starter: null },
   'Events connect — one leads to the next': { ask: 'Does each event lead to the next one?', tip: 'Link the events with words like "after that," "until," or "as soon as."', starter: 'After that, ' },
   'Ending resolves the story, not just stops it': { ask: 'Does the ending wrap up the story instead of just stopping?', tip: 'Add an ending that shows how things changed.', starter: 'From then on, ' },
+  // grade 2 (the word-swap lines are handled by their own tap-a-word step)
+  'Tells why, using "because"': { ask: 'Does Pip tell why?', tip: 'Type one sentence that tells why. Use the word "because."', starter: 'Because ' },
+  'Tells one more fact': { ask: 'Does Pip give enough facts?', tip: 'Type one more true fact.', starter: 'Also, ' },
+  'Has an ending': { ask: 'Does the story have an ending?', tip: 'Type one sentence that tells how it ended.', starter: 'In the end, ' },
 }
 
 export const coachFor = (text) => COACH[text] || { ask: text + '?', tip: 'Revise Pip\'s draft so it does this.', starter: null }
@@ -56,7 +60,7 @@ export function wordsThatWork(rule, max = 5) {
 export function offending(rule, text) {
   if (!rule) return []
   const t = (text || '').toLowerCase().replace(/[’]/g, "'")
-  if (rule.type === 'notContains' || rule.type === 'phraseRemoved') return rule.any.filter((p) => t.includes(p.toLowerCase())).map((p) => p.trim())
+  if (rule.type === 'notContains' || rule.type === 'phraseRemoved' || rule.type === 'noWord') return rule.any.filter((p) => t.includes(p.toLowerCase())).map((p) => p.trim())
   if (rule.type === 'all' || rule.type === 'any') return rule.of.flatMap((r) => offending(r, text))
   return []
 }

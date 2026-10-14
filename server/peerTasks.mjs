@@ -41,6 +41,7 @@ export function checkRule(rule, text, original = '') {
     case 'minParagraphs': return paragraphs(text).length >= rule.n
     case 'contains': return rule.any.some((p) => t.includes(norm(p)))
     case 'notContains': return !rule.any.some((p) => t.includes(norm(p)))
+    case 'noWord': return !rule.any.some((p) => new RegExp('\\b' + norm(p).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b').test(t))
     case 'phraseRemoved': return !rule.any.some((p) => t.includes(norm(p)))
     case 'distinctOpeners': {
       const firsts = sentences(text).map((s) => (wordList(s)[0] || ''))
@@ -389,6 +390,52 @@ export const PEER_TASKS = [
       checklist: narMid(['soft', 'warm', 'chirp', 'trembled', 'quiet', 'feathers', 'cold', 'breath']) } } },
 ]
 
-export const bandFor = (grade) => (grade <= 5 ? 'elem' : 'mid')
+/* ---------- grade 2 ----------
+ * Second grade (Kennady, 2026-10-14, "make 2nd grade a little different"): a 2-3 sentence draft with two problems. One weak
+ * word the student swaps by tapping a better one (one choice is no better, so it is still a choice), and one short sentence
+ * the student TYPES ("they need to be typing to practice"): a because-reason, one more fact, or an ending.
+ */
+const sentCount = (t) => sentences(t).length
+const swapItem = (word, better, meh) => ({ ...item(`Uses a better word than "${word}"`, { type: 'noWord', any: [word] }), swap: { word, better, meh } })
+const G2_TYPED = {
+  argument: () => item('Tells why, using "because"', has('because')),
+  informational: (text) => item('Tells one more fact', all(sent(sentCount(text) + 1), added(4))),
+  narrative: () => item('Has an ending', all(has('in the end', 'at last', 'finally', 'from then on', 'after that', 'the next day'), added(3))),
+}
+const G2 = {
+  pr_recess:      ['Recess should be longer. Recess is fun.', 'fun', ['exciting', 'awesome'], 'ok'],
+  pr_uniform:     ['Uniforms are bad. They are not nice to wear.', 'nice', ['comfy', 'soft'], 'good'],
+  pr_homework:    ['Homework should be short. Homework is hard stuff.', 'stuff', ['work', 'math'], 'things'],
+  pr_phones:      ['Kids should not have phones in class. Phones are bad.', 'bad', ['distracting', 'noisy'], 'not nice'],
+  pr_yearround:   ['We should have school in the summer. Summer is so long and bad.', 'bad', ['dull', 'lonely'], 'not nice'],
+  pr_classpet:    ['Our class should get a pet. A pet is nice.', 'nice', ['cuddly', 'friendly'], 'ok'],
+  pr_recycle:     ['We should all recycle. It is good.', 'good', ['helpful', 'smart'], 'fine'],
+  pr_starttime:   ['School should start later. Mornings are bad.', 'bad', ['sleepy', 'rushed'], 'not fun'],
+  pr_desert:      ['A desert is hot and dry. Lots of stuff can live there.', 'stuff', ['animals', 'plants'], 'things'],
+  pr_volcano:     ['A volcano is a big mountain. Hot stuff comes out of the top.', 'stuff', ['lava', 'rock'], 'things'],
+  pr_bees:        ['Bees make honey. Bees are nice.', 'nice', ['busy', 'helpful'], 'ok'],
+  pr_watercycle:  ['Water goes up into the sky. Then it comes back down as stuff.', 'stuff', ['rain', 'snow'], 'things'],
+  pr_sharks:      ['Sharks live in the ocean. They have lots of big teeth.', 'big', ['sharp', 'pointy'], 'very big'],
+  pr_egypt:       ['Egypt has pyramids. The pyramids are really big things.', 'things', ['tombs', 'buildings'], 'stuff'],
+  pr_hurricane:   ['A hurricane is a big storm. It has wind that is bad.', 'bad', ['strong', 'fast'], 'not nice'],
+  pr_solar:       ['The sun is a star. It is very big and nice.', 'nice', ['hot', 'bright'], 'good'],
+  pr_lostdog:     ['My dog ran away. I looked and looked. I was sad.', 'sad', ['worried', 'upset'], 'not happy'],
+  pr_newschool:   ['I went to a new school. The kids were nice.', 'nice', ['friendly', 'kind'], 'ok'],
+  pr_storm:       ['There was a storm at night. The thunder was big.', 'big', ['loud', 'booming'], 'very big'],
+  pr_game:        ['We had a soccer game. I kicked the ball. It was good.', 'good', ['exciting', 'amazing'], 'ok'],
+  pr_attic:       ['I went up to the attic. It was old and bad.', 'bad', ['dusty', 'creepy'], 'not nice'],
+  pr_fair:        ['I went to the fair. The rides were fun.', 'fun', ['fast', 'wild'], 'ok'],
+  pr_robotgarden: ['A robot woke up in a garden. The flowers were nice.', 'nice', ['bright', 'pretty'], 'ok'],
+  pr_snowday:     ['It snowed all night. The snow was good.', 'good', ['soft', 'deep'], 'ok'],
+  pr_bird:        ['I found a bird in my yard. Its wing was bad.', 'bad', ['hurt', 'broken'], 'not good'],
+}
+const G2_PROMPT = { argument: 'Help Pip make this opinion stronger.', informational: 'Help Pip make these facts better.', narrative: 'Help Pip make this story better.' }
+for (const task of PEER_TASKS) {
+  const g = G2[task.id]; if (!g) continue
+  const [weakText, word, better, meh] = g
+  task.bands.g2 = { prompt: G2_PROMPT[task.genre], weakText, checklist: [swapItem(word, better, meh), G2_TYPED[task.genre](weakText)] }
+}
+
+export const bandFor = (grade) => (grade <= 2 ? 'g2' : grade <= 5 ? 'elem' : 'mid')
 // Rotates at the student's local midnight, not UTC.
 export const todaysTask = () => PEER_TASKS[dayNumber() % PEER_TASKS.length]

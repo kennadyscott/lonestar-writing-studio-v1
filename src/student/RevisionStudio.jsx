@@ -231,24 +231,9 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
   const [spot, setSpot] = useState({}) // rubric index -> what they answered (true = "yes, it does")
   const [summary, setSummary] = useState(false)
   const box = useRef(null)
-  const caret = useRef(null) // where the student last left the cursor in the draft; a tapped starter or word goes there
   const done = !!sub.completedAt
   const fixedNow = (r) => checkRule(r.check, content, original.content)
   const fixedCount = problems.filter(fixedNow).length
-
-  function insert(text) {
-    const el = box.current
-    const at0 = Math.min(caret.current ?? (content || '').length, (content || '').length)
-    const before = (content || '').slice(0, at0)
-    // a starter ending in ", " runs into the sentence after it: "First, solar power…", not "First, Solar power…"
-    let after = (content || '').slice(at0)
-    if (/,\s$/.test(text) && /^[A-Z][a-z]/.test(after)) after = after[0].toLowerCase() + after.slice(1)
-    const pad = before && !/\s$/.test(before) ? ' ' : ''
-    edit(before + pad + text + after)
-    const pos = (before + pad + text).length
-    caret.current = pos
-    requestAnimationFrame(() => { if (!el) return; el.focus(); el.setSelectionRange(pos, pos) })
-  }
 
   const p = problems[at]
   const coach = p && coachFor(p.text)
@@ -265,8 +250,7 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
           <b><Glossed text={t("{name}'s draft — fix it right here", { name: asg.teacher.name })} /></b>
           <span>{t('{n} words · autosaves', { n: (content || '').split(/\s+/).filter(Boolean).length })}</span>
         </div>
-        <textarea ref={box} value={content} onChange={(e) => { caret.current = e.target.selectionStart; edit(e.target.value) }} disabled={done}
-          onSelect={(e) => { caret.current = e.currentTarget.selectionStart }} aria-label={t("{name}'s draft — fix it right here", { name: asg.teacher.name })} />
+        <textarea ref={box} value={content} onChange={(e) => edit(e.target.value)} disabled={done} aria-label={t("{name}'s draft — fix it right here", { name: asg.teacher.name })} />
       </div>
 
       <div className="card rev-coach" aria-live="polite">
@@ -311,8 +295,9 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
               <div className="rev-label">2 · {t('Fix it')}</div>
               <p className="rev-tip">{say(coach.tip)}</p>
               {look.length > 0 && <div className="rev-look">{t('Look for:')} {look.map((w) => <code key={w}>{w}</code>)}</div>}
-              {ideas.length > 0 && <div className="rev-look ideas">{t('Words that would work:')} {ideas.map((w) => <button type="button" key={w} onClick={() => insert(w + ' ')}>{w}</button>)}</div>}
-              {coach.starter && <button type="button" className="rev-starter" onClick={() => insert(coach.starter)}>+ {t('Add')} “{coach.starter.trim()}…”</button>}
+              {/* hints only: the student types every change ("I want them to actually type though", 2026-10-14) */}
+              {ideas.length > 0 && <div className="rev-look ideas">{t('Words that would work:')} {ideas.map((w) => <span key={w}>{w}</span>)}</div>}
+              {coach.starter && <div className="rev-hint">{t('Try starting with:')} <em>{coach.starter.trim()}…</em></div>}
               <div className={'rev-status' + (met ? ' ok' : '')}>{met ? <>✓ {t('Fixed!')}</> : t('Not fixed yet — change the draft on the left.')}</div>
               <div className="rev-nav">
                 {at > 0 && <button type="button" className="rev-link" onClick={() => setAt(at - 1)}>← {t('Back')}</button>}

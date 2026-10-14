@@ -6,7 +6,6 @@ import { writingStreak } from '../lib/streak.js'
 import { LanguageBridgePanel } from './LanguageBridge.jsx'
 import { ReadAloudText } from './ReadAloud.jsx'
 import { useSay, Directions, Glossed } from './Scaffold.jsx'
-import { useLook } from '../lib/look.js'
 
 /*
  * Quick Write — the live product's 3-part flow, refreshed in the studio brand:
@@ -107,7 +106,6 @@ function ShareToWall({ submissionId, shared, busy, teacherName, onShare }) {
 
 export default function QuickWritePage({ state, me, onBack, onChange }) {
   const t = useT()
-  const look = useLook()
   const say = useSay()
   const supportLevel = me?.supportLevel || null
   // teacher-configured goal time (from their system)
@@ -260,8 +258,6 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
     } finally { setBusy(false) }
   }
 
-  // B (simpler, 2026-10-14): the intro is the picture, the title, the prompt and Start writing; no labels and no tips strip.
-  const simple = look === 'b'
   return (
     <div>
       {onBack && <button className="backlink" onClick={leave}>{t('← Back to Dashboard')}</button>}
@@ -280,21 +276,21 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                   little) instead of the column width. 310px = header + card padding + the three
                   cards below, so the whole intro fits on one screen. */}
               <img src={`${import.meta.env.BASE_URL || '/'}qw-hero-forest.jpg`} alt=""
-                style={{ width: '100%', height: simple ? 'clamp(220px, calc(100vh - 230px), 460px)' : 'clamp(200px, calc(100vh - 310px), 400px)', objectFit: 'cover', objectPosition: 'center 55%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
+                style={{ width: '100%', height: 'clamp(200px, calc(100vh - 310px), 400px)', objectFit: 'cover', objectPosition: 'center 55%', borderRadius: 18, display: 'block', boxShadow: '0 12px 30px rgba(30,25,40,.22)' }} />
               <div>
-                {!simple && <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <span style={{ width: 50, height: 50, borderRadius: '50%', background: '#e9f5fb', display: 'grid', placeItems: 'center', fontSize: 23 }}>🪶</span>
                   <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase' }}>{t('Writing Topic')}</span>
-                </div>}
+                </div>
                 <div style={{ fontSize: 'clamp(32px, 6vh, 46px)', fontWeight: 800, color: '#0d2440', lineHeight: 1.1, margin: '8px 0 8px' }}>{pick.title}</div>
-                {!simple && <div className="constellation-rule" aria-hidden><i /><i /><i /><span /></div>}
-                {!simple && <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>{t('Writing Prompt')}</div>}
+                <div className="constellation-rule" aria-hidden><i /><i /><i /><span /></div>
+                <div style={{ fontSize: 15, fontWeight: 800, letterSpacing: 2, color: '#0f97c2', textTransform: 'uppercase', marginBottom: 8 }}>{t('Writing Prompt')}</div>
                 <div style={{ fontSize: 'clamp(20px, 3.6vh, 26px)', fontWeight: 700, color: '#10294a', lineHeight: 1.3, marginBottom: 20, textWrap: 'pretty' }}>{pick.prompt}</div>
                 <button className="btn lg" style={{ fontSize: 17, padding: '13px 26px', borderRadius: 14 }} onClick={() => setStage('writing')}>{t('Start writing')}</button>
               </div>
             </div>
             {/* benefits strip */}
-            {!simple && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: '1px solid var(--line)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', borderTop: '1px solid var(--line)' }}>
               {[
                 ['⭐', '#2e9e6b', 'Share Your Ideas', 'Your voice matters. Big ideas can spark real change!'],
                 ['🚀', '#2f8ceb', 'Be Creative', 'There are no wrong answers — just your unique voice.'],
@@ -308,7 +304,7 @@ export default function QuickWritePage({ state, me, onBack, onChange }) {
                   </span>
                 </div>
               ))}
-            </div>}
+            </div>
           </div>
         )}
 

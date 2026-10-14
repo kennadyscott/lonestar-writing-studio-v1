@@ -1,9 +1,14 @@
 import React, { useState } from 'react'
-import { BRAND } from '../lib/brand.js'
 import ModuleBadge from '../components/ModuleBadge.jsx'
 import { useLessonArt } from '../lib/lessonArt.js'
 import { useT } from '../lib/i18n/index.jsx'
 import { Directions, Glossed, useSay } from './Scaffold.jsx'
+import { useLook } from '../lib/look.js'
+
+// B (simpler, 2026-10-14: "This is the next zone I want to attempt to simplify"): the same page with fewer words on it:
+// a small Back link, no band labels, short module names, no blurb or "to go", no lesson numbers, no stars.
+/** The short module names, shared with the home page's Luna banner. */
+export const MODULE_SHORT = { m1: 'SCR', m2: 'ECR', m3: 'Stellar', m4: 'Process', m5: 'Revision', m6: 'Editing' }
 
 /*
  * Luna's Writing Nook — the student's module page.
@@ -116,9 +121,10 @@ function BandHead({ modules, right }) {
 // A — every module in one slim row.
 function JourneyAll({ modules, currentId, onPick }) {
   const t = useT()
+  const simple = useLook() === 'b'
   return (
-    <div style={{ ...BAND, padding: '7px 16px 8px', marginBottom: 12 }}>
-      <BandHead modules={modules} />
+    <div style={{ ...BAND, padding: simple ? '8px 16px' : '7px 16px 8px', marginBottom: 12 }}>
+      {!simple && <BandHead modules={modules} />}
       <div style={{ display: 'flex', alignItems: 'flex-start' }}>
         {modules.map((m, i) => {
           const cur = m.id === currentId
@@ -133,7 +139,7 @@ function JourneyAll({ modules, currentId, onPick }) {
                   {done && <span style={{ position: 'absolute', top: -3, right: -4, width: 14, height: 14, borderRadius: '50%', background: '#2e9e6b', color: '#fff', display: 'grid', placeItems: 'center', fontSize: 8.5, fontWeight: 800 }}>✓</span>}
                 </div>
                 <div style={{ fontSize: 10, fontWeight: 800, lineHeight: 1.2, color: cur ? '#fff' : '#cfe7f3', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '100%' }}>
-                  <span style={{ color: cur ? '#f5c542' : 'inherit' }}>M{i + 1}</span> · {t(m.label)}
+                  {simple ? t(MODULE_SHORT[m.id] || m.label) : <><span style={{ color: cur ? '#f5c542' : 'inherit' }}>M{i + 1}</span> · {t(m.label)}</>}
                 </div>
               </button>
             </React.Fragment>
@@ -156,19 +162,20 @@ function UpNextLesson({ a, isUp, onOpen }) {
   const say = useSay()
   const current = a.status === 'in_progress'
   const passed = a.status === 'passed'
+  const simple = useLook() === 'b'
   return (
     <div className="nook-upnext" key={a.n} role="button" tabIndex={0} onClick={() => onOpen?.(a)}
       onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onOpen?.(a)}>
       <div className="nook-upnext-art"><img src={LESSON_ART(a.art)} alt="" /></div>
       <div className="nook-upnext-words">
-        <div className="nook-upnext-kicker">{passed ? t('Completed') : current ? t('Up next') : isUp ? t('Your next lesson') : t('Not started')} · {a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>
+        {!simple && <div className="nook-upnext-kicker">{passed ? t('Completed') : current ? t('Up next') : isUp ? t('Your next lesson') : t('Not started')} · {a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</div>}
         <div className="nook-upnext-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}>
           <Glossed text={t(a.title)} />
         </div>
         {a.sub && <div style={{ fontSize: 14, color: '#4a6f8c', fontWeight: 600 }}>{say(a.sub)}</div>}
-        <Stars n={a.stars} size={22} dimColor="#d3dbe3" />
+        {!simple && <Stars n={a.stars} size={22} dimColor="#d3dbe3" />}
         <button className="nook-upnext-btn" onClick={(e) => { e.stopPropagation(); onOpen?.(a) }}>
-          {passed ? t('Review →') : current ? t('✦ Continue →') : t('Start →')}
+          {simple ? (passed ? t('Review') : current ? t('Continue') : t('Start')) : passed ? t('Review →') : current ? t('✦ Continue →') : t('Start →')}
         </button>
       </div>
     </div>
@@ -180,6 +187,7 @@ function RailLesson({ a, isUp, picked, onOpen }) {
   const t = useT()
   const LESSON_ART = useLessonArt()
   const passed = a.status === 'passed'
+  const simple = useLook() === 'b'
   // nothing is locked: lessons, like modules, can be done in any order (her note, 2026-10-02)
   return (
     <div className={`nook-rail-row${isUp ? ' up' : ''}${picked ? ' picked' : ''}`} role="button" tabIndex={0}
@@ -188,7 +196,7 @@ function RailLesson({ a, isUp, picked, onOpen }) {
       aria-current={isUp ? 'step' : undefined}>
       <span className="nook-rail-thumb"><img src={LESSON_ART(a.art)} alt="" /></span>
       <span className="nook-rail-words">
-        <span className="nook-mini-kicker">{a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</span>
+        {!simple && <span className="nook-mini-kicker">{a.final ? t('FINAL CHALLENGE') : t('LESSON {n}', { n: a.n })}</span>}
         <span className="nook-mini-title" onClick={(e) => { if (e.target.closest && e.target.closest('button')) e.stopPropagation() }}><Glossed text={t(a.title)} /></span>
       </span>
       {isUp ? <span className="nook-rail-now">{t('Now')}</span>
@@ -205,10 +213,11 @@ function FocusLessons({ acts, onOpen }) {
   const up = acts.find((a) => a.status === 'in_progress') || acts.find((a) => a.status === 'todo') || acts[acts.length - 1]
   const [pickedN, setPickedN] = React.useState(up?.n)
   const shown = acts.find((a) => a.n === pickedN) || up
+  const simple = useLook() === 'b'
   return (
     <div className="nook-railwrap">
       <nav className="nook-rail" aria-label={t('All lessons')}>
-        <div className="nook-rest-label">{t('All lessons')}</div>
+        {!simple && <div className="nook-rest-label">{t('All lessons')}</div>}
         {acts.map((a) => <RailLesson key={a.n} a={a} isUp={a === up} picked={a === shown} onOpen={(x) => setPickedN(x.n)} />)}
       </nav>
       <UpNextLesson a={shown} isUp={shown === up} onOpen={onOpen} />
@@ -233,6 +242,7 @@ export default function LunaPage({ state, me, onBack, onOpenLesson, initialModul
   // English label: LessonPage translates it on render, so switching language
   // mid-lesson does not leave a snapshot of the old one on screen.
   const open = (a) => onOpenLesson?.(a, `Module ${currentIdx + 1}: ${current.label}`)
+  const simple = useLook() === 'b'
 
   return (
     <div style={{ margin: '-26px calc(50% - 50vw) -70px', padding: '16px 0 18px', minHeight: 'calc(100vh - 64px)', position: 'relative', boxSizing: 'border-box', color: 'var(--ink)',
@@ -242,18 +252,17 @@ export default function LunaPage({ state, me, onBack, onOpenLesson, initialModul
 
       <div style={{ position: 'relative', maxWidth: 1500, margin: '0 auto', padding: '0 clamp(22px, 2.6vw, 56px)' }}>
         {/* header */}
-        <div className="nook-head" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
-          {/* her logo, unchanged, given depth with light (2026-10-02: "I like my current logo, it's just a little flat") */}
-          <span className="luna-lockup" style={{ '--lockup': `url(${BRAND.lunaAdventure})` }}>
-            <img src={BRAND.lunaAdventure} alt={t("Luna's Writing Adventure")} style={{ height: 'clamp(51px, 4.8vw, 70px)', width: 'auto', display: 'block', marginTop: 2 }} />
-          </span>
+        {simple ? (onBack && <button className="backlink" onClick={onBack}>{t('← Back')}</button>) : <div className="nook-head" style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 12, flexWrap: 'wrap' }}>
+          {/* No logo up here (Kennady, 2026-10-14: "get rid of the logo at the top on both versions"); the page's own title says where you are. */}
+          <h1 className="sr-only">{t("Luna's Writing Adventure")}</h1>
           <div style={{ flex: 1 }} />
           {onBack && (
             <button onClick={onBack} style={{ background: 'rgba(255,255,255,.92)', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '9px 16px', fontWeight: 800, fontSize: 13, color: NAVY, boxShadow: 'var(--shadow)', whiteSpace: 'nowrap' }}>
               {t('← Back to Previous Page')}
             </button>
           )}
-        </div>
+        </div>}
+        {simple && <h1 className="sr-only">{t("Luna's Writing Adventure")}</h1>}
 
         <JourneyAll modules={modules} currentId={current.id} onPick={(id) => { setPickedId(id); onPickModule?.(id) }} />
 
@@ -266,13 +275,13 @@ export default function LunaPage({ state, me, onBack, onOpenLesson, initialModul
                 <div style={{ flex: 1, minWidth: 260 }}>
                   <div style={{ fontFamily: SERIF, fontSize: 'clamp(22px, 2vw, 30px)', fontWeight: 700, color: NAVY, lineHeight: 1.15 }}>{MISSION_TITLE[current.id] ? t(MISSION_TITLE[current.id]) : t('Master the {label}', { label: t(current.label) })}</div>
                   {/* The mission blurb is the page's directions — the one Listen on this page. */}
-                  <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}><Directions text={MISSION_BLURB[current.id]} /></div>
+                  {!simple && <div style={{ fontSize: 13, color: '#4a6f8c', fontWeight: 600, marginTop: 2 }}><Directions text={MISSION_BLURB[current.id]} /></div>}
                 </div>
                 <div style={{ minWidth: 220, maxWidth: 320, flex: '0 1 320px' }}>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--link)', marginBottom: 4 }}>{t('{done} of {total} lessons', { done, total: acts.length })} · {left === 0 ? t('mission complete!') : t('{n} to go', { n: left })}</div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: 'var(--link)', marginBottom: 4 }}>{t('{done} of {total} lessons', { done, total: acts.length })}{simple ? '' : <> · {left === 0 ? t('mission complete!') : t('{n} to go', { n: left })}</>}</div>
                   <div style={{ position: 'relative', height: 12, background: '#e6eef3', borderRadius: 8, overflow: 'hidden' }}>
                     <div style={{ height: '100%', width: `${pct * 100}%`, background: 'linear-gradient(90deg,#02b2d5,#0a7dba)', borderRadius: 8 }} />
-                    <span style={{ position: 'absolute', right: 6, top: 0, fontSize: 10, fontWeight: 800, lineHeight: '12px', color: '#4a6f8c' }}>{Math.round(pct * 100)}%</span>
+                    {!simple && <span style={{ position: 'absolute', right: 6, top: 0, fontSize: 10, fontWeight: 800, lineHeight: '12px', color: '#4a6f8c' }}>{Math.round(pct * 100)}%</span>}
                   </div>
                 </div>
               </div>

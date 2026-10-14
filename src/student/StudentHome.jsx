@@ -15,6 +15,7 @@ import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
 import { useLook } from '../lib/look.js'
+import { MODULE_SHORT } from './LunaPage.jsx'
 
 
 const TODAY = new Date('2026-07-02T00:00:00')
@@ -59,7 +60,6 @@ function WayTile({ icon, title, sub, onClick, busy }) {
   )
 }
 
-const MODULE_SHORT = { m1: 'SCR', m2: 'ECR', m3: 'Stellar', m4: 'Process', m5: 'Revision', m6: 'Editing' }
 
 function LunaNook({ modules, onLuna }) {
   const t = useT()

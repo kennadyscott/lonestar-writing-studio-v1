@@ -16,20 +16,9 @@ const THUMBS = ['quill-forest', 'cards-forest', 'notebook-forest', 'desk-forest'
 // Stable per piece: same id always draws the same picture.
 const thumbFor = (id) => THUMBS[[...String(id)].reduce((a, c) => a + c.charCodeAt(0), 0) % THUMBS.length]
 
-// Module-level option lists keep their English labels; every label below is run
-// through t() where it is rendered.
-const TYPES = [
-  ['all', 'All types'],
-  ['free', 'Free Write'],
-  ['quick', 'Quick Write'],
-  ['assign', 'Assignments'],
-]
-const SORTS = [
-  ['newest', 'Sort: Newest'],
-  ['oldest', 'Sort: Oldest'],
-  ['longest', 'Sort: Longest'],
-]
-
+// Cleaned up (Kennady, 2026-10-14: "Next, let's cleanup the Writing Bank"): no stats strip, search, type or sort; the tabs carry
+// the counts, newest first; each row keeps its picture, title, status and first line, one main button, and a small delete.
+// The option list keeps its English labels; every label is run through t() where it is rendered.
 const FILTERS = [
   ['all', 'All'],
   ['progress', 'In progress'],
@@ -50,9 +39,6 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
   const say = useSay()
   const locale = useLocale()
   const [filter, setFilter] = useState('all')
-  const [q, setQ] = useState('')
-  const [type, setType] = useState('all')
-  const [sort, setSort] = useState('newest')
   const [confirmId, setConfirmId] = useState(null)
   const [confirmAction, setConfirmAction] = useState(null) // { kind: 'publish'|'share', sub, a }
   const [busy, setBusy] = useState(false)
@@ -82,13 +68,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
 
   const visible = pieces
     .filter((p) => (filter === 'all' ? true : filter === 'published' ? p.sub.published : (!p.sub.published && !p.sub.completedAt)))
-    .filter((p) => (type === 'all' ? true : p.kind === type))
-    .filter((p) => {
-      const needle = q.trim().toLowerCase()
-      if (!needle) return true
-      return (p.name || '').toLowerCase().includes(needle) || (p.excerpt || '').toLowerCase().includes(needle)
-    })
-    .sort((x, y) => (sort === 'longest' ? y.wcount - x.wcount : sort === 'oldest' ? (x.at > y.at ? 1 : -1) : (y.at > x.at ? 1 : -1)))
+    .sort((x, y) => (y.at > x.at ? 1 : -1))
 
   const total = pieces.length
   const publishedCount = pieces.filter((p) => p.sub.published).length
@@ -137,65 +117,22 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
       {onBack && <button className="backlink on-scene" onClick={onBack}>{t('← Back to Dashboard')}</button>}
 
       {/* title — on a frosted panel so it reads over the forest (2026-09-24) */}
-      <div className="glass-head" style={{ marginBottom: 16 }}>
-        <div className="eyebrow">{t('The Writing Studio')}</div>
-        <h1 className="page" style={{ margin: '2px 0' }}>{t('🗂️ My Writing Bank')}</h1>
-        <p className="page-sub" style={{ margin: 0 }}>
-          <Directions text="Every piece you've started — free writes, quick writes and assignments, all in one place." inline />
-          {onWall && <> · <button onClick={onWall} style={{ color: 'var(--link)', fontWeight: 800, fontSize: 14 }}>{t('🌟 Visit the Writing Wall →')}</button></>}
-        </p>
-      </div>
-
-      {/* stats + new piece */}
-      <div className="bank-head">
-        <div className="card bank-stats">
-          {[
-            { icon: '📄', bg: '#e5f1fb', n: total, label: 'pieces', sub: 'Total writing pieces' },
-            { icon: '✅', bg: '#e6f6ee', n: publishedCount, label: 'published', sub: 'Shared with the world' },
-            { icon: '✏️', bg: '#fdf3df', n: progressCount, label: 'in progress', sub: 'Keep going — great ideas ahead!' },
-          ].map((x) => (
-            <div key={x.label} className="bank-stat">
-              <span className="bank-stat-icon" style={{ background: x.bg }} aria-hidden="true">{x.icon}</span>
-              <div style={{ minWidth: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, flexWrap: 'wrap' }}>
-                  <b>{x.n}</b>
-                  <span className="bank-stat-label">{t(x.label)}</span>
-                </div>
-                <div className="bank-stat-sub">{t(x.sub)}</div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div className="glass-head bank-top" style={{ marginBottom: 14 }}>
+        <h1 className="page" style={{ margin: 0 }}>{t('🗂️ My Writing Bank')}</h1>
+        <span style={{ flex: 1 }} />
+        {onWall && <button className="bank-wall-link" onClick={onWall}>{t('🌟 Visit the Writing Wall →')}</button>}
         <button className="btn bank-new" onClick={startNew} disabled={busy}>
-          <span aria-hidden="true" style={{ width: 24, height: 24, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 15 }}>+</span>
-          {t('Start a New Piece')} <span aria-hidden="true" style={{ opacity: .7 }}>›</span>
+          <span aria-hidden="true" style={{ width: 22, height: 22, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'grid', placeItems: 'center', fontSize: 15 }}>+</span>
+          {t('Start a new piece')}
         </button>
       </div>
 
-      {/* filters + search + type + sort */}
-      <div className="card" style={{ padding: '10px 14px', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-        <div style={{ display: 'inline-flex', background: '#dcebf3', borderRadius: 11, padding: 3 }}>
-          {FILTERS.map(([k, label]) => (
-            <button key={k} onClick={() => setFilter(k)}
-              style={{ padding: '8px 16px', borderRadius: 9, fontSize: 13, fontWeight: 800,
-                background: filter === k ? 'var(--teal-mid)' : 'transparent', color: filter === k ? '#fff' : 'var(--teal)' }}>
-              {t(label)}
-            </button>
-          ))}
-        </div>
-        <div className="bank-search">
-          <span aria-hidden="true" style={{ fontSize: 14, color: 'var(--muted)' }}>🔍</span>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search your writing pieces…')}
-            aria-label={t('Search your writing pieces…')} />
-          {q.trim() && (
-            <button type="button" className="bank-search-clear" onClick={() => setQ('')}>{t('Clear search')}</button>
-          )}
-        </div>
-        {[[type, setType, TYPES], [sort, setSort, SORTS]].map(([val, set, opts], i) => (
-          <select key={i} value={val} onChange={(e) => set(e.target.value)}
-            style={{ border: '1px solid var(--line)', borderRadius: 10, padding: '9px 12px', font: 'inherit', fontSize: 13, fontWeight: 700, color: 'var(--ink)', background: '#fff' }}>
-            {opts.map(([k, label]) => <option key={k} value={k}>{t(label)}</option>)}
-          </select>
+      {/* the tabs carry the counts */}
+      <div className="bank-tabs" role="tablist" aria-label={t('Your pieces')}>
+        {FILTERS.map(([k, label]) => (
+          <button key={k} role="tab" aria-selected={filter === k} className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>
+            {t(label)} <b>{k === 'all' ? total : k === 'published' ? publishedCount : progressCount}</b>
+          </button>
         ))}
       </div>
 
@@ -203,18 +140,10 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
         <div className="card" role="status" style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
           <div style={{ fontSize: 40, marginBottom: 8 }} aria-hidden="true">🗂️</div>
           <Directions text={
-            q.trim()
-              ? 'Nothing matches "{query}".'
-              : pieces.length === 0
-                ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
-                : type === 'assign'
-                  ? 'No assignments turned in yet. Finish one from your Home page and it shows up here.'
-                  : type === 'quick'
-                  ? 'No Quick Writes yet. Finish one and it shows up here.'
-                  : type === 'free'
-                    ? 'No Free Writes yet. Start one and it shows up here.'
-                    : 'Nothing matches these filters.'
-          } vars={q.trim() ? { query: q.trim() } : undefined} inline />
+            pieces.length === 0
+              ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
+              : filter === 'published' ? 'Nothing published yet.' : 'Nothing in progress right now.'
+          } inline />
         </div>
       )}
 
@@ -233,7 +162,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
                 {excerpt || t('Nothing written yet')}{excerpt ? '…' : ''}
               </div>
               <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3, fontWeight: 600 }}>
-                📄 {t('{n} words', { n: wcount })} · 📚 <Glossed text={t(sub.drafts.length > 1 ? '{n} drafts' : '{n} draft', { n: sub.drafts.length })} /> · 🏷️ {kind === 'assign' ? [t('Assignment'), a.type, a.format].filter(Boolean).join(' · ') : t(a.genre === 'free' ? 'Free Write' : 'Quick Write')} · 🕐 {t('Last updated {when}', { when: relTime(at) })}
+                {kind === 'assign' ? [t('Assignment'), a.format].filter(Boolean).join(' · ') : t(a.genre === 'free' ? 'Free Write' : 'Quick Write')} · {relTime(at)}
               </div>
             </div>
 
@@ -264,8 +193,8 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
                 )}
               </div>
               <button type="button" className="bank-delete" disabled={busy}
-                aria-label={t('Delete {title}', { title: name })}
-                onClick={() => setConfirmId(sub.id)}>{t('Delete')}</button>
+                aria-label={t('Delete {title}', { title: name })} title={t('Delete')}
+                onClick={() => setConfirmId(sub.id)}>🗑</button>
             </div>
             )}
           </li>

@@ -247,19 +247,14 @@ h1.page { font-size: 28px; font-weight: 700; margin: 4px 0 2px; color: var(--ink
 .piece-title { display: block; width: 100%; max-width: 720px; border: none; border-bottom: 1.5px solid transparent; background: transparent; padding: 2px 0 4px; margin: 0; font: inherit; font-size: 28px; font-weight: 700; letter-spacing: -.03em; color: var(--ink); outline: none; }
 .piece-title:focus { border-bottom-color: var(--gold); }
 .piece-title::placeholder { color: #8aa0b3; font-weight: 650; }
-.bank-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 14px; margin-bottom: 14px; align-items: stretch; }
-.bank-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 14px 4px; }
-.bank-stat { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-width: 0; }
-.bank-stat + .bank-stat { border-left: 1px solid var(--line); }
-.bank-stat-icon { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; font-size: 19px; flex-shrink: 0; }
-.bank-stat b { font-size: 22px; color: #0d2f55; }
-.bank-stat-label { font-size: 12.5px; font-weight: 700; color: var(--muted); }
-.bank-stat-sub { font-size: 11.5px; color: var(--muted); }
-.bank-new { padding: 0 26px; font-size: 15.5px; border-radius: 14px; background: linear-gradient(140deg, #0d2f55, #02384d); min-width: 230px; justify-content: center; gap: 10px; }
-.bank-search { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 4px 6px 4px 12px; }
-.bank-search input { flex: 1; min-width: 0; border: none; outline: none; font: inherit; font-size: 13.5px; color: var(--ink); background: transparent; padding: 8px 0; }
-.bank-search-clear { flex: none; min-height: 40px; padding: 0 12px; border-radius: 8px; background: #eef3f6; color: var(--ink); font-weight: 800; font-size: 13px; }
-.bank-search-clear:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.bank-new { padding: 10px 20px; font-size: 14.5px; border-radius: 12px; background: linear-gradient(140deg, #0d2f55, #02384d); justify-content: center; gap: 8px; }
+/* cleaned-up Writing Bank (2026-10-14): one header row, tabs with counts */
+.bank-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.bank-wall-link { background: none; border: 0; padding: 0; font: inherit; color: var(--link); font-weight: 800; font-size: 14px; cursor: pointer; }
+.bank-tabs { display: inline-flex; gap: 3px; background: #dcebf3; border-radius: 12px; padding: 3px; margin-bottom: 14px; }
+.bank-tabs button { padding: 8px 16px; border-radius: 9px; font-size: 13.5px; font-weight: 800; background: transparent; color: var(--teal); border: 0; cursor: pointer; }
+.bank-tabs button b { margin-left: 4px; font-weight: 900; opacity: .75; }
+.bank-tabs button.on { background: var(--teal-mid); color: #fff; }
 .bank-pieces { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
 .bank-piece { padding: 16px 20px; display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .bank-piece-copy { flex: 1; min-width: 220px; }
@@ -284,15 +279,12 @@ h1.page { font-size: 28px; font-weight: 700; margin: 4px 0 2px; color: var(--ink
 }
 .bank-row-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .bank-row-main { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.bank-delete { margin-left: 6px; padding: 10px 16px; min-height: 44px; border-radius: 10px; border: 1.5px solid #e7a8ae; background: #fff; color: #b42318; font-weight: 800; font-size: 13px; }
+.bank-delete { margin-left: 4px; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 10px; border: 1px solid transparent; background: transparent; font-size: 17px; opacity: .55; }
+.bank-delete:hover, .bank-delete:focus-visible { opacity: 1; border-color: #e7a8ae; }
 .bank-delete:hover { background: #fdeeee; }
 .bank-delete:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .bank-delete:disabled { opacity: .55; }
 @media (max-width: 720px) {
-  .bank-head { grid-template-columns: 1fr; }
-  .bank-stats { grid-template-columns: 1fr; padding: 4px 0; }
-  .bank-stat { padding: 12px 16px; }
-  .bank-stat + .bank-stat { border-left: none; border-top: 1px solid var(--line); }
   .bank-new { min-width: 0; width: 100%; min-height: 52px; }
   .bank-piece-copy { min-width: 0; flex-basis: 100%; }
   .bank-row-actions { flex-direction: column; align-items: stretch; width: 100%; }

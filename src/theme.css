@@ -155,12 +155,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .assign-list-b { flex: 1; }
 .assign-more-b { margin-left: auto; padding: 4px 10px; border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
 .assign-more-b:hover { color: var(--ink); text-decoration: underline; }
-html[data-band="2-3"] .assign-list-b, html[data-band="4-5"] .assign-list-b { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 14px; }
-html[data-band="2-3"] .assign-list-b .assign-row, html[data-band="4-5"] .assign-list-b .assign-row {
+html[data-band="2"] .assign-list-b, html[data-band="4-5"] .assign-list-b { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 14px; }
+html[data-band="2"] .assign-list-b .assign-row, html[data-band="4-5"] .assign-list-b .assign-row {
   padding: 15px 20px; border: 1px solid var(--line); border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(13,47,85,.07); }
-html[data-band="2-3"] .assign-list-b .assign-title, html[data-band="4-5"] .assign-list-b .assign-title { font-size: 18px; }
-html[data-band="2-3"] .assign-list-b .assign-meta, html[data-band="4-5"] .assign-list-b .assign-meta { margin-top: 8px; }
-html[data-band="2-3"] .assign-list-b .assign-go .btn, html[data-band="4-5"] .assign-list-b .assign-go .btn { padding: 11px 20px; font-size: 15px; border-radius: 12px; }
+html[data-band="2"] .assign-list-b .assign-title, html[data-band="4-5"] .assign-list-b .assign-title { font-size: 18px; }
+html[data-band="2"] .assign-list-b .assign-meta, html[data-band="4-5"] .assign-list-b .assign-meta { margin-top: 8px; }
+html[data-band="2"] .assign-list-b .assign-go .btn, html[data-band="4-5"] .assign-list-b .assign-go .btn { padding: 11px 20px; font-size: 15px; border-radius: 12px; }
 
 .luna-bar-mods { display: flex; align-items: flex-start; gap: 4px; flex-shrink: 0; }
 .luna-mod { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 62px; padding: 5px 2px; border-radius: 10px; cursor: pointer; }
@@ -2508,3 +2508,20 @@ body { font-size: 16px; }
 .dg-lastconf dl { margin: 0; display: grid; gap: 4px; }
 .dg-lastconf dt { margin-top: 8px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
 .dg-lastconf dd { margin: 0; font-size: 15px; line-height: 1.5; color: #33506b; }
+
+/* ---- Second grade (2026-10-14: 3rd grade moved up to 3-5; grade 2 gets its own supports) ---- */
+.g2-read { position: fixed; right: 16px; bottom: 14px; z-index: 30; display: inline-flex; align-items: center; gap: 6px; padding: 9px 15px; border-radius: 999px;
+  border: 1.5px solid var(--line); background: #fff; font: inherit; font-size: 14px; font-weight: 800; color: var(--muted); box-shadow: 0 4px 12px rgba(13,47,85,.14); cursor: pointer; }
+.g2-read.on { background: #0d2f55; border-color: #0d2f55; color: #fff; }
+/* grade 2: a little bigger everywhere (every px font grows by --fs-up at build time), bigger buttons */
+html[data-band="2"] { --fs-up: 2px; }
+html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 20px; }
+/* grade 2: Today's writing */
+.g2-today { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; padding: 26px 28px; flex: 1; justify-content: center; }
+.g2-today-kicker { font-size: 13px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #a37400; background: #fff4d6; border-radius: 999px; padding: 4px 12px; }
+.g2-today-title { margin: 0; font-size: 30px; font-weight: 800; line-height: 1.15; color: #0d2f55; text-wrap: balance; }
+.g2-today-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; font-weight: 700; color: var(--muted); }
+.g2-today-go { font-size: 19px; padding: 14px 30px; border-radius: 16px; }
+.g2-today-all { background: none; border: 0; padding: 0; font: inherit; font-size: 14px; font-weight: 800; color: var(--link); cursor: pointer; }
+.dg-stars { letter-spacing: 2px; color: #f5b400; }
+.dg-stars span { color: #d8dee5; }

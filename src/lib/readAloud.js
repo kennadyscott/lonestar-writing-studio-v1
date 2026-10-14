@@ -114,3 +114,42 @@ export function useSpeech() {
 
   return { speak, stop, speaking, index }
 }
+
+/*
+ * Second grade reads aloud by default (her note, 2026-10-14). Directions that appear on a screen queue themselves here; a moment
+ * later they are spoken in order, once each. Browsers only allow speech after the student's first tap, which a screen change
+ * already is. The student can turn it off (the 🔊 switch), and the choice is kept in this browser.
+ */
+const AUTO_KEY = 'lscr.g2read'
+const autoListeners = new Set()
+export const autoReadOn = () => { try { return localStorage.getItem(AUTO_KEY) !== '0' } catch { return true } }
+export function setAutoRead(on) {
+  try { localStorage.setItem(AUTO_KEY, on ? '1' : '0') } catch { /* fine */ }
+  if (!on) { autoQueue = []; try { window.speechSynthesis.cancel() } catch { /* fine */ } }
+  autoListeners.forEach((fn) => fn())
+}
+export const onAutoReadChange = (fn) => { autoListeners.add(fn); return () => autoListeners.delete(fn) }
+let autoQueue = []
+let autoTimer = null
+const spokenRecently = new Map() // text -> time, so a re-render does not read the same words twice
+export function autoRead(text, lang = 'en') {
+  if (!canSpeak() || !text || !autoReadOn()) return
+  const now = Date.now()
+  if ((spokenRecently.get(text) || 0) > now - 8000) return
+  spokenRecently.set(text, now)
+  autoQueue.push({ text, lang })
+  clearTimeout(autoTimer)
+  autoTimer = setTimeout(() => {
+    const items = autoQueue; autoQueue = []
+    try { window.speechSynthesis.cancel() } catch { /* fine */ }
+    for (const it of items) {
+      for (const s of splitSentences(it.text)) {
+        const u = new SpeechSynthesisUtterance(s)
+        u.lang = VOICE_LANG[it.lang] || VOICE_LANG.en
+        u.rate = 0.9
+        const v = pickVoice(u.lang); if (v) u.voice = v
+        try { window.speechSynthesis.speak(u) } catch { /* fine */ }
+      }
+    }
+  }, 450)
+}

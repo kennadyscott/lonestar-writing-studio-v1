@@ -1,9 +1,10 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useT, useLang } from '../lib/i18n/index.jsx'
 import { useBridgeLevel } from '../lib/bridgeContext.jsx'
 import { levelOf } from '../lib/languageBridge.js'
 import { markTerms, simplerFor } from '../lib/scaffold.js'
-import { canSpeak, rateFor, readsAloud, splitSentences, useSpeech } from '../lib/readAloud.js'
+import { autoRead, canSpeak, rateFor, readsAloud, splitSentences, useSpeech } from '../lib/readAloud.js'
+import { isGrade2, useBandValue } from '../lib/gradeBand.js'
 
 /*
  * The scaffolding primitives every student surface can adopt.
@@ -78,7 +79,8 @@ export function Speak({ text, lang, compact = true, style }) {
   const { lang: uiLang } = useLang()
   const level = useBridgeLevel()
   const { speak, stop, speaking } = useSpeech()
-  if (!canSpeak() || !readsAloud(level) || !text) return null
+  const g2 = isGrade2(useBandValue()) // second grade can always hear it
+  if (!canSpeak() || !(readsAloud(level) || g2) || !text) return null
   const lv = levelOf(level)
   const color = lv ? lv.color : '#0a7dba'
   // A translated direction is spoken in the language it is shown in; anything
@@ -105,8 +107,11 @@ export function Speak({ text, lang, compact = true, style }) {
 export function Directions({ text, vars, style, inline = false, children }) {
   const say = useSay()
   const level = useBridgeLevel()
+  const g2 = isGrade2(useBandValue())
   const said = text != null ? say(text, vars) : null
-  if (!level || said == null) return <span style={style}>{children ?? said}</span>
+  // second grade: directions read themselves aloud when they appear, and always carry a Listen button
+  useEffect(() => { if (g2 && said) autoRead(said) }, [g2, said])
+  if ((!level && !g2) || said == null) return <span style={style}>{children ?? said}</span>
   return (
     <span style={{ display: inline ? 'inline' : 'flex', gap: 8, alignItems: 'flex-start', ...style }}>
       <span style={{ flex: inline ? undefined : 1, minWidth: 0 }}><Glossed text={said} /></span>

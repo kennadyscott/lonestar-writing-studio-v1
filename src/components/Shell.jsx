@@ -3,6 +3,20 @@ import { BRAND } from '../lib/brand.js'
 import { useLang, useT, LANGS } from '../lib/i18n/index.jsx'
 import { LEVELS } from '../lib/languageBridge.js'
 import { BANDS } from '../lib/gradeBand.js'
+import { autoReadOn, canSpeak, onAutoReadChange, setAutoRead } from '../lib/readAloud.js'
+
+/** Second grade: turn reading aloud on or off (on to start). */
+export function ReadAloudSwitch() {
+  const t = useT()
+  const [on, setOn] = useState(autoReadOn)
+  React.useEffect(() => onAutoReadChange(() => setOn(autoReadOn())), [])
+  if (!canSpeak()) return null
+  return (
+    <button type="button" className={'g2-read' + (on ? ' on' : '')} aria-pressed={on} onClick={() => setAutoRead(!on)}>
+      <span aria-hidden>{on ? '🔊' : '🔈'}</span> {on ? t('Reading aloud') : t('Read aloud is off')}
+    </button>
+  )
+}
 
 export function TopBar({ who, onArcade, onLogo, band, onBand }) {
   const t = useT()

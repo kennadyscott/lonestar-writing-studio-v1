@@ -184,8 +184,8 @@ function pathModel(topic, content, record) {
 
 function PathForGrade({ band, topic, content, record, onOpen, onBack }) {
   const model = pathModel(topic, content, record)
-  if (band === '2-3') return <Path23 model={model} onOpen={onOpen} onBack={onBack} />
-  if (band === '4-5') return <Path45 model={model} onOpen={onOpen} onBack={onBack} />
+  if (band === '2' || band === '2-3') return <Path23 model={model} onOpen={onOpen} onBack={onBack} />
+  if (band === '3-5' || band === '4-5') return <Path45 model={model} onOpen={onOpen} onBack={onBack} />
   if (band === '6-7') return <Path67 model={model} onOpen={onOpen} onBack={onBack} />
   if (band === '8') return <Path8 model={model} onOpen={onOpen} onBack={onBack} />
   return <Path912 model={model} onOpen={onOpen} onBack={onBack} />

@@ -3,6 +3,7 @@ import { api, TRAIT_LABELS } from '../lib/api.js'
 import { scoreSubmission } from '../lib/writingScore.js'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { useSay, Glossed, Directions, Speak } from './Scaffold.jsx'
+import { isGrade2, useBandValue } from '../lib/gradeBand.js'
 
 /*
  * Student "Data & Goals" and "Share Wall" tabs — rendered inside the home page's
@@ -542,6 +543,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const firstTime = !goal && !history.length
   const [toast, setToast] = useState(null)
   const [mpTab, setMpTab] = useState('scr')
+  const band = useBandValue()
   const [conferring, setConferring] = useState(false)
   // The page is version C (Kennady, 2026-10-14: "I like version C - that's perfect"): My goal beside At a Glance (with a count of
   // goals reached and their trophies), Conference with my teacher as its own bar, then the year's chart, RACE and the growth story.
@@ -629,6 +631,9 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const series = mpTab === 'scr' ? mp.scr : mp.ecr
   const now = series[series.length - 1], grew = Math.round((now - series[0]) * 10) / 10
   const RACE = [['R', 'Restate'], ['A', 'Answer'], ['C', 'Cite'], ['E', 'Explain']]
+  // second grade: stars, not scores; no score chart or R-A-C-E bars (the teacher still has the numbers)
+  const g2 = isGrade2(band)
+  const stars = Math.max(0, Math.min(4, Math.round(now)))
   return (
     <div className="dg-b">
       {modals}
@@ -660,7 +665,9 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
             <b className="dg-glance-title">{t('At a Glance')}</b>
             <div className="dg-stats four">
               {[
-                { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
+                g2
+                  ? { tone: 'teal', icon: '⭐', v: <span className="dg-stars" aria-label={t('{n} of 4 stars', { n: stars })}>{'★'.repeat(stars)}<span>{'★'.repeat(4 - stars)}</span></span>, k: t('My writing stars') }
+                  : { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
                 { tone: 'violet', icon: '✏️', v: revisions, k: t('Revisions made') },
                 { tone: 'orange', icon: '✅', v: finished, k: t('Pieces finished') },
                 { tone: 'gold', icon: '🏆', v: history.length, k: t('Goals reached') },
@@ -687,7 +694,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           </>}
         </div>
 
-      <div className="dg-main">
+      {!g2 && <div className="dg-main">
         <div className="card dg-chart">
           <div className="dg-row">
             <b>{t('My scores this year')}</b>
@@ -714,7 +721,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
             </div>
           </> : <EcrCombined org={d.ecrOrg} conv={d.ecrConv} />}
         </div>
-      </div>
+      </div>}
 
       {/* the growth story stays on the page (her note, 2026-10-14: "Keep the growth story even on the simpler version") */}
       {growthStories}

@@ -12,7 +12,7 @@ import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
 import { topicStatus, clearingTitle, buildStops, nextStopOf, kindLabel, landName, landImg, LAND_ORDER } from './ProofRoom.jsx'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
-import { useBandValue } from '../lib/gradeBand.js'
+import { isGrade2, useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
 import { useLook } from '../lib/look.js'
 import { MODULE_SHORT } from './LunaPage.jsx'
@@ -1278,6 +1278,27 @@ function FreeWriteModal({ stories, onPick, onNew, onClose, onBank, busy }) {
 
 
 /* ---- Full assignments list (owns its filter state) ---- */
+/*
+ * Second grade: one thing on the screen (her note, 2026-10-14). The writing due soonest, as one big card with one button; the rest
+ * open from a small link.
+ */
+function TodaysWriting({ rows, busy, begin, onAll }) {
+  const t = useT()
+  const active = rows.filter((r) => r.status !== 'completed').sort((x, y) => daysTo(x.a.dueDate) - daysTo(y.a.dueDate))
+  const row = active[0]
+  return (
+    <div className="card g2-today">
+      <span className="g2-today-kicker">✏️ {t("Today's writing")}</span>
+      {row ? <>
+        <h2 className="g2-today-title">{row.a.title}</h2>
+        <div className="g2-today-meta"><span>{row.a.teacher.display || row.a.teacher.name}</span> <DueChip dueDate={row.a.dueDate} status={row.status} /></div>
+        <button className="btn g2-today-go" disabled={busy} onClick={() => begin(row)}>{row.status === 'in_progress' ? t('Keep writing →') : t('Start writing →')}</button>
+        {active.length > 1 && <button type="button" className="g2-today-all" onClick={onAll}>{t('See all my writing ({n})', { n: active.length })}</button>}
+      </> : <h2 className="g2-today-title">{t('All done! Nothing is due right now.')}</h2>}
+    </div>
+  )
+}
+
 function AssignmentsCard({ rows, busy, begin, headerAction }) {
   // The card stretches to the Quick Write block beside it and
   // the list grows into the room instead of leaving a gap under it. The list is
@@ -1407,6 +1428,8 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
 export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQuickWrite, onBank, onWall, onProofRoom, onChange }) {
   const t = useT()
   const say = useSay()
+  const band = useBandValue()
+  const [allWriting, setAllWriting] = useState(false) // grade 2: the full list, opened from Today's writing
   // The tab survives a trip away and back (Writing Bank, Free Write, the Daily
   // Challenge all leave the dashboard), so Practice returns to Practice.
   const [homeTab, setHomeTabState] = useState(() => {
@@ -1541,9 +1564,12 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {tab === 'home' && (<>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
         <BridgeBanner level={me.supportLevel} />
-        <GoalBanner me={me} classFocus={state.classFocus} />
+        {/* grade 2 keeps Home to one thing; the goal lives on Data & Goals */}
+        {!isGrade2(band) && <GoalBanner me={me} classFocus={state.classFocus} />}
         <div className="home-main stretch">
-          <AssignmentsCard rows={rows} busy={busy} begin={begin} />
+          {isGrade2(band) && !allWriting
+            ? <TodaysWriting rows={rows} busy={busy} begin={begin} onAll={() => setAllWriting(true)} />
+            : <AssignmentsCard rows={rows} busy={busy} begin={begin} />}
           <QuickWriteBlock state={state} me={me} onQuickWrite={onQuickWrite} busy={busy} />
         </div>
         <LunaNook modules={state.modules} onLuna={onLuna} />

@@ -311,7 +311,7 @@ function Crumbs({ t, onBack, land, topic, running, toMap, toLand, toPath }) {
   )
 }
 
-export default function ProofRoom({ band = '4-5', initialTopicId = null, initialWsId = null, skipGate = false, onBack, onChange }) {
+export default function ProofRoom({ band = '3-5', initialTopicId = null, initialWsId = null, skipGate = false, onBack, onChange }) {
   const t = useT()
   const say = useSay()
   // Opened from the Practice tab on one path, the page starts on that path.

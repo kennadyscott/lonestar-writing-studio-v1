@@ -907,7 +907,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
           <div className="prf-c-actions">
-            <button type="button" className="prf-c-all" onClick={() => onOpen('topic_pos', null, { skipGate: true })}>Parts of Speech</button>
+            <button type="button" className="prf-c-all prf-c-shortcut" onClick={() => onOpen('topic_pos', null, { skipGate: true })}>Parts of Speech</button>
             <button type="button" className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
           </div>
         </div>
@@ -1421,6 +1421,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [fwChooser, setFwChooser] = useState(false)
   const [gamePicker, setGamePicker] = useState(false)
   const [calm, setCalm] = useState('a')
+  const simpleLook = useLook() === 'b'
   const CALM = [['a', 'A'], ['b', 'B'], ['c', 'C']]
 
   // A grid game finished: record the clear, reveal the coins, refresh state.
@@ -1549,7 +1550,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {/* ================= PRACTICE ================= */}
       {tab === 'practice' && (
         // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
-        <div className={'practice-view' + (calm === 'b' ? ' calm-plain' : '')} data-clean="" data-side={calm === 'c' ? 'c' : 'a'} style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        // B (simpler, 2026-10-14: "Now let's simplify the Practice page on the AB"): look-simple hides the extra words (theme.css).
+        <div className={'practice-view' + (calm === 'b' ? ' calm-plain' : '') + (simpleLook ? ' look-simple' : '')} data-clean="" data-side={calm === 'c' ? 'c' : 'a'} style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div className="prac-calm" role="group" aria-label={t('Practice pages')}>
             {CALM.map(([k, label]) => (
               <button key={k} type="button" className={calm === k ? 'on' : ''} aria-pressed={calm === k} onClick={() => setCalm(k)}>{t(label)}</button>

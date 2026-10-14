@@ -121,6 +121,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .assign-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
 .assign-due { width: 112px; text-align: right; }
 .assign-go { width: 104px; text-align: right; }
+/* B (simpler) Practice: the same page with fewer words (2026-10-14). */
+.practice-view.look-simple .proof-kicker,
+.practice-view.look-simple .prf-c-shortcut,
+.practice-view.look-simple .gr-ns-line,
+.practice-view.look-simple .gr-ns-tag,
+.practice-view.look-simple .prac-sub,
+.practice-view.look-simple .daily-kicker,
+.practice-view.look-simple .daily-dir { display: none; }
 /* B (simpler): at most 3 of A's cards. Grades 2-5 get bigger cards with room between them (2026-10-14). */
 .assign-list-b { flex: 1; }
 .assign-more-b { margin-left: auto; padding: 4px 10px; border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; }

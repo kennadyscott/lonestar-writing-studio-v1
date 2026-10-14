@@ -107,7 +107,9 @@ function TrailLook({ m, carousel, land }) {
     const usedSb = s.sb != null || s.state === 'sb'
     if (sbStyle === 'stop' && usedSb) {
       // the skill shows its first try; the Skill Builder is the next stop on the trail
-      nodes.push({ key: s.id, kind: 'tried', icon: STONE.tried, label: s.short, full: s.title, pill: s.acts + '%', pillKind: 'low', done: true })
+      // once the Skill Builder carried it to mastery the skill is cleared (green check); its pill keeps the first try
+      const cleared = s.sb != null
+      nodes.push({ key: s.id, kind: cleared ? 'mastered' : 'tried', icon: cleared ? '✓' : STONE.tried, label: s.short, full: s.title, pill: s.acts + '%', pillKind: 'low', done: true })
       nodes.push({ key: s.id + ':sb', kind: s.sb != null ? 'sbstop' : 'sbstop sb', icon: '⚡', small: true, label: t('Skill Builder'),
         pill: s.sb != null ? s.sb + '%' : null, pillKind: 'good', done: s.sb != null, here: s.sb == null })
     } else {
@@ -266,8 +268,8 @@ function ThenNowLook({ m, carousel }) {
       </div>
       <div className="ll-chips">
         <span className="ll-chips-l">{t('Your clearings')}</span>
-        {m.skills.map((s) => <span key={s.id} className={'ll-skill ' + s.state} title={s.title + ' · ' + t(STATUS_B[s.state])}><i aria-hidden>{CHIP_C[s.state]}</i>{s.short}</span>)}
-        {m.post && <span className={'ll-skill post-' + m.post.state}><i aria-hidden>🏆</i>{t('Post-test')}</span>}
+        {m.skills.map((s) => <span key={s.id} className={'ll-skill ' + s.state} title={s.title + ' · ' + t(STATUS_B[s.state])}><i aria-hidden>{CHIP_C[s.state]}</i>{s.short}{s.acts != null && <em className="ll-skill-n">{s.sb != null ? `${s.acts}% → ${s.sb}%` : s.acts + '%'}</em>}</span>)}
+        {m.post && <span className={'ll-skill post-' + m.post.state}><i aria-hidden>🏆</i>{t('Post-test')}{m.post.score != null && <em className="ll-skill-n">{m.post.score}%</em>}</span>}
       </div>
     </div>
   )

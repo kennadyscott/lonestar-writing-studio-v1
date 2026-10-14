@@ -11,7 +11,7 @@ import { coachFor, offending, wordsThatWork } from './revisionCoach.js'
  * same rubric and pays the coins.
  */
 
-function FeedbackModal({ result, onClose }) {
+function FeedbackModal({ result, onClose, onKeepFixing }) {
   const t = useT()
   const say = useSay()
   if (!result) return null
@@ -24,7 +24,7 @@ function FeedbackModal({ result, onClose }) {
       <div className="card" style={{ padding: 26, width: 520, maxWidth: '94vw', maxHeight: '92vh', overflowY: 'auto' }} onClick={(e) => e.stopPropagation()}>
         <div style={{ textAlign: 'center' }}>
           <div style={{ fontSize: 42 }}>🎉</div>
-          <h2 style={{ margin: '4px 0 2px' }}><Glossed text={t('Revision submitted!')} /></h2>
+          <h2 style={{ margin: '4px 0 2px' }}><Glossed text={result.allFixed === false ? t('Almost there!') : t('Revision submitted!')} /></h2>
           <p style={{ color: 'var(--muted)', margin: '0 0 14px', fontSize: 14 }}>
             <Directions inline text="You just did what real writers do — judge, then improve." />
           </p>
@@ -75,7 +75,12 @@ function FeedbackModal({ result, onClose }) {
             </div>
           ))}
         </div>
-        <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>{t('Back to my dashboard')}</button>
+        {result.allFixed === false ? <>
+          <div style={{ background: '#fff7e6', borderRadius: 12, padding: '12px 14px', fontSize: 14, lineHeight: 1.45, marginBottom: 12, color: '#7a5600', fontWeight: 700 }}>
+            🪙 {say(result.left === 1 ? 'No coins yet: {n} problem is still left. Fix it to earn 50 coins. Your work is saved.' : 'No coins yet: {n} problems are still left. Fix them to earn 50 coins. Your work is saved.', { n: result.left })}
+          </div>
+          <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onKeepFixing}>{t('Keep fixing →')}</button>
+        </> : <button className="btn" style={{ width: '100%', justifyContent: 'center' }} onClick={onClose}>{t('Back to my dashboard')}</button>}
       </div>
     </div>
   )
@@ -137,12 +142,19 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
           </div>
         ) : summary ? (
           <div className="rev-step">
-            <div className="rev-big">{t('You fixed {a} of {b} problems!', { a: fixedCount, b: problems.length })}</div>
+            <div className="rev-big">{fixedCount === problems.length ? t('🎉 You fixed all {n} problems!', { n: problems.length }) : t('You fixed {a} of {b} problems.', { a: fixedCount, b: problems.length })}</div>
+            {fixedCount < problems.length && <p className="rev-tip">🪙 {say('Fix all {n} to earn 50 coins.', { n: problems.length })}</p>}
             <ul className="rev-sum">
               {problems.map((r, k) => <li key={r.i} className={fixedNow(r) ? 'ok' : ''}><span aria-hidden>{fixedNow(r) ? '✓' : '○'}</span>
                 <button type="button" onClick={() => { setSummary(false); setAt(k) }}>{coachFor(r.text).ask}</button></li>)}
             </ul>
-            <button className="btn gold" disabled={busy} onClick={() => onFinish(spot)}>{t('📬 Get feedback')}</button>
+            {fixedCount === problems.length
+              ? <button className="btn gold" disabled={busy} onClick={() => onFinish(spot)}>{t('📬 Get feedback')} · 🪙 50</button>
+              : <div className="rev-nav">
+                  <button type="button" className="rev-link quiet" disabled={busy} onClick={() => onFinish(spot)}>{t('Get feedback without coins')}</button>
+                  <span style={{ flex: 1 }} />
+                  <button type="button" className="btn" onClick={() => { setSummary(false); setAt(Math.max(0, problems.findIndex((r) => !fixedNow(r)))) }}>{t('Keep fixing →')}</button>
+                </div>}
           </div>
         ) : (
           <div className="rev-step">
@@ -228,7 +240,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
 
   return (
     <div>
-      <FeedbackModal result={result} onClose={() => { setResult(null); onBack && onBack() }} />
+      <FeedbackModal result={result} onClose={() => { setResult(null); onBack && onBack() }} onKeepFixing={() => setResult(null)} />
       {onBack && <button className="backlink" onClick={onBack}>{t('← Back to My Writing')}</button>}
 
       {/* challenge banner */}
@@ -236,7 +248,7 @@ export default function RevisionStudio({ state, sub, health, onChange, onBack })
         <div style={{ fontSize: 30 }}>🤖</div>
         <div style={{ flex: 1, minWidth: 260 }}>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#0d2f55' }}>{t('Help {name} fix this draft', { name: asg.teacher.name })}</div>
-          <div style={{ fontSize: 14, marginTop: 2, color: 'var(--muted)', fontWeight: 600 }}>{t('One problem at a time.')} 🪙 {t('Earn 50 coins')}</div>
+          <div style={{ fontSize: 14, marginTop: 2, color: 'var(--muted)', fontWeight: 600 }}>{t('One problem at a time.')} 🪙 {t('Fix every problem to earn 50 coins')}</div>
         </div>
       </div>
 

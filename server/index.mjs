@@ -342,15 +342,19 @@ const server = http.createServer(async (req, res) => {
         fixed: after.filter((r, i) => r.met && !before[i]?.met).length,
       }
       sub.rubricResult = rubric
-      const newMilestones = [{ id: uid('ms'), type: 'daily_challenge', label: 'Finished the Daily Revision Challenge', coins: DAILY_CHALLENGE_COINS, ts: now() },
-        ...evaluateMilestones(sub, original, revision)]
+      // The 50 coins come only when every problem Pip's draft started with is fixed (Kennady, 2026-10-14: "They only get the 50
+      // coins if they fix all the identified problems in the draft"). Until then the challenge stays open for the day: the student
+      // sees what is left, keeps fixing, and turns it in again.
+      const problems = before.filter((r) => !r.met).length
+      const allFixed = rubric.fixed >= problems
+      const newMilestones = allFixed ? [{ id: uid('ms'), type: 'daily_challenge', label: 'Fixed every problem in the Daily Revision Challenge', coins: DAILY_CHALLENGE_COINS, ts: now() }] : []
       sub.milestones.push(...newMilestones)
       for (const m of newMilestones) {
         state.coinEvents.push({ id: uid('ce'), studentId: sub.studentId, submissionId: sub.id, type: m.type, coins: m.coins, ts: m.ts })
         const stu = findStu(sub.studentId); if (stu) stu.coins += m.coins
       }
-      sub.completedAt = now(); sub.phase = 'done'; save()
-      return send(res, 200, { traits, rubric, agreement: sub.agreement || null, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0) })
+      if (allFixed) { sub.completedAt = now(); sub.phase = 'done' }; save()
+      return send(res, 200, { traits, rubric, agreement: sub.agreement || null, newMilestones, coinsAwarded: newMilestones.reduce((a, m) => a + m.coins, 0), allFixed, problems, left: problems - rubric.fixed })
     }
 
     // POST /api/share { submissionId } -> publish a finished piece to the Share Wall

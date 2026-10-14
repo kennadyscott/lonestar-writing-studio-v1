@@ -4,7 +4,7 @@ import { StudentTestCard } from './testCard/StudentTestCard.jsx'
 import { scoreStudentItem } from './testCard/studentTestItem.mjs'
 import { useBandValue } from '../lib/gradeBand.js'
 import './StudentPathway.css'
-import { Path45Look, PATH45_LOOKS, samplePathRecord } from './Path45Looks.jsx'
+import { Path45Trail, Path45Dashboard, PATH45_LOOKS, samplePathRecord } from './Path45Looks.jsx'
 
 const names = { pre: 'Pre-test', lesson: 'Lesson', practice: 'Practice', post: 'Post-test' }
 const marks = { pre: '01', lesson: '▤', practice: '✦', post: '✓' }
@@ -30,10 +30,10 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   const [record, setRecord] = useState(() => loadRecord(storageKey))
   const [active, setActive] = useState(null)
   const [saveFailed, setSaveFailed] = useState(false)
-  // PROTOTYPE (grades 3-5, 2026-10-14): which look, and sample progress to see it new / partway / done (display only)
-  const is45 = band === '3-5' || band === '4-5'
+  // PROTOTYPE (grades 3-5, 2026-10-14): A Trail or B Dashboard, and sample progress to see it new / partway / done (display only)
   const [look, setLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.path45Look'); return PATH45_LOOKS.some(([k]) => k === v) ? v : 'a' } catch { return 'a' } })
   const setLook = (v) => { setLookRaw(v); try { localStorage.setItem('lscr.path45Look', v) } catch { /* fine */ } }
+  const is45 = band === '3-5' || band === '4-5'
   const [sample, setSampleRaw] = useState(() => { try { return localStorage.getItem('lscr.pathSample') || 'partway' } catch { return 'partway' } })
   const setSample = (v) => { setSampleRaw(v); try { localStorage.setItem('lscr.pathSample', v) } catch { /* fine */ } }
   useEffect(() => {
@@ -196,6 +196,10 @@ function pathModel(topic, content, record) {
     finished: steps.length > 0 && steps.every(done),
     gained: done(pre) && done(post) && pre.score != null && post.score != null ? post.score - pre.score : null,
   }
+}
+
+function Path45Look({ look, ...props }) {
+  return look === 'b' ? <Path45Dashboard {...props} /> : <Path45Trail {...props} />
 }
 
 function PathForGrade({ band, topic, content, record, onOpen, onBack }) {

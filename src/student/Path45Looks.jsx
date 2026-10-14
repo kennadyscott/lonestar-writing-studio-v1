@@ -2,16 +2,11 @@ import React, { useState } from 'react'
 import { landImg } from './ProofRoom.jsx'
 
 /*
- * Grades 3-5: three looks for the student's pathway (Kennady, 2026-10-14: "let's play with what the pathway preview looks like
- * on the student side. Give me three versions of what this could be in an ABC picker. Start with 3rd - 5th grade"). They borrow
- * what she picked on the Practice card: the domain's land art, the trail of stones with each score, a Skill Builder as its own
- * purple ⚡ stop, growth as a percent.
- *   A  Trail       the land-art header holds the trail; one "next step" panel underneath (tap any stone to see it)
- *   C  One step    just the step you are on, big, with a slim row of dots for the whole path
+ * Grades 3-5: the student's pathway as a trail (Kennady, 2026-10-14: "let's play with what the pathway preview looks like on the
+ * student side"; she picked the trail, "I like the path - remove the other option"). It borrows the Practice card: the domain's
+ * land art behind a trail of stones with each score, a Skill Builder as its own purple ⚡ stop, growth as a percent. Under it,
+ * the stop you are on as a Home-page card with assignment-style rows. Tried and dropped: a quest board of cards, a one-step view.
  */
-
-// the Quest board came out (2026-10-14: "I prefer A or C - remove B")
-export const PATH45_LOOKS = [['a', 'Trail'], ['c', 'One step']]
 
 const isDone = (s) => s?.state === 'complete'
 const isNow = (s) => s?.state === 'current' || s?.state === 'unavailable'
@@ -56,20 +51,7 @@ function Growth({ model }) {
   )
 }
 
-/* One sub-step as a button: done (with its score), the one to do now, or later. */
-function PartButton({ part, i, onOpen, big = false }) {
-  const s = part.step
-  const done = isDone(s)
-  const now = isNow(s)
-  const right = done ? (s.score != null ? `✓ ${s.score}%` : '✓ Done') : now ? (s.state === 'unavailable' ? 'Coming soon' : 'Start →') : '🔒 Later'
-  return (
-    <button type="button" className={'p45-part' + (done ? ' done' : now ? ' now' : ' later') + (part.sb ? ' sb' : '') + (big ? ' big' : '')} disabled={!canOpen(s)} onClick={() => onOpen(s)}>
-      <span className="p45-part-n">{part.sb ? '⚡' : i + 1}</span>
-      <span className="p45-part-words"><b>{part.label}</b><small>{part.sub}</small></span>
-      <span className="p45-part-go">{right}</span>
-    </button>
-  )
-}
+export const PATH45_LOOKS = [['a', 'Trail'], ['b', 'Dashboard']]
 
 const Back = ({ onBack }) => <button type="button" className="p45-back" onClick={onBack}>← Back to the map</button>
 
@@ -131,13 +113,8 @@ function NextCard({ pick, onOpen, onBackToNext }) {
   )
 }
 
-/* ---------- A · Trail ---------- */
-function TrailLook({ model, record, topic, onOpen, onBack }) {
-  const stops = stopsOf(model, record)
-  const nowKey = stops.find((s) => s.state === 'now')?.key || stops[stops.length - 1].key
-  const [sel, setSel] = useState(null)
-  const pick = stops.find((s) => s.key === (sel || nowKey))
-  // stones: each stop, plus a purple Skill Builder stop right after a skill that needed one
+/* The trail of stones (shared by both looks): each stop, plus a purple Skill Builder stop right after a skill that needed one. */
+function TrailStones({ model, stops, pick, onPick, className = '' }) {
   const stones = []
   for (const s of stops) {
     stones.push({ key: s.key, stop: s, kind: s.kind === 'test' ? (s.key === 'pre' ? 'start' : 'post-' + (s.state === 'done' ? 'done' : s.state === 'now' ? 'next' : 'locked')) : s.state === 'done' ? 'mastered' : s.state === 'now' ? 'next' : 'locked',
@@ -152,6 +129,33 @@ function TrailLook({ model, record, topic, onOpen, onBack }) {
   const doneUpTo = stones.reduce((k, st, i) => (st.done ? i : k), 0)
   const growth = isDone(model.pre) && isDone(model.post) ? model.post.score - model.pre.score : null
   return (
+    <div className={'ll-trail on-land p45-trail ' + className}>
+      <svg className="ll-trail-line" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden>
+        <polyline points={pts.join(' ')} className="todo" vectorEffect="non-scaling-stroke" />
+        <polyline points={pts.slice(0, doneUpTo + 1).join(' ')} className="done" vectorEffect="non-scaling-stroke" />
+      </svg>
+      {stones.map((st, i) => (
+        <button type="button" key={st.key} className={'ll-stone-wrap p45-stone' + (pick?.key === st.stop.key ? ' picked' : '')} style={{ left: ((i + 0.5) / N) * 100 + '%', top: yOf(i) + '%' }} onClick={() => onPick(st.stop.key)}>
+          {st.here && <span className="ll-here">📍 You are here</span>}
+          <span className={'ll-stone ' + st.kind + (st.small ? ' small' : '')}>{st.icon}</span>
+          {st.key === 'post' && growth != null && <span className="ll-stone-growth">{growth >= 0 ? '+' : ''}{growth}%</span>}
+          <span className="ll-stone-under">
+            <span className={'ll-stone-label ' + st.kind}>{st.label}</span>
+            {st.pill && <span className={'ll-pill ' + st.pillKind}>{st.pill}</span>}
+          </span>
+        </button>
+      ))}
+    </div>
+  )
+}
+
+/* ---------- A · Trail ---------- */
+export function Path45Trail({ model, record, topic, onOpen, onBack }) {
+  const stops = stopsOf(model, record)
+  const nowKey = stops.find((s) => s.state === 'now')?.key || stops[stops.length - 1].key
+  const [sel, setSel] = useState(null)
+  const pick = stops.find((s) => s.key === (sel || nowKey))
+  return (
     <div className="p45 p45-a">
       <header className="p45-hero" style={{ '--p45-land': `url(${landImg(topic.domain)})` }}>
         <div className="p45-hero-top">
@@ -163,91 +167,81 @@ function TrailLook({ model, record, topic, onOpen, onBack }) {
           <span style={{ flex: 1 }} />
           <Back onBack={onBack} />
         </div>
-        <div className="ll-trail on-land p45-trail">
-          <svg className="ll-trail-line" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden>
-            <polyline points={pts.join(' ')} className="todo" vectorEffect="non-scaling-stroke" />
-            <polyline points={pts.slice(0, doneUpTo + 1).join(' ')} className="done" vectorEffect="non-scaling-stroke" />
-          </svg>
-          {stones.map((st, i) => (
-            <button type="button" key={st.key} className={'ll-stone-wrap p45-stone' + (pick?.key === st.stop.key ? ' picked' : '')} style={{ left: ((i + 0.5) / N) * 100 + '%', top: yOf(i) + '%' }} onClick={() => setSel(st.stop.key)}>
-              {st.here && <span className="ll-here">📍 You are here</span>}
-              <span className={'ll-stone ' + st.kind + (st.small ? ' small' : '')}>{st.icon}</span>
-              {st.key === 'post' && growth != null && <span className="ll-stone-growth">{growth >= 0 ? '+' : ''}{growth}%</span>}
-              <span className="ll-stone-under">
-                <span className={'ll-stone-label ' + st.kind}>{st.label}</span>
-                {st.pill && <span className={'ll-pill ' + st.pillKind}>{st.pill}</span>}
-              </span>
-            </button>
-          ))}
-        </div>
+        <TrailStones model={model} stops={stops} pick={pick} onPick={setSel} />
       </header>
       <NextCard pick={pick} onOpen={onOpen} onBackToNext={sel && sel !== nowKey ? () => setSel(null) : null} />
     </div>
   )
 }
 
-/* ---------- C · One step ---------- */
-function FocusLook({ model, record, topic, onOpen, onBack }) {
+/* ---------- B · Dashboard ----------
+ * (2026-10-14: "Can you make a 'B' version of this page that would better align with our homepage aesthetic?", with the Practice
+ * page as the picture.) The Lit Lab card's own parts: the navy art header, the gold Next bar, the trail on washed land art; and
+ * beside it the stops as navy Practice bars (a status circle, the name, a score chip; the one you are on gets an Up next tag). */
+export function Path45Dashboard({ model, record, topic, onOpen, onBack }) {
   const stops = stopsOf(model, record)
-  const nowKey = stops.find((s) => s.state === 'now')?.key
-  const [sel, setSel] = useState(null)
-  const pick = stops.find((s) => s.key === (sel || nowKey))
-  const growth = isDone(model.pre) && isDone(model.post) ? model.post.score - model.pre.score : null
-  const doneSkills = stops.filter((s) => s.kind !== 'test' && s.state === 'done').length
-  const skills = stops.filter((s) => s.kind !== 'test').length
+  const now = stops.find((s) => s.state === 'now')
+  const nowPart = now?.parts.find((p) => isNow(p.step))
+  const what = nowPart ? (nowPart.step.type === 'lesson' ? (nowPart.sb ? 'Skill Builder lesson' : 'Lesson') : nowPart.step.type === 'practice' ? (nowPart.sb ? 'Skill Builder' : nowPart.label === 'Try it again' ? 'Try it again' : 'Practice') : 'Test') : ''
+  const BASE = import.meta.env.BASE_URL || '/'
+  const goStop = (s) => { const p = s.parts.find((x) => isNow(x.step)) || s.parts.find((x) => isDone(x.step) && canOpen(x.step)); if (p && canOpen(p.step)) onOpen(p.step) }
   return (
-    <div className="p45 p45-c">
-      <div className="p45-focus">
-        <div className="p45-focus-art" style={{ '--p45-land': `url(${landImg(topic.domain)})` }}>
-          <span className="p45-focus-step">{pick ? `Step ${pick.n} of ${stops.length}` : 'Path complete'}</span>
+    <div className="p45b">
+      <div className="prf-card prf-c look-b p45b-main">
+        <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
+          <div className="prf-c-words">
+            <span className="proof-kicker">Your path · Grade {topic.grade}</span>
+            <span className="prf-c-title">{model.title}</span>
+          </div>
+          <div className="prf-c-actions"><button type="button" className="prf-c-all" onClick={onBack}>← Back to the map</button></div>
         </div>
-        <div className="p45-focus-body">
-          <p className="p45-kicker">{model.title} · {pick ? (pick.state === 'now' ? 'Up next' : pick.state === 'done' ? 'Done' : 'Coming up') : 'All done'}</p>
-          {pick ? (
-            <>
-              <h2>{pick.label}</h2>
-              <p className="p45-line big">{pick.line}</p>
-              <div className="p45-parts stack">{pick.parts.map((p, i) => <PartButton key={p.step.id} part={p} i={i} onOpen={onOpen} big />)}</div>
-              {sel && sel !== nowKey && <button type="button" className="p45-link" onClick={() => setSel(null)}>Back to my next step</button>}
-            </>
+        <div className="prf-body">
+          {now && nowPart ? (
+            <div className="gr-nextstep">
+              <span className="gr-ns-n" aria-hidden>{now.key === 'pre' ? '🚩' : now.key === 'post' ? '🏆' : now.kind === 'full' ? '✦' : now.n - 1}</span>
+              <div className="gr-ns-words">
+                <span className="gr-ns-k">Next · {what}</span>
+                <b>{now.label}</b>
+              </div>
+              <div className="gr-ns-go"><button className="btn gr-ns-btn" disabled={!canOpen(nowPart.step)} onClick={() => onOpen(nowPart.step)}>Start →</button></div>
+            </div>
           ) : (
-            <>
-              <h2>🏆 You finished the path!</h2>
-              <p className="p45-line big">Pre-test {model.pre?.score}% → Post-test {model.post?.score}%{growth != null && <> · <b className="p45-up">{growth >= 0 ? '+' : ''}{growth}% growth</b></>}</p>
-              <Back onBack={onBack} />
-            </>
+            <div className="gr-nextstep p45b-finished">
+              <span className="gr-ns-n" aria-hidden>🏆</span>
+              <div className="gr-ns-words"><span className="gr-ns-k">Path complete</span><b>You finished {model.title}!</b></div>
+              <div className="gr-ns-go"><button className="btn gr-ns-btn" onClick={onBack}>Back to the map →</button></div>
+            </div>
           )}
+          <div className="gr-pathwrap ll-wrap" style={{ '--ll-land': `url(${landImg(topic.domain)})` }}>
+            <div className="ll ll-a">
+              <div className="ll-head"><Growth model={model} /></div>
+              <TrailStones model={model} stops={stops} pick={null} onPick={(k) => { const s = stops.find((x) => x.key === k); if (s) goStop(s) }} className="p45b-trail" />
+              <div className="ll-foot"><div className="ll-key"><span><i className="mastered">✓</i>Cleared</span><span><i className="sbstop">⚡</i>Skill Builder</span></div></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="p45-rail" aria-label="Your whole path">
-        {stops.map((s, i) => (
-          <React.Fragment key={s.key}>
-            {i > 0 && <span className={'p45-rail-line' + (s.state !== 'later' ? ' on' : '')} aria-hidden />}
-            <button type="button" className={'p45-dot ' + s.state + (pick?.key === s.key ? ' picked' : '')} onClick={() => setSel(s.key)} title={s.label}>
-              <span className="p45-dot-c">{s.key === 'pre' ? '🚩' : s.key === 'post' ? '🏆' : s.state === 'done' ? '✓' : s.state === 'later' ? '🔒' : s.n - 1}</span>
-              {s.sb && <i className="p45-dot-sb" title="Skill Builder">⚡</i>}
-              <span className="p45-dot-l">{s.label}</span>
-              <span className="p45-dot-s">{s.state === 'done' && (s.first ?? s.score) != null ? (s.first ?? s.score) + '%' : ''}</span>
+      <div className="p45b-side" aria-label="Your stops">
+        {stops.map((s) => {
+          const scoreShown = s.state === 'done' && (s.first ?? s.score) != null
+          return (
+            <button key={s.key} type="button" className={'p45b-bar ' + s.state} disabled={s.state === 'later'} onClick={() => goStop(s)}>
+              <span className={'p45b-dot ' + s.state}>{s.key === 'pre' ? '🚩' : s.key === 'post' ? '🏆' : s.state === 'done' ? '✓' : s.state === 'later' ? '🔒' : s.kind === 'full' ? '✦' : s.n - 1}</span>
+              <span className="p45b-words">
+                {s.state === 'now' && <span className="p45b-tag">Up next</span>}
+                <span className="p45b-title">{s.label}</span>
+              </span>
+              {s.sb && s.sb.score != null && <span className="p45b-sb" title="Skill Builder">⚡ {s.sb.score}%</span>}
+              {scoreShown && <span className="p45b-score">{(s.first ?? s.score)}%</span>}
+              <span aria-hidden className="p45b-chev">›</span>
             </button>
-          </React.Fragment>
-        ))}
-      </div>
-      <div className="p45-foot">
-        <span>Pre-test <b>{isDone(model.pre) ? model.pre.score + '%' : '—'}</b></span>
-        <span><b>{doneSkills}</b> of {skills} skills done</span>
-        <span>Post-test <b>{isDone(model.post) ? model.post.score + '%' : 'at the end'}</b></span>
-        <span style={{ flex: 1 }} />
-        {pick && <Back onBack={onBack} />}
+          )
+        })}
       </div>
     </div>
   )
 }
 
-export function Path45Look({ look, model, record, topic, onOpen, onBack }) {
-  const props = { model, record, topic, onOpen, onBack }
-  if (look === 'c') return <FocusLook {...props} />
-  return <TrailLook {...props} />
-}
 
 /*
  * PROTOTYPE sample progress, so each look can be seen new, partway and done. Display only: the student's saved record is untouched.

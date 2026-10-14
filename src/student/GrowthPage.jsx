@@ -541,13 +541,8 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const [toast, setToast] = useState(null)
   const [mpTab, setMpTab] = useState('scr')
   const [conferring, setConferring] = useState(false)
-  // A (today's page) or B (simpler), to compare (Kennady, 2026-10-14: "Next, let's clean up the Data & Goals page. Give me an
-  // AB option"). B: the goal on one line, four numbers, the chart beside R-A-C-E under one SCR / ECR switch, then the growth story.
-  // B is the page now ("I like B over A, so we can get rid of A"); C is a new layout to compare ("make me a new version where we
-  // have 'At a Glance' on the same line as 'My Goal' and then Conference with my teacher is a separate bar ... keep count of how
-  // many goals they reach").
-  const [look, setLook] = useState(() => { try { const v = localStorage.getItem('lscr.dataLook2'); return v === 'b' || v === 'c' ? v : 'c' } catch { return 'c' } })
-  const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.dataLook2', k) } catch { /* fine */ } }
+  // The page is version C (Kennady, 2026-10-14: "I like version C - that's perfect"): My goal beside At a Glance (with a count of
+  // goals reached and their trophies), Conference with my teacher as its own bar, then the year's chart, RACE and the growth story.
 
   async function choose(g) { await api.setGoal(g); setPicking(false); onChange && onChange() }
   async function setCustomGoal() { if (!custom.trim()) return; await api.setGoal({ text: custom.trim(), trait: null }); setCustom(''); setPicking(false); onChange && onChange() }
@@ -557,11 +552,6 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const revisions = subs.reduce((a, s) => a + Math.max(0, s.drafts.length - 1), 0)
   const finished = subs.filter((s) => s.completedAt).length
 
-  const lookSwitch = (
-    <div className="dg-looks" role="group" aria-label={t('Page versions')}>
-      {[['b', 'B · Current'], ['c', 'C · New']].map(([k, label]) => <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => pickLook(k)}>{label}</button>)}
-    </div>
-  )
   const stories = subs.filter((s) => s.drafts.filter((d) => d.traits).length > 1 && !s.isPeerRevision)
   const growthStories = stories.map((sub) => {
     const asg = state.assignments.find((a) => a.id === sub.assignmentId)
@@ -612,13 +602,9 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
       <div className="dg-b">
         {modals}
 
-        {look === 'c' ? <>
           <div className="dg-top">
             <div className="card dg-goal c">
-              <div className="dg-row">
-                <span className="dg-kicker">🎯 {t('My goal')}</span>
-                {lookSwitch}
-              </div>
+              <span className="dg-kicker">🎯 {t('My goal')}</span>
               <b className="dg-goal-text">{t(me.goal.text)}</b>
               <div className="dg-goal-acts">
                 <button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button>
@@ -653,41 +639,6 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
             <div className="dg-confer-words"><b>{t('Ready to talk about your writing?')}</b><span>{say('Meet with your teacher to look at your work and pick your next goal together.')}</span></div>
             <button className="btn" onClick={() => setConferring(true)}>{t('Conference with my teacher →')}</button>
           </div>
-        </> : <>
-        <div className="card dg-goal">
-          <span className="dg-goal-icon" aria-hidden>{PRESET_GOALS.find((g) => g.id === me.goal.id)?.icon || '🎯'}</span>
-          <div className="dg-goal-words">
-            <span className="dg-kicker">{t('My goal')}</span>
-            <b>{t(me.goal.text)}</b>
-            <span className="dg-goal-meta">
-              <button type="button" className="dg-link" onClick={() => setPicking(true)}>{t('Change goal')}</button>
-              {me.goalHistory?.length > 0 && <span className="dg-won" title={me.goalHistory.map((g) => t(g.text)).join(' · ')}>🏆 {t(me.goalHistory.length === 1 ? '{n} goal reached' : '{n} goals reached', { n: me.goalHistory.length })}</span>}
-            </span>
-          </div>
-          <button className="btn ghost" onClick={() => setConferring(true)}>{t('🤝 Talk with my teacher')}</button>
-          <button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button>
-          {lookSwitch}
-        </div>
-
-        {/* At a Glance (her note, 2026-10-14: "We don't need the coins earned. They earn coins from all over. Let's make that whole
-            section 'At a Glance' and make it a little more colorful") */}
-        <section className="card dg-glance" aria-label={t('At a Glance')}>
-          <b className="dg-glance-title">{t('At a Glance')}</b>
-          <div className="dg-stats">
-            {[
-              { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
-              { tone: 'violet', icon: '✏️', v: revisions, k: t('Revisions made') },
-              { tone: 'orange', icon: '✅', v: finished, k: t('Pieces finished') },
-            ].map((x, i) => (
-              <div key={i} className={'dg-stat ' + x.tone}>
-                <span className="dg-stat-icon" aria-hidden>{x.icon}</span>
-                <div><div className="v">{x.v}</div><div className="k">{x.k}</div>{x.up && <div className="up">{x.up}</div>}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        </>}
 
         <div className="dg-main">
           <div className="card dg-chart">

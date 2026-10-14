@@ -2441,19 +2441,11 @@ body { font-size: 16px; }
 .rev-sum li button { background: none; border: 0; padding: 0; font: inherit; text-align: left; color: inherit; cursor: pointer; }
 @media (max-width: 900px) { .rev-guided { grid-template-columns: 1fr; } }
 
-/* ---- Data & Goals, B · Simpler (2026-10-14): goal on one line, four numbers, chart beside R-A-C-E ---- */
-.dg-looks { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #eef3f7; border: 1px solid var(--line); }
-.dg-looks button { padding: 6px 13px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; white-space: nowrap; }
-.dg-looks button.on { background: #0d2f55; color: #fff; }
+/* ---- Data & Goals (2026-10-14): At a Glance tiles, the year's chart beside R-A-C-E ---- */
 .dg-b { display: flex; flex-direction: column; gap: 14px; }
 .dg-goal { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 18px; }
-.dg-goal-icon { font-size: 30px; }
-.dg-goal-words { flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 2px; }
 .dg-kicker { font-size: 11.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
-.dg-goal-words b { font-size: 18px; color: #0d2f55; line-height: 1.25; }
-.dg-goal-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 2px; font-size: 13px; }
 .dg-link { background: none; border: 0; padding: 0; font: inherit; font-weight: 800; color: var(--link); cursor: pointer; }
-.dg-won { font-weight: 700; color: #1f7a4d; }
 .dg-glance { padding: 14px 16px 16px; }
 .dg-glance-title { display: block; margin: 0 2px 10px; font-size: 15px; color: #0d2f55; }
 .dg-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -2476,7 +2468,7 @@ body { font-size: 16px; }
 .dg-race-pct { width: 40px; text-align: right; font-size: 13px; font-weight: 800; }
 @media (max-width: 900px) { .dg-stats { grid-template-columns: 1fr; } .dg-main { grid-template-columns: 1fr; } }
 
-/* ---- Data & Goals, C · New (2026-10-14): goal beside At a Glance, a goals-reached count, conference as its own bar ---- */
+/* ---- Data & Goals top (her pick C, 2026-10-14): goal beside At a Glance, a goals-reached count, conference as its own bar ---- */
 .dg-top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.75fr); gap: 14px; align-items: stretch; }
 .dg-goal.c { flex-direction: column; align-items: stretch; flex-wrap: nowrap; gap: 8px; padding: 14px 18px 16px; }
 .dg-goal.c .dg-row { margin: 0; }

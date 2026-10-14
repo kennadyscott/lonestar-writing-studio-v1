@@ -919,46 +919,50 @@ export function ProofRoomFeature({ onOpen, studio = false, variant = 'a' }) {
     const s = seedDemoMastery(mine, lead.tp.id, progress); if (s) setSeeded(s)
   }, [lead?.tp.id, topics]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // B (2026-10-14: a Practice page in Home's style): a white card like Home's assignments card. The next step is an
-  // assignment-style row (type chip, path tag, "Up next", navy Begin); the trail on land art sits under it.
+  // B (2026-10-14: "I still like the structure, it's just the colors, boxes, etc."): A's structure (domain tiles, the next step,
+  // the trail, See all progress) in Home's styling: a plain white card with a white header and Home's bold sans title, the next
+  // step as an assignment row (type chip, "Up next", navy Begin) instead of the gold bar, and quiet text links.
   if (variant === 'b') {
     const started = next && progress[next.ws.id]?.best > 0
     const stage = !next ? null : next.capstone ? ['POST-TEST', '#0d2f55', 'Show what you learned'] : next.state === 'sb' ? ['⚡ SKILL BUILDER', '#8b6ee0', 'Extra practice on this skill']
       : started ? ['PRACTICE', 'var(--scr)', t('{n} activities', { n: (next.ws.activities || []).length })] : ['LESSON', 'var(--ecr)', t('Short lesson, then {n} activities', { n: (next.ws.activities || []).length })]
     return (
-      <div className="card prb-lit">
+      <div className="card prf-c look-b prb-lit">
         <div className="assign-head prb-head">
           <b className="prb-title">{t('The Lit Labyrinth')}</b>
           <button type="button" className="assign-more-b" onClick={() => onOpen()}>{t('See every path →')}</button>
         </div>
-        {!topics && <div className="prf-empty">{t('Loading…')}</div>}
-        {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
-        {lead && (
-          <>
-            <div className="assign-list-b prb-list">
-              <div className="assign-row prb-next">
-                <div className="assign-main">
-                  <div className="assign-title">{next ? (next.capstone ? t('Post-test') : clearingTitle(next.ws)) : t('Path complete!')}</div>
-                  <div className="assign-meta">
-                    {stage && <span className="p45-type" style={{ background: stage[1] }}>{stage[0]}</span>}
-                    <span className="pill" style={{ background: '#eef3f6', color: '#5c7285' }}>{lead.tp.short || lead.tp.title}</span>
-                    {stage && <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{stage[2]}</span>}
+        <div className="prb-body">
+          {!topics && <div className="prf-empty">{t('Loading…')}</div>}
+          {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
+          {lead && (
+            <>
+              <DomainStrip mine={mine} progress={progress} selD={view.tp.domain} onPick={pickDomain} next={next} onStart={start} />
+              <div className="assign-list-b prb-list">
+                <div className="assign-row prb-next">
+                  <div className="assign-main">
+                    <div className="assign-title">{next ? (next.capstone ? t('Post-test') : clearingTitle(next.ws)) : t('Path complete!')}</div>
+                    <div className="assign-meta">
+                      {stage && <span className="p45-type" style={{ background: stage[1] }}>{stage[0]}</span>}
+                      <span className="pill" style={{ background: '#eef3f6', color: '#5c7285' }}>{lead.tp.short || lead.tp.title}</span>
+                      {stage && <span style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600 }}>{stage[2]}</span>}
+                    </div>
+                  </div>
+                  <div className="assign-actions">
+                    <div className="assign-due">{next && <span className="prb-upnext">{t('Up next')}</span>}</div>
+                    <div className="assign-go"><button className="btn" onClick={start}>{next ? (started ? t('Continue') : t('Begin')) : t('Review')}</button></div>
                   </div>
                 </div>
-                <div className="assign-actions">
-                  <div className="assign-due">{next && <span className="prb-upnext">{t('Up next')}</span>}</div>
-                  <div className="assign-go"><button className="btn" onClick={start}>{next ? (started ? t('Continue') : t('Begin')) : t('Review')}</button></div>
-                </div>
               </div>
-            </div>
-            <div className="prb-trailwrap">
-              <div className="gr-pathwrap ll-wrap" style={{ '--ll-land': `url(${landImg(view.tp.domain)})` }}>
+              <div className="gr-pathwrap ll-wrap prb-trail" style={{ '--ll-land': `url(${landImg(view.tp.domain)})` }}>
                 <TrailLook m={pathModel(view.tp, progress, viewNext)}
                   carousel={ringAt >= 0 ? { i: ringAt, n: ring.length, prev: () => step(-1), next: () => step(1) } : null} />
               </div>
-            </div>
-          </>
-        )}
+              <div className="prb-foot"><button type="button" className="assign-more-b" onClick={() => setAllProg(true)}>{t('See all progress →')}</button></div>
+            </>
+          )}
+        </div>
+        {allProg && <ProgressReport mine={mine} progress={progress} grade={grade} onOpen={onOpen} onClose={() => setAllProg(false)} />}
       </div>
     )
   }
@@ -1059,66 +1063,6 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
 
 /* ---- Daily Challenge banner: navy space theme (mockup) ---- */
 
-
-/* Practice B (2026-10-14): the Revision Challenge as a tall painted card, built like Home's Quick Write card. */
-function RevisionCard({ dc, busy, onGo }) {
-  const t = useT()
-  const BASE = import.meta.env.BASE_URL || '/'
-  const done = !!dc?.done
-  return (
-    <div className="qw-block prb-rev" style={{ '--qw-img': `url(${BASE}daily-pip.jpg)` }}>
-      <div aria-hidden className="qw-art" />
-      <div className="qw-body">
-        <div className="qw-label"><span aria-hidden>✏️</span>{t('Revision Challenge')}</div>
-        <div className="qw-prompt">
-          <div style={{ fontSize: 22, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{done ? t('You fixed Pip’s draft!') : t('Help Pip fix a draft')}</div>
-        </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,180,0,.18)', border: '1px solid rgba(245,197,66,.55)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700, color: '#ffe6a3' }}>
-            {done ? '✓ ' + t('Done today') : <>🪙 +50 {t('coins')}</>}
-          </span>
-        </div>
-        <span style={{ flex: 1 }} />
-        <button onClick={onGo} disabled={busy}
-          style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? 'var(--scene-deep)' : '#fff',
-            background: done ? '#eaf5fb' : 'linear-gradient(120deg, var(--scene-blue), var(--scene-navy))', border: done ? '1.5px solid #fff' : '2px solid var(--scene-sky)',
-            boxShadow: done ? 'none' : '0 0 18px rgba(168,223,245,.4), inset 0 0 12px rgba(168,223,245,.18)' }}>
-          {done ? t('✓ See my revision →') : dc?.started ? t('Keep going') : t('Start fixing')}
-        </button>
-      </div>
-    </div>
-  )
-}
-
-/* Practice B: the rest of Practice as a band built like Home's Luna bar: painted badges for Fluency Zone, Free Write and the
- * Writing Bank, and the Share Wall as the band's button. */
-function PracticeBand({ onFluency, onFree, onBank, onWall, busy }) {
-  const t = useT()
-  const BASE = import.meta.env.BASE_URL || '/'
-  const items = [['prac-fluency.jpg', 'Fluency Zone', onFluency], ['prac-free.jpg', 'Free Write', onFree], ['prac-bank.jpg', 'Writing Bank', onBank]]
-  return (
-    <div className="luna-bar lg journey one-lane prb-band">
-      <div className="journey-row">
-        <div className="journey-who">
-          <div style={{ minWidth: 0 }}>
-            <div className="journey-title-row"><img className="journey-gem" src={BRAND.crystalSet} alt="" /><div className="journey-title">{t('More practice')}</div></div>
-            <div className="journey-sub">{t('Games, free writing, and your pieces')}</div>
-          </div>
-        </div>
-        <div className="prb-mods">
-          {items.map(([img, label, go]) => (
-            <button key={label} type="button" className="prb-mod" disabled={busy} onClick={go}>
-              <span aria-hidden className="prb-mod-img" style={{ backgroundImage: `url(${BASE}${img})` }} />
-              <span className="prb-mod-label">{t(label)}</span>
-            </button>
-          ))}
-        </div>
-        <span className="journey-divider" aria-hidden />
-        <button className="journey-btn" onClick={onWall}>⭐ {t('Share Wall')} <span aria-hidden>→</span></button>
-      </div>
-    </div>
-  )
-}
 
 /*
  * The daily Revision Challenge as one of the Practice bars (2026-10-14: "I don't know what it is about this section, but I just
@@ -1560,7 +1504,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const setHomeTab = (v) => { setHomeTabState(v); try { sessionStorage.setItem('lscr.homeTab', v) } catch { /* fine */ } }
   const tab = ['home', 'practice', 'data'].includes(homeTab) ? homeTab : 'home'
   const TABS = [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']]
-  // PROTOTYPE (2026-10-14): Practice A (as it is) or B (built like Home: a white Lit Labyrinth card, a painted Revision card, a band)
+  // PROTOTYPE (2026-10-14): Practice A (as it is) or B (same layout, the Lit Labyrinth card in Home's styling)
   const [practiceLook, setPracticeLookRaw] = useState(() => { try { return localStorage.getItem('lscr.practiceLook') === 'a' ? 'a' : 'b' } catch { return 'b' } })
   const setPracticeLook = (v) => { setPracticeLookRaw(v); try { localStorage.setItem('lscr.practiceLook', v) } catch { /* fine */ } }
   const [busy, setBusy] = useState(false)
@@ -1679,7 +1623,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
         {tab === 'practice' && (
           <div className="style-pick prb-pick" role="group" aria-label="Prototype: Practice page">
             <span className="lbl">Practice</span>
-            {[['a', 'As is'], ['b', 'Like Home']].map(([k, n], i) => <button key={k} className={practiceLook === k ? 'on' : ''} aria-pressed={practiceLook === k} onClick={() => setPracticeLook(k)}>{'AB'[i]}<small>{n}</small></button>)}
+            {[['a', 'As is'], ['b', 'Home style']].map(([k, n], i) => <button key={k} className={practiceLook === k ? 'on' : ''} aria-pressed={practiceLook === k} onClick={() => setPracticeLook(k)}>{'AB'[i]}<small>{n}</small></button>)}
           </div>
         )}
         <div className="seg nav-tabs" role="tablist" aria-label={t('Dashboard sections')} style={{ position: 'relative', zIndex: 2 }}>
@@ -1708,23 +1652,14 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       </>)}
 
       {/* ================= PRACTICE ================= */}
-      {tab === 'practice' && practiceLook === 'b' && (
-        <div className="practice-b" style={{ display: 'flex', flexDirection: 'column', gap: 18, maxWidth: 1560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
-          <div className="home-main stretch">
-            <ProofRoomFeature onOpen={onProofRoom} variant="b" />
-            <RevisionCard dc={dc} busy={busy} onGo={peer} />
-          </div>
-          <PracticeBand busy={busy} onFluency={() => setGamePicker(true)} onFree={freeWrite} onBank={onBank} onWall={onWall} />
-        </div>
-      )}
-      {tab === 'practice' && practiceLook !== 'b' && (
+      {tab === 'practice' && (
         // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
         // B (simpler, 2026-10-14: "Now let's simplify the Practice page on the AB"): look-simple hides the extra words (theme.css).
         <div className={'practice-view' + (simpleLook ? ' look-simple' : '')} data-clean="" data-side="a" style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
           {/* Side cards A wears the paintings. Side cards C is the three white cards, and the Daily Challenge keeps its painting. */}
           <div className="practice-split">
-            <ProofRoomFeature onOpen={onProofRoom} />
+            <ProofRoomFeature onOpen={onProofRoom} variant={practiceLook} />
             <div className="practice-side">
               {/* Fluency Zone leads the side column (her call, 2026-10-02) */}
               <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />

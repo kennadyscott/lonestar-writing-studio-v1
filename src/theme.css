@@ -2589,21 +2589,14 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .prb-pick { background: #fff; border: 1px dashed #b9c7d6; }
 .prb-pick button { display: inline-flex; align-items: baseline; gap: 5px; }
 .prb-pick button small { font-size: 11px; font-weight: 700; opacity: .8; }
-.prb-lit { overflow: hidden; display: flex; flex-direction: column; }
-.prb-head { padding-bottom: 0; }
 .prb-title { font-size: 18px; font-weight: 800; color: var(--ink, #0d2f55); }
-.prb-list { flex: none !important; }
 .prb-next { border-color: #f0cf7a !important; }
 .prb-upnext { font-size: 13px; font-weight: 700; color: #e08a2b; }
-.prb-trailwrap { padding: 0 16px 16px; flex: 1; display: flex; flex-direction: column; }
-.prb-trailwrap .gr-pathwrap.ll-wrap { flex: 1; border-radius: 16px; padding: 12px 14px; border: 1px solid #d6e4ee;
-  background: linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.86)), var(--ll-land) center 60% / cover no-repeat; display: flex; flex-direction: column; }
-.prb-trailwrap .ll { flex: 1; }
-.prb-trailwrap .ll-trail { min-height: 150px; }
-.prb-rev .qw-art { background-position: 38% 22%; }
-.prb-mods { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
-.prb-mod { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 104px; padding: 4px 2px; border: 0; background: none; color: #fff; font: inherit; cursor: pointer; border-radius: 12px; }
-.prb-mod:hover .prb-mod-img { transform: translateY(-2px); box-shadow: 0 0 0 3px #f5c542, 0 6px 16px rgba(0,0,0,.35); }
-.prb-mod-img { width: 58px; height: 58px; border-radius: 50%; background-size: 260% auto; background-position: 12% 55%; box-shadow: 0 0 0 2px rgba(168,223,245,.55), 0 4px 12px rgba(0,0,0,.3); transition: transform .15s, box-shadow .15s; }
-.prb-mod-label { font-size: 12.5px; font-weight: 800; letter-spacing: .3px; color: var(--scene-sky, #90d8f0); white-space: nowrap; }
 .prb-lit .p45-type { font-size: 11px; font-weight: 800; letter-spacing: .4px; color: #fff; padding: 3px 9px; border-radius: 7px; }
+.prb-lit { overflow: hidden; display: flex; flex-direction: column; border-radius: 20px; }
+.prb-head { padding: 14px 18px 0; }
+.prb-body { display: flex; flex-direction: column; gap: 10px; padding: 12px 18px 14px; flex: 1; }
+.prb-list { flex: none !important; padding: 0 !important; }
+.prb-lit .gre-tile.on { border-color: #1a8fb5; box-shadow: 0 0 0 2px rgba(26,143,181,.15); }
+.prb-trail { flex: 1; }
+.prb-foot { display: flex; justify-content: flex-end; }

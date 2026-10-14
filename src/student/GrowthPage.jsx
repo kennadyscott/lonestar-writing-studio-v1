@@ -9,14 +9,6 @@ import { useSay, Glossed, Directions, Speak } from './Scaffold.jsx'
  * three-tab switch (Assignments · Data & Goals · Share Wall).
  */
 
-const PRESET_GOALS = [
-  { id: 'g_ideas', trait: 'ideas', icon: '💡', text: 'Back up my opinion with strong, specific reasons' },
-  { id: 'g_org', trait: 'organization', icon: '🧭', text: 'Organize my writing with a clear beginning, middle, and end' },
-  { id: 'g_word', trait: 'word_choice', icon: '🎨', text: 'Swap plain words for exact, vivid ones' },
-  { id: 'g_voice', trait: 'voice', icon: '🎤', text: 'Let my voice come through and write to my reader' },
-  { id: 'g_fluency', trait: 'sentence_fluency', icon: '🌊', text: 'Vary my sentences so my writing flows when read aloud' },
-]
-
 const fmtDate = (d, locale = 'en-US') => d ? new Date(d).toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : ''
 
 /* ---------- Monthly progress chart (compact) ---------- */
@@ -538,9 +530,8 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const mp = state.monthlyProgress
   // Goals and conferences (Kennady, 2026-10-14): "The conference is locked until the teacher unlocks it on their end. If it isn't
   // time for a new conference, they can 'see my last conference'. I also don't want them to be able to change their goal until
-  // they reach it. And they should build their first goal with their teacher during their first conference." Picking a goal is
-  // only possible after one is reached. Two prototype switches show each case (in the product the teacher's side sets these).
-  const [picking, setPicking] = useState(false)
+  // they reach it. And they should build their first goal with their teacher during their first conference." "I want every goal
+  // to come from a conference": there is no goal picker. Two prototype switches show each case (the teacher's side sets these).
   const [confOpen, setConfOpen] = useState(() => { try { return localStorage.getItem('lscr.confOpen') === '1' } catch { return false } })
   const [demoFirst, setDemoFirst] = useState(() => { try { return localStorage.getItem('lscr.demoFirstConf') === '1' } catch { return false } })
   const setOpen = (v) => { setConfOpen(v); try { localStorage.setItem('lscr.confOpen', v ? '1' : '0') } catch { /* fine */ } }
@@ -549,17 +540,14 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const goal = demoFirst ? null : me.goal
   const history = demoFirst ? [] : (me.goalHistory || [])
   const firstTime = !goal && !history.length
-  const [custom, setCustom] = useState('')
   const [toast, setToast] = useState(null)
   const [mpTab, setMpTab] = useState('scr')
   const [conferring, setConferring] = useState(false)
   // The page is version C (Kennady, 2026-10-14: "I like version C - that's perfect"): My goal beside At a Glance (with a count of
   // goals reached and their trophies), Conference with my teacher as its own bar, then the year's chart, RACE and the growth story.
 
-  async function choose(g) { await api.setGoal(g); setPicking(false); onChange && onChange() }
-  async function setCustomGoal() { if (!custom.trim()) return; await api.setGoal({ text: custom.trim(), trait: null }); setCustom(''); setPicking(false); onChange && onChange() }
   async function achieve() { const r = await api.achieveGoal(); setToast(r.coins); onChange && onChange() }
-  async function conferenceGoal(payload) { await api.setGoal(payload); setConferring(false); setPicking(false); if (demoFirst) setFirst(false); onChange && onChange() }
+  async function conferenceGoal(payload) { await api.setGoal(payload); setConferring(false); if (demoFirst) setFirst(false); onChange && onChange() }
 
   const revisions = subs.reduce((a, s) => a + Math.max(0, s.drafts.length - 1), 0)
   const finished = subs.filter((s) => s.completedAt).length
@@ -598,7 +586,8 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           <h2 style={{ margin: '6px 0' }}>{t('Goal reached!')}</h2>
           <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>{say('Amazing work sticking with it. You earned')}</p>
           <div className="coin" style={{ fontSize: 22, justifyContent: 'center' }}><span className="disc" style={{ width: 20, height: 20 }} />+{toast}</div>
-          <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Pick my next goal')}</button>
+          <p style={{ color: 'var(--muted)', margin: '10px 0 0', fontSize: 14 }}>{say('Your next goal will come from your next conference.')}</p>
+          <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Done')}</button>
         </div>
       </div>
     )}
@@ -636,146 +625,99 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
     </div>
   )
 
-  if (!picking) {
-    const d = state.writingData?.ELA
-    const series = mpTab === 'scr' ? mp.scr : mp.ecr
-    const now = series[series.length - 1], grew = Math.round((now - series[0]) * 10) / 10
-    const RACE = [['R', 'Restate'], ['A', 'Answer'], ['C', 'Cite'], ['E', 'Explain']]
-    return (
-      <div className="dg-b">
-        {modals}
-        {lastCard}
-        {proto}
-
-          <div className="dg-top">
-            <div className="card dg-goal c">
-              <span className="dg-kicker">🎯 {t('My goal')}</span>
-              {goal ? <>
-                <b className="dg-goal-text">{t(goal.text)}</b>
-                {/* no changing it until it is reached */}
-                <div className="dg-goal-acts"><button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button></div>
-              </> : firstTime ? <>
-                <b className="dg-goal-text">{t("You'll build your first goal with your teacher.")}</b>
-                <span className="dg-goal-note">{say('It happens in your first conference.')}</span>
-              </> : <>
-                <b className="dg-goal-text">{t('🎉 Goal reached! What is next?')}</b>
-                <div className="dg-goal-acts"><button className="btn" onClick={() => setPicking(true)}>{t('Pick my next goal')}</button></div>
-              </>}
-              {history.length > 0 && (
-                <div className="dg-trophies" aria-label={t("Goals you've reached")}>
-                  {history.map((g, i) => <span key={i} className="dg-trophy" title={`${t(g.text)} · ${fmtDate(g.achievedOn, locale)}`}>🏆</span>)}
-                  <span className="dg-trophy-label">{t("Goals you've reached")}</span>
-                </div>
-              )}
-            </div>
-            <section className="card dg-glance c" aria-label={t('At a Glance')}>
-              <b className="dg-glance-title">{t('At a Glance')}</b>
-              <div className="dg-stats four">
-                {[
-                  { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
-                  { tone: 'violet', icon: '✏️', v: revisions, k: t('Revisions made') },
-                  { tone: 'orange', icon: '✅', v: finished, k: t('Pieces finished') },
-                  { tone: 'gold', icon: '🏆', v: history.length, k: t('Goals reached') },
-                ].map((x, i) => (
-                  <div key={i} className={'dg-stat ' + x.tone}>
-                    <span className="dg-stat-icon" aria-hidden>{x.icon}</span>
-                    <div><div className="v">{x.v}</div><div className="k">{x.k}</div>{x.up && <div className="up">{x.up}</div>}</div>
-                  </div>
-                ))}
-              </div>
-            </section>
-          </div>
-          {/* the teacher opens a conference; until then it is locked and the last one can be read */}
-          <div className={'dg-confer' + (confOpen ? '' : ' locked')}>
-            <span className="dg-confer-icon" aria-hidden>{confOpen ? '🤝' : '🔒'}</span>
-            {confOpen ? <>
-              <div className="dg-confer-words"><b>{firstTime ? t('Your teacher is ready for your first conference!') : t('Your teacher is ready to meet!')}</b>
-                <span>{firstTime ? say('Look at your writing together and build your first goal.') : say('Look at your work together and talk about your next step.')}</span></div>
-              <button className="btn" onClick={() => setConferring(true)}>{firstTime ? t('Start my first conference →') : t('Start my conference →')}</button>
-            </> : <>
-              <div className="dg-confer-words"><b>{firstTime ? t('Your first conference is coming soon') : t('Your next conference is coming soon')}</b>
-                <span>{say('It opens when your teacher is ready to meet with you.')}</span></div>
-              {!firstTime && lastSource && <button className="btn ghost" onClick={() => setLastConf(true)}>{t('See my last conference')}</button>}
-            </>}
-          </div>
-
-        <div className="dg-main">
-          <div className="card dg-chart">
-            <div className="dg-row">
-              <b>{t('My scores this year')}</b>
-              <div className="seg">
-                <button className={mpTab === 'scr' ? 'on' : ''} onClick={() => setMpTab('scr')}>SCR</button>
-                <button className={mpTab === 'ecr' ? 'on' : ''} onClick={() => setMpTab('ecr')}>ECR</button>
-              </div>
-            </div>
-            {mpTab === 'scr'
-              ? <MonthChart label="SCR — Short response" months={mp.months} data={mp.scr} color="var(--scr)" height={120} />
-              : <MonthChart label="ECR — Extended response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={120} />}
-          </div>
-          <div className="card dg-race">
-            {mpTab === 'scr' ? <>
-              <b>{t('How I use RACE')}</b>
-              <div className="dg-race-rows">
-                {RACE.map(([k, word]) => { const r = d?.scr.find((x) => x.k === k) || { pct: 0, label: word }; return (
-                  <div key={k} className="dg-race-row">
-                    <span className="anchor-k" style={{ color: ANCHOR_COLORS[r.label] || 'var(--navy)' }}>{k}</span>
-                    <span className="dg-race-word">{t(word)}</span>
-                    <DataBar pct={r.pct} />
-                    <span className="dg-race-pct">{r.pct}%</span>
-                  </div>) })}
-              </div>
-            </> : <EcrCombined org={d.ecrOrg} conv={d.ecrConv} />}
-          </div>
-        </div>
-
-        {/* the growth story stays on the page (her note, 2026-10-14: "Keep the growth story even on the simpler version") */}
-        {growthStories}
-      </div>
-    )
-  }
-
-  // After a goal is reached: pick the next one (or plan it with the teacher).
+  const d = state.writingData?.ELA
+  const series = mpTab === 'scr' ? mp.scr : mp.ecr
+  const now = series[series.length - 1], grew = Math.round((now - series[0]) * 10) / 10
+  const RACE = [['R', 'Restate'], ['A', 'Answer'], ['C', 'Cite'], ['E', 'Explain']]
   return (
-    <div>
+    <div className="dg-b">
       {modals}
-      <div className="card" style={{ padding: 22, marginBottom: 18 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <b style={{ fontSize: 17 }}>{t('🎯 Pick my goal')}</b>
-          <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(false)}>{t('Back')}</button>
-        </div>
-          <div style={{ marginTop: 10 }}>
-            <div style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap' }}>
-              {/* the sentence is three fragments around a live button, so it is glossed piecewise and read aloud as one */}
-              <span style={{ flex: 1, minWidth: 0 }}>
-                <Glossed text={say('Best way:')} /> <button onClick={() => setConferring(true)} style={{ color: 'var(--link)', fontWeight: 800, background: 'none', cursor: 'pointer', padding: 0 }}>{t('sit down with your teacher')}</button> <Glossed text={say('and work out your goal together. Or pick one to focus on now — you can change it anytime.')} />
-              </span>
-              <Speak text={`${say('Best way:')} ${t('sit down with your teacher')} ${say('and work out your goal together. Or pick one to focus on now — you can change it anytime.')}`} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {PRESET_GOALS.map((g) => {
-                const on = me.goal?.id === g.id
-                return (
-                  <button key={g.id} onClick={() => choose(g)}
-                    style={{ display: 'flex', gap: 12, alignItems: 'center', textAlign: 'left', padding: '12px 14px', borderRadius: 12,
-                      border: on ? '2px solid var(--navy)' : '1px solid var(--line)', background: on ? '#eef4f7' : '#fff', cursor: 'pointer' }}>
-                    <span style={{ fontSize: 24 }}>{g.icon}</span>
-                    <span>
-                      <span style={{ display: 'block', fontWeight: 600, fontSize: 14 }}>{t(g.text)}</span>
-                      <span style={{ display: 'block', fontSize: 11, color: 'var(--link)', fontWeight: 700, marginTop: 2 }}>{t(TRAIT_LABELS[g.trait])}</span>
-                    </span>
-                  </button>
-                )
-              })}
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '12px 14px', borderRadius: 12, border: '1px dashed var(--line)', gridColumn: '1 / -1' }}>
-                <span style={{ fontSize: 22 }}>✏️</span>
-                <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder={t('Or write your own goal…')}
-                  onKeyDown={(e) => e.key === 'Enter' && setCustomGoal()}
-                  style={{ flex: 1, padding: '9px 12px', borderRadius: 9, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 14 }} />
-                <button className="btn" disabled={!custom.trim()} onClick={setCustomGoal}>{t('Set goal')}</button>
+      {lastCard}
+      {proto}
+
+        <div className="dg-top">
+          <div className="card dg-goal c">
+            <span className="dg-kicker">🎯 {t('My goal')}</span>
+            {goal ? <>
+              <b className="dg-goal-text">{t(goal.text)}</b>
+              {/* no changing it until it is reached */}
+              <div className="dg-goal-acts"><button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button></div>
+            </> : firstTime ? <>
+              <b className="dg-goal-text">{t("You'll build your first goal with your teacher.")}</b>
+              <span className="dg-goal-note">{say('It happens in your first conference.')}</span>
+            </> : <>
+              <b className="dg-goal-text">{t('🎉 Goal reached!')}</b>
+              <span className="dg-goal-note">{say('You and your teacher will set your next goal in your next conference.')}</span>
+            </>}
+            {history.length > 0 && (
+              <div className="dg-trophies" aria-label={t("Goals you've reached")}>
+                {history.map((g, i) => <span key={i} className="dg-trophy" title={`${t(g.text)} · ${fmtDate(g.achievedOn, locale)}`}>🏆</span>)}
+                <span className="dg-trophy-label">{t("Goals you've reached")}</span>
               </div>
+            )}
+          </div>
+          <section className="card dg-glance c" aria-label={t('At a Glance')}>
+            <b className="dg-glance-title">{t('At a Glance')}</b>
+            <div className="dg-stats four">
+              {[
+                { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
+                { tone: 'violet', icon: '✏️', v: revisions, k: t('Revisions made') },
+                { tone: 'orange', icon: '✅', v: finished, k: t('Pieces finished') },
+                { tone: 'gold', icon: '🏆', v: history.length, k: t('Goals reached') },
+              ].map((x, i) => (
+                <div key={i} className={'dg-stat ' + x.tone}>
+                  <span className="dg-stat-icon" aria-hidden>{x.icon}</span>
+                  <div><div className="v">{x.v}</div><div className="k">{x.k}</div>{x.up && <div className="up">{x.up}</div>}</div>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+        {/* the teacher opens a conference; until then it is locked and the last one can be read */}
+        <div className={'dg-confer' + (confOpen ? '' : ' locked')}>
+          <span className="dg-confer-icon" aria-hidden>{confOpen ? '🤝' : '🔒'}</span>
+          {confOpen ? <>
+            <div className="dg-confer-words"><b>{firstTime ? t('Your teacher is ready for your first conference!') : t('Your teacher is ready to meet!')}</b>
+              <span>{firstTime ? say('Look at your writing together and build your first goal.') : say('Look at your work together and talk about your next step.')}</span></div>
+            <button className="btn" onClick={() => setConferring(true)}>{firstTime ? t('Start my first conference →') : t('Start my conference →')}</button>
+          </> : <>
+            <div className="dg-confer-words"><b>{firstTime ? t('Your first conference is coming soon') : t('Your next conference is coming soon')}</b>
+              <span>{say('It opens when your teacher is ready to meet with you.')}</span></div>
+            {!firstTime && lastSource && <button className="btn ghost" onClick={() => setLastConf(true)}>{t('See my last conference')}</button>}
+          </>}
+        </div>
+
+      <div className="dg-main">
+        <div className="card dg-chart">
+          <div className="dg-row">
+            <b>{t('My scores this year')}</b>
+            <div className="seg">
+              <button className={mpTab === 'scr' ? 'on' : ''} onClick={() => setMpTab('scr')}>SCR</button>
+              <button className={mpTab === 'ecr' ? 'on' : ''} onClick={() => setMpTab('ecr')}>ECR</button>
             </div>
           </div>
+          {mpTab === 'scr'
+            ? <MonthChart label="SCR — Short response" months={mp.months} data={mp.scr} color="var(--scr)" height={120} />
+            : <MonthChart label="ECR — Extended response" months={mp.months} data={mp.ecr} color="var(--ecr)" height={120} />}
+        </div>
+        <div className="card dg-race">
+          {mpTab === 'scr' ? <>
+            <b>{t('How I use RACE')}</b>
+            <div className="dg-race-rows">
+              {RACE.map(([k, word]) => { const r = d?.scr.find((x) => x.k === k) || { pct: 0, label: word }; return (
+                <div key={k} className="dg-race-row">
+                  <span className="anchor-k" style={{ color: ANCHOR_COLORS[r.label] || 'var(--navy)' }}>{k}</span>
+                  <span className="dg-race-word">{t(word)}</span>
+                  <DataBar pct={r.pct} />
+                  <span className="dg-race-pct">{r.pct}%</span>
+                </div>) })}
+            </div>
+          </> : <EcrCombined org={d.ecrOrg} conv={d.ecrConv} />}
+        </div>
       </div>
+
+      {/* the growth story stays on the page (her note, 2026-10-14: "Keep the growth story even on the simpler version") */}
+      {growthStories}
     </div>
   )
 }

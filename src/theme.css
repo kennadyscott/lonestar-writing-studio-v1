@@ -121,6 +121,13 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .assign-actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
 .assign-due { width: 112px; text-align: right; }
 .assign-go { width: 104px; text-align: right; }
+/* B (simpler): the whole row is the button. */
+.assign-row-b { width: 100%; background: none; border: 0; border-bottom: 1px solid var(--line); text-align: left; font: inherit; color: inherit; cursor: pointer; }
+.assign-row-b:hover:not(:disabled) { background: #f5f9fc; }
+.assign-row-b:focus-visible { outline: 2px solid var(--scene-sky, #8fd3f0); outline-offset: -2px; }
+.assign-row-b .assign-title { display: block; }
+.assign-row-b .btn { pointer-events: none; }
+.assign-chev { width: 18px; text-align: center; font-size: 22px; line-height: 1; color: #9bb0bf; }
 
 .luna-bar-mods { display: flex; align-items: flex-start; gap: 4px; flex-shrink: 0; }
 .luna-mod { display: flex; flex-direction: column; align-items: center; gap: 3px; width: 62px; padding: 5px 2px; border-radius: 10px; cursor: pointer; }
@@ -151,6 +158,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: rgba(255,255,255,.82); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(13,47,85,.12);
   font-size: 11.5px; font-weight: 800; color: var(--muted); opacity: .7; transition: opacity .15s; }
 .demo-reset:hover, .demo-reset:focus-visible { opacity: 1; background: #fff; }
+/* A / B page versions, beside Reset (2026-10-14). */
+.demo-look { position: fixed; left: 150px; bottom: 11px; z-index: 30; display: flex; padding: 3px; gap: 2px; border-radius: 999px;
+  background: rgba(255,255,255,.9); border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(13,47,85,.12); }
+.demo-look button { padding: 5px 11px; border: 0; border-radius: 999px; background: transparent; font-size: 11.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
+.demo-look button.on { background: var(--scene-navy, #0d2f55); color: #fff; }
+.demo-look button:focus-visible { outline: 2px solid var(--scene-sky, #8fd3f0); outline-offset: 1px; }
 
 /* ===== cards / buttons ===== */
 .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }

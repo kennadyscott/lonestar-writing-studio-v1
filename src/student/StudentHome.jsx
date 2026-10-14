@@ -14,6 +14,7 @@ import { topicStatus, clearingTitle, buildStops, nextStopOf, kindLabel, landName
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { useBandValue } from '../lib/gradeBand.js'
 import { writingStreak } from '../lib/streak.js'
+import { useLook } from '../lib/look.js'
 
 
 const TODAY = new Date('2026-07-02T00:00:00')
@@ -938,6 +939,8 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
   const pick = todaysQuickPrompt(state)
   const done = !!completedQuickWrite(state, me.id, pick)
   const streak = writingStreak(state.growthSummary)
+  // B (simpler): the badge, the prompt's title, and the button.
+  const simple = useLook() === 'b'
   return (
     // The painting sits behind the whole block (her mockup): the wolf fills the
     // top, and the text reads over a navy fade at the bottom.
@@ -947,18 +950,18 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
         {/* the label, as a badge: it is the one thing that says what this block is */}
         <div className="qw-label"><span aria-hidden>⚡</span>{t('Quick Write')}</div>
         <div className="qw-prompt">
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--scene-sky)', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>
-          <div style={{ fontSize: 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
-          <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>
+          {!simple && <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: 1, color: 'var(--scene-sky)', textTransform: 'uppercase' }}>{t("Today's prompt")}</div>}
+          <div style={{ fontSize: simple ? 22 : 20, fontWeight: 800, lineHeight: 1.2, margin: '2px 0 5px', textWrap: 'balance' }}>{pick.title}</div>
+          {!simple && <div style={{ fontSize: 13.5, lineHeight: 1.45, color: 'rgba(255,255,255,.9)' }}>{pick.prompt}</div>}
         </div>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+        {!simple && <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(255,255,255,.12)', border: '1px solid rgba(255,255,255,.22)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700 }}>
             🔥 {t('{n} day streak', { n: streak.days })}
           </span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(245,180,0,.18)', border: '1px solid rgba(245,197,66,.55)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700, color: '#ffe6a3' }}>
             🪙 +10 {t('coins')}
           </span>
-        </div>
+        </div>}
         {done && (
           <div style={{ fontSize: 12.5, color: 'var(--scene-mist)', lineHeight: 1.4 }}>{t('Done for today. A new prompt comes tomorrow.')}</div>
         )}
@@ -967,7 +970,7 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
           style={{ width: '100%', padding: '13px 18px', borderRadius: 14, fontSize: 15, fontWeight: 800, cursor: 'pointer', color: done ? 'var(--scene-deep)' : '#fff',
             background: done ? '#eaf5fb' : 'linear-gradient(120deg, var(--scene-blue), var(--scene-navy))', border: done ? '1.5px solid #fff' : '2px solid var(--scene-sky)',
             boxShadow: done ? 'none' : '0 0 18px rgba(168,223,245,.4), inset 0 0 12px rgba(168,223,245,.18)' }}>
-          {done ? t('✓ See what I wrote →') : t('Start writing →')}
+          {done ? t('✓ See what I wrote →') : simple ? t('Start writing') : t('Start writing →')}
         </button>
       </div>
     </div>
@@ -1284,15 +1287,17 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
   const [typeFilter, setTypeFilter] = useState('all')
   const [formatFilter, setFormatFilter] = useState('all')
   const [query, setQuery] = useState('')
+  // B (simpler, 2026-10-14): no search, filters or sort; each row is one click, and only the next one due has a button.
+  const simple = useLook() === 'b'
 
   const types = ['all', ...Array.from(new Set(rows.map((r) => r.a.type)))]
   const filtered = rows
     .filter((r) => (tab === 'completed' ? r.status === 'completed' : r.status !== 'completed'))
-    .filter((r) => typeFilter === 'all' || r.a.type === typeFilter)
-    .filter((r) => formatFilter === 'all' || r.a.format === formatFilter)
-    .filter((r) => r.a.title.toLowerCase().includes(query.toLowerCase()))
+    .filter((r) => simple || typeFilter === 'all' || r.a.type === typeFilter)
+    .filter((r) => simple || formatFilter === 'all' || r.a.format === formatFilter)
+    .filter((r) => simple || r.a.title.toLowerCase().includes(query.toLowerCase()))
     .sort((x, y) => {
-      if (sort === 'due') return (daysTo(x.a.dueDate)) - (daysTo(y.a.dueDate))
+      if (simple || sort === 'due') return (daysTo(x.a.dueDate)) - (daysTo(y.a.dueDate))
       if (sort === 'title') return x.a.title.localeCompare(y.a.title)
       if (sort === 'type') return x.a.type.localeCompare(y.a.type)
       if (sort === 'teacher') return x.a.teacher.name.localeCompare(y.a.teacher.name)
@@ -1309,14 +1314,22 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
     count()
     const ro = new ResizeObserver(count); ro.observe(el)
     return () => ro.disconnect()
-  }, [filtered.length, tab])
+  }, [filtered.length, tab, simple])
   const hidden = Math.max(0, filtered.length - visible)
 
   const listBody = (
     <>
         {filtered.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'var(--muted)' }}>{say('Nothing here — try the other tab or clear filters.')}</div>}
-        {filtered.map((row) => {
+        {filtered.map((row, i) => {
           const s = STATUS_CHIP[row.status]
+          const verb = row.status === 'completed' ? t('Review') : row.status === 'in_progress' ? t('Continue') : t('Begin')
+          if (simple) return (
+            <button key={row.a.id} type="button" className="assign-row assign-row-b" disabled={busy} onClick={() => begin(row)}>
+              <span className="assign-main"><span className="assign-title">{row.a.title}</span></span>
+              <span className="assign-due"><DueChip dueDate={row.a.dueDate} status={row.status} /></span>
+              {i === 0 && tab === 'active' ? <span className="btn">{verb}</span> : <span className="assign-chev" aria-hidden>›</span>}
+            </button>
+          )
           return (
             <div key={row.a.id} className="assign-row">
               <div className="assign-main">
@@ -1354,7 +1367,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
         </div>
         {headerAction}
       </div>
-      <div className="assign-filters">
+      {!simple && <div className="assign-filters">
         <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={t('🔍 Search assignments…')}
           style={{ flex: 1, minWidth: 140, padding: '8px 12px', borderRadius: 10, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 13 }} />
         <select value={formatFilter} onChange={(e) => setFormatFilter(e.target.value)} style={selStyle}>
@@ -1371,7 +1384,7 @@ function AssignmentsCard({ rows, busy, begin, headerAction }) {
           <option value="type">{t('Sort: Type')}</option>
           <option value="teacher">{t('Sort: Teacher')}</option>
         </select>
-      </div>
+      </div>}
       <div style={{ position: 'relative', flex: 1, minHeight: 246 }}>
         <div ref={listRef} style={{ position: 'absolute', inset: 0, overflowY: 'auto' }}>{listBody}</div>
       </div>

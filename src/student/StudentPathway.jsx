@@ -4,6 +4,7 @@ import { StudentTestCard } from './testCard/StudentTestCard.jsx'
 import { scoreStudentItem } from './testCard/studentTestItem.mjs'
 import { useBandValue } from '../lib/gradeBand.js'
 import './StudentPathway.css'
+import { Path45Look, PATH45_LOOKS, samplePathRecord } from './Path45Looks.jsx'
 
 const names = { pre: 'Pre-test', lesson: 'Lesson', practice: 'Practice', post: 'Post-test' }
 const marks = { pre: '01', lesson: '▤', practice: '✦', post: '✓' }
@@ -29,6 +30,12 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   const [record, setRecord] = useState(() => loadRecord(storageKey))
   const [active, setActive] = useState(null)
   const [saveFailed, setSaveFailed] = useState(false)
+  // PROTOTYPE (grades 3-5, 2026-10-14): which look, and sample progress to see it new / partway / done (display only)
+  const is45 = band === '3-5' || band === '4-5'
+  const [look, setLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.path45Look'); return PATH45_LOOKS.some(([k]) => k === v) ? v : 'a' } catch { return 'a' } })
+  const setLook = (v) => { setLookRaw(v); try { localStorage.setItem('lscr.path45Look', v) } catch { /* fine */ } }
+  const [sample, setSampleRaw] = useState(() => { try { return localStorage.getItem('lscr.pathSample') || 'partway' } catch { return 'partway' } })
+  const setSample = (v) => { setSampleRaw(v); try { localStorage.setItem('lscr.pathSample', v) } catch { /* fine */ } }
   useEffect(() => {
     try { localStorage.setItem(storageKey, JSON.stringify(record)); setSaveFailed(false) }
     catch { setSaveFailed(true) }
@@ -50,7 +57,12 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   const testing = !!active && (active.type === 'pre' || active.type === 'post')
   return (
     <section className={'student-pathway' + (testing ? ' sp-testing' : '')} aria-label={`${topic.short || topic.title} pathway`}>
-      {!testing && <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span></div>}
+      {!testing && <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span>
+        {is45 && !active && <span className="sp-proto">
+          <span className="style-pick" role="group" aria-label="Prototype: pathway look">{PATH45_LOOKS.map(([k, n], i) => <button key={k} className={look === k ? 'on' : ''} onClick={() => setLook(k)}>{'ABC'[i]}<small>{n}</small></button>)}</span>
+          <span className="style-pick" role="group" aria-label="Prototype: sample progress"><span className="lbl">Sample</span>{[['new', 'New'], ['partway', 'Partway'], ['done', 'Done'], ['mine', 'Mine']].map(([k, n]) => <button key={k} className={sample === k ? 'on' : ''} onClick={() => setSample(k)}>{n}</button>)}</span>
+        </span>}
+      </div>}
       {saveFailed && <p role="status">Progress is kept for this visit, but this browser could not save it for later.</p>}
       {active ? (
         <>
@@ -76,7 +88,10 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
           )}
         </>
       ) : (
-        <PathForGrade band={band} topic={topic} content={content} record={record} onOpen={open} onBack={onBackToMap} />
+        is45
+          ? <Path45Look look={look} topic={topic} record={sample === 'mine' ? record : samplePathRecord(sample, topic)}
+              model={pathModel(topic, content, sample === 'mine' ? record : samplePathRecord(sample, topic))} onOpen={open} onBack={onBackToMap} />
+          : <PathForGrade band={band} topic={topic} content={content} record={record} onOpen={open} onBack={onBackToMap} />
       )}
     </section>
   )
@@ -158,6 +173,7 @@ function pathModel(topic, content, record) {
     return {
       id: sheet.id,
       n: i + 1,
+      full: sheet === topic.full,
       title: titleOf(sheet),
       skill: sheet.skill,
       lesson,

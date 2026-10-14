@@ -451,3 +451,108 @@
 .proof-page:has(.sp-testing) .crumbs { display: none; }
 .student-pathway.sp-testing { gap: 0; }
 .content:has(.sp-testing) { padding-bottom: 4px; }
+
+/* ---- Grades 3-5: three pathway looks (Path45Looks.jsx, 2026-10-14) ---- */
+.student-pathway .sp-preview-note { flex-wrap: wrap; }
+.student-pathway .sp-proto { margin-left: auto; display: inline-flex; gap: 8px; flex-wrap: wrap; }
+.student-pathway .sp-proto .style-pick { background: #fff; border: 1px dashed #b9c7d6; }
+.student-pathway .sp-proto .style-pick button { display: inline-flex; align-items: baseline; gap: 5px; border: 0; }
+.student-pathway .sp-proto .style-pick small { font-size: 11px; font-weight: 700; opacity: .8; }
+
+.student-pathway .p45 { display: flex; flex-direction: column; gap: 10px; color: #0d2f55; }
+.student-pathway .p45 h2, .student-pathway .p45 h3 { margin: 0; line-height: 1.15; }
+.student-pathway .p45 p { margin: 0; }
+.student-pathway .p45-kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #3c6a86; margin-bottom: 3px !important; }
+.student-pathway .p45-line { color: #3d5870; font-size: 15px; }
+.student-pathway .p45-line.big { font-size: 18px; margin-top: 6px !important; }
+.student-pathway .p45-back { border: 1px solid #c9d8e6; background: rgba(255,255,255,.9); color: #0d2f55; font: inherit; font-weight: 800; font-size: 14px; border-radius: 999px; padding: 8px 14px; cursor: pointer; white-space: nowrap; }
+.student-pathway .p45-link { border: 0; background: none; color: #1f6fb2; font: inherit; font-weight: 800; font-size: 14px; cursor: pointer; padding: 0; margin-left: auto; align-self: flex-start; }
+.student-pathway .p45-growth { font-size: 14px; background: rgba(255,255,255,.88); border-radius: 999px; padding: 5px 6px 5px 12px; }
+
+/* hero: the domain's land art, washed light (her pick on the Practice card) */
+.student-pathway .p45-hero { border-radius: 20px; padding: 14px 22px 8px; border: 1px solid #d6e4ee;
+  background: linear-gradient(rgba(255,255,255,.78), rgba(255,255,255,.86)), var(--p45-land) center 60% / cover no-repeat; }
+.student-pathway .p45-hero.slim { padding: 12px 20px; }
+.student-pathway .p45-hero-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.student-pathway .p45-hero h2 { font-size: 30px; font-weight: 800; }
+.student-pathway .p45-trail { height: 190px; margin-top: 0; }
+.student-pathway .p45-stone { border: 0; background: none; padding: 0; font: inherit; cursor: pointer; }
+.student-pathway .p45-stone.picked .ll-stone { box-shadow: 0 0 0 5px rgba(13,47,85,.25); }
+.student-pathway .p45-stone .ll-stone-label { font-size: 13px; }
+
+/* the next-step panel (A) and the step buttons (A, C) */
+.student-pathway .p45-panel { display: flex; flex-direction: column; gap: 12px; background: #fff; border: 1px solid #dbe5ee; border-radius: 20px; padding: 14px 20px; box-shadow: 0 6px 18px rgba(13,47,85,.06); }
+.student-pathway .p45-panel.now { border-color: #f0cf7a; box-shadow: 0 0 0 3px rgba(245,180,0,.15), 0 6px 18px rgba(13,47,85,.06); }
+.student-pathway .p45-panel-head { display: flex; align-items: center; gap: 14px; }
+.student-pathway .p45-panel h3 { font-size: 24px; font-weight: 800; }
+.student-pathway .p45-badge { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; font-weight: 900; background: #fff; border: 3px solid #f5b400; color: #0d2f55; }
+.student-pathway .p45-badge.done { background: #2f9e6f; border-color: #237a55; color: #fff; }
+.student-pathway .p45-badge.later { background: #f1f4f7; border-color: #dbe3ec; font-size: 15px; }
+.student-pathway .p45-parts { display: flex; gap: 10px; flex-wrap: wrap; }
+.student-pathway .p45-parts.stack { flex-direction: column; margin-top: 14px; }
+.student-pathway .p45-part { flex: 1 1 210px; display: flex; align-items: center; gap: 12px; text-align: left; border: 2px solid #dbe5ee; background: #fff; border-radius: 16px; padding: 12px 14px; font: inherit; color: #0d2f55; cursor: pointer; }
+.student-pathway .p45-part:disabled { cursor: default; }
+.student-pathway .p45-part.big { padding: 13px 18px; flex: none; }
+.student-pathway .p45-part-n { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; background: #eaf2fa; }
+.student-pathway .p45-part-words { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.student-pathway .p45-part-words b { font-size: 16px; }
+.student-pathway .p45-part.big .p45-part-words b { font-size: 19px; }
+.student-pathway .p45-part-words small { font-size: 13px; color: #5b6b7d; font-weight: 700; }
+.student-pathway .p45-part-go { flex: none; font-weight: 900; font-size: 14px; color: #5b6b7d; }
+.student-pathway .p45-part.done { border-color: #bfe5cf; background: #f4fbf7; }
+.student-pathway .p45-part.done .p45-part-n { background: #2f9e6f; color: #fff; }
+.student-pathway .p45-part.done .p45-part-go { color: #1d6b48; }
+.student-pathway .p45-part.now { border-color: #f5b400; background: #fffbef; box-shadow: 0 0 0 3px rgba(245,180,0,.18); }
+.student-pathway .p45-part.now .p45-part-n { background: #f5b400; color: #3d2c00; }
+.student-pathway .p45-part.now .p45-part-go { color: #fff; background: #0d2f55; border-radius: 999px; padding: 6px 14px; }
+.student-pathway .p45-part.later { opacity: .6; }
+.student-pathway .p45-part.sb .p45-part-n { background: #8b6ee0; color: #fff; }
+.student-pathway .p45-part.sb.done { border-color: #d6ccf5; background: #f7f4ff; }
+
+/* B · Quest board */
+.student-pathway .p45-hero-mid { display: flex; flex-direction: column; gap: 6px; align-items: flex-start; }
+.student-pathway .p45-count { font-size: 14px; font-weight: 700; color: #3c5a78; padding-left: 4px; }
+.student-pathway .p45-count b { color: #0d2f55; }
+.student-pathway .p45-continue { border: 0; background: #0d2f55; color: #fff; font: inherit; font-weight: 800; font-size: 16px; border-radius: 14px; padding: 13px 20px; cursor: pointer; box-shadow: 0 6px 16px rgba(13,47,85,.25); }
+.student-pathway .p45-grid { display: grid; grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 10px; }
+.student-pathway .p45-card { display: flex; flex-direction: column; gap: 4px; background: #fff; border: 2px solid #dbe5ee; border-radius: 18px; padding: 10px 12px 10px; min-width: 0; }
+.student-pathway .p45-card h3 { font-size: 16px; font-weight: 800; }
+.student-pathway .p45-card .p45-line { font-size: 13px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.4em; }
+.student-pathway .p45-card-top { display: flex; align-items: center; justify-content: space-between; }
+.student-pathway .p45-card .p45-badge { width: 32px; height: 32px; font-size: 15px; border-width: 2.5px; }
+.student-pathway .p45-chip { font-size: 11px; font-weight: 900; letter-spacing: .04em; text-transform: uppercase; border-radius: 999px; padding: 3px 9px; background: #eef2f6; color: #5b6b7d; }
+.student-pathway .p45-chip.done { background: #dff3e8; color: #1d6b48; }
+.student-pathway .p45-chip.now { background: #fff2c2; color: #7a5600; }
+.student-pathway .p45-card.done { border-color: #bfe5cf; }
+.student-pathway .p45-card.now { border-color: #f5b400; box-shadow: 0 0 0 4px rgba(245,180,0,.18); background: #fffdf5; }
+.student-pathway .p45-card.later { opacity: .62; background: #f8fafc; }
+.student-pathway .p45-card-rows { display: flex; flex-direction: column; gap: 2px; margin-top: auto; }
+.student-pathway .p45-row { display: flex; justify-content: space-between; font-size: 12.5px; font-weight: 700; color: #5b6b7d; border-top: 1px solid #eef2f6; padding-top: 2px; }
+.student-pathway .p45-row b { color: #0d2f55; font-variant-numeric: tabular-nums; }
+.student-pathway .p45-row.ok b { color: #1d6b48; }
+.student-pathway .p45-row.sb { color: #5b3fb0; }
+.student-pathway .p45-row.sb b { color: #5b3fb0; }
+.student-pathway .p45-card-go { margin-top: 4px; border: 0; background: #0d2f55; color: #fff; font: inherit; font-weight: 800; font-size: 14px; border-radius: 12px; padding: 9px 12px; cursor: pointer; }
+
+/* C · One step */
+.student-pathway .p45-focus { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.4fr); background: #fff; border: 1px solid #dbe5ee; border-radius: 22px; overflow: hidden; box-shadow: 0 8px 22px rgba(13,47,85,.08); min-height: 296px; }
+.student-pathway .p45-focus-art { position: relative; background: var(--p45-land) center / cover no-repeat; }
+.student-pathway .p45-focus-step { position: absolute; left: 16px; top: 16px; background: rgba(255,255,255,.92); border-radius: 999px; padding: 6px 14px; font-weight: 900; font-size: 14px; }
+.student-pathway .p45-focus-body { padding: 22px 28px; display: flex; flex-direction: column; }
+.student-pathway .p45-focus-body h2 { font-size: 34px; font-weight: 800; }
+.student-pathway .p45-up { color: #1d6b48; }
+.student-pathway .p45-rail { display: flex; align-items: flex-start; background: #fff; border: 1px solid #dbe5ee; border-radius: 18px; padding: 14px 18px 10px; overflow-x: auto; }
+.student-pathway .p45-rail-line { flex: 1 1 18px; min-width: 14px; height: 4px; border-radius: 4px; background: #dbe5ee; margin-top: 19px; }
+.student-pathway .p45-rail-line.on { background: #7cc7a2; }
+.student-pathway .p45-dot { position: relative; flex: none; width: 92px; display: flex; flex-direction: column; align-items: center; gap: 3px; border: 0; background: none; font: inherit; cursor: pointer; padding: 0; }
+.student-pathway .p45-dot-c { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 15px; background: #f1f4f7; border: 3px solid #dbe3ec; }
+.student-pathway .p45-dot.done .p45-dot-c { background: #2f9e6f; border-color: #237a55; color: #fff; }
+.student-pathway .p45-dot.now .p45-dot-c { background: #fff; border-color: #f5b400; box-shadow: 0 0 0 5px rgba(245,180,0,.22); }
+.student-pathway .p45-dot.picked .p45-dot-c { outline: 3px solid rgba(13,47,85,.25); outline-offset: 2px; }
+.student-pathway .p45-dot-sb { position: absolute; top: -4px; left: calc(50% + 12px); width: 20px; height: 20px; border-radius: 50%; background: #8b6ee0; color: #fff; font-style: normal; font-size: 11px; display: grid; place-items: center; border: 2px solid #fff; }
+.student-pathway .p45-dot-l { font-size: 12px; font-weight: 800; text-align: center; line-height: 1.15; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.student-pathway .p45-dot.later .p45-dot-l { color: #8a99a8; }
+.student-pathway .p45-dot-s { font-size: 12px; font-weight: 900; color: #1d6b48; min-height: 15px; }
+.student-pathway .p45-foot { display: flex; align-items: center; gap: 18px; font-size: 14px; font-weight: 700; color: #5b6b7d; padding: 0 6px; }
+.student-pathway .p45-foot b { color: #0d2f55; }
+.student-pathway .p45-focus-body .p45-back { align-self: flex-start; margin-top: 14px; }

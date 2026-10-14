@@ -896,54 +896,95 @@ export function ShareWallTab({ state, me, onChange, onBack }) {
   async function share(subId) { await api.share(subId); onChange && onChange() }
   async function react(id, type) { await api.react(id, type); onChange && onChange() }
 
-  // Her Share Wall mockup (2026-09-24): the night forest behind a parchment
-  // board, a crystal by the storybook title, an owl on the "share yours" strip,
-  // and cards that read like pages.
+  // Three directions to compare (Kennady, 2026-10-14: "the share wall, which is my least favorite UI of the entire platform ...
+  // Give me 3 options in an ABC switcher"). A: a bulletin board of pinned notes. B: one reading column, like a class magazine.
+  // C: one piece in the spotlight with the rest listed beside it. All three share a plain header and a slim "share yours" bar.
   const title = shareable.length ? (state.assignments.find((a) => a.id === shareable[0].assignmentId)?.title || '').trim() || t('Untitled') : ''
+  const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.wallLook') || 'a' } catch { return 'a' } })
+  const pick = (k) => { setLook(k); try { localStorage.setItem('lscr.wallLook', k) } catch { /* fine */ } }
+  const cheers = (e) => Object.values(e.reactions || {}).reduce((a, n) => a + n, 0)
+  const [spotId, setSpotId] = useState(null)
+  const spot = shareWall.find((e) => e.id === spotId) || shareWall[0]
+  const LOOKS = [['a', 'A · Board'], ['b', 'B · Feed'], ['c', 'C · Spotlight']]
+  const NOTE = ['#fff4c2', '#dff1ff', '#ffe3ec', '#e3f7e6', '#efe6ff', '#ffeedd']
+  const who = (e, big) => (
+    <div className="sw2-who">
+      <span className={'sw2-av' + (big ? ' big' : '')} aria-hidden>{e.avatar}</span>
+      <span className="sw2-name">{e.studentName}</span>
+      <span className="sw2-genre">{t(e.genre)}</span>
+    </div>
+  )
   return (
-    <div className="wall-page">
+    <div className="wall-page sw2">
       <div aria-hidden className="wall-backdrop" style={{ '--wall-bg': `url(${BASE}bg-enchanted.jpg)` }} />
       <div className="wall-inner">
-        {onBack && <button className="backlink wall-back" onClick={onBack}>{t('← Back to Dashboard')}</button>}
-        <div className="wall-board">
-          <div className="wall-head">
-            <img className="wall-gem" src={`${BASE}crystal-set.png`} alt="" />
-            <div>
-              <h1 className="wall-title">{t('Share Wall')}</h1>
-              <div className="wall-sub">{say('See what other students are writing!')}</div>
-              <div className="wall-dir"><Directions text="Cheer for each other with a 👍, ❤️, or 🎉 — reactions only, no comments." /></div>
-            </div>
-          </div>
-
-          {shareable.length > 0 && (
-            <div className="wall-share">
-              <img className="wall-owl" src={`${BASE}wall-owl.jpg`} alt="" />
-              <div className="wall-share-words">
-                <div className="wall-share-title">{t('You finished "{title}"!', { title })}</div>
-                <div className="wall-share-sub">{say('Proud of it? Share it with the class.')}</div>
-              </div>
-              <button className="wall-share-btn" onClick={() => share(shareable[0].id)}>✦ {t('Share to wall →')}</button>
-            </div>
-          )}
-
-          <div className="wall-grid">
-            {shareWall.map((e) => (
-              <article key={e.id} className="wall-card">
-                <div className="wall-card-who">
-                  <span className="wall-avatar" aria-hidden>{e.avatar}</span>
-                  <div style={{ minWidth: 0 }}>
-                    <div className="wall-name">{e.studentName}</div>
-                    <div className="wall-genre">{t(e.genre)}</div>
-                  </div>
-                </div>
-                <h2 className="wall-card-title">{e.title}</h2>
-                <p className="wall-excerpt">{e.excerpt}{e.excerpt.length >= 180 ? '…' : ''}</p>
-                <div style={{ marginTop: 'auto' }}><ReactionBar entry={e} onReact={react} size="lg" /></div>
-              </article>
-            ))}
-            {!shareWall.length && <div className="wall-empty">{t('Nothing on the wall yet. Finish a piece and be the first to share!')}</div>}
+        {onBack && <button className="backlink on-scene" onClick={onBack}>{t('← Back to Dashboard')}</button>}
+        <div className="sw2-head">
+          <h1 className="page" style={{ margin: 0 }}>{t('Share Wall')}</h1>
+          <span className="sw2-hint">{say('Cheer with')} 👍 ❤️ 🎉</span>
+          <span style={{ flex: 1 }} />
+          <div className="sw2-looks" role="group" aria-label={t('Wall layouts')}>
+            {LOOKS.map(([k, label]) => <button key={k} type="button" aria-pressed={look === k} className={look === k ? 'on' : ''} onClick={() => pick(k)}>{label}</button>)}
           </div>
         </div>
+
+        {shareable.length > 0 && (
+          <div className="sw2-sharebar">
+            <span aria-hidden>✨</span>
+            <span><b>{t('You finished "{title}"!', { title })}</b> {say('Proud of it? Share it with the class.')}</span>
+            <button className="btn" onClick={() => share(shareable[0].id)}>{t('Share to wall')}</button>
+          </div>
+        )}
+
+        {!shareWall.length && <div className="card sw2-empty">{t('Nothing on the wall yet. Finish a piece and be the first to share!')}</div>}
+
+        {shareWall.length > 0 && look === 'a' && (
+          <div className="sw2-board">
+            {shareWall.map((e, i) => (
+              <article key={e.id} className="sw2-note" style={{ '--note': NOTE[i % NOTE.length], '--tilt': `${[-1.6, 1.2, -0.6, 1.6, -1.1, 0.7][i % 6]}deg` }}>
+                <span className="sw2-pin" aria-hidden />
+                <h2 className="sw2-title">{e.title}</h2>
+                <p className="sw2-ex clamp">{e.excerpt}</p>
+                {who(e)}
+                <ReactionBar entry={e} onReact={react} size="sm" />
+              </article>
+            ))}
+          </div>
+        )}
+
+        {shareWall.length > 0 && look === 'b' && (
+          <div className="sw2-feed">
+            {shareWall.map((e) => (
+              <article key={e.id} className="card sw2-post">
+                {who(e, true)}
+                <h2 className="sw2-title big">{e.title}</h2>
+                <p className="sw2-ex">{e.excerpt}{e.excerpt.length >= 180 ? '…' : ''}</p>
+                <ReactionBar entry={e} onReact={react} />
+              </article>
+            ))}
+          </div>
+        )}
+
+        {shareWall.length > 0 && look === 'c' && spot && (
+          <div className="sw2-spot">
+            <article className="card sw2-feature">
+              <span className="sw2-kicker">{t('In the spotlight')}</span>
+              <h2 className="sw2-title huge">{spot.title}</h2>
+              {who(spot, true)}
+              <p className="sw2-ex big">{spot.excerpt}{spot.excerpt.length >= 180 ? '…' : ''}</p>
+              <ReactionBar entry={spot} onReact={react} size="lg" />
+            </article>
+            <nav className="card sw2-list" aria-label={t('More from your class')}>
+              {shareWall.map((e) => (
+                <button key={e.id} type="button" className={'sw2-row' + (e === spot ? ' on' : '')} aria-pressed={e === spot} onClick={() => setSpotId(e.id)}>
+                  <span className="sw2-av" aria-hidden>{e.avatar}</span>
+                  <span className="sw2-row-words"><b>{e.title}</b><span>{e.studentName} · {t(e.genre)}</span></span>
+                  <span className="sw2-row-n">{t('{n} cheers', { n: cheers(e) })}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+        )}
       </div>
     </div>
   )

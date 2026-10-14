@@ -250,6 +250,17 @@ export function seedState() {
         excerpt: 'The flashlight flickered as we stepped into the cave. My heart pounded like a drum. Then, in the dark, something moved.', sharedOn: '2026-06-19', reactions: { like: 15, heart: 24, celebrate: 11 }, myReactions: [] },
       { id: 'sw_jordan', submissionId: null, studentId: 'stu_jdennis', studentName: 'Jordan Dennis', avatar: '🦌', title: 'How Volcanoes Erupt', genre: 'Informational',
         excerpt: 'A volcano erupts when hot melted rock called magma pushes up through cracks in the earth. The pressure builds until it finally bursts out.', sharedOn: '2026-06-17', reactions: { like: 9, heart: 15, celebrate: 4 }, myReactions: [] },
+      // More classmates (2026-10-14), so a fuller wall can be judged while she picks a layout.
+      { id: 'sw_maya', submissionId: null, studentId: 'stu_mreyes', studentName: 'Maya Reyes', avatar: '🐢', title: 'Grandma\'s Kitchen', genre: 'Narrative',
+        excerpt: 'Every Sunday the kitchen smelled like cinnamon and warm tortillas. Grandma let me roll the dough, even when it came out looking like a map of Texas.', sharedOn: '2026-06-24', reactions: { like: 10, heart: 22, celebrate: 6 }, myReactions: [] },
+      { id: 'sw_eli', submissionId: null, studentId: 'stu_ebrooks', studentName: 'Eli Brooks', avatar: '🐙', title: 'Should Recess Be Longer?', genre: 'Argument',
+        excerpt: 'Recess should be longer because kids learn better after they move. When we come in from a short recess, half the class is still wiggling.', sharedOn: '2026-06-21', reactions: { like: 18, heart: 9, celebrate: 13 }, myReactions: [] },
+      { id: 'sw_zoe', submissionId: null, studentId: 'stu_zchen', studentName: 'Zoe Chen', avatar: '🦉', title: 'How Bees Make Honey', genre: 'Informational',
+        excerpt: 'Bees collect nectar from flowers and carry it back to the hive in a special stomach. Then they pass it from bee to bee until it turns thick and sweet.', sharedOn: '2026-06-18', reactions: { like: 11, heart: 14, celebrate: 8 }, myReactions: [] },
+      { id: 'sw_leo', submissionId: null, studentId: 'stu_lpatel', studentName: 'Leo Patel', avatar: '🚀', title: 'The Day the Lights Went Out', genre: 'Narrative',
+        excerpt: 'At 7:42 the whole street went dark. My little sister grabbed my hand, and for the first time all year she did not tell me to go away.', sharedOn: '2026-06-15', reactions: { like: 13, heart: 27, celebrate: 9 }, myReactions: [] },
+      { id: 'sw_nia', submissionId: null, studentId: 'stu_nwright', studentName: 'Nia Wright', avatar: '🌈', title: 'Why We Need More Trees', genre: 'Argument',
+        excerpt: 'Our school yard needs more trees. They give shade on hot days, they clean the air, and birds would finally have somewhere to sing at lunch.', sharedOn: '2026-06-12', reactions: { like: 8, heart: 12, celebrate: 5 }, myReactions: [] },
     ],
     // Monthly averages across the 2025–26 school year, split by format (out of 4).
     monthlyProgress: {

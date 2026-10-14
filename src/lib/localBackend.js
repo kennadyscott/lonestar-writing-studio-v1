@@ -60,6 +60,12 @@ function loadState() {
     saved = JSON.parse(raw)
   } catch { return fresh }
   if (!saved || !Array.isArray(saved.submissions) || !Array.isArray(saved.assignments) || !Array.isArray(saved.students)) return fresh
+  // Once: a saved demo gets the sample classmates' wall posts it is missing (2026-10-14).
+  if (!saved.wallDemoV2 && Array.isArray(saved.shareWall)) {
+    const have = new Set(saved.shareWall.map((e) => e.id))
+    saved.shareWall = [...saved.shareWall, ...(fresh.shareWall || []).filter((e) => !have.has(e.id))]
+    saved.wallDemoV2 = true
+  }
   // Once: a saved demo whose Fluency card has nothing finished gets the sample finished tiles (2026-10-14).
   if (!saved.fluencyDemoSeeded) {
     if (!Object.keys(saved.fluencyGrid?.cleared || {}).length) saved.fluencyGrid = fresh.fluencyGrid

@@ -2388,3 +2388,54 @@ body { font-size: 16px; }
 .crumbs .crumb.here { color: var(--ink); cursor: default; max-width: 26ch; overflow: hidden; text-overflow: ellipsis; }
 .crumbs .crumb-sep { color: #8aa0b0; font-weight: 800; font-size: 14px; }
 @media (max-width: 680px) { .crumbs .crumb { padding: 3px 4px; font-size: 12.5px; } }
+
+/* ---- Share Wall: three layouts to compare (2026-10-14: "my least favorite UI of the entire platform") ---- */
+.sw2 .wall-inner { max-width: 1180px; }
+.sw2-head { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 20px; margin: 4px 0 12px; border-radius: 18px; background: rgba(255,255,255,.9); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.sw2-hint { font-size: 14px; font-weight: 700; color: var(--muted); }
+.sw2-looks { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #eef3f7; border: 1px solid var(--line); }
+.sw2-looks button { padding: 6px 13px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
+.sw2-looks button.on { background: #0d2f55; color: #fff; }
+.sw2-sharebar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 12px 10px 18px; margin-bottom: 14px; border-radius: 14px; background: #fff8e1; border: 1.5px solid var(--gold-line); font-size: 14.5px; color: #10294a; }
+.sw2-sharebar > span:nth-child(2) { flex: 1; min-width: 220px; }
+.sw2-sharebar .btn { padding: 8px 16px; font-size: 14px; }
+.sw2-empty { padding: 32px; text-align: center; color: var(--muted); font-weight: 600; }
+.sw2-who { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.sw2-av { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; font-size: 16px; background: #fff; box-shadow: 0 0 0 1px var(--line); }
+.sw2-av.big { width: 40px; height: 40px; font-size: 21px; }
+.sw2-name { font-weight: 800; font-size: 14px; color: #10294a; }
+.sw2-genre { font-size: 12.5px; font-weight: 700; color: var(--muted); }
+.sw2-genre::before { content: "·"; margin-right: 8px; }
+.sw2-title { margin: 0; font-size: 18px; font-weight: 800; line-height: 1.2; color: #0d2440; text-wrap: balance; }
+.sw2-title.big { font-size: 22px; }
+.sw2-title.huge { font-size: clamp(26px, 2.6vw, 34px); letter-spacing: -.02em; }
+.sw2-ex { margin: 0; font-size: 15px; line-height: 1.55; color: #33506b; text-wrap: pretty; }
+.sw2-ex.big { font-size: 18px; line-height: 1.65; }
+.sw2-ex.clamp { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; }
+
+/* A · bulletin board: pinned paper notes, a little crooked */
+.sw2-board { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 22px 18px; padding: 22px; border-radius: 22px;
+  background: radial-gradient(circle at 20% 10%, rgba(255,255,255,.35), transparent 40%), #c9a272; box-shadow: inset 0 0 0 10px #8a6238, inset 0 0 30px rgba(60,35,10,.35), 0 10px 28px rgba(2,20,50,.25); }
+.sw2-note { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 20px 18px 16px; background: var(--note); border-radius: 4px;
+  transform: rotate(var(--tilt)); box-shadow: 0 8px 16px rgba(40,25,5,.28); transition: transform .18s ease; }
+.sw2-note:hover { transform: rotate(0deg) scale(1.02); z-index: 1; }
+.sw2-pin { position: absolute; top: -7px; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a8a, #d23a3a 60%, #8f1d1d); box-shadow: 0 3px 4px rgba(0,0,0,.35); }
+
+/* B · reading feed: one column, like a class magazine */
+.sw2-feed { display: flex; flex-direction: column; gap: 14px; max-width: 760px; margin: 0 auto; }
+.sw2-post { display: flex; flex-direction: column; gap: 10px; padding: 18px 22px 16px; }
+
+/* C · spotlight: one piece large, the rest listed beside it */
+.sw2-spot { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.sw2-feature { display: flex; flex-direction: column; gap: 14px; padding: 26px 30px 24px; }
+.sw2-kicker { align-self: flex-start; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #a37400; background: #fff4d6; border-radius: 999px; padding: 4px 10px; }
+.sw2-list { display: flex; flex-direction: column; padding: 6px; }
+.sw2-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 12px; border: 0; border-radius: 12px; background: transparent; font: inherit; text-align: left; cursor: pointer; color: inherit; }
+.sw2-row:hover { background: #f3f8fb; }
+.sw2-row.on { background: #e8f4fa; box-shadow: inset 0 0 0 1.5px #9fd3ea; }
+.sw2-row-words { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.sw2-row-words b { font-size: 14.5px; color: #10294a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sw2-row-words span { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.sw2-row-n { font-size: 12px; font-weight: 800; color: var(--muted); white-space: nowrap; }
+@media (max-width: 860px) { .sw2-spot { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .sw2-note { transition: none; } }

@@ -230,6 +230,10 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
   const [at, setAt] = useState(0)
   const [spot, setSpot] = useState({}) // rubric index -> what they answered (true = "yes, it does")
   const [summary, setSummary] = useState(false)
+  // "Next problem" before the fix: the draft glows with a cue to type in it (2026-10-14: "If they try to click 'Next problem'
+  // without fixing the issue - highlight the draft with a 'type in the box to fix the draft' cue").
+  const [nudge, setNudge] = useState(false)
+  useEffect(() => { setNudge(false) }, [at, content])
   const box = useRef(null)
   const done = !!sub.completedAt
   const fixedNow = (r) => checkRule(r.check, content, original.content)
@@ -245,11 +249,12 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
 
   return (
     <div className="rev-guided">
-      <div className="card rev-editor">
+      <div className={'card rev-editor' + (nudge ? ' nudge' : '')}>
         <div className="rev-editor-head">
           <b><Glossed text={t("{name}'s draft — fix it right here", { name: asg.teacher.name })} /></b>
           <span>{t('{n} words · autosaves', { n: (content || '').split(/\s+/).filter(Boolean).length })}</span>
         </div>
+        {nudge && <div className="rev-cue" role="status">✏️ {t('Type in the box to fix the draft')}</div>}
         <textarea ref={box} value={content} onChange={(e) => edit(e.target.value)} disabled={done} aria-label={t("{name}'s draft — fix it right here", { name: asg.teacher.name })} />
       </div>
 
@@ -302,9 +307,10 @@ function GuidedRevision({ asg, sub, original, content, edit, busy, onFinish }) {
               <div className="rev-nav">
                 {at > 0 && <button type="button" className="rev-link" onClick={() => setAt(at - 1)}>← {t('Back')}</button>}
                 <span style={{ flex: 1 }} />
-                {met
-                  ? <button type="button" className="btn" onClick={next}>{at < problems.length - 1 ? t('Next problem →') : t('Finish →')}</button>
-                  : <button type="button" className="rev-link" onClick={next}>{t('Skip for now')}</button>}
+                {!met && <button type="button" className="rev-link quiet" onClick={next}>{t('Skip for now')}</button>}
+                <button type="button" className="btn" onClick={() => { if (met) next(); else { setNudge(true); box.current?.focus() } }}>
+                  {at < problems.length - 1 ? t('Next problem →') : t('Finish →')}
+                </button>
               </div>
             </>}
           </div>

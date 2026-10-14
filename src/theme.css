@@ -2409,6 +2409,12 @@ body { font-size: 16px; }
 .rev-editor-head span { font-size: 12px; color: var(--muted); }
 .rev-editor textarea { min-height: 380px; border: 0; outline: 0; resize: vertical; padding: 16px 18px; font: inherit; font-family: Manrope, sans-serif; font-size: 16px; line-height: 1.7; color: var(--ink); background: #fff; }
 .rev-coach { padding: 18px 20px; border: 2px solid #f0cf8a; }
+.rev-editor { transition: box-shadow .2s ease, border-color .2s ease; }
+.rev-editor.nudge { border-color: #f5b400; box-shadow: 0 0 0 4px rgba(245,180,0,.35), 0 0 22px rgba(245,180,0,.35); animation: revNudge .9s ease 2; }
+@keyframes revNudge { 50% { box-shadow: 0 0 0 7px rgba(245,180,0,.18), 0 0 30px rgba(245,180,0,.5); } }
+.rev-cue { padding: 9px 16px; background: #fff4d6; border-bottom: 1px solid #f0cf8a; font-size: 14.5px; font-weight: 800; color: #7a5600; }
+.rev-link.quiet { color: var(--muted); font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .rev-editor.nudge { animation: none; } }
 .rev-step { display: flex; flex-direction: column; gap: 12px; }
 .rev-progress { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; font-weight: 800; color: var(--muted); }
 .rev-dots { display: inline-flex; gap: 6px; }

@@ -2562,19 +2562,13 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .g2-rev-big small { font-size: 15px; color: var(--muted); font-weight: 600; }
 .rev-status.cue { color: #7a5600; }
 /* ---- Lit Lab card: three student-friendly looks for a path's data (A Trail, B Stars, C Then & Now; 2026-10-14) ---- */
-.lit-look-pick { margin-right: 4px; background: #fff; border: 1px solid var(--line); }
-.lit-look-pick button { display: inline-flex; align-items: baseline; gap: 5px; }
-.lit-look-pick button small { font-size: 11px; font-weight: 700; opacity: .8; }
 .ll { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; }
 .ll-head { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .ll-name { font-family: var(--font-display, inherit); font-size: 17px; color: #0d2f55; white-space: nowrap; }
-.ll-cheer { font-size: 14px; font-weight: 700; color: #3c5a78; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ll-key { display: flex; gap: 16px; justify-content: center; font-size: 12px; font-weight: 700; color: var(--muted); }
 .ll-key span { display: inline-flex; align-items: center; gap: 5px; }
 .ll-key i { font-style: normal; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; }
 .ll-key i.mastered { background: #2f9e6f; color: #fff; }
-.ll-key i.boosted { background: #fff2c2; }
-.ll-key i.locked { background: #e6ebf0; }
 
 /* A · Trail */
 .ll-trail { position: relative; flex: 1; min-height: 168px; margin: 0 6px; }
@@ -2592,7 +2586,6 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-stone.locked, .ll-stone.open { background: #f1f4f7; border-color: #dbe3ec; font-size: 18px; }
 .ll-stone.post-locked { background: #f1f4f7; border-color: #dbe3ec; filter: grayscale(1); opacity: .6; }
 .ll-stone.post-done { background: #fff2c2; border-color: #f5b400; }
-.ll-boost { position: absolute; right: -8px; top: -8px; width: 24px; height: 24px; border-radius: 50%; background: #fff2c2; border: 2px solid #fff; font-style: normal; font-size: 13px; display: grid; place-items: center; }
 .ll-here { position: absolute; bottom: calc(100% + 4px); white-space: nowrap; font-size: 11.5px; font-weight: 800; color: #7a5600; background: #fff4d6; border-radius: 999px; padding: 2px 9px; }
 .ll-stone-under { position: absolute; top: calc(100% + 5px); display: flex; flex-direction: column; align-items: center; gap: 3px; }
 .ll-stone-label { width: 112px; text-align: center; font-size: 12.5px; font-weight: 800; line-height: 1.2; color: #0d2f55;
@@ -2602,35 +2595,6 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 @keyframes ll-pulse { 50% { box-shadow: 0 0 0 11px rgba(245,180,0,.12); } }
 @media (prefers-reduced-motion: reduce) { .ll-stone { animation: none !important; } }
 
-/* C · Then & Now */
-.ll-tn { flex: 1; display: flex; align-items: center; gap: 18px; min-height: 0; }
-.ll-bars { --lab: 140px; position: relative; flex: 1; display: flex; flex-direction: column; gap: 14px; padding-top: 24px; }
-.ll-bar-row { display: flex; align-items: center; }
-.ll-bar-l { width: var(--lab); flex: none; font-size: 14px; font-weight: 800; color: #3c5a78; }
-.ll-bar-track { flex: 1; height: 40px; border-radius: 12px; background: #dde9f3; position: relative; overflow: hidden; display: flex; align-items: center; }
-.ll-bar { height: 100%; border-radius: 12px; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px; min-width: 56px; }
-.ll-bar b { color: #fff; font-size: 17px; font-weight: 900; font-variant-numeric: tabular-nums; }
-.ll-bar.pre { background: #8aa4bf; }
-.ll-bar.now { background: linear-gradient(90deg, #4bb88a, #2f9e6f); }
-.ll-bar.now.goal { background: linear-gradient(90deg, #4bb88a, #1f8a5c); }
-.ll-bar-wait { padding: 0 14px; font-size: 13.5px; font-weight: 700; color: #5b6b7d; }
-.ll-goal { position: absolute; top: 0; bottom: -4px; border-left: 2.5px dashed #e0a100; z-index: 1; pointer-events: none; }
-.ll-goal b { position: absolute; top: 0; left: 50%; transform: translateX(-50%); white-space: nowrap; font-size: 12px; color: #7a5600; background: #fff4d6; border-radius: 999px; padding: 1px 8px; }
-.ll-bubble { flex: none; width: 112px; height: 112px; border-radius: 28px; background: #e6f6ee; border: 2px solid #9ad6b8; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; color: #1d6b48; }
-.ll-bubble span { font-size: 26px; }
-.ll-bubble b { font-size: 30px; line-height: 1; }
-.ll-bubble small { font-size: 13px; font-weight: 800; }
-.ll-bubble.wait, .ll-bubble.down { background: #fff8e1; border-color: #f0cf7a; color: #7a5600; }
-.ll-bubble.wait b, .ll-bubble.down b { font-size: 15px; text-align: center; }
-.ll-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.ll-chips-l { font-size: 12px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
-.ll-skill { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 800; color: #0d2f55; background: #fff; border: 1.5px solid #dbe3ec; border-radius: 999px; padding: 4px 11px 4px 6px; }
-.ll-skill i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; background: #eef2f6; }
-.ll-skill.mastered i { background: #2f9e6f; color: #fff; }
-.ll-skill.boosted i { background: #fff2c2; }
-.ll-skill.next, .ll-skill.sb, .ll-skill.post-next { border-color: #f5b400; background: #fffbef; }
-.ll-skill.locked, .ll-skill.post-locked, .ll-skill.open { color: #8a99a8; }
-.ll-skill.post-done { border-color: #f5b400; background: #fff8e1; }
 /* Trail: how they did on each stone, and the growth (2026-10-14) */
 .ll-pill { font-size: 12px; font-weight: 900; border-radius: 999px; padding: 2px 9px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .ll-pill.pre { background: #e3ebf3; color: #3c5a78; }
@@ -2647,13 +2611,14 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-g-up small { font-weight: 700; opacity: .9; font-size: 11px; }
 .ll-g-up.down { background: #c0392b; }
 /* Trail: backgrounds, the Skill Builder as its own stop, prototype switches (2026-10-14) */
-.ll-trail.scene-land, .ll-trail.scene-meadow { margin: 0; border-radius: 14px; overflow: hidden; background-size: cover; background-position: center 60%; }
-.ll-meadow { position: absolute; inset: 0; width: 100%; height: 100%; }
-.ll-trail.scene-land .ll-trail-line .todo, .ll-trail.scene-meadow .ll-trail-line .todo { stroke: #fff; stroke-width: 9; stroke-dasharray: 1 14; }
-.ll-trail.scene-land .ll-trail-line .done, .ll-trail.scene-meadow .ll-trail-line .done { stroke: #4bb88a; stroke-width: 9; }
-.ll-trail.scene-land .ll-stone-label, .ll-trail.scene-meadow .ll-stone-label { width: max-content; max-width: 112px; background: rgba(255,255,255,.88); border-radius: 8px; padding: 1px 7px; }
-.ll-trail.scene-land .ll-stone-label.locked, .ll-trail.scene-meadow .ll-stone-label.locked, .ll-trail.scene-land .ll-stone-label.post-locked, .ll-trail.scene-meadow .ll-stone-label.post-locked { color: #6c7b8a; }
-.ll-trail.scene-land .ll-stone.locked, .ll-trail.scene-meadow .ll-stone.locked, .ll-trail.scene-land .ll-stone.post-locked, .ll-trail.scene-meadow .ll-stone.post-locked { opacity: 1; background: #f4f7fa; }
+/* the land art fills the whole data panel, washed light so it never competes with the scores */
+.prf-c.look-b .gr-pathwrap.ll-wrap { background: linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.86)), var(--ll-land) center 60% / cover no-repeat; border-color: #d6e4ee; }
+.ll-trail.on-land { margin: 0; }
+.ll-trail.on-land .ll-trail-line .todo { stroke: #fff; stroke-width: 9; stroke-dasharray: 1 14; }
+.ll-trail.on-land .ll-trail-line .done { stroke: #4bb88a; stroke-width: 9; }
+.ll-trail.on-land .ll-stone-label { width: max-content; max-width: 112px; background: rgba(255,255,255,.88); border-radius: 8px; padding: 1px 7px; }
+.ll-trail.on-land .ll-stone-label.locked, .ll-trail.on-land .ll-stone-label.post-locked { color: #6c7b8a; }
+.ll-trail.on-land .ll-stone.locked, .ll-trail.on-land .ll-stone.post-locked { opacity: 1; background: #f4f7fa; }
 .ll-stone.tried { background: #fff4d6; border-color: #e0a100; color: #a37400; }
 .ll-stone.small { width: 38px; height: 38px; font-size: 17px; }
 .ll-stone.sbstop { background: #8b6ee0; border-color: #6a4fc4; color: #fff; }
@@ -2662,11 +2627,4 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-key i.sbstop { background: #8b6ee0; color: #fff; }
 .ll-foot { display: flex; align-items: center; gap: 8px; }
 .ll-foot .ll-key { justify-content: flex-start; }
-.ll-proto { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border-radius: 999px; background: #fff; border: 1px dashed #b9c7d6; font-size: 11px; }
-.ll-proto > span { font-weight: 800; color: var(--muted); padding: 0 6px 0 8px; text-transform: uppercase; letter-spacing: .04em; font-size: 10px; }
-.ll-proto button { border: 0; background: transparent; font: inherit; font-weight: 800; color: var(--muted); padding: 3px 9px; border-radius: 999px; cursor: pointer; }
-.ll-proto button.on { background: #1e2a6b; color: #fff; }
 
-.ll-skill-n { font-style: normal; font-weight: 900; font-size: 12px; color: #1d6b48; margin-left: 2px; font-variant-numeric: tabular-nums; }
-.ll-skill.boosted .ll-skill-n { color: #5b3fb0; }
-.ll-skill.post-done .ll-skill-n { color: #7a5600; }

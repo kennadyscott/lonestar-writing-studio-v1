@@ -13,7 +13,7 @@ import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
 import { topicStatus, clearingTitle, buildStops, nextStopOf, kindLabel, landName, landImg, LAND_ORDER } from './ProofRoom.jsx'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { isGrade2, useBandValue } from '../lib/gradeBand.js'
-import { LitLabLook, LIT_LOOKS } from './LitLabLooks.jsx'
+import { TrailLook } from './LitLabLooks.jsx'
 import { writingStreak } from '../lib/streak.js'
 import { useLook } from '../lib/look.js'
 import { MODULE_SHORT } from './LunaPage.jsx'
@@ -509,7 +509,7 @@ function skillOutcome(tp, ws, progress) {
 }
 const avgOf = (xs) => (xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null)
 
-// One path in a kid's terms, for the three Practice-card looks (LitLabLooks.jsx, 2026-10-14): each skill's state
+// One path in a kid's terms, for the Practice card's trail (LitLabLooks.jsx, 2026-10-14): each skill's state
 // (mastered / boosted by a Skill Builder / up next / Skill Builder next / tried / locked) and its scores.
 function pathModel(tp, progress, next) {
   const core = tp.core || []
@@ -531,20 +531,8 @@ function pathModel(tp, progress, next) {
   const post = tp.full ? { score: full.best > 0 ? full.best : null, state: full.passed ? 'done' : next?.capstone ? 'next' : 'locked' } : null
   const pre = demoPretest(tp.id)
   const tried = skills.map((x) => x.score).filter((b) => b != null)
-  return { name: tp.short || tp.title, land: landImg(tp.domain), pre, now: post?.score ?? avgOf(tried), post, skills,
+  return { name: tp.short || tp.title, pre, now: post?.score ?? avgOf(tried), post, skills,
     mastered: skills.filter((x) => x.state === 'mastered' || x.state === 'boosted').length, total: core.length }
-}
-
-// PROTOTYPE (2026-10-14: "Put data in all the way through the entire trail ... so I can see what this looks like"): the
-// whole path finished, with every skill scored, two of them carried to mastery by a Skill Builder, and the post-test taken.
-const FULL_RUN = [{ acts: 92 }, { acts: 58, sb: 90 }, { acts: 100 }, { acts: 64, sb: 86 }, { acts: 88 }, { acts: 96 }]
-function fullPathModel(m) {
-  const skills = m.skills.map((x, i) => {
-    const r = FULL_RUN[i % FULL_RUN.length]
-    return { ...x, state: r.sb != null ? 'boosted' : 'mastered', acts: r.acts, sb: r.sb ?? null, score: r.sb ?? r.acts }
-  })
-  const postScore = Math.min(97, m.pre + 47)
-  return { ...m, skills, mastered: skills.length, now: postScore, post: m.post ? { score: postScore, state: 'done' } : null }
 }
 
 // average growth, pre-test to post-test, over the paths that have a post-test
@@ -884,11 +872,6 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
   // A's domain tiles switch the chart to that domain's path (2026-10-02)
   const [pickId, setPickId] = useState(null)
   const [allProg, setAllProg] = useState(false)
-  // the ABC prototype picker for the path's data (2026-10-14); kept in this browser
-  const [look, setLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.litLook'); return LIT_LOOKS.some(([k]) => k === v) ? v : 'a' } catch { return 'a' } })
-  const setLook = (v) => { setLookRaw(v); try { localStorage.setItem('lscr.litLook', v) } catch { /* fine */ } }
-  const [fullData, setFullRaw] = useState(() => { try { return localStorage.getItem('lscr.litFull') !== '0' } catch { return true } })
-  const setFull = (v) => { setFullRaw(v); try { localStorage.setItem('lscr.litFull', v ? '1' : '0') } catch { /* fine */ } }
   const headGrowth = topics ? avgGrowthOf(mine, progress) : null
   // the path being worked on drives the next step; the chart can show another
   // (her ask, 2026-10-02: a carousel through the paths finished or in progress)
@@ -951,11 +934,6 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
           </div>
           {/* every path lives in the Lit Labyrinth itself; the card keeps only the one you're on */}
           <div className="prf-c-actions">
-            {!studio && (<>
-              <div className="style-pick lit-look-pick" role="group" aria-label="Prototype: how the path's data looks">
-                {LIT_LOOKS.map(([k, name], i) => <button key={k} className={look === k ? 'on' : ''} aria-pressed={look === k} onClick={() => setLook(k)}>{'AB'[i]}<small>{name}</small></button>)}
-              </div>
-            </>)}
             <button type="button" className="prf-c-all prf-c-shortcut" onClick={() => onOpen('topic_pos', null, { skipGate: true })}>Parts of Speech</button>
             <button type="button" className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button>
           </div>
@@ -968,9 +946,11 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
 <DomainStrip mine={mine} progress={progress} selD={view.tp.domain} onPick={pickDomain} next={next} onStart={start} />
 <NextStep tp={lead.tp} next={next} progress={progress} onStart={start} onMap={() => onOpen(lead.tp.id)} />
 {/* the path's name now leads the numbers line under the next step (2026-10-02) */}
+              {/* her pick (2026-10-14): the Trail on the domain's land art, filling the whole panel, washed light so it never
+                  competes with the data */}
               {!studio ? (
-              <div className="gr-pathwrap ll-wrap">
-                <LitLabLook look={look} model={fullData ? fullPathModel(pathModel(view.tp, progress, viewNext)) : pathModel(view.tp, progress, viewNext)}
+              <div className="gr-pathwrap ll-wrap" style={{ '--ll-land': `url(${landImg(view.tp.domain)})` }}>
+                <TrailLook m={pathModel(view.tp, progress, viewNext)}
                   carousel={ringAt >= 0 ? { i: ringAt, n: ring.length, prev: () => step(-1), next: () => step(1) } : null} />
               </div>
               ) : (
@@ -979,11 +959,7 @@ export function ProofRoomFeature({ onOpen, studio = false }) {
                 carousel={ringAt >= 0 ? { i: ringAt, n: ring.length, prev: () => step(-1), next: () => step(1) } : null} />
               </div>
               )}
-              <div className="gr-allprog-row">{!studio && <div className="style-pick lit-look-pick" role="group" aria-label="Prototype: sample data">
-                <span className="lbl">Data</span>
-                <button className={!fullData ? 'on' : ''} aria-pressed={!fullData} onClick={() => setFull(false)}>As is</button>
-                <button className={fullData ? 'on' : ''} aria-pressed={fullData} onClick={() => setFull(true)}>Full path</button>
-              </div>}<span style={{ flex: 1 }} /><button className="gr-allprog" onClick={() => setAllProg(true)}>{t('See all progress →')}</button></div>
+              <div className="gr-allprog-row"><button className="gr-allprog" onClick={() => setAllProg(true)}>{t('See all progress →')}</button></div>
             </div>
           )}
         </div>

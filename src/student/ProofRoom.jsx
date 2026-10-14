@@ -409,7 +409,8 @@ export default function ProofRoom({ band = '3-5', initialTopicId = null, initial
     <PageMode.Provider value={true}>
       {/* the dashboard's enchanted-forest painting, just as soft (22%) */}
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
-        ...(pathwayContent ? { background: '#f1f5f0' } : (topic && !running) || (!topic && !running && raw)
+        // the pathway gets the same forest as the dashboard (2026-10-14: "I don't love the weird green in the background")
+        ...(pathwayContent ? { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 } : (topic && !running) || (!topic && !running && raw)
           ? { background: `url(${import.meta.env.BASE_URL || '/'}lit-valley.jpg) center / cover no-repeat, #0b2a22`, filter: 'blur(8px) brightness(.55)', transform: 'scale(1.06)' }
           : { background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`, opacity: .22 }) }} />
       {/* on the map, Back and the prototype pill float over the valley instead of taking a row (her note, 2026-10-01) */}

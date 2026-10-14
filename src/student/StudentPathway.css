@@ -480,14 +480,7 @@
 .student-pathway .p45-stone.picked .ll-stone { box-shadow: 0 0 0 5px rgba(13,47,85,.25); }
 .student-pathway .p45-stone .ll-stone-label { font-size: 13px; }
 
-/* the next-step panel (A) and the step buttons (A, C) */
-.student-pathway .p45-panel { display: flex; flex-direction: column; gap: 12px; background: #fff; border: 1px solid #dbe5ee; border-radius: 20px; padding: 14px 20px; box-shadow: 0 6px 18px rgba(13,47,85,.06); }
-.student-pathway .p45-panel.now { border-color: #f0cf7a; box-shadow: 0 0 0 3px rgba(245,180,0,.15), 0 6px 18px rgba(13,47,85,.06); }
-.student-pathway .p45-panel-head { display: flex; align-items: center; gap: 14px; }
-.student-pathway .p45-panel h3 { font-size: 24px; font-weight: 800; }
-.student-pathway .p45-badge { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font-size: 18px; font-weight: 900; background: #fff; border: 3px solid #f5b400; color: #0d2f55; }
-.student-pathway .p45-badge.done { background: #2f9e6f; border-color: #237a55; color: #fff; }
-.student-pathway .p45-badge.later { background: #f1f4f7; border-color: #dbe3ec; font-size: 15px; }
+/* the step buttons (One step) */
 .student-pathway .p45-parts { display: flex; gap: 10px; flex-wrap: wrap; }
 .student-pathway .p45-parts.stack { flex-direction: column; margin-top: 14px; }
 .student-pathway .p45-part { flex: 1 1 210px; display: flex; align-items: center; gap: 12px; text-align: left; border: 2px solid #dbe5ee; background: #fff; border-radius: 16px; padding: 12px 14px; font: inherit; color: #0d2f55; cursor: pointer; }
@@ -531,3 +524,30 @@
 .student-pathway .p45-foot { display: flex; align-items: center; gap: 18px; font-size: 14px; font-weight: 700; color: #5b6b7d; padding: 0 6px; }
 .student-pathway .p45-foot b { color: #0d2f55; }
 .student-pathway .p45-focus-body .p45-back { align-self: flex-start; margin-top: 14px; }
+/* the next step in the Lit Lab card's Next-bar style (theme.css .gr-nextstep), plus its parts as step chips */
+.student-pathway .p45-next { padding: 16px 20px; }
+.student-pathway .p45-next .gr-ns-words b { font-size: 24px; }
+.student-pathway .p45-next .gr-ns-line { margin-top: 1px; }
+.student-pathway .p45-next.done { background: linear-gradient(110deg, #e2f5ea, #f8fdfa 70%); border-color: #7cc7a2; box-shadow: 0 6px 18px rgba(47,158,111,.16); }
+.student-pathway .p45-next.done .gr-ns-n { background: #2f9e6f; color: #fff; box-shadow: 0 0 0 5px rgba(47,158,111,.2); }
+.student-pathway .p45-next.done .gr-ns-k { color: #1d6b48; }
+.student-pathway .p45-next.later { background: #f7f9fb; border-color: #dbe3ec; box-shadow: none; }
+.student-pathway .p45-next.later .gr-ns-n { background: #eef2f6; color: #6c7b8a; box-shadow: none; font-size: 18px; }
+.student-pathway .p45-next.later .gr-ns-k { color: #6c7b8a; }
+.student-pathway .p45-later { font-weight: 800; color: #6c7b8a; font-size: 15px; }
+.student-pathway .p45-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.student-pathway .p45-step { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #0d2f55; background: rgba(255,255,255,.85); border: 1.5px solid #e6dcc0; border-radius: 999px; padding: 3px 11px 3px 4px; }
+.student-pathway .p45-step i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; background: #eef2f6; }
+.student-pathway .p45-step small { font-size: 12px; font-weight: 700; color: #6c7b8a; }
+.student-pathway .p45-step.done i { background: #2f9e6f; color: #fff; }
+.student-pathway .p45-step.done small { color: #1d6b48; font-weight: 900; }
+.student-pathway .p45-step.now { border-color: #f5b400; background: #fff; }
+.student-pathway .p45-step.now i { background: #f5b400; color: #3d2c00; }
+.student-pathway .p45-step.now small { color: #9a6b00; font-weight: 900; }
+.student-pathway .p45-step.later { opacity: .7; }
+.student-pathway .p45-step.sb i { background: #8b6ee0; color: #fff; }
+/* One step (B): its buttons take the same green Start as the Next bar */
+.student-pathway .p45-part.now .p45-part-go { background: #2e9e6b; box-shadow: 0 4px 12px rgba(46,158,107,.3); }
+.student-pathway .p45-next .gr-ns-words { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.student-pathway .p45-next .gr-ns-line { display: block; white-space: normal; overflow: visible; text-overflow: clip; max-width: none; }
+.student-pathway .p45-next .gr-ns-n { width: 48px; height: 48px; font-size: 21px; flex-shrink: 0; }

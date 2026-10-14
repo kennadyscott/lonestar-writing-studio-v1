@@ -73,6 +73,41 @@ function PartButton({ part, i, onOpen, big = false }) {
 
 const Back = ({ onBack }) => <button type="button" className="p45-back" onClick={onBack}>← Back to the map</button>
 
+/* One stop as the Lit Lab card's "Next" bar: gold while it is the step you are on, green once done, grey while it waits.
+ * The stop's parts (learn it, practice, a Skill Builder) sit underneath as small step chips. */
+function NextBar({ pick, onOpen, onBackToNext }) {
+  const go = pick.parts.find((p) => isNow(p.step)) || (pick.state === 'done' ? pick.parts.find((p) => canOpen(p.step)) : null)
+  const what = go ? (go.step.type === 'lesson' ? (go.sb ? 'Skill Builder lesson' : 'Lesson') : go.step.type === 'practice' ? (go.sb ? 'Skill Builder practice' : go.label === 'Try it again' ? 'Try it again' : 'Practice') : go.label) : ''
+  const kicker = pick.state === 'now' ? `Next · ${what}` : pick.state === 'done' ? 'Done' : 'Coming up'
+  const badge = pick.key === 'pre' ? '🚩' : pick.key === 'post' ? '🏆' : pick.state === 'done' ? '✓' : pick.state === 'later' ? '🔒' : pick.kind === 'full' ? '✦' : pick.n - 1
+  return (
+    <section className={'gr-nextstep p45-next ' + pick.state}>
+      <span className="gr-ns-n">{badge}</span>
+      <div className="gr-ns-words">
+        <span className="gr-ns-k">{kicker}{pick.kind === 'skill' ? ` · Skill ${pick.n - 1}` : ''}</span>
+        <b>{pick.label}</b>
+        <span className="gr-ns-line">{pick.line}</span>
+        {pick.parts.length > 1 && (
+          <span className="p45-steps">
+            {pick.parts.map((p, i) => (
+              <span key={p.step.id} className={'p45-step' + (isDone(p.step) ? ' done' : isNow(p.step) ? ' now' : ' later') + (p.sb ? ' sb' : '')}>
+                <i>{p.sb ? '⚡' : isDone(p.step) ? '✓' : i + 1}</i>{p.label}
+                <small>{isDone(p.step) ? (p.step.score != null ? p.step.score + '%' : 'done') : isNow(p.step) ? 'now' : p.sub}</small>
+              </span>
+            ))}
+          </span>
+        )}
+      </div>
+      <div className="gr-ns-go">
+        {pick.state === 'later'
+          ? <span className="p45-later">🔒 Later</span>
+          : go && <button className="btn gr-ns-btn" disabled={!canOpen(go.step)} onClick={() => onOpen(go.step)}>{pick.state === 'done' ? 'Look back' : go.step.state === 'unavailable' ? 'Coming soon' : 'Start'} →</button>}
+        {onBackToNext && <button type="button" className="gr-ns-map" onClick={onBackToNext}>Back to my next step</button>}
+      </div>
+    </section>
+  )
+}
+
 /* ---------- A · Trail ---------- */
 function TrailLook({ model, record, topic, onOpen, onBack }) {
   const stops = stopsOf(model, record)
@@ -123,18 +158,9 @@ function TrailLook({ model, record, topic, onOpen, onBack }) {
           ))}
         </div>
       </header>
-      <section className={'p45-panel ' + pick.state}>
-        <div className="p45-panel-head">
-          <span className={'p45-badge ' + pick.state}>{pick.key === 'pre' ? '🚩' : pick.key === 'post' ? '🏆' : pick.state === 'done' ? '✓' : pick.state === 'later' ? '🔒' : pick.kind === 'full' ? '✦' : pick.n - 1}</span>
-          <div>
-            <p className="p45-kicker">{pick.state === 'now' ? 'Your next step' : pick.state === 'done' ? 'Done' : 'Coming up'}{pick.kind === 'skill' ? ` · Skill ${pick.n - 1}` : ''}</p>
-            <h3>{pick.label}</h3>
-            <p className="p45-line">{pick.line}</p>
-          </div>
-          {sel && sel !== nowKey && <button type="button" className="p45-link" onClick={() => setSel(null)}>Back to my next step</button>}
-        </div>
-        <div className="p45-parts">{pick.parts.map((p, i) => <PartButton key={p.step.id} part={p} i={i} onOpen={onOpen} />)}</div>
-      </section>
+      {/* the next step, in the Lit Lab card's "Next" bar style (2026-10-14: "the style of the Your Next Step box seems different
+          from our aesthetic") */}
+      <NextBar pick={pick} onOpen={onOpen} onBackToNext={sel && sel !== nowKey ? () => setSel(null) : null} />
     </div>
   )
 }

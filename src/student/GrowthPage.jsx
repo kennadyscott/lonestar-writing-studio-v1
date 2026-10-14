@@ -682,11 +682,9 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const [mpTab, setMpTab] = useState('scr')
   const [conferring, setConferring] = useState(false)
   // A (today's page) or B (simpler), to compare (Kennady, 2026-10-14: "Next, let's clean up the Data & Goals page. Give me an
-  // AB option"). B: the goal on one line, four numbers, the chart beside R-A-C-E under one SCR / ECR switch, the growth story
-  // behind a button.
+  // AB option"). B: the goal on one line, four numbers, the chart beside R-A-C-E under one SCR / ECR switch, then the growth story.
   const [look, setLook] = useState(() => { try { return localStorage.getItem('lscr.dataLook') || 'b' } catch { return 'b' } })
   const pickLook = (k) => { setLook(k); try { localStorage.setItem('lscr.dataLook', k) } catch { /* fine */ } }
-  const [showGrowth, setShowGrowth] = useState(false)
 
   async function choose(g) { await api.setGoal(g); setPicking(false); onChange && onChange() }
   async function setCustomGoal() { if (!custom.trim()) return; await api.setGoal({ text: custom.trim(), trait: null }); setCustom(''); setPicking(false); onChange && onChange() }
@@ -803,12 +801,8 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           </div>
         </div>
 
-        {stories.length > 0 && (
-          <div className="dg-growth">
-            <button type="button" className="btn ghost" aria-expanded={showGrowth} onClick={() => setShowGrowth((v) => !v)}>{showGrowth ? t('Hide my growth story') : t('📖 See how my writing grew')}</button>
-          </div>
-        )}
-        {showGrowth && growthStories}
+        {/* the growth story stays on the page (her note, 2026-10-14: "Keep the growth story even on the simpler version") */}
+        {growthStories}
       </div>
     )
   }

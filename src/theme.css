@@ -2468,5 +2468,4 @@ body { font-size: 16px; }
 .dg-race-row { display: flex; align-items: center; gap: 10px; }
 .dg-race-word { width: 64px; font-size: 13.5px; font-weight: 700; }
 .dg-race-pct { width: 40px; text-align: right; font-size: 13px; font-weight: 800; }
-.dg-growth { display: flex; justify-content: center; }
 @media (max-width: 900px) { .dg-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } .dg-main { grid-template-columns: 1fr; } }

@@ -459,7 +459,7 @@
 .student-pathway .sp-proto .style-pick button { display: inline-flex; align-items: baseline; gap: 5px; border: 0; }
 .student-pathway .sp-proto .style-pick small { font-size: 11px; font-weight: 700; opacity: .8; }
 
-.student-pathway .p45 { display: flex; flex-direction: column; gap: 10px; color: #0d2f55; }
+.student-pathway .p45 { display: flex; flex-direction: column; gap: 8px; color: #0d2f55; }
 .student-pathway .p45 h2, .student-pathway .p45 h3 { margin: 0; line-height: 1.15; }
 .student-pathway .p45 p { margin: 0; }
 .student-pathway .p45-kicker { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #3c6a86; margin-bottom: 3px !important; }
@@ -475,7 +475,7 @@
 .student-pathway .p45-hero.slim { padding: 12px 20px; }
 .student-pathway .p45-hero-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .student-pathway .p45-hero h2 { font-size: 30px; font-weight: 800; }
-.student-pathway .p45-trail { height: 190px; margin-top: 0; }
+.student-pathway .p45-trail { height: 150px; margin-top: 0; }
 .student-pathway .p45-stone { border: 0; background: none; padding: 0; font: inherit; cursor: pointer; }
 .student-pathway .p45-stone.picked .ll-stone { box-shadow: 0 0 0 5px rgba(13,47,85,.25); }
 .student-pathway .p45-stone .ll-stone-label { font-size: 13px; }
@@ -524,30 +524,27 @@
 .student-pathway .p45-foot { display: flex; align-items: center; gap: 18px; font-size: 14px; font-weight: 700; color: #5b6b7d; padding: 0 6px; }
 .student-pathway .p45-foot b { color: #0d2f55; }
 .student-pathway .p45-focus-body .p45-back { align-self: flex-start; margin-top: 14px; }
-/* the next step in the Lit Lab card's Next-bar style (theme.css .gr-nextstep), plus its parts as step chips */
-.student-pathway .p45-next { padding: 16px 20px; }
-.student-pathway .p45-next .gr-ns-words b { font-size: 24px; }
-.student-pathway .p45-next .gr-ns-line { margin-top: 1px; }
-.student-pathway .p45-next.done { background: linear-gradient(110deg, #e2f5ea, #f8fdfa 70%); border-color: #7cc7a2; box-shadow: 0 6px 18px rgba(47,158,111,.16); }
-.student-pathway .p45-next.done .gr-ns-n { background: #2f9e6f; color: #fff; box-shadow: 0 0 0 5px rgba(47,158,111,.2); }
-.student-pathway .p45-next.done .gr-ns-k { color: #1d6b48; }
-.student-pathway .p45-next.later { background: #f7f9fb; border-color: #dbe3ec; box-shadow: none; }
-.student-pathway .p45-next.later .gr-ns-n { background: #eef2f6; color: #6c7b8a; box-shadow: none; font-size: 18px; }
-.student-pathway .p45-next.later .gr-ns-k { color: #6c7b8a; }
-.student-pathway .p45-later { font-weight: 800; color: #6c7b8a; font-size: 15px; }
-.student-pathway .p45-steps { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.student-pathway .p45-step { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 800; color: #0d2f55; background: rgba(255,255,255,.85); border: 1.5px solid #e6dcc0; border-radius: 999px; padding: 3px 11px 3px 4px; }
-.student-pathway .p45-step i { font-style: normal; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; background: #eef2f6; }
-.student-pathway .p45-step small { font-size: 12px; font-weight: 700; color: #6c7b8a; }
-.student-pathway .p45-step.done i { background: #2f9e6f; color: #fff; }
-.student-pathway .p45-step.done small { color: #1d6b48; font-weight: 900; }
-.student-pathway .p45-step.now { border-color: #f5b400; background: #fff; }
-.student-pathway .p45-step.now i { background: #f5b400; color: #3d2c00; }
-.student-pathway .p45-step.now small { color: #9a6b00; font-weight: 900; }
-.student-pathway .p45-step.later { opacity: .7; }
-.student-pathway .p45-step.sb i { background: #8b6ee0; color: #fff; }
 /* One step (B): its buttons take the same green Start as the Next bar */
 .student-pathway .p45-part.now .p45-part-go { background: #2e9e6b; box-shadow: 0 4px 12px rgba(46,158,107,.3); }
-.student-pathway .p45-next .gr-ns-words { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
-.student-pathway .p45-next .gr-ns-line { display: block; white-space: normal; overflow: visible; text-overflow: clip; max-width: none; }
-.student-pathway .p45-next .gr-ns-n { width: 48px; height: 48px; font-size: 21px; flex-shrink: 0; }
+/* the next step as a Home-page card with assignment-style rows (2026-10-14) */
+.student-pathway .p45-nextcard { overflow: hidden; }
+.student-pathway .p45-nc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 10px 20px 0; }
+.student-pathway .p45-nc-head > div { display: flex; flex-direction: column; gap: 2px; }
+.student-pathway .p45-nc-k { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: #1a8fb5; }
+.student-pathway .p45-nextcard.done .p45-nc-k { color: var(--good); }
+.student-pathway .p45-nextcard.later .p45-nc-k { color: var(--muted); }
+.student-pathway .p45-nc-title { font-size: 21px; font-weight: 800; color: #0d2f55; line-height: 1.2; }
+.student-pathway .p45-nc-line { font-size: 14px; font-weight: 600; color: var(--muted); }
+.student-pathway .p45-nc-list { padding: 8px 16px 10px !important; gap: 8px !important; }
+.student-pathway .p45-nc-list .assign-row { padding: 9px 18px !important; }
+.student-pathway .p45-nc-list .assign-meta { margin-top: 5px !important; }
+.student-pathway .p45-nc-done { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 6px 20px 0; font-size: 13px; font-weight: 800; color: var(--good); }
+.student-pathway .p45-nc-done .sb { color: #5b3fb0; }
+.student-pathway .p45-type { font-size: 11px; font-weight: 800; letter-spacing: .4px; color: #fff; padding: 3px 9px; border-radius: 7px; }
+.student-pathway .p45-due { font-size: 13px; font-weight: 700; color: var(--muted); }
+.student-pathway .p45-due.now { color: #e08a2b; }
+.student-pathway .p45-nc-list .assign-row.later { opacity: .65; }
+.student-pathway .p45-nc-list .assign-row.now { border-color: #f0cf7a; }
+.student-pathway .p45-nc-side { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.student-pathway .p45-nextcard.done .p45-nc-done { padding-bottom: 14px; }
+.student-pathway .p45-nextcard.done .p45-nc-list:empty { display: none; }

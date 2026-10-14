@@ -138,19 +138,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .practice-view.look-simple .practice-side { gap: 10px; }
 .practice-view.look-simple .practice-side .prac-tile { min-height: 62px; padding: 10px 14px 10px 34%; }
 .practice-view.look-simple .practice-side .prac-title { font-size: 15.5px; }
-.practice-view.look-simple .practice-side .daily-banner { min-height: 0; padding: 14px 16px 14px 34%; gap: 10px; }
-.practice-view.look-simple .practice-side .daily-title { font-size: 15px; }
-.practice-view.look-simple .practice-side .daily-banner { padding-left: 30%; }
-.practice-view.look-simple .practice-side .daily-words { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; min-width: 0; }
-.practice-view.look-simple .practice-side .daily-words > span:last-child { padding: 6px 12px !important; font-size: 12px !important; }
-.practice-view.look-simple .practice-side .daily-cta { position: absolute; right: 14px; bottom: 14px; padding: 7px 12px; font-size: 12.5px; white-space: nowrap; }
+
 .practice-view.look-simple .proof-kicker,
 .practice-view.look-simple .prf-c-shortcut,
 .practice-view.look-simple .gr-ns-line,
 .practice-view.look-simple .gr-ns-tag,
-.practice-view.look-simple .prac-sub,
-.practice-view.look-simple .daily-kicker,
-.practice-view.look-simple .daily-dir { display: none; }
+.practice-view.look-simple .prac-sub { display: none; }
 /* B (simpler): at most 3 of A's cards. Grades 2-5 get bigger cards with room between them (2026-10-14). */
 .assign-list-b { flex: 1; }
 .assign-more-b { margin-left: auto; padding: 4px 10px; border: 0; background: none; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
@@ -392,7 +385,6 @@ a { color: var(--link); }
 .practice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 760px) { .practice-grid { grid-template-columns: 1fr; } }
 
-
 /* The Home Quick Write block. Tall in the side column; sideways when
    the home grid drops to one column, so it never becomes a wide empty strip. */
 .qw-block { position: relative; overflow: hidden; border-radius: 20px; color: #fff; display: flex; flex-direction: column;
@@ -491,7 +483,6 @@ a { color: var(--link); }
 .prac-chev { font-size: 28px; line-height: 1; flex-shrink: 0; position: relative; }
 .prac-icon { width: 54px; height: 54px; flex-shrink: 0; border-radius: 50%; display: grid; place-items: center; font-size: 23px; position: relative; }
 
-
 /* dark tiles: the painting only on the left, dimmed, over solid navy */
 .practice-view .prac-tile { padding: 16px 22px 16px 38%; color: #fff; background: linear-gradient(120deg, #0d2e49, #0a2438);
   border: 1px solid rgba(255,255,255,.1); box-shadow: 0 6px 18px rgba(8,16,40,.22); }
@@ -511,31 +502,8 @@ a { color: var(--link); }
 }
 
 /* Daily Challenge */
-.daily-banner { position: relative; overflow: hidden; border-radius: 22px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
-.daily-words { flex: 1 1 300px; min-width: 0; position: relative; }
-.daily-kicker { font-size: 12px; font-weight: 800; letter-spacing: 2.2px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.daily-dot { font-size: 9px; }
-.daily-title { font-size: 22px; font-weight: 800; margin: 5px 0 3px; text-wrap: balance; }
-.daily-dir { font-size: 14px; margin-bottom: 12px; }
-.daily-cta { position: relative; flex-shrink: 0; white-space: nowrap; font-weight: 800; font-size: 17px; border-radius: 16px; padding: 15px 26px; cursor: pointer; }
 
-
-.practice-view .daily-banner { padding: 22px 26px 22px 36%; min-height: 190px; color: #fff; background: linear-gradient(120deg, #151a52, #111540);
-  box-shadow: 0 6px 20px rgba(8,16,50,.28); }
 /* Pip stays bright (no dark wash); only the right edge fades into the navy. */
-.practice-view .daily-art { position: absolute; left: 0; top: 0; bottom: 0; width: 38%;
-  background: linear-gradient(90deg, rgba(21,26,82,0) 62%, #151a52 100%), var(--daily-img) center 40% / cover no-repeat; }
-.practice-view .daily-kicker { color: #e8f1ff; }
-.practice-view .daily-dot { color: #5aa8ff; }
-.practice-view .daily-dir { color: #cdd9ee; }
-.practice-view .daily-cta { color: #fff; background: linear-gradient(120deg, rgba(20,48,130,.92), rgba(32,70,170,.92)); border: 2px solid #55d7ff; box-shadow: 0 0 16px rgba(85,215,255,.4); }
-
-@media (max-width: 780px) {
-  .practice-view .daily-banner { padding: 20px; }
-  .practice-view .daily-art { width: 100%; background: linear-gradient(0deg, rgba(17,21,64,.92), rgba(17,21,64,.7)), var(--daily-img) left center / cover no-repeat; }
-  .daily-cta { width: 100%; }
-}
-
 
 /* Home goal banner: the goal and the class focus are the headline, one size, no sub-lines. */
 .goal-text { font-size: 17px; font-weight: 800; line-height: 1.25; margin-top: 2px; text-wrap: balance; }
@@ -758,11 +726,7 @@ a { color: var(--link); }
 .prf-empty { padding: 18px; text-align: center; color: var(--muted); font-weight: 700; }
 .prf-cta { margin-top: auto; justify-content: center; padding: 13px 20px; font-size: 16px; border-radius: 14px; }
 /* the Daily Challenge in the narrower side column */
-.practice-side .daily-banner { min-height: 0; padding: 14px 14px 14px 36%; gap: 10px; }
-.practice-side .daily-title { font-size: 16px; }
-.practice-side .daily-dir { font-size: 12px; margin-bottom: 6px; }
-.practice-side .daily-cta { font-size: 13.5px; padding: 9px 14px; }
-.practice-side .daily-kicker { font-size: 10.5px; letter-spacing: 1.6px; }
+
 @media (max-width: 1100px) { .practice-split { grid-template-columns: 1fr; } }
 @media (max-width: 560px) {
   .prf-hero { background: linear-gradient(0deg, rgba(2,40,62,.94), rgba(2,40,62,.78)), var(--prf-img) left center / cover no-repeat, #02283e; min-height: 0; }
@@ -912,11 +876,7 @@ a { color: var(--link); }
 .wall-side { padding: 12px 14px !important; }
 .wall-side > div:first-child { margin-bottom: 8px !important; }
 /* side column: the coin badge and the Start button share one row */
-.practice-side .daily-banner { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; column-gap: 10px; row-gap: 0; }
-.practice-side .daily-words { display: contents; }
-.practice-side :is(.daily-kicker, .daily-title, .daily-dir) { grid-column: 1 / -1; position: relative; }
-.practice-side .daily-words > span:last-child { position: relative; padding: 8px 14px !important; font-size: 12.5px !important; }
-.practice-side .daily-cta { justify-self: start; }
+
 .practice-side { gap: 8px; }
 .practice-side .prac-tile { min-height: 78px; padding-top: 10px; padding-bottom: 10px; }
 /* small laptop screens: the side Share Wall keeps just its header + View all, so the column fits above the fold */
@@ -937,13 +897,6 @@ a { color: var(--link); }
 .wall-side .wall-post-meta { font-size: 12.5px !important; }
 .wall-side .wall-post-title { font-size: 17px !important; margin: 10px 0 4px !important; }
 .wall-side .wall-react { margin-top: 9px !important; }
-.practice-side .daily-banner { padding: 11px 12px 11px 34%; }
-.practice-side .daily-kicker { font-size: 9.5px; letter-spacing: 1.4px; gap: 7px; }
-.practice-side .daily-title { font-size: 14.5px; margin: 3px 0 2px; }
-.practice-side .daily-dir { font-size: 11.5px; margin-bottom: 6px; }
-.practice-side .daily-words > span:last-child { padding: 6px 12px !important; font-size: 11.5px !important; }
-.practice-side .daily-cta { font-size: 12.5px; padding: 7px 12px; border-radius: 12px; }
-
 
 /* ---- Practice page (2026-10-01): the Lit Labyrinth card keeps B's clean block — a
    plain navy banner and no gold frame. The side cards wear their paintings again
@@ -987,7 +940,6 @@ a { color: var(--link); }
 .next > .lp-dot, .next .lp-dot { background: #fff5d6; color: #8a6400; border-color: var(--lp-next); box-shadow: 0 0 0 4px rgba(233,185,58,.22); }
 .sb .lp-dot { background: #eaf6ee; border-color: #8fd0a6; }
 .locked .lp-dot { font-size: 12px; }
-
 
 .lp-next { display: flex; flex-direction: column; gap: 8px; padding: 16px 18px; border-radius: 14px; background: #fffaf0; border: 1.5px solid #f0d9a8; }
 .lp-next.compact { padding: 2px 0 4px 46px; background: none; border: none; }
@@ -2132,7 +2084,6 @@ body { font-size: 16px; }
 .prac-icon-white { display: none; }
 .practice-view { position: relative; max-width: 1560px; }
 
-
 /* domain tile bars by state (her note: all-green bars next to the green Start read as one thing) */
 .gre-tile.m-prog .gre-meter i { background: linear-gradient(90deg, #e9a812, #f5c542); }
 .gre-tile.m-done .gre-meter i { background: linear-gradient(90deg, #2e9e6b, #5fe0a0); }
@@ -2385,7 +2336,6 @@ body { font-size: 16px; }
 .sw2-note:hover { transform: rotate(0deg) scale(1.02); z-index: 1; }
 .sw2-pin { position: absolute; top: -7px; left: 50%; width: 16px; height: 16px; margin-left: -8px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ff8a8a, #d23a3a 60%, #8f1d1d); box-shadow: 0 3px 4px rgba(0,0,0,.35); }
 
-
 /* reading a whole piece */
 .sw2-open { background: none; border: 0; padding: 0; font: inherit; color: inherit; text-align: left; cursor: pointer; }
 .sw2-open:hover { text-decoration: underline; text-underline-offset: 3px; }
@@ -2629,12 +2579,9 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-foot .ll-key { justify-content: flex-start; }
 
 /* Revision Challenge as a Practice bar (2026-10-14) */
-.rev-bar-pick { align-self: flex-start; margin-bottom: -4px; background: #fff; border: 1px dashed #b9c7d6; }
-.rev-bar-pick button { display: inline-flex; align-items: baseline; gap: 5px; }
-.rev-bar-pick button small { font-size: 11px; font-weight: 700; opacity: .8; }
 .rev-bar .prac-words { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
 .rev-bar-coins { flex-shrink: 0; position: relative; display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 900; color: #3d2c00;
   background: linear-gradient(120deg, #f5c542, #e89a00); border-radius: 999px; padding: 4px 11px; }
 .rev-bar.done .rev-bar-coins { background: rgba(255,255,255,.16); color: #bff0d8; }
-.rev-bar.look-c { border-color: rgba(245,197,66,.75); box-shadow: 0 0 0 1.5px rgba(245,197,66,.55), 0 6px 18px rgba(8,16,40,.22); }
+.rev-bar { border-color: rgba(245,197,66,.75); box-shadow: 0 0 0 1.5px rgba(245,197,66,.55), 0 6px 18px rgba(8,16,40,.22); }
 .rev-bar-today { font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #3d2c00; background: #f5c542; border-radius: 999px; padding: 2px 9px; }

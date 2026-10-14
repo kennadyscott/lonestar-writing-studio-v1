@@ -5,6 +5,7 @@ import PromptBridge from './PromptBridge.jsx'
 import { ReadAloudText } from './ReadAloud.jsx'
 import TraitPanel from './TraitPanel.jsx'
 import PromptsPanel from './PromptsPanel.jsx'
+import { useLook } from '../lib/look.js'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
 
 function CoinToast({ data, onClose }) {
@@ -83,6 +84,11 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
   const [toast, setToast] = useState(null)
   const [pub, setPub] = useState(null) // publish celebration
   const [sharedNow, setSharedNow] = useState(false)
+  // B (simpler, 2026-10-14): Free Write gets the whole width; the Inspiration Hub opens only from "Need an idea?" and closes once an
+  // idea is used. A Story Spark shows above the writing; a First Line goes into an empty page.
+  const simpleFree = useLook() === 'b' && isFree
+  const [ideasOpen, setIdeasOpen] = useState(false)
+  const [idea, setIdea] = useState(null)
   const timer = useRef(null)
   // The bank reads React state, not the saved draft. Autosave has to push
   // the words (and the title) up, or the card still says nothing was written.
@@ -315,15 +321,38 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
       </div>
 
       {writing ? (
-      <div className="write-layout">
+      <div className={'write-layout' + (simpleFree && !supportLevel ? ' one-col' : '')}>
         {/* editor */}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', position: 'relative' }}>
           <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <b style={{ fontSize: 15 }}>
               {isFree && isCurrent && selected.n > 1 ? t('✏️ Revising Draft {n}', { n: selected.n }) : `${t('Draft {n}', { n: selected.n })} ${isCurrent ? t('(working copy)') : ''}`}
             </b>
-            <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('{n} words', { n: wc })}</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 12 }}>
+              {simpleFree && isCurrent && !published && (
+                <button type="button" className="btn ghost" aria-expanded={ideasOpen} onClick={() => setIdeasOpen((v) => !v)} style={{ padding: '6px 12px', fontSize: 13 }}>{t('💡 Need an idea?')}</button>
+              )}
+              <span style={{ fontSize: 12, color: 'var(--muted)' }}>{t('{n} words', { n: wc })}</span>
+            </span>
           </div>
+          {simpleFree && idea && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 16px', background: '#f2f9fd', borderBottom: '1px solid var(--line)' }}>
+              <span aria-hidden style={{ fontSize: 16 }}>💡</span>
+              <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: '#0d2f55', lineHeight: 1.45 }}><b>{t('Your idea:')}</b> {idea}</span>
+              <button type="button" onClick={() => setIdea(null)} aria-label={t('Remove the idea')} style={{ border: 0, background: 'none', fontSize: 17, color: 'var(--muted)', lineHeight: 1 }}>×</button>
+            </div>
+          )}
+          {simpleFree && ideasOpen && (
+            <div className="ideas-drawer">
+              <PromptsPanel summary={state.growthSummary} onClose={() => setIdeasOpen(false)}
+                onUse={(text, mode) => {
+                  if (mode === 'line' && !(content || '').trim()) edit(text + ' ')
+                  else setIdea(text)
+                  setIdeasOpen(false)
+                  setTimeout(() => document.getElementById('ws-editor')?.focus(), 0)
+                }} />
+            </div>
+          )}
           <textarea id="ws-editor" value={content} onChange={(e) => edit(e.target.value)} placeholder={isFree ? t('Start writing here…\nAnything goes.') : t('Start writing your argument here…')}
             style={{ flex: 1, minHeight: 380, border: 'none', outline: 'none', resize: 'none', padding: 18, fontSize: 16, lineHeight: 1.6, fontFamily: 'Manrope, sans-serif', color: 'var(--ink)' }} />
           {isCurrent && !published && (
@@ -357,12 +386,12 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
         </div>
 
         {/* Language Bridge (teacher-set) sits above whichever panel this is */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {!(simpleFree && !supportLevel) && <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {/* RACE is a constructed-response organizer — a free write has no
             question to restate, so it gets sentence support only. */}
         {supportLevel && <LanguageBridgePanel level={supportLevel} onInsert={insertSupport}
           race={!isFree} canStartFrames={!(content || '').trim()} />}
-        <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: supportLevel ? 320 : 480 }}>
+        {!simpleFree && <div className="card" style={{ display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: supportLevel ? 320 : 480 }}>
           {isFree ? (
             <PromptsPanel summary={state.growthSummary} />
           ) : (
@@ -376,8 +405,8 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
               </div>
             </>
           )}
-        </div>
-        </div>
+        </div>}
+        </div>}
       </div>
       ) : (
         <div className={compare && sub.drafts.length > 1 ? 'read-layout compare' : 'read-layout'}>

@@ -95,7 +95,9 @@ const QUICK = [
   { key: 'line', icon: '❤️', label: "A moment I'll always remember", pick: () => -1 },
 ]
 
-export default function PromptsPanel({ summary, streakDays = 0 }) {
+// onUse / onClose: B's Free Write opens this only when asked and closes it once an idea is picked (2026-10-14: "it doesn't make
+// sense for this prompt section to take up so much real estate at all times").
+export default function PromptsPanel({ summary, streakDays = 0, onUse, onClose }) {
   const t = useT()
   const streak = summary ? writingStreak(summary) : { days: streakDays, extendedToday: false }
   const [mode, setMode] = useState('spark')
@@ -140,6 +142,7 @@ export default function PromptsPanel({ summary, streakDays = 0 }) {
             </div>
           </div>
         )}
+        {onClose && <button type="button" onClick={onClose} aria-label={t('Close')} style={{ width: 32, height: 32, borderRadius: 10, border: '1px solid var(--line)', background: '#fff', fontSize: 18, lineHeight: 1, color: 'var(--muted)', flexShrink: 0 }}>×</button>}
       </div>
 
       {/* mode toggle */}
@@ -179,7 +182,10 @@ export default function PromptsPanel({ summary, streakDays = 0 }) {
                 {mode === 'line' ? `“${m.bank[idx]}”` : m.bank[idx]}
               </div>
             </div>
-            <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={() => spin()}>{t('🎲 Another one!')}</button>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center' }}>
+              {onUse && <button className="btn" style={{ padding: '9px 22px' }} onClick={() => onUse(m.bank[idx], mode)}>{mode === 'line' ? t('Start with this line') : t('Use this idea')}</button>}
+              <button className="btn ghost" style={{ padding: '9px 22px' }} onClick={() => spin()}>{t('🎲 Another one!')}</button>
+            </div>
             <p style={{ fontSize: 12, color: 'var(--muted)', margin: 0, maxWidth: 260 }}>
               <Directions text={m.hint} inline />
             </p>

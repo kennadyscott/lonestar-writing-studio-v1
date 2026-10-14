@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fluency Zone tile options</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&display=swap">
+<style>
+  /* Options for the Fluency Zone bingo tiles (Kennady, 2026-10-14: "I thought we had built the Fluency zone with cards that flip
+     around - so it's bright and colorful and then when you hover, it shows the title with the overlay? Then when they complete the
+     card, it needs to show differently too - show me some options"). Uses the real tile paintings in zone/. */
+  :root { --navy: #0d2f55; --ink: #10294a; --muted: #5d7387; --line: #dbe5ec; --gold: #f5b400; --bg: #eef4f8; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Manrope, system-ui, sans-serif; color: var(--ink); background: var(--bg); }
+  header { padding: 28px 16px 8px; max-width: 1240px; margin: 0 auto; }
+  h1 { margin: 0 0 6px; font-size: 28px; letter-spacing: -.02em; }
+  header p { margin: 0; color: var(--muted); font-weight: 600; max-width: 70ch; line-height: 1.5; }
+  h2 { margin: 28px 0 4px; font-size: 19px; }
+  .hint { margin: 0 0 14px; color: var(--muted); font-size: 14px; font-weight: 600; }
+  main { max-width: 1240px; margin: 0 auto; padding: 0 16px 48px; }
+  .options { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 18px; }
+  .opt { background: #fff; border: 1px solid var(--line); border-radius: 18px; padding: 14px; box-shadow: 0 2px 10px rgba(13,47,85,.06); }
+  .opt h3 { margin: 0 0 2px; font-size: 16px; display: flex; gap: 8px; align-items: baseline; }
+  .opt h3 b { display: inline-grid; place-items: center; min-width: 26px; height: 26px; border-radius: 8px; background: var(--navy); color: #fff; font-size: 13px; }
+  .opt p { margin: 0 0 10px; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.45; }
+  .tag { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: #8a6200; background: #fff8e1; border: 1px solid #f0d58a; border-radius: 999px; padding: 2px 8px; }
+  .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+
+  /* a tile */
+  .tile { position: relative; aspect-ratio: 16 / 10; border: 0; padding: 0; border-radius: 12px; cursor: pointer; background: none; font: inherit; color: #fff; perspective: 700px; }
+  .tile:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .face { position: absolute; inset: 0; border-radius: 12px; overflow: hidden; }
+  .art { position: absolute; inset: 0; background-size: cover; background-position: center 42%; transition: filter .25s ease; }
+  .worth { position: absolute; top: 6px; right: 6px; z-index: 3; display: inline-flex; align-items: center; gap: 3px; background: #fff8e1; border: 1px solid #f0d58a; border-radius: 999px; padding: 2px 7px; font-size: 11px; font-weight: 800; color: #8a6200; box-shadow: 0 2px 6px rgba(13,47,85,.28); }
+  .coin { width: 11px; height: 11px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #ffe27a, #f5b400 60%, #c98a00); display: inline-block; }
+  .title { font-weight: 800; font-size: 15px; line-height: 1.15; letter-spacing: -.01em; text-align: center; text-wrap: balance; text-shadow: 0 2px 8px rgba(0,0,0,.35); }
+  .play { margin-top: 6px; font-size: 11.5px; font-weight: 800; opacity: .92; display: inline-flex; gap: 4px; align-items: center; }
+
+  /* H1 fade (today) */
+  .fade .label { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; align-content: center; padding: 10px; background: rgba(8,22,36,.82); opacity: 0; transition: opacity .18s ease; }
+  .fade .tile:not(.done):hover .label, .fade .tile:not(.done):focus-visible .label { opacity: 1; }
+
+  /* H2 flip: bright painting on the front, a colored card with the name on the back */
+  .flip .inner { position: absolute; inset: 0; transform-style: preserve-3d; transition: transform .5s cubic-bezier(.3,.7,.3,1); }
+  .flip .tile:not(.done):hover .inner, .flip .tile:not(.done):focus-visible .inner { transform: rotateY(180deg); }
+  .flip .face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+  .flip .back { transform: rotateY(180deg); display: grid; place-items: center; align-content: center; padding: 10px; background: var(--c); box-shadow: inset 0 0 0 3px rgba(255,255,255,.35); }
+  .flip .back::before { content: ""; position: absolute; inset: 0; background: var(--img) center / cover; opacity: .16; mix-blend-mode: luminosity; }
+  .flip .back > * { position: relative; }
+
+  /* completion styles */
+  .stamp { position: absolute; left: 50%; top: 50%; z-index: 3; transform: translate(-50%, -50%) rotate(-8deg); width: 54px; aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center; align-content: center;
+    background: radial-gradient(circle at 35% 30%, #ffe27a, #f5b400 55%, #d99a00); border: 3px solid #fff; color: #5c3d00; box-shadow: 0 4px 14px rgba(0,0,0,.35); animation: pop .45s cubic-bezier(.2,1.5,.4,1) both; }
+  .stamp i { font-style: normal; font-size: 18px; font-weight: 900; line-height: 1; }
+  .stamp small { font-size: 10.5px; font-weight: 900; }
+  @keyframes pop { from { opacity: 0; transform: translate(-50%, -50%) rotate(-8deg) scale(1.8); } to { opacity: 1; transform: translate(-50%, -50%) rotate(-8deg) scale(1); } }
+
+  /* C1 gold stamp on a grey picture (today) */
+  .c1 .done .art { filter: saturate(.35) brightness(.8); }
+
+  /* C2 stays flipped: the done side is the tile's color, with the score */
+  .c2 .done .inner { transform: rotateY(180deg); }
+  .c2 .done .back { box-shadow: inset 0 0 0 3px #fff; }
+  .doneback { display: grid; justify-items: center; gap: 4px; animation: rise .4s ease both; }
+    .doneback .title { font-size: 13px; line-height: 1.1; }
+  .doneback .score { font-size: 11px; font-weight: 800; background: rgba(255,255,255,.22); border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* C3 the picture stays bright, framed in gold, with a corner ribbon */
+  .c3 .done .face { box-shadow: inset 0 0 0 3px var(--gold), 0 0 14px rgba(245,180,0,.55); }
+  .c3 .done { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--gold); border-radius: 12px; }
+  .ribbon { position: absolute; left: 0; bottom: 8px; z-index: 3; display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px 4px 8px; background: linear-gradient(90deg, #1f8a5a, #2fb37a); color: #fff; font-size: 11.5px; font-weight: 900; border-radius: 0 999px 999px 0; box-shadow: 0 3px 8px rgba(0,0,0,.3); animation: slide .35s ease both; }
+  @keyframes slide { from { transform: translateX(-100%); } to { transform: none; } }
+
+  /* C4 bingo dauber: a see-through colored dot over the picture, like a real bingo marker */
+  .c4 .done .art { filter: brightness(.92); }
+  .dauber { position: absolute; left: 50%; top: 50%; z-index: 3; width: 74%; aspect-ratio: 1; max-height: 92%; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, color-mix(in srgb, var(--c) 78%, transparent) 60%, color-mix(in srgb, var(--c) 40%, transparent) 70%, transparent 72%);
+    display: grid; place-items: center; align-content: center; color: #fff; animation: dab .35s cubic-bezier(.2,1.4,.4,1) both; }
+  .dauber i { font-style: normal; font-size: 22px; font-weight: 900; line-height: 1; text-shadow: 0 2px 6px rgba(0,0,0,.3); }
+  .dauber small { font-size: 11px; font-weight: 900; }
+  @keyframes dab { from { transform: translate(-50%, -50%) scale(.3); opacity: 0; } to { transform: translate(-50%, -50%) scale(1); opacity: 1; } }
+
+  .foot { margin-top: 10px; font-size: 12.5px; font-weight: 700; color: var(--muted); }
+  .reset { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 11px; font: inherit; font-size: 12px; font-weight: 800; color: var(--navy); cursor: pointer; margin-left: 6px; }
+  @media (prefers-reduced-motion: reduce) { .flip .inner, .stamp, .doneback, .ribbon, .dauber { transition: none; animation: none; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>Fluency Zone tiles</h1>
+  <p>Hover a tile to see how it reveals its name. Click a tile to mark it done (click again to undo) and watch how a finished tile looks. These use the real tile pictures.</p>
+</header>
+<main>
+  <h2>When you hover</h2>
+  <p class="hint">How a tile shows its name before it's played.</p>
+  <div class="options">
+    <section class="opt fade c1" data-done="">
+      <h3><b>H1</b> Fade in the name <span class="tag">Today</span></h3>
+      <p>The picture stays put; a dark layer with the name fades in on top.</p>
+      <div class="board"></div>
+    </section>
+    <section class="opt flip c1" data-done="">
+      <h3><b>H2</b> Flip the card</h3>
+      <p>The card turns over to a bright colored back with the name and the coins it's worth.</p>
+      <div class="board"></div>
+    </section>
+  </div>
+
+  <h2>When a tile is done</h2>
+  <p class="hint">Three tiles start done here. Click any tile to finish it or undo it.</p>
+  <div class="options">
+    <section class="opt flip c1" data-done="0,4,8">
+      <h3><b>C1</b> Gold stamp, picture goes grey <span class="tag">Today</span></h3>
+      <p>The picture fades to grey and a gold coin stamp lands on it with the coins earned.</p>
+      <div class="board"></div>
+    </section>
+    <section class="opt flip c2" data-done="0,4,8">
+      <h3><b>C2</b> Stays flipped, shows the score</h3>
+      <p>A finished card stays turned over: its bright color, the name, a check with the score and coins. Easy to see which are left.</p>
+      <div class="board"></div>
+    </section>
+    <section class="opt flip c3" data-done="0,4,8">
+      <h3><b>C3</b> Gold frame and a ribbon</h3>
+      <p>The picture stays bright. A gold frame and a green ribbon with the score slide in.</p>
+      <div class="board"></div>
+    </section>
+    <section class="opt flip c4" data-done="0,4,8">
+      <h3><b>C4</b> Bingo marker dot</h3>
+      <p>A see-through colored dot lands on the tile like a bingo marker, with the check and coins on it.</p>
+      <div class="board"></div>
+    </section>
+  </div>
+</main>
+<script>
+  const TILES = [
+    ['sentences', 'Sentence Builders', '#0e9aa7'], ['flow', 'Smooth Transitions', '#6c5ce7'], ['wordswap', 'Word Upgrade', '#e67e22'],
+    ['context', 'Context Clues', '#27ae60'], ['thisvsthat', 'This vs. That', '#2f80ed'], ['wordwork', 'Word Work', '#d6457a'],
+    ['spelling', 'Spelling', '#d4a017'], ['conventions', 'Conventions', '#e04848'], ['typing', 'Type Right', '#3d4fd6'],
+  ]
+  const SCORES = [96, 88, 92, 74, 100, 90, 81, 95, 86]
+  const coinsFor = (pct) => (pct >= 90 ? 20 : 10)
+  const coin = '<span class="coin" aria-hidden="true"></span>'
+
+  function tileHTML(section, i, done) {
+    const [id, name, color] = TILES[i], pct = SCORES[i], img = `url(zone/${id}-forest3.webp)`
+    const flip = section.classList.contains('flip'), c = [...section.classList].find((k) => /^c\d$/.test(k))
+    const front = `<span class="face front"><span class="art" style="background-image:${img}"></span>${done ? '' : `<span class="worth">${coin}20</span>`}${
+      !flip ? `<span class="label"><span class="title">${name}</span></span>` : ''}${
+      done && c === 'c1' ? `<span class="stamp"><i>✓</i><small>+${coinsFor(pct)}</small></span>` : ''}${
+      done && c === 'c3' ? `<span class="ribbon">✓ ${pct}% · +${coinsFor(pct)}</span>` : ''}${
+      done && c === 'c4' ? `<span class="dauber"><i>✓</i><small>+${coinsFor(pct)}</small></span>` : ''}</span>`
+    const back = flip ? `<span class="face back" style="--c:${color};--img:${img}">${done && c === 'c2'
+      ? `<span class="doneback"><span class="title">${name}</span><span class="score">✓ ${pct}% · ${coin} +${coinsFor(pct)}</span></span>`
+      : `<span class="title">${name}</span><span class="play">▶ Play · ${coin} 20</span>`}</span>` : ''
+    return `<button type="button" class="tile${done ? ' done' : ''}" style="--c:${color}" data-i="${i}" aria-pressed="${done}" aria-label="${name}${done ? ', done' : ''}">${
+      flip ? `<span class="inner">${front}${back}</span>` : front}</button>`
+  }
+
+  document.querySelectorAll('.opt').forEach((section) => {
+    const start = (section.dataset.done || '').split(',').filter(Boolean).map(Number)
+    let done = new Set(start)
+    const board = section.querySelector('.board')
+    const draw = () => { board.innerHTML = TILES.map((_, i) => tileHTML(section, i, done.has(i))).join('') }
+    draw()
+    board.addEventListener('click', (e) => {
+      const tile = e.target.closest('.tile'); if (!tile) return
+      const i = Number(tile.dataset.i)
+      done.has(i) ? done.delete(i) : done.add(i)
+      draw()
+      board.querySelector(`[data-i="${i}"]`)?.focus()
+    })
+  })
+</script>
+</body>
+</html>

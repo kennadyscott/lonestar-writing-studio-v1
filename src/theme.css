@@ -2492,3 +2492,19 @@ body { font-size: 16px; }
 .dg-confer-words span { font-size: 13.5px; color: rgba(255,255,255,.85); }
 .dg-confer .btn { background: #fff; color: #0d2f55; border-color: #fff; }
 @media (max-width: 1000px) { .dg-top { grid-template-columns: 1fr; } .dg-stats.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* goals and conferences: the prototype switches, the locked bar, the last conference */
+.dg-proto { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; font-size: 12px; font-weight: 800; color: var(--muted); }
+.dg-proto > span { text-transform: uppercase; letter-spacing: .06em; }
+.dg-proto-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #fff; border: 1px dashed #b9c8d4; }
+.dg-proto-seg button { padding: 5px 11px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 12px; font-weight: 800; color: var(--muted); cursor: pointer; }
+.dg-proto-seg button.on { background: #5b6b7c; color: #fff; }
+.dg-goal-note { font-size: 13.5px; font-weight: 600; color: var(--muted); }
+.dg-confer.locked { background: #eef3f7; color: #0d2f55; box-shadow: none; border: 1.5px dashed #b9c8d4; }
+.dg-confer.locked .dg-confer-icon { background: #fff; }
+.dg-confer.locked .dg-confer-words span { color: var(--muted); }
+.dg-confer.locked .btn.ghost { background: #fff; color: #0d2f55; border-color: #b9c8d4; }
+.dg-lastconf { position: relative; width: min(560px, 100%); padding: 24px 28px; display: flex; flex-direction: column; gap: 8px; }
+.dg-lastconf h2 { margin: 0 40px 6px 0; font-size: 22px; color: #0d2f55; }
+.dg-lastconf dl { margin: 0; display: grid; gap: 4px; }
+.dg-lastconf dt { margin-top: 8px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
+.dg-lastconf dd { margin: 0; font-size: 15px; line-height: 1.5; color: #33506b; }

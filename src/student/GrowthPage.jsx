@@ -536,7 +536,19 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const locale = useLocale() // was referenced below but never declared — crashed as soon as a goal existed
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const mp = state.monthlyProgress
-  const [picking, setPicking] = useState(!me.goal)
+  // Goals and conferences (Kennady, 2026-10-14): "The conference is locked until the teacher unlocks it on their end. If it isn't
+  // time for a new conference, they can 'see my last conference'. I also don't want them to be able to change their goal until
+  // they reach it. And they should build their first goal with their teacher during their first conference." Picking a goal is
+  // only possible after one is reached. Two prototype switches show each case (in the product the teacher's side sets these).
+  const [picking, setPicking] = useState(false)
+  const [confOpen, setConfOpen] = useState(() => { try { return localStorage.getItem('lscr.confOpen') === '1' } catch { return false } })
+  const [demoFirst, setDemoFirst] = useState(() => { try { return localStorage.getItem('lscr.demoFirstConf') === '1' } catch { return false } })
+  const setOpen = (v) => { setConfOpen(v); try { localStorage.setItem('lscr.confOpen', v ? '1' : '0') } catch { /* fine */ } }
+  const setFirst = (v) => { setDemoFirst(v); try { localStorage.setItem('lscr.demoFirstConf', v ? '1' : '0') } catch { /* fine */ } }
+  const [lastConf, setLastConf] = useState(false)
+  const goal = demoFirst ? null : me.goal
+  const history = demoFirst ? [] : (me.goalHistory || [])
+  const firstTime = !goal && !history.length
   const [custom, setCustom] = useState('')
   const [toast, setToast] = useState(null)
   const [mpTab, setMpTab] = useState('scr')
@@ -547,7 +559,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   async function choose(g) { await api.setGoal(g); setPicking(false); onChange && onChange() }
   async function setCustomGoal() { if (!custom.trim()) return; await api.setGoal({ text: custom.trim(), trait: null }); setCustom(''); setPicking(false); onChange && onChange() }
   async function achieve() { const r = await api.achieveGoal(); setToast(r.coins); onChange && onChange() }
-  async function conferenceGoal(payload) { await api.setGoal(payload); setConferring(false); setPicking(false); onChange && onChange() }
+  async function conferenceGoal(payload) { await api.setGoal(payload); setConferring(false); setPicking(false); if (demoFirst) setFirst(false); onChange && onChange() }
 
   const revisions = subs.reduce((a, s) => a + Math.max(0, s.drafts.length - 1), 0)
   const finished = subs.filter((s) => s.completedAt).length
@@ -593,7 +605,38 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
     {conferring && <ConferenceProtocol teacher={state.teacher?.name || t('your teacher')} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />}
   </>
 
-  if (me.goal && !picking) {
+  const proto = (
+    <div className="dg-proto" role="group" aria-label={t('Prototype controls')}>
+      <span>{t('Prototype')}</span>
+      <div className="dg-proto-seg">
+        <button type="button" aria-pressed={!confOpen} className={!confOpen ? 'on' : ''} onClick={() => setOpen(false)}>🔒 {t('Locked')}</button>
+        <button type="button" aria-pressed={confOpen} className={confOpen ? 'on' : ''} onClick={() => setOpen(true)}>🔓 {t('Open')}</button>
+      </div>
+      <div className="dg-proto-seg">
+        <button type="button" aria-pressed={demoFirst} className={demoFirst ? 'on' : ''} onClick={() => setFirst(true)}>{t('First conference')}</button>
+        <button type="button" aria-pressed={!demoFirst} className={!demoFirst ? 'on' : ''} onClick={() => setFirst(false)}>{t('Has a goal')}</button>
+      </div>
+    </div>
+  )
+  // what the last conference saved with the goal it set (sample words stand in where the demo goal has none)
+  const lastSource = goal?.source === 'conference' ? goal : history.slice().reverse().find((g) => g.source === 'conference') || goal || history[history.length - 1]
+  const lastCard = lastConf && lastSource && (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={() => setLastConf(false)}>
+      <div className="card dg-lastconf" role="dialog" aria-modal="true" aria-labelledby="dg-lastconf-title" onClick={(e) => e.stopPropagation()}>
+        <button type="button" className="sw2-reader-x" onClick={() => setLastConf(false)} aria-label={t('Close')}>×</button>
+        <span className="dg-kicker">🤝 {t('My last conference')} · {fmtDate(lastSource.setOn, locale)}</span>
+        <h2 id="dg-lastconf-title">{t('With {teacher}', { teacher: state.teacher?.name || t('your teacher') })}</h2>
+        <dl>
+          <dt>{t('What I did well')}</dt><dd>{lastSource.strength || say('You state your opinion clearly, right at the start.')}</dd>
+          <dt>{t('What we worked on')}</dt><dd>{lastSource.teachingPoint || say('Giving a real reason, then backing it up with an example.')}</dd>
+          <dt>{t('My strategy')}</dt><dd>{lastSource.strategy || say('Use "because" and "for example" in each body paragraph.')}</dd>
+          <dt>{t('The goal we set')}</dt><dd><b>{t(lastSource.text)}</b></dd>
+        </dl>
+      </div>
+    </div>
+  )
+
+  if (!picking) {
     const d = state.writingData?.ELA
     const series = mpTab === 'scr' ? mp.scr : mp.ecr
     const now = series[series.length - 1], grew = Math.round((now - series[0]) * 10) / 10
@@ -601,18 +644,26 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
     return (
       <div className="dg-b">
         {modals}
+        {lastCard}
+        {proto}
 
           <div className="dg-top">
             <div className="card dg-goal c">
               <span className="dg-kicker">🎯 {t('My goal')}</span>
-              <b className="dg-goal-text">{t(me.goal.text)}</b>
-              <div className="dg-goal-acts">
-                <button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button>
-                <button type="button" className="dg-link" onClick={() => setPicking(true)}>{t('Change goal')}</button>
-              </div>
-              {me.goalHistory?.length > 0 && (
+              {goal ? <>
+                <b className="dg-goal-text">{t(goal.text)}</b>
+                {/* no changing it until it is reached */}
+                <div className="dg-goal-acts"><button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button></div>
+              </> : firstTime ? <>
+                <b className="dg-goal-text">{t("You'll build your first goal with your teacher.")}</b>
+                <span className="dg-goal-note">{say('It happens in your first conference.')}</span>
+              </> : <>
+                <b className="dg-goal-text">{t('🎉 Goal reached! What is next?')}</b>
+                <div className="dg-goal-acts"><button className="btn" onClick={() => setPicking(true)}>{t('Pick my next goal')}</button></div>
+              </>}
+              {history.length > 0 && (
                 <div className="dg-trophies" aria-label={t("Goals you've reached")}>
-                  {me.goalHistory.map((g, i) => <span key={i} className="dg-trophy" title={`${t(g.text)} · ${fmtDate(g.achievedOn, locale)}`}>🏆</span>)}
+                  {history.map((g, i) => <span key={i} className="dg-trophy" title={`${t(g.text)} · ${fmtDate(g.achievedOn, locale)}`}>🏆</span>)}
                   <span className="dg-trophy-label">{t("Goals you've reached")}</span>
                 </div>
               )}
@@ -624,7 +675,7 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
                   { tone: 'teal', icon: '📈', v: <>{now}<small>/4</small></>, k: mpTab === 'scr' ? t('SCR score') : t('ECR score'), up: grew > 0 ? `▲ ${grew} ${t('since Sep')}` : null },
                   { tone: 'violet', icon: '✏️', v: revisions, k: t('Revisions made') },
                   { tone: 'orange', icon: '✅', v: finished, k: t('Pieces finished') },
-                  { tone: 'gold', icon: '🏆', v: me.goalHistory?.length || 0, k: t('Goals reached') },
+                  { tone: 'gold', icon: '🏆', v: history.length, k: t('Goals reached') },
                 ].map((x, i) => (
                   <div key={i} className={'dg-stat ' + x.tone}>
                     <span className="dg-stat-icon" aria-hidden>{x.icon}</span>
@@ -634,10 +685,18 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
               </div>
             </section>
           </div>
-          <div className="dg-confer">
-            <span className="dg-confer-icon" aria-hidden>🤝</span>
-            <div className="dg-confer-words"><b>{t('Ready to talk about your writing?')}</b><span>{say('Meet with your teacher to look at your work and pick your next goal together.')}</span></div>
-            <button className="btn" onClick={() => setConferring(true)}>{t('Conference with my teacher →')}</button>
+          {/* the teacher opens a conference; until then it is locked and the last one can be read */}
+          <div className={'dg-confer' + (confOpen ? '' : ' locked')}>
+            <span className="dg-confer-icon" aria-hidden>{confOpen ? '🤝' : '🔒'}</span>
+            {confOpen ? <>
+              <div className="dg-confer-words"><b>{firstTime ? t('Your teacher is ready for your first conference!') : t('Your teacher is ready to meet!')}</b>
+                <span>{firstTime ? say('Look at your writing together and build your first goal.') : say('Look at your work together and talk about your next step.')}</span></div>
+              <button className="btn" onClick={() => setConferring(true)}>{firstTime ? t('Start my first conference →') : t('Start my conference →')}</button>
+            </> : <>
+              <div className="dg-confer-words"><b>{firstTime ? t('Your first conference is coming soon') : t('Your next conference is coming soon')}</b>
+                <span>{say('It opens when your teacher is ready to meet with you.')}</span></div>
+              {!firstTime && lastSource && <button className="btn ghost" onClick={() => setLastConf(true)}>{t('See my last conference')}</button>}
+            </>}
           </div>
 
         <div className="dg-main">
@@ -675,14 +734,14 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
     )
   }
 
-  // No goal yet, or changing it: pick one (or plan it with the teacher).
+  // After a goal is reached: pick the next one (or plan it with the teacher).
   return (
     <div>
       {modals}
       <div className="card" style={{ padding: 22, marginBottom: 18 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <b style={{ fontSize: 17 }}>{t('🎯 Pick my goal')}</b>
-          {me.goal && <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(false)}>{t('Keep my goal')}</button>}
+          <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(false)}>{t('Back')}</button>
         </div>
           <div style={{ marginTop: 10 }}>
             <div style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 12, display: 'flex', gap: 8, alignItems: 'flex-start', flexWrap: 'wrap' }}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react'
 import { api } from './lib/api.js'
 import { TopBar, DemoTools, ReadAloudSwitch } from './components/Shell.jsx'
+import { G2_READ_ALOUD } from './lib/readAloud.js'
 import { useLang } from './lib/i18n/index.jsx'
 import { BridgeProvider } from './lib/bridgeContext.jsx'
 import { ShareWallTab } from './student/GrowthPage.jsx'
@@ -165,7 +166,7 @@ export default function App() {
         onBand={setBand}
       />
       <div className="content">{body}</div>
-      {band === '2' && <ReadAloudSwitch />}
+      {band === '2' && G2_READ_ALOUD && <ReadAloudSwitch />}
       <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)}
         settings={{ lang: me.lang, supportLevel: me.supportLevel }} onSettings={saveSettings} />
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}

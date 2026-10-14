@@ -14,6 +14,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
  * and it also sidesteps the long-utterance stall in Chromium.
  */
 
+// Second-grade read-aloud (auto-read, the Reading aloud pill, Listen on every direction) is OFF for now (Kennady,
+// 2026-10-14: "Let's take off read aloud for now."). Flip to true to bring it all back.
+export const G2_READ_ALOUD = false
+
 export const canSpeak = () => typeof window !== 'undefined' && 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window
 
 // Slower for a student with less English, never slower than is listenable.

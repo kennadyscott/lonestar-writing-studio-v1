@@ -3,7 +3,7 @@ import { useT, useLang } from '../lib/i18n/index.jsx'
 import { useBridgeLevel } from '../lib/bridgeContext.jsx'
 import { levelOf } from '../lib/languageBridge.js'
 import { markTerms, simplerFor } from '../lib/scaffold.js'
-import { autoRead, canSpeak, rateFor, readsAloud, splitSentences, useSpeech } from '../lib/readAloud.js'
+import { G2_READ_ALOUD, autoRead, canSpeak, rateFor, readsAloud, splitSentences, useSpeech } from '../lib/readAloud.js'
 import { isGrade2, useBandValue } from '../lib/gradeBand.js'
 
 /*
@@ -79,7 +79,7 @@ export function Speak({ text, lang, compact = true, style }) {
   const { lang: uiLang } = useLang()
   const level = useBridgeLevel()
   const { speak, stop, speaking } = useSpeech()
-  const g2 = isGrade2(useBandValue()) // second grade can always hear it
+  const g2 = isGrade2(useBandValue()) && G2_READ_ALOUD // second grade can always hear it (switched off for now)
   if (!canSpeak() || !(readsAloud(level) || g2) || !text) return null
   const lv = levelOf(level)
   const color = lv ? lv.color : '#0a7dba'
@@ -107,7 +107,7 @@ export function Speak({ text, lang, compact = true, style }) {
 export function Directions({ text, vars, style, inline = false, children }) {
   const say = useSay()
   const level = useBridgeLevel()
-  const g2 = isGrade2(useBandValue())
+  const g2 = isGrade2(useBandValue()) && G2_READ_ALOUD
   const said = text != null ? say(text, vars) : null
   // second grade: directions read themselves aloud when they appear, and always carry a Listen button
   useEffect(() => { if (g2 && said) autoRead(said) }, [g2, said])

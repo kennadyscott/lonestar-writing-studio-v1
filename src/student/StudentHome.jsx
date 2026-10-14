@@ -1422,7 +1422,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const [gamePicker, setGamePicker] = useState(false)
   const [calm, setCalm] = useState('a')
   const simpleLook = useLook() === 'b'
-  const CALM = [['a', 'A'], ['b', 'B'], ['c', 'C']]
+  // B (colored cards, no paintings) came out (Kennady, 2026-10-14: "Remove option 'B' from the ABC switcher at the top").
+  const CALM = [['a', 'A'], ['c', 'C']]
 
   // A grid game finished: record the clear, reveal the coins, refresh state.
   // Closing a zone game before it is finished forfeits the round: ask first.
@@ -1551,7 +1552,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       {tab === 'practice' && (
         // data-clean: the quiet Practice page (her pick 2026-10-01: A's white cards + B's clean Lit Labyrinth block)
         // B (simpler, 2026-10-14: "Now let's simplify the Practice page on the AB"): look-simple hides the extra words (theme.css).
-        <div className={'practice-view' + (calm === 'b' ? ' calm-plain' : '') + (simpleLook ? ' look-simple' : '')} data-clean="" data-side={calm === 'c' ? 'c' : 'a'} style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+        <div className={'practice-view' + (simpleLook ? ' look-simple' : '')} data-clean="" data-side={calm === 'c' ? 'c' : 'a'} style={{ display: 'flex', flexDirection: 'column', gap: 18, margin: '0 auto', position: 'relative', zIndex: 1 }}>
           <div className="prac-calm" role="group" aria-label={t('Practice pages')}>
             {CALM.map(([k, label]) => (
               <button key={k} type="button" className={calm === k ? 'on' : ''} aria-pressed={calm === k} onClick={() => setCalm(k)}>{t(label)}</button>

@@ -2151,26 +2151,6 @@ body { font-size: 16px; }
 .prac-calm button { border-radius: 999px; padding: 5px 12px; font-size: 13px; font-weight: 800; color: #3d5870; background: #f4f7fa; border: 1px solid var(--line); }
 .prac-calm button.on { background: #0d2f55; color: #fff; border-color: #0d2f55; }
 
-/* B: the two-column page, no paintings, color on the cards. */
-.practice-view.calm-plain .prf-c-head { background: linear-gradient(110deg, #0e7c78, #0b3a55 58%, #1a3f78); }
-.practice-view.calm-plain .prac-art,
-.practice-view.calm-plain .daily-art,
-.practice-view.calm-plain .gre-tile img,
-.practice-view.calm-plain .prac-icon { display: none; }
-.practice-view.calm-plain .prac-tile { padding: 14px 16px; min-height: 0; color: #fff; border: none; box-shadow: 0 6px 16px rgba(13,47,85,.12); }
-.practice-view.calm-plain .prac-tile:nth-child(1) { background: linear-gradient(120deg, #0c8b90, #0a5560); }
-.practice-view.calm-plain .prac-tile:nth-child(2) { background: linear-gradient(120deg, #5a52b0, #322c78); }
-.practice-view.calm-plain .prac-tile:nth-child(3) { background: linear-gradient(120deg, #e09a32, #8d5a12); }
-.practice-view.calm-plain .prac-title { color: #fff; text-shadow: none; }
-.practice-view.calm-plain .prac-sub { color: rgba(255,255,255,.84); text-shadow: none; }
-.practice-view.calm-plain .prac-chev { color: rgba(255,255,255,.8); }
-.practice-view.calm-plain .daily-banner { min-height: 0; padding: 16px 18px; color: #fff; background: linear-gradient(120deg, #2a3a9e, #151a52); border: none; border-radius: 18px; box-shadow: 0 8px 18px rgba(21,26,82,.18); }
-.practice-view.calm-plain .daily-kicker { color: #d7e6ff; }
-.practice-view.calm-plain .daily-title { color: #fff; }
-.practice-view.calm-plain .daily-dir { color: #d5e0f2; }
-.practice-view.calm-plain .daily-cta { color: #fff; background: linear-gradient(120deg, #1d4ed8, #2563eb); border: 2px solid #7dd3fc; box-shadow: none; }
-
-
 /* side cards C (2026-10-02): Free Write / Fluency Zone / Writing Bank white, Pip's Daily Challenge keeps its painting */
 .practice-view[data-side="c"] .prac-tile { padding: 12px 16px; min-height: 0; color: #10294a; background: #fff; border: 1px solid var(--line); box-shadow: 0 1px 3px rgba(13,47,85,.06); }
 .practice-view[data-side="c"] .prac-art { display: none; }
@@ -2179,12 +2159,6 @@ body { font-size: 16px; }
 .practice-view[data-side="c"] .prac-title { text-shadow: none; color: #10294a; }
 .practice-view[data-side="c"] .prac-sub { color: var(--muted); text-shadow: none; }
 .practice-view[data-side="c"] .prac-chev { color: #9db0c0; }
-.practice-view.calm-plain .prac-tile:nth-child(1) { background: linear-gradient(120deg, #0c8b90, #0a5560); color: #fff; border-color: transparent; }
-.practice-view.calm-plain .prac-tile:nth-child(2) { background: linear-gradient(120deg, #5a52b0, #322c78); color: #fff; border-color: transparent; }
-.practice-view.calm-plain .prac-tile:nth-child(3) { background: linear-gradient(120deg, #e09a32, #8d5a12); color: #fff; border-color: transparent; }
-.practice-view.calm-plain .prac-title { color: #fff; }
-.practice-view.calm-plain .prac-sub { color: rgba(255,255,255,.84); }
-.practice-view.calm-plain .prac-chev { color: rgba(255,255,255,.8); }
 
 /* domain tile bars by state (her note: all-green bars next to the green Start read as one thing) */
 .gre-tile.m-prog .gre-meter i { background: linear-gradient(90deg, #e9a812, #f5c542); }

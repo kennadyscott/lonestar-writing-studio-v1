@@ -344,7 +344,7 @@ export default function WritingStudio({ state, sub, health, onChange, onBack }) 
           )}
           {simpleFree && ideasOpen && (
             <div className="ideas-drawer">
-              <PromptsPanel summary={state.growthSummary} onClose={() => setIdeasOpen(false)}
+              <PromptsPanel compact summary={state.growthSummary} onClose={() => setIdeasOpen(false)}
                 onUse={(text, mode) => {
                   if (mode === 'line' && !(content || '').trim()) edit(text + ' ')
                   else setIdea(text)

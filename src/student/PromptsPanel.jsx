@@ -97,7 +97,8 @@ const QUICK = [
 
 // onUse / onClose: B's Free Write opens this only when asked and closes it once an idea is picked (2026-10-14: "it doesn't make
 // sense for this prompt section to take up so much real estate at all times").
-export default function PromptsPanel({ summary, streakDays = 0, onUse, onClose }) {
+// compact: the drawer version (2026-10-14: "it doesn't fit in the box"): smaller die, no line under the title, tighter sparks.
+export default function PromptsPanel({ summary, streakDays = 0, onUse, onClose, compact = false }) {
   const t = useT()
   const streak = summary ? writingStreak(summary) : { days: streakDays, extendedToday: false }
   const [mode, setMode] = useState('spark')
@@ -129,9 +130,9 @@ export default function PromptsPanel({ summary, streakDays = 0, onUse, onClose }
         <div style={{ fontSize: 22 }}>💡</div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: 800, fontSize: 15.5, color: '#0d2f55' }}>{t('Inspiration Hub')}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>
+          {!compact && <div style={{ fontSize: 12, color: 'var(--muted)' }}>
             <Directions text="Need an idea? Spin for inspiration — then write wherever it takes you." />
-          </div>
+          </div>}
         </div>
         {streak.days > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, background: '#fff8e1', border: '1px solid var(--gold-line)', borderRadius: 999, padding: '5px 12px', flexShrink: 0 }}>
@@ -159,11 +160,11 @@ export default function PromptsPanel({ summary, streakDays = 0, onUse, onClose }
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 14, textAlign: 'center' }}>
+      <div style={{ flex: 1, overflowY: 'auto', padding: compact ? '14px 18px 0' : '16px 18px 0', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: compact ? 'flex-start' : 'center', gap: compact ? 10 : 14, textAlign: 'center' }}>
         {idx === null ? (
           <>
             {/* a plain glowing die; the ringed-planet dice was the space set */}
-            <span aria-hidden style={{ width: 120, height: 120, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: 64,
+            <span aria-hidden style={{ width: compact ? 76 : 120, height: compact ? 76 : 120, flexShrink: 0, borderRadius: '50%', display: 'grid', placeItems: 'center', fontSize: compact ? 40 : 64,
               background: 'radial-gradient(circle at 50% 42%, #fff8e1 0%, #e8f3f9 62%, #d6e9f3 100%)', boxShadow: '0 0 26px rgba(245,197,66,.45), inset 0 0 18px rgba(92,192,230,.25)' }}>🎲</span>
             <p style={{ color: 'var(--muted)', fontSize: 14, maxWidth: 250, margin: 0, lineHeight: 1.5 }}>
               {t(m.empty, { n: m.bank.length })}
@@ -194,13 +195,13 @@ export default function PromptsPanel({ summary, streakDays = 0, onUse, onClose }
       </div>
 
       {/* quick sparks */}
-      <div style={{ padding: '14px 16px 16px', borderTop: '1px solid var(--line)', marginTop: 14 }}>
+      <div style={{ padding: compact ? '10px 14px 12px' : '14px 16px 16px', borderTop: '1px solid var(--line)', marginTop: compact ? 10 : 14 }}>
         <div style={{ fontSize: 12.5, color: 'var(--muted)', fontWeight: 600, marginBottom: 8 }}>{t('Or try a quick spark…')}</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8 }}>
           {QUICK.map((q) => (
             <button key={q.label} onClick={() => quick(q)}
-              style={{ background: '#fff', border: '1px solid var(--gold-line)', borderRadius: 12, padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, boxShadow: 'var(--shadow)' }}>
-              <span style={{ fontSize: 18 }}>{q.icon}</span>
+              style={{ background: '#fff', border: '1px solid var(--gold-line)', borderRadius: 12, padding: compact ? '7px 6px' : '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: compact ? 3 : 5, boxShadow: 'var(--shadow)' }}>
+              <span style={{ fontSize: compact ? 15 : 18 }}>{q.icon}</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: '#0d2f55', lineHeight: 1.25, textAlign: 'center' }}>{t(q.label)}</span>
             </button>
           ))}

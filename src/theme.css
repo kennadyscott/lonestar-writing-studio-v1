@@ -274,7 +274,8 @@ h1.page { font-size: 28px; font-weight: 700; margin: 4px 0 2px; color: var(--ink
 /* B Free Write: the page is the writing; the Inspiration Hub slides over its right side only when asked (2026-10-14). */
 .write-layout.one-col { grid-template-columns: 1fr; }
 .ideas-drawer { position: absolute; top: 49px; right: 0; bottom: 0; z-index: 5; width: min(420px, 100%); background: #fff; border-left: 1px solid var(--line);
-  box-shadow: -12px 0 28px rgba(13,47,85,.14); animation: ideasIn .22s ease both; }
+  box-shadow: -12px 0 28px rgba(13,47,85,.14); animation: ideasIn .22s ease both; overflow-y: auto; display: flex; flex-direction: column; }
+.ideas-drawer > div { flex: 1 0 auto; height: auto !important; }
 @keyframes ideasIn { from { transform: translateX(24px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ideas-drawer { animation: none; } }
 .read-layout { display: grid; gap: 16px; align-items: start; }
@@ -2268,8 +2269,11 @@ body { font-size: 16px; }
 
 .bingo-worth, .bingo-flag { z-index: 2; }
 
+/* No hover (a touch screen): the picture stays bright and the name sits in a slim strip along the bottom, instead of the dark
+   layer covering every tile (2026-10-14: "I still don't see Fluency setup the way we talked about"). */
 @media (hover: none) {
-  .bingo-label { opacity: 1; }
+  .bingo-label { opacity: 1; inset: auto 0 0 0; padding: 22px 10px 7px; background: linear-gradient(180deg, transparent, rgba(8,22,36,.8)); }
+  .bingo-title { font-size: clamp(14px, 2.2vh, 17px); }
 }
 
 @media (prefers-reduced-motion: reduce) {

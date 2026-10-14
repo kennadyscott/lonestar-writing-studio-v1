@@ -251,7 +251,11 @@ h1.page { font-size: 28px; font-weight: 700; margin: 4px 0 2px; color: var(--ink
 /* cleaned-up Writing Bank (2026-10-14): one header row, tabs with counts */
 .bank-top { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 .bank-wall-link { background: none; border: 0; padding: 0; font: inherit; color: var(--link); font-weight: 800; font-size: 14px; cursor: pointer; }
-.bank-tabs { display: inline-flex; gap: 3px; background: #dcebf3; border-radius: 12px; padding: 3px; margin-bottom: 14px; }
+.bank-filter-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.bank-tabs { display: inline-flex; gap: 3px; background: #dcebf3; border-radius: 12px; padding: 3px; }
+.bank-find { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; width: min(240px, 100%); padding: 0 10px; height: 38px; background: rgba(255,255,255,.92); border: 1px solid var(--line); border-radius: 10px; font-size: 13px; }
+.bank-find:focus-within { border-color: var(--teal-mid); box-shadow: 0 0 0 3px rgba(15,151,194,.15); }
+.bank-find input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; font: inherit; font-size: 13.5px; color: var(--ink); }
 .bank-tabs button { padding: 8px 16px; border-radius: 9px; font-size: 13.5px; font-weight: 800; background: transparent; color: var(--teal); border: 0; cursor: pointer; }
 .bank-tabs button b { margin-left: 4px; font-weight: 900; opacity: .75; }
 .bank-tabs button.on { background: var(--teal-mid); color: #fff; }

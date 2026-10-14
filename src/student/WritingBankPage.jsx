@@ -16,8 +16,8 @@ const THUMBS = ['quill-forest', 'cards-forest', 'notebook-forest', 'desk-forest'
 // Stable per piece: same id always draws the same picture.
 const thumbFor = (id) => THUMBS[[...String(id)].reduce((a, c) => a + c.charCodeAt(0), 0) % THUMBS.length]
 
-// Cleaned up (Kennady, 2026-10-14: "Next, let's cleanup the Writing Bank"): no stats strip, search, type or sort; the tabs carry
-// the counts, newest first; each row keeps its picture, title, status and first line, one main button, and a small delete.
+// Cleaned up (Kennady, 2026-10-14: "Next, let's cleanup the Writing Bank"): no stats strip, type or sort; the tabs carry the
+// counts, newest first, with a small search beside them ("I'd like to still have a small search box"); each row keeps its picture, title, status and first line, one main button, and a small delete.
 // The option list keeps its English labels; every label is run through t() where it is rendered.
 const FILTERS = [
   ['all', 'All'],
@@ -39,6 +39,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
   const say = useSay()
   const locale = useLocale()
   const [filter, setFilter] = useState('all')
+  const [q, setQ] = useState('')
   const [confirmId, setConfirmId] = useState(null)
   const [confirmAction, setConfirmAction] = useState(null) // { kind: 'publish'|'share', sub, a }
   const [busy, setBusy] = useState(false)
@@ -68,6 +69,7 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
 
   const visible = pieces
     .filter((p) => (filter === 'all' ? true : filter === 'published' ? p.sub.published : (!p.sub.published && !p.sub.completedAt)))
+    .filter((p) => { const n = q.trim().toLowerCase(); return !n || (p.name || '').toLowerCase().includes(n) || (p.excerpt || '').toLowerCase().includes(n) })
     .sort((x, y) => (y.at > x.at ? 1 : -1))
 
   const total = pieces.length
@@ -128,22 +130,29 @@ export default function WritingBankPage({ state, me, onBack, onOpen, onReview, o
       </div>
 
       {/* the tabs carry the counts */}
-      <div className="bank-tabs" role="tablist" aria-label={t('Your pieces')}>
-        {FILTERS.map(([k, label]) => (
-          <button key={k} role="tab" aria-selected={filter === k} className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>
-            {t(label)} <b>{k === 'all' ? total : k === 'published' ? publishedCount : progressCount}</b>
-          </button>
-        ))}
+      <div className="bank-filter-row">
+        <div className="bank-tabs" role="tablist" aria-label={t('Your pieces')}>
+          {FILTERS.map(([k, label]) => (
+            <button key={k} role="tab" aria-selected={filter === k} className={filter === k ? 'on' : ''} onClick={() => setFilter(k)}>
+              {t(label)} <b>{k === 'all' ? total : k === 'published' ? publishedCount : progressCount}</b>
+            </button>
+          ))}
+        </div>
+        <label className="bank-find">
+          <span aria-hidden="true">🔍</span>
+          <input type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder={t('Search')} aria-label={t('Search your writing pieces…')} />
+        </label>
       </div>
 
       {visible.length === 0 && (
         <div className="card" role="status" style={{ padding: 40, textAlign: 'center', color: 'var(--muted)' }}>
           <div style={{ fontSize: 40, marginBottom: 8 }} aria-hidden="true">🗂️</div>
           <Directions text={
-            pieces.length === 0
+            q.trim() ? 'Nothing matches "{query}".'
+            : pieces.length === 0
               ? 'Nothing here yet — start a Free Write or Quick Write and it will land in your bank.'
               : filter === 'published' ? 'Nothing published yet.' : 'Nothing in progress right now.'
-          } inline />
+          } vars={q.trim() ? { query: q.trim() } : undefined} inline />
         </div>
       )}
 

@@ -1493,9 +1493,9 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     <div>
       <div aria-hidden style={{ position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
         background: `url(${import.meta.env.BASE_URL || '/'}bg-enchanted.jpg) center / cover no-repeat`,
-        // Same lightening as Home (22% → 14%). Practice steps back a little further
-        // (10% → 6%) because that tab already carries its own paintings.
-        opacity: tab === 'practice' ? .06 : .14, transition: 'opacity .3s' }} />
+        // Home at 14%. Practice matches the Share Wall's 22% (her note, 2026-10-14: "bump it up a little bit on the Practice
+        // page. It's too opaque. I like the opacity on the share wall"); it had been 6%.
+        opacity: tab === 'practice' ? .22 : .14, transition: 'opacity .3s' }} />
       {game?.key === 'typing'
         ? <TypingGame grade={me.gradeLevel ?? 6} onClose={closeGame} onChange={onChange} onFinished={(r) => finishGridGame(r)} payHere={!game?.category} />
         : game && <FluencyGame gameKey={game.key} onClose={closeGame} onFinished={(r) => finishGridGame(r)} />}

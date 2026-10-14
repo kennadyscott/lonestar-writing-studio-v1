@@ -1016,6 +1016,31 @@ function QuickWriteBlock({ state, me, onQuickWrite, busy }) {
 /* ---- Daily Challenge banner: navy space theme (mockup) ---- */
 
 
+/*
+ * The daily Revision Challenge as one of the Practice bars (2026-10-14: "I don't know what it is about this section, but I just
+ * don't like it ... It's just a 'Revision Challenge' - maybe less words? A different picture?"). Same shape as the bars above
+ * it: picture, name, a small coin chip, the arrow. Three looks on a prototype picker:
+ *   A  Pip's picture      B  the notebook painting (same set as the other bars)      C  Pip, gold ring + a "Today" tag
+ */
+const REV_BARS = [['a', 'Pip'], ['b', 'Notebook'], ['c', 'Today']]
+function RevisionBar({ look, dc, busy, onGo }) {
+  const t = useT()
+  const BASE = import.meta.env.BASE_URL || '/'
+  const art = look === 'b' ? { img: 'prac-proof.jpg', pos: 'left center', tint: '#1b2c4a' } : { img: 'daily-pip.jpg', pos: '38% 28%', tint: '#13204a' }
+  return (
+    <button className={'big-task prac-tile rev-bar look-' + look + (dc?.done ? ' done' : '')} disabled={busy} onClick={onGo}
+      style={{ '--tile-img': `url(${BASE}${art.img})`, '--tile-pos': art.pos, '--tile-tint': art.tint }}>
+      <span aria-hidden className="prac-art" />
+      <span className="prac-words">
+        {look === 'c' && !dc?.done && <span className="rev-bar-today">{t('Today')}</span>}
+        <span className="prac-title">{t('Revision Challenge')}</span>
+      </span>
+      <span className="rev-bar-coins">{dc?.done ? '✓ ' + t('Done') : <><span aria-hidden>🪙</span> 50</>}</span>
+      <span aria-hidden className="prac-chev">›</span>
+    </button>
+  )
+}
+
 function DailyBanner({ dc, busy, onGo }) {
   const t = useT()
   const say = useSay()
@@ -1534,6 +1559,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
     if (openStories.length > 0) setFwChooser(true)
     else launch('free')
   }
+  const [revLook, setRevLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.revBar'); return REV_BARS.some(([k]) => k === v) ? v : 'a' } catch { return 'a' } })
+  const setRevLook = (v) => { setRevLookRaw(v); try { localStorage.setItem('lscr.revBar', v) } catch { /* fine */ } }
   async function peer() {
     setBusy(true)
     try { const r = await api.peerRevision(isGrade2(band) ? { band: 'g2' } : {}); onOpen(r.submissionId) } finally { setBusy(false) }
@@ -1626,7 +1653,12 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
               <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />
               <BigTask icon="🪶" title={t('Free Write')} sub={<Glossed text={say('Your page, your rules — write anything')} />} bg="prac-free.jpg" tint="#231d5a" busy={busy} onClick={freeWrite} />
               <BigTask icon="🗂️" title={t('Writing Bank')} sub={<Glossed text={say('Revise, publish & share your pieces')} />} bg="prac-bank.jpg" tint="#4a3010" onClick={onBank} />
-              <DailyBanner dc={dc} busy={busy} onGo={peer} />
+              {/* PROTOTYPE: which Revision Challenge bar (2026-10-14) */}
+              <div className="style-pick rev-bar-pick" role="group" aria-label="Prototype: Revision Challenge bar">
+                <span className="lbl">Revision bar</span>
+                {REV_BARS.map(([k, n], i) => <button key={k} className={revLook === k ? 'on' : ''} aria-pressed={revLook === k} onClick={() => setRevLook(k)}>{'ABC'[i]}<small>{n}</small></button>)}
+              </div>
+              <RevisionBar look={revLook} dc={dc} busy={busy} onGo={peer} />
               {/* the Share Wall fills the space under the side cards (her call, 2026-09-30) */}
               <ShareWallStrip state={state} onChange={onChange} onViewAll={onWall} side />
             </div>

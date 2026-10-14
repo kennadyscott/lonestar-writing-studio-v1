@@ -496,7 +496,7 @@ a { color: var(--link); }
 .practice-view .prac-tile { padding: 16px 22px 16px 38%; color: #fff; background: linear-gradient(120deg, #0d2e49, #0a2438);
   border: 1px solid rgba(255,255,255,.1); box-shadow: 0 6px 18px rgba(8,16,40,.22); }
 .practice-view .prac-art { position: absolute; left: 0; top: 0; bottom: 0; width: 44%;
-  background: linear-gradient(90deg, rgba(13,46,73,0) 50%, #0d2e49 100%), linear-gradient(rgba(6,20,40,.3), rgba(6,20,40,.3)), var(--tile-img) left center / cover no-repeat, var(--tile-tint); }
+  background: linear-gradient(90deg, rgba(13,46,73,0) 50%, #0d2e49 100%), linear-gradient(rgba(6,20,40,.3), rgba(6,20,40,.3)), var(--tile-img) var(--tile-pos, left center) / cover no-repeat, var(--tile-tint); }
 .practice-view .prac-icon { background: rgba(4,18,40,.6); border: 2px solid #f0b429; }
 .practice-view .prac-title { text-shadow: 0 1px 6px rgba(0,0,0,.4); }
 .practice-view .prac-sub { color: rgba(255,255,255,.82); }
@@ -2628,3 +2628,13 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-foot { display: flex; align-items: center; gap: 8px; }
 .ll-foot .ll-key { justify-content: flex-start; }
 
+/* Revision Challenge as a Practice bar (2026-10-14) */
+.rev-bar-pick { align-self: flex-start; margin-bottom: -4px; background: #fff; border: 1px dashed #b9c7d6; }
+.rev-bar-pick button { display: inline-flex; align-items: baseline; gap: 5px; }
+.rev-bar-pick button small { font-size: 11px; font-weight: 700; opacity: .8; }
+.rev-bar .prac-words { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.rev-bar-coins { flex-shrink: 0; position: relative; display: inline-flex; align-items: center; gap: 5px; font-size: 13.5px; font-weight: 900; color: #3d2c00;
+  background: linear-gradient(120deg, #f5c542, #e89a00); border-radius: 999px; padding: 4px 11px; }
+.rev-bar.done .rev-bar-coins { background: rgba(255,255,255,.16); color: #bff0d8; }
+.rev-bar.look-c { border-color: rgba(245,197,66,.75); box-shadow: 0 0 0 1.5px rgba(245,197,66,.55), 0 6px 18px rgba(8,16,40,.22); }
+.rev-bar-today { font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #3d2c00; background: #f5c542; border-radius: 999px; padding: 2px 9px; }

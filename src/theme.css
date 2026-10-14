@@ -2646,3 +2646,51 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .ll-g-up { font-weight: 900; color: #fff; background: #2f9e6f; border-radius: 999px; padding: 2px 10px; }
 .ll-g-up small { font-weight: 700; opacity: .9; font-size: 11px; }
 .ll-g-up.down { background: #c0392b; }
+/* Trail: backgrounds, the Skill Builder as its own stop, prototype switches (2026-10-14) */
+.ll-trail.scene-land, .ll-trail.scene-meadow { margin: 0; border-radius: 14px; overflow: hidden; background-size: cover; background-position: center 60%; }
+.ll-meadow { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ll-trail.scene-land .ll-trail-line .todo, .ll-trail.scene-meadow .ll-trail-line .todo { stroke: #fff; stroke-width: 9; stroke-dasharray: 1 14; }
+.ll-trail.scene-land .ll-trail-line .done, .ll-trail.scene-meadow .ll-trail-line .done { stroke: #4bb88a; stroke-width: 9; }
+.ll-trail.scene-land .ll-stone-label, .ll-trail.scene-meadow .ll-stone-label { width: max-content; max-width: 112px; background: rgba(255,255,255,.88); border-radius: 8px; padding: 1px 7px; }
+.ll-trail.scene-land .ll-stone-label.locked, .ll-trail.scene-meadow .ll-stone-label.locked, .ll-trail.scene-land .ll-stone-label.post-locked, .ll-trail.scene-meadow .ll-stone-label.post-locked { color: #6c7b8a; }
+.ll-trail.scene-land .ll-stone.locked, .ll-trail.scene-meadow .ll-stone.locked, .ll-trail.scene-land .ll-stone.post-locked, .ll-trail.scene-meadow .ll-stone.post-locked { opacity: 1; background: #f4f7fa; }
+.ll-stone.tried { background: #fff4d6; border-color: #e0a100; color: #a37400; }
+.ll-stone.small { width: 38px; height: 38px; font-size: 17px; }
+.ll-stone.sbstop { background: #8b6ee0; border-color: #6a4fc4; color: #fff; }
+.ll-stone.sbstop.sb { background: #fff; color: #6a4fc4; border-color: #f5b400; box-shadow: 0 0 0 6px rgba(245,180,0,.25); animation: ll-pulse 1.8s ease-in-out infinite; }
+.ll-stone-label.sbstop { color: #5b3fb0; }
+.ll-key i.sbstop { background: #8b6ee0; color: #fff; }
+.ll-foot { display: flex; align-items: center; gap: 8px; }
+.ll-foot .ll-key { justify-content: flex-start; }
+.ll-proto { display: inline-flex; align-items: center; gap: 2px; padding: 2px; border-radius: 999px; background: #fff; border: 1px dashed #b9c7d6; font-size: 11px; }
+.ll-proto > span { font-weight: 800; color: var(--muted); padding: 0 6px 0 8px; text-transform: uppercase; letter-spacing: .04em; font-size: 10px; }
+.ll-proto button { border: 0; background: transparent; font: inherit; font-weight: 800; color: var(--muted); padding: 3px 9px; border-radius: 999px; cursor: pointer; }
+.ll-proto button.on { background: #1e2a6b; color: #fff; }
+
+/* C · Donuts */
+.ll-donuts { flex: 1; display: flex; align-items: center; justify-content: space-between; gap: 4px; min-height: 0; padding: 0 4px; }
+.ll-dn { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; flex: 1; text-align: center; }
+.ll-dn.big { flex: 1.2; }
+.ll-dn-gap { width: 1px; align-self: stretch; margin: 18px 2px; background: #cfdde9; }
+.ll-donut { position: relative; display: grid; place-items: center; flex: none; }
+.ll-donut svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+.ll-donut circle { fill: none; stroke-width: 13; }
+.ll-donut .track { stroke: #e3ebf2; }
+.ll-donut .arc { stroke-linecap: butt; }
+.ll-donut .arc.good { stroke: #2f9e6f; }
+.ll-donut .arc.low { stroke: #f0b429; }
+.ll-donut .arc.pre { stroke: #8aa4bf; }
+.ll-donut .arc.post { stroke: #f5b400; }
+.ll-donut-in { position: relative; font-size: 18px; }
+.ll-donut-in b { font-size: 14px; font-weight: 900; color: #0d2f55; font-variant-numeric: tabular-nums; }
+.ll-dn.big .ll-donut-in b { font-size: 18px; }
+.ll-donut.next .track, .ll-donut.sb .track { stroke: #fff2c2; }
+.ll-dn.locked { opacity: .55; }
+.ll-dn-l { font-size: 12.5px; font-weight: 800; color: #0d2f55; line-height: 1.2; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ll-dn-s { font-size: 11.5px; font-weight: 700; color: var(--muted); min-height: 15px; white-space: nowrap; }
+.ll-dn-s.sb { color: #5b3fb0; font-weight: 800; }
+.ll-dn .ll-stone-growth { bottom: auto; top: -8px; right: 2px; z-index: 1; }
+.ll-key i.dk { width: 14px; height: 14px; border-radius: 4px; }
+.ll-key i.dk.good { background: #2f9e6f; }
+.ll-key i.dk.low { background: #f0b429; }
+.ll-key i.dk.sbpair { background: linear-gradient(90deg, #f0b429 50%, #2f9e6f 50%); }

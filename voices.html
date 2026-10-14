@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Read-Aloud Voices</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&display=swap">
+<style>
+  :root { --ink: #0d2f55; --muted: #5b6b7d; --line: #dbe3ec; --bg: #f4f7fb; --card: #fff; --go: #0f8a6a; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 500 16px/1.5 'Plus Jakarta Sans', system-ui, sans-serif; }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 60px; }
+  h1 { margin: 0 0 6px; font-size: 30px; font-weight: 800; }
+  p.lede { margin: 0 0 18px; color: var(--muted); max-width: 62ch; }
+  textarea { width: 100%; font: inherit; font-size: 17px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); resize: vertical; }
+  .speed { display: flex; gap: 10px; align-items: center; margin: 10px 0 22px; font-weight: 700; color: var(--muted); font-size: 14px; }
+  ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+  li { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1.5px solid var(--line); border-radius: 14px; padding: 12px 14px; }
+  li.on { border-color: var(--go); box-shadow: 0 0 0 3px rgba(15,138,106,.15); }
+  .name { flex: 1; min-width: 0; }
+  .name b { display: block; font-size: 16px; }
+  .name small { color: var(--muted); font-size: 13px; }
+  .tag { font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; background: #e9f0f8; color: var(--ink); margin-left: 6px; }
+  button { font: inherit; font-weight: 800; font-size: 14px; border-radius: 10px; padding: 9px 14px; cursor: pointer; border: 1.5px solid var(--line); background: #fff; color: var(--ink); }
+  button.use { background: var(--ink); border-color: var(--ink); color: #fff; }
+  li.on button.use { background: var(--go); border-color: var(--go); }
+  button:focus-visible { outline: 3px solid #6aa7e8; outline-offset: 2px; }
+  .empty { color: var(--muted); }
+  .foot { margin-top: 22px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Read-aloud voices</h1>
+  <p class="lede">These are the best voices this computer has, best first. Press Play to hear each one. "Use this voice" makes it the read-aloud voice in LoneStar on this browser. Every computer has its own voices, so a student's device may sound different.</p>
+  <textarea id="say" rows="2">Write 2 to 4 sentences about your favorite day. Start with "One day."</textarea>
+  <label class="speed">Speed <input id="rate" type="range" min="0.7" max="1.1" step="0.05" value="0.9"> <span id="rateVal">0.9</span></label>
+  <ul id="list"><li class="empty">Loading voices…</li></ul>
+  <p class="foot" id="foot"></p>
+</main>
+<script>
+  const KEY = 'lscr.voice'
+  const NOVELTY = /\b(albert|bad news|bahh|bells|boing|bubbles|cellos|good news|jester|organ|superstar|trinoids|whisper|wobble|zarvox|fred|junior|ralph|kathy|grandma|grandpa|rocko|eddy|flo|reed|sandy|shelley)\b/i
+  function score(v) {
+    const n = v.name || ''
+    if (NOVELTY.test(n)) return -1
+    let s = 0
+    if (/natural/i.test(n)) s += 100
+    else if (/online/i.test(n) && /microsoft/i.test(n)) s += 90
+    else if (/^google/i.test(n)) s += 80
+    else if (/premium/i.test(n)) s += 75
+    else if (/enhanced|siri/i.test(n)) s += 65
+    else if (/\b(ava|zoe|allison|susan|nathan|evan|tom|aria|jenny|guy|samantha)\b/i.test(n)) s += 20
+    if (/\b(ava|aria|jenny|zoe|allison|samantha)\b/i.test(n)) s += 5
+    if ((v.lang || '').replace('_', '-') === 'en-US') s += 10
+    return s
+  }
+  const kind = (v) => /natural|online/i.test(v.name) ? 'Natural' : /^google/i.test(v.name) ? 'Google' : /premium/i.test(v.name) ? 'Premium' : /enhanced|siri/i.test(v.name) ? 'Enhanced' : ''
+  const chosen = () => { try { return localStorage.getItem(KEY) } catch { return null } }
+  const rate = document.getElementById('rate')
+  rate.oninput = () => { document.getElementById('rateVal').textContent = rate.value }
+  function play(v) {
+    speechSynthesis.cancel()
+    const u = new SpeechSynthesisUtterance(document.getElementById('say').value)
+    u.voice = v; u.lang = v.lang; u.rate = Number(rate.value)
+    speechSynthesis.speak(u)
+  }
+  function render() {
+    const all = speechSynthesis.getVoices().filter((v) => /^en/i.test(v.lang) && score(v) >= 0).sort((a, b) => score(b) - score(a)).slice(0, 12)
+    const list = document.getElementById('list')
+    if (!all.length) { list.innerHTML = '<li class="empty">This browser has no English voices.</li>'; return }
+    const pick = chosen()
+    const active = all.find((v) => v.name === pick) || all[0]
+    list.innerHTML = ''
+    all.forEach((v, i) => {
+      const li = document.createElement('li')
+      if (v === active) li.className = 'on'
+      const k = kind(v)
+      li.innerHTML = `<div class="name"><b></b><small></small></div><button class="play">▶ Play</button><button class="use"></button>`
+      li.querySelector('b').textContent = v.name
+      if (k) li.querySelector('b').insertAdjacentHTML('beforeend', `<span class="tag">${k}</span>`)
+      li.querySelector('small').textContent = v.lang + (v.localService ? '' : ' · needs internet') + (i === 0 && !pick ? ' · the app uses this one now' : '')
+      li.querySelector('.play').onclick = () => play(v)
+      const use = li.querySelector('.use')
+      use.textContent = v === active ? '✓ In use' : 'Use this voice'
+      use.onclick = () => { try { localStorage.setItem(KEY, v.name) } catch {} ; render() }
+      list.appendChild(li)
+    })
+    const hasGood = all.some((v) => score(v) >= 65)
+    document.getElementById('foot').textContent = hasGood ? '' :
+      'No high-quality voices are on this computer yet. Chrome adds Google voices; Edge adds Microsoft "Natural" voices. On a Mac, System Settings → Accessibility → Spoken Content → System voice → Manage Voices lets you download "Ava (Premium)" or "Zoe (Premium)".'
+  }
+  speechSynthesis.addEventListener('voiceschanged', render)
+  render()
+</script>
+</body>
+</html>

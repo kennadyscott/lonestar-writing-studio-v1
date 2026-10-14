@@ -2398,10 +2398,7 @@ body { font-size: 16px; }
 .sw2-reader .sw2-title.huge { padding-right: 40px; }
 @media (prefers-reduced-motion: reduce) { .sw2-note { transition: none; } }
 
-/* ---- Daily Revision Challenge, B · Guided (2026-10-14): one problem at a time beside Pip's draft ---- */
-.rev-looks { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #eef3f7; border: 1px solid var(--line); }
-.rev-looks button { padding: 6px 13px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 12.5px; font-weight: 800; color: var(--muted); cursor: pointer; }
-.rev-looks button.on { background: #0d2f55; color: #fff; }
+/* ---- Daily Revision Challenge, guided (2026-10-14): one problem at a time beside Pip's draft ---- */
 .rev-guided { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr); gap: 16px; align-items: start; }
 .rev-editor { display: flex; flex-direction: column; overflow: hidden; }
 .rev-editor-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--line); background: #f2fafd; }

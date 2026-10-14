@@ -124,6 +124,17 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 /* B (simpler) Practice: the same page with fewer words (2026-10-14), a wider Lit Labyrinth and smaller side cards
    ("Play with making The Lit Lab even wider and the side rail cards smaller"). */
 .practice-view.look-simple .practice-split { grid-template-columns: minmax(0, 2.1fr) minmax(0, 1fr); }
+/* B domain tiles: just the name and the bar ("I don't know that we need the number of topics in each one and I don't think we need the
+   check when the full status bar is green"); the room goes to the next lesson. */
+.practice-view.look-simple .prf-c.look-b .gre-tile { padding: 7px 0 8px; gap: 6px; }
+.practice-view.look-simple .prf-c.look-b .gre-tile-n,
+.practice-view.look-simple .prf-c.look-b .gre-tile-badge { display: none; }
+.practice-view.look-simple .prf-c.look-b .gre-tile-name,
+.practice-view.look-simple .prf-c.look-b .gre-tile.mastered .gre-tile-name { padding-right: 9px; }
+.practice-view.look-simple .gr-nextstep { padding: 11px 12px 11px 14px; gap: 12px; border-width: 2px; }
+.practice-view.look-simple .gr-ns-n { width: 36px; height: 36px; font-size: 17px; }
+.practice-view.look-simple .gr-ns-words b { font-size: 19px; }
+.practice-view.look-simple .gr-ns-btn { padding: 10px 24px; font-size: 15px; }
 .practice-view.look-simple .practice-side { gap: 10px; }
 .practice-view.look-simple .practice-side .prac-tile { min-height: 62px; padding: 10px 14px 10px 34%; }
 .practice-view.look-simple .practice-side .prac-title { font-size: 15.5px; }

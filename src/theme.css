@@ -928,8 +928,14 @@ a { color: var(--link); }
   .practice-view[data-clean] .wall-side .wall-react { margin-top: 6px !important; }
 }
 /* 720px-tall screens: the side Share Wall keeps just its header + View all */
+/* very short screens: the latest post still shows, just compact (2026-10-15: "The share wall is blank now ... we still want to
+   show recent activity in that box"; it had been hidden below 730px tall) */
 @media (min-width: 1101px) and (max-height: 730px) {
-  .practice-view[data-clean] .wall-side .wall-strip { display: none; }
+  .practice-view[data-clean] .wall-side .wall-strip > div { padding: 9px 12px !important; }
+  .practice-view[data-clean] .wall-side .wall-post-av { width: 34px !important; height: 34px !important; font-size: 17px !important; }
+  .practice-view[data-clean] .wall-side .wall-post-name { font-size: 14.5px !important; }
+  .practice-view[data-clean] .wall-side .wall-post-title { font-size: 15px !important; margin: 6px 0 0 !important; }
+  .practice-view[data-clean] .wall-side .wall-react { margin-top: 6px !important; }
 }
 
 /* ---- The clean learning path on the Practice card (her pick B, 2026-10-01) ---- */

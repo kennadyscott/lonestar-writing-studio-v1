@@ -922,16 +922,24 @@ export function ProofRoomFeature({ onOpen, studio = false, variant = 'a' }) {
   // B (2026-10-14: "I still like the structure, it's just the colors, boxes, etc."): A's structure (domain tiles, the next step,
   // the trail, See all progress) in Home's styling: a plain white card with a white header and Home's bold sans title, the next
   // step as an assignment row (type chip, "Up next", navy Begin) instead of the gold bar, and quiet text links.
-  if (variant === 'b') {
+  // C (2026-10-15: "Can we try out B with the A header?"): B's card with A's painted header band.
+  if (variant === 'b' || variant === 'c') {
     const started = next && progress[next.ws.id]?.best > 0
     const stage = !next ? null : next.capstone ? ['POST-TEST', '#0d2f55', 'Show what you learned'] : next.state === 'sb' ? ['⚡ SKILL BUILDER', '#8b6ee0', 'Extra practice on this skill']
       : started ? ['PRACTICE', 'var(--scr)', t('{n} activities', { n: (next.ws.activities || []).length })] : ['LESSON', 'var(--ecr)', t('Short lesson, then {n} activities', { n: (next.ws.activities || []).length })]
     return (
       <div className="card prf-c look-b prb-lit">
-        <div className="assign-head prb-head">
-          <b className="prb-title">{t('The Lit Labyrinth')}</b>
-          <button type="button" className="assign-more-b" onClick={() => onOpen()}>{t('See every path →')}</button>
-        </div>
+        {variant === 'c' ? (
+          <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
+            <div className="prf-c-words"><span className="prf-c-title">{t('The Lit Labyrinth')}</span></div>
+            <div className="prf-c-actions"><button type="button" className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button></div>
+          </div>
+        ) : (
+          <div className="assign-head prb-head">
+            <b className="prb-title">{t('The Lit Labyrinth')}</b>
+            <button type="button" className="assign-more-b" onClick={() => onOpen()}>{t('See every path →')}</button>
+          </div>
+        )}
         <div className="prb-body">
           {!topics && <div className="prf-empty">{t('Loading…')}</div>}
           {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
@@ -1505,7 +1513,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const tab = ['home', 'practice', 'data'].includes(homeTab) ? homeTab : 'home'
   const TABS = [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']]
   // PROTOTYPE (2026-10-14): Practice A (as it is) or B (same layout, the Lit Labyrinth card in Home's styling)
-  const [practiceLook, setPracticeLookRaw] = useState(() => { try { return localStorage.getItem('lscr.practiceLook') === 'a' ? 'a' : 'b' } catch { return 'b' } })
+  const [practiceLook, setPracticeLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.practiceLook'); return v === 'a' || v === 'b' ? v : 'c' } catch { return 'c' } })
   const setPracticeLook = (v) => { setPracticeLookRaw(v); try { localStorage.setItem('lscr.practiceLook', v) } catch { /* fine */ } }
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
@@ -1623,7 +1631,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
         {tab === 'practice' && (
           <div className="style-pick prb-pick" role="group" aria-label="Prototype: Practice page">
             <span className="lbl">Practice</span>
-            {[['a', 'As is'], ['b', 'Home style']].map(([k, n], i) => <button key={k} className={practiceLook === k ? 'on' : ''} aria-pressed={practiceLook === k} onClick={() => setPracticeLook(k)}>{'AB'[i]}<small>{n}</small></button>)}
+            {[['a', 'As is'], ['b', 'Home style'], ['c', 'B + A header']].map(([k, n], i) => <button key={k} className={practiceLook === k ? 'on' : ''} aria-pressed={practiceLook === k} onClick={() => setPracticeLook(k)}>{'ABC'[i]}<small>{n}</small></button>)}
           </div>
         )}
         <div className="seg nav-tabs" role="tablist" aria-label={t('Dashboard sections')} style={{ position: 'relative', zIndex: 2 }}>

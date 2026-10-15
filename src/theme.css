@@ -2586,15 +2586,10 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .rev-bar { border-color: rgba(245,197,66,.75); box-shadow: 0 0 0 1.5px rgba(245,197,66,.55), 0 6px 18px rgba(8,16,40,.22); }
 .rev-bar-today { font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; color: #3d2c00; background: #f5c542; border-radius: 999px; padding: 2px 9px; }
 /* ---- Practice B: built like Home (2026-10-14) ---- */
-.prb-pick { background: #fff; border: 1px dashed #b9c7d6; }
-.prb-pick button { display: inline-flex; align-items: baseline; gap: 5px; }
-.prb-pick button small { font-size: 11px; font-weight: 700; opacity: .8; }
-.prb-title { font-size: 18px; font-weight: 800; color: var(--ink, #0d2f55); }
 .prb-next { border-color: #f0cf7a !important; }
 .prb-upnext { font-size: 13px; font-weight: 700; color: #e08a2b; }
 .prb-lit .p45-type { font-size: 11px; font-weight: 800; letter-spacing: .4px; color: #fff; padding: 3px 9px; border-radius: 7px; }
 .prb-lit { overflow: hidden; display: flex; flex-direction: column; border-radius: 20px; }
-.prb-head { padding: 14px 18px 0; }
 .prb-body { display: flex; flex-direction: column; gap: 10px; padding: 12px 18px 14px; flex: 1; }
 .prb-list { flex: none !important; padding: 0 !important; }
 .prb-lit .gre-tile.on { border-color: #1a8fb5; box-shadow: 0 0 0 2px rgba(26,143,181,.15); }

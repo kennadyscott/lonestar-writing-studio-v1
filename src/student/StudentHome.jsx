@@ -919,27 +919,19 @@ export function ProofRoomFeature({ onOpen, studio = false, variant = 'a' }) {
     const s = seedDemoMastery(mine, lead.tp.id, progress); if (s) setSeeded(s)
   }, [lead?.tp.id, topics]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // B (2026-10-14: "I still like the structure, it's just the colors, boxes, etc."): A's structure (domain tiles, the next step,
-  // the trail, See all progress) in Home's styling: a plain white card with a white header and Home's bold sans title, the next
-  // step as an assignment row (type chip, "Up next", navy Begin) instead of the gold bar, and quiet text links.
-  // C (2026-10-15: "Can we try out B with the A header?"): B's card with A's painted header band.
-  if (variant === 'b' || variant === 'c') {
+  // Practice's Lit Labyrinth card (her pick, 2026-10-15: "Ya, I like C"): A's structure and painted header ("I still like the
+  // structure, it's just the colors, boxes, etc."; "Can we try out B with the A header?") on a plain white Home card, the next
+  // step as an assignment row (type chip, "Up next", navy Begin), and quiet text links. The Studio (9-12) keeps the original.
+  if (variant === 'home') {
     const started = next && progress[next.ws.id]?.best > 0
     const stage = !next ? null : next.capstone ? ['POST-TEST', '#0d2f55', 'Show what you learned'] : next.state === 'sb' ? ['⚡ SKILL BUILDER', '#8b6ee0', 'Extra practice on this skill']
       : started ? ['PRACTICE', 'var(--scr)', t('{n} activities', { n: (next.ws.activities || []).length })] : ['LESSON', 'var(--ecr)', t('Short lesson, then {n} activities', { n: (next.ws.activities || []).length })]
     return (
       <div className="card prf-c look-b prb-lit">
-        {variant === 'c' ? (
-          <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
-            <div className="prf-c-words"><span className="prf-c-title">{t('The Lit Labyrinth')}</span></div>
-            <div className="prf-c-actions"><button type="button" className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button></div>
-          </div>
-        ) : (
-          <div className="assign-head prb-head">
-            <b className="prb-title">{t('The Lit Labyrinth')}</b>
-            <button type="button" className="assign-more-b" onClick={() => onOpen()}>{t('See every path →')}</button>
-          </div>
-        )}
+        <div className="prf-c-head" style={{ '--prf-img': `url(${BASE}lit-valley.jpg)` }}>
+          <div className="prf-c-words"><span className="prf-c-title">{t('The Lit Labyrinth')}</span></div>
+          <div className="prf-c-actions"><button type="button" className="prf-c-all" onClick={() => onOpen()}>{t('See every path →')}</button></div>
+        </div>
         <div className="prb-body">
           {!topics && <div className="prf-empty">{t('Loading…')}</div>}
           {topics && !lead && <div className="prf-empty">{t('New paths are on the way. No Grade {n} paths are published yet.', { n: grade })}</div>}
@@ -1512,9 +1504,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
   const setHomeTab = (v) => { setHomeTabState(v); try { sessionStorage.setItem('lscr.homeTab', v) } catch { /* fine */ } }
   const tab = ['home', 'practice', 'data'].includes(homeTab) ? homeTab : 'home'
   const TABS = [['home', 'Home'], ['practice', 'Practice'], ['data', 'Data & Goals']]
-  // PROTOTYPE (2026-10-14): Practice A (as it is) or B (same layout, the Lit Labyrinth card in Home's styling)
-  const [practiceLook, setPracticeLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.practiceLook'); return v === 'a' || v === 'b' ? v : 'c' } catch { return 'c' } })
-  const setPracticeLook = (v) => { setPracticeLookRaw(v); try { localStorage.setItem('lscr.practiceLook', v) } catch { /* fine */ } }
   const [busy, setBusy] = useState(false)
   const [game, setGame] = useState(null) // { key, category } for a grid game; category null when launched elsewhere
   const [lastReveal, setLastReveal] = useState(null)
@@ -1628,12 +1617,6 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
 
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 14, position: 'relative', zIndex: 1 }}>
-        {tab === 'practice' && (
-          <div className="style-pick prb-pick" role="group" aria-label="Prototype: Practice page">
-            <span className="lbl">Practice</span>
-            {[['a', 'As is'], ['b', 'Home style'], ['c', 'B + A header']].map(([k, n], i) => <button key={k} className={practiceLook === k ? 'on' : ''} aria-pressed={practiceLook === k} onClick={() => setPracticeLook(k)}>{'ABC'[i]}<small>{n}</small></button>)}
-          </div>
-        )}
         <div className="seg nav-tabs" role="tablist" aria-label={t('Dashboard sections')} style={{ position: 'relative', zIndex: 2 }}>
           {TABS.map(([k, label]) => (
             <button key={k} role="tab" aria-selected={tab === k} className={tab === k ? 'on' : ''} onClick={() => setHomeTab(k)}>
@@ -1667,7 +1650,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
           {/* The Lit Labyrinth takes the whole left side; the rest stack beside it (2026-09-30). */}
           {/* Side cards A wears the paintings. Side cards C is the three white cards, and the Daily Challenge keeps its painting. */}
           <div className="practice-split">
-            <ProofRoomFeature onOpen={onProofRoom} variant={practiceLook} />
+            <ProofRoomFeature onOpen={onProofRoom} variant="home" />
             <div className="practice-side">
               {/* Fluency Zone leads the side column (her call, 2026-10-02) */}
               <BigTask icon="🎮" title={t('Fluency Zone')} sub={<Glossed text={say('Small games, big progress · double coins')} />} bg="prac-fluency.jpg" tint="#0b3a3e" onClick={() => setGamePicker(true)} />

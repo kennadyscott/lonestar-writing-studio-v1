@@ -2595,44 +2595,30 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .prb-lit .gre-tile.on { border-color: #1a8fb5; box-shadow: 0 0 0 2px rgba(26,143,181,.15); }
 .prb-trail { flex: 1; }
 .prb-foot { display: flex; justify-content: flex-end; }
-/* ---- Trail styles B and C (prototype, 2026-10-15) ---- */
+/* ---- Lit Lab trail: three ways to show the scores (prototype, 2026-10-15) ---- */
 .ll-style-pick { background: #fff; border: 1px dashed #b9c7d6; padding: 2px; }
 .ll-style-pick button { display: inline-flex; align-items: baseline; gap: 4px; padding: 4px 10px; font-size: 11.5px; }
 .ll-style-pick button small { font-size: 10.5px; font-weight: 700; opacity: .8; }
-.ll-in-n { font-size: 14px; font-weight: 900; color: #8a99a8; }
-.ll-in-score { font-size: 15px; font-weight: 900; color: #fff; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-/* both: a lighter wash so the stones lead */
-.gr-pathwrap.ll-wrap:has(.trail-b), .gr-pathwrap.ll-wrap:has(.trail-c) { background: linear-gradient(rgba(255,255,255,.86), rgba(255,255,255,.9)), var(--ll-land) center 60% / cover no-repeat !important; }
-/* B · Timeline: one straight line, names in one row, scores as plain text, quiet numbered locked stops */
-.trail-b .ll-trail-line .done { stroke-width: 10 !important; }
-.trail-b .ll-trail-line .todo { stroke: #c9d8e6 !important; stroke-width: 6 !important; stroke-dasharray: 1 12 !important; }
-.trail-b .ll-stone { width: 46px; height: 46px; font-size: 19px; border-width: 3px; box-shadow: 0 2px 6px rgba(13,47,85,.12); }
-.trail-b .ll-stone.small { width: 34px; height: 34px; font-size: 15px; }
-.trail-b .is-here .ll-stone { width: 56px; height: 56px; }
-.trail-b .ll-stone.locked, .trail-b .ll-stone.open { width: 32px; height: 32px; background: #fff; border: 2px solid #d3dee8; box-shadow: none; }
-.trail-b .ll-stone.post-locked { width: 38px; height: 38px; font-size: 16px; opacity: .55; }
-.trail-b .ll-stone-under { gap: 1px; }
-.trail-b .ll-stone-label { background: none !important; padding: 0 !important; font-size: 12.5px; max-width: 104px !important; }
-.trail-b .ll-pill { background: none !important; padding: 0; font-size: 13px; }
-.trail-b .ll-pill.good { color: #1d8a5b; } .trail-b .ll-pill.low { color: #b07800; } .trail-b .ll-pill.pre { color: #5c7285; } .trail-b .ll-pill.post { color: #b07800; }
-.trail-b .ll-here { background: #0d2f55; color: #fff; }
-/* C · Scores in the stones: a gentle curve, the score inside each finished stone, names with a soft glow instead of a box */
-.trail-c .ll-trail-line .done { stroke-width: 9 !important; }
-.trail-c .ll-trail-line .todo { stroke: #fff !important; stroke-width: 8 !important; stroke-dasharray: 1 13 !important; }
-.trail-c .ll-stone { width: 50px; height: 50px; border-width: 3px; box-shadow: 0 3px 8px rgba(13,47,85,.16); }
-.trail-c .ll-stone.start { background: #5c7a99; border-color: #48627d; }
-.trail-c .ll-stone.start .ll-in-score, .trail-c .ll-stone.start { color: #fff; }
-.trail-c .ll-stone.small { width: 40px; height: 40px; }
-.trail-c .ll-stone.small .ll-in-score { font-size: 13px; }
-.trail-c .ll-stone.locked, .trail-c .ll-stone.open { width: 36px; height: 36px; background: rgba(255,255,255,.92); border: 2px solid #d3dee8; box-shadow: none; }
-.trail-c .ll-stone.post-done { background: #f5b400; border-color: #d99a00; }
-.trail-c .ll-stone.post-done .ll-in-score { color: #3d2c00; }
-.trail-c .ll-stone.post-locked { width: 40px; height: 40px; font-size: 17px; opacity: .55; }
-.trail-c .ll-stone-label { background: none !important; padding: 0 !important; font-size: 12.5px; max-width: 104px !important;
-  text-shadow: 0 0 4px #fff, 0 0 8px #fff, 0 0 12px rgba(255,255,255,.9); }
-.trail-c .ll-here { background: #f5b400; color: #3d2c00; }
-.ll-trail-line path { fill: none; stroke-linecap: round; stroke-linejoin: round; }
-/* C: a first try that needed a Skill Builder is gold, not green; the Skill Builder stop after it carries the pass */
-.trail-c .ll-stone.first-try { background: #f0b429; border-color: #d99a00; }
-.trail-c .ll-stone.first-try .ll-in-score { color: #3d2c00; }
-.trail-c .ll-in-score.now { color: #b07800; }
+.ll-trail-line path { fill: none; }
+/* B · stat tiles, like Home's At a Glance */
+.ll-tiles { display: inline-flex; gap: 8px; margin-left: 6px; }
+.ll-tile { display: flex; flex-direction: column; align-items: flex-start; gap: 0; background: rgba(255,255,255,.92); border: 1px solid #dbe5ee; border-radius: 12px; padding: 4px 12px 5px; min-width: 76px; box-shadow: 0 1px 3px rgba(13,47,85,.06); }
+.ll-tile small { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.ll-tile b { font-size: 18px; font-weight: 900; color: #0d2f55; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.ll-tile.grow { background: #e6f6ee; border-color: #a7dcc1; }
+.ll-tile.grow b { color: #1d8a5b; }
+.ll-tile.grow.down { background: #fdecec; border-color: #f2b8b5; } .ll-tile.grow.down b { color: #c0392b; }
+.ll-tile.grow.wait { background: rgba(255,255,255,.92); border-color: #dbe5ee; } .ll-tile.grow.wait b { color: var(--muted); }
+/* C · a growth bar from the pre-test to now */
+.ll-gbar { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,.88); border-radius: 12px; padding: 7px 12px; font-size: 13px; font-weight: 700; color: #3c5a78; }
+.ll-gbar-k { white-space: nowrap; } .ll-gbar-k b { color: #0d2f55; font-weight: 900; }
+.ll-gbar-track { position: relative; flex: 1; height: 10px; border-radius: 999px; background: #e3ebf2; }
+.ll-gbar-fill { position: absolute; top: 0; bottom: 0; border-radius: 999px; background: linear-gradient(90deg, #8fd3b0, #2f9e6f); }
+.ll-gbar-fill.down { background: #e88b85; }
+.ll-gbar-dot { position: absolute; top: 50%; width: 16px; height: 16px; border-radius: 50%; transform: translate(-50%, -50%); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(13,47,85,.3); }
+.ll-gbar-dot.pre { background: #5c7a99; }
+.ll-gbar-dot.now { background: #2f9e6f; }
+.head-b .ll-trail, .head-c .ll-trail { min-height: 156px; }
+.head-b .ll-head, .head-c .ll-head { margin-bottom: 2px; }
+.head-c .ll-gbar { padding: 5px 12px; }
+.ll-a.head-b, .ll-a.head-c { gap: 6px; }

@@ -285,7 +285,7 @@ function BridgeBanner({ level }) {
 function GoalBanner({ me, classFocus }) {
   const t = useT()
   const say = useSay()
-  // read-only on Home — the goal is set and managed in a writing conference
+  // read-only on Home — the goal is picked, changed and reached on Data & Goals
   const half = { flex: '1 1 320px', minWidth: 0, display: 'flex', alignItems: 'center', gap: 14, padding: '4px 2px' }
   return (
     <div className="card gold-edge" style={{ padding: '14px 20px', display: 'flex', alignItems: 'stretch', gap: 20, flexWrap: 'wrap',
@@ -301,7 +301,7 @@ function GoalBanner({ me, classFocus }) {
           <div style={{ minWidth: 0 }}>
             <div className="eyebrow">{t('My goal')}</div>
             <div style={{ fontSize: 15, fontWeight: 700 }}>
-              <Glossed text={say("You'll name your next goal in a writing conference with your teacher.")} />
+              <Glossed text={say('Pick one thing to focus on in Data & Goals.')} />
             </div>
           </div>
         )}

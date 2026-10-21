@@ -2442,30 +2442,22 @@ body { font-size: 16px; }
 .dg-stats.four .dg-stat-icon { width: 36px; height: 36px; border-radius: 11px; font-size: 18px; }
 .dg-stats.four .dg-stat .v { font-size: 26px; }
 .dg-stat.gold { --tint: #fff6da; --edge: #f2d98e; --ink2: #a37400; }
-.dg-confer { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; padding: 14px 18px; border-radius: 18px; color: #fff;
-  background: linear-gradient(110deg, #0e5a7e, #0d2f55 70%); box-shadow: 0 6px 18px rgba(13,47,85,.18); }
-.dg-confer-icon { width: 44px; height: 44px; flex-shrink: 0; display: grid; place-items: center; border-radius: 14px; background: rgba(255,255,255,.14); font-size: 22px; }
-.dg-confer-words { flex: 1; min-width: 240px; display: flex; flex-direction: column; gap: 2px; }
-.dg-confer-words b { font-size: 16px; }
-.dg-confer-words span { font-size: 13.5px; color: rgba(255,255,255,.85); }
-.dg-confer .btn { background: #fff; color: #0d2f55; border-color: #fff; }
 @media (max-width: 1000px) { .dg-top { grid-template-columns: 1fr; } .dg-stats.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-/* goals and conferences: the prototype switches, the locked bar, the last conference */
-.dg-proto { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; font-size: 12px; font-weight: 800; color: var(--muted); }
-.dg-proto > span { text-transform: uppercase; letter-spacing: .06em; }
-.dg-proto-seg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 999px; background: #fff; border: 1px dashed #b9c8d4; }
-.dg-proto-seg button { padding: 5px 11px; border: 0; border-radius: 999px; background: transparent; font: inherit; font-size: 12px; font-weight: 800; color: var(--muted); cursor: pointer; }
-.dg-proto-seg button.on { background: #5b6b7c; color: #fff; }
 .dg-goal-note { font-size: 13.5px; font-weight: 600; color: var(--muted); }
-.dg-confer.locked { background: #eef3f7; color: #0d2f55; box-shadow: none; border: 1.5px dashed #b9c8d4; }
-.dg-confer.locked .dg-confer-icon { background: #fff; }
-.dg-confer.locked .dg-confer-words span { color: var(--muted); }
-.dg-confer.locked .btn.ghost { background: #fff; color: #0d2f55; border-color: #b9c8d4; }
-.dg-lastconf { position: relative; width: min(560px, 100%); padding: 24px 28px; display: flex; flex-direction: column; gap: 8px; }
-.dg-lastconf h2 { margin: 0 40px 6px 0; font-size: 22px; color: #0d2f55; }
-.dg-lastconf dl { margin: 0; display: grid; gap: 4px; }
-.dg-lastconf dt { margin-top: 8px; font-size: 12px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--teal); }
-.dg-lastconf dd { margin: 0; font-size: 15px; line-height: 1.5; color: #33506b; }
+/* the goal picker (2026-10-21: back to picking, reaching, or writing one in; no conference) */
+.dg-pick { padding: 20px 22px; }
+.dg-pick-note { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+.dg-pick-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.dg-pick-opt { display: flex; gap: 12px; align-items: center; text-align: left; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; font: inherit; color: var(--ink); }
+.dg-pick-opt:hover { border-color: var(--navy); }
+.dg-pick-opt.on { border: 2px solid var(--navy); background: #eef4f7; }
+.dg-pick-icon { font-size: 24px; flex-shrink: 0; }
+.dg-pick-text { display: block; font-weight: 600; font-size: 14px; }
+.dg-pick-trait { display: block; font-size: 11px; color: var(--link); font-weight: 700; margin-top: 2px; }
+.dg-pick-own { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; padding: 12px 14px; border-radius: 12px; border: 1px dashed var(--line); flex-wrap: wrap; }
+.dg-pick-own > span { font-size: 22px; }
+.dg-pick-own input { flex: 1; min-width: 180px; padding: 9px 12px; border-radius: 9px; border: 1px solid var(--line); font: inherit; font-size: 14px; }
+@media (max-width: 640px) { .dg-pick-grid { grid-template-columns: 1fr; } }
 
 /* ---- Second grade (2026-10-14: 3rd grade moved up to 3-5; grade 2 gets its own supports) ---- */
 .g2-read { position: fixed; right: 16px; bottom: 14px; z-index: 30; display: inline-flex; align-items: center; gap: 6px; padding: 9px 15px; border-radius: 999px;

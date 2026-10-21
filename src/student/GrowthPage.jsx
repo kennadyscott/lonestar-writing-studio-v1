@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { api, TRAIT_LABELS } from '../lib/api.js'
 import { scoreSubmission } from '../lib/writingScore.js'
 import { useT, useLocale } from '../lib/i18n/index.jsx'
@@ -9,6 +9,14 @@ import { isGrade2, useBandValue } from '../lib/gradeBand.js'
  * Student "Data & Goals" and "Share Wall" tabs — rendered inside the home page's
  * three-tab switch (Assignments · Data & Goals · Share Wall).
  */
+
+const PRESET_GOALS = [
+  { id: 'g_ideas', trait: 'ideas', icon: '💡', text: 'Back up my opinion with strong, specific reasons' },
+  { id: 'g_org', trait: 'organization', icon: '🧭', text: 'Organize my writing with a clear beginning, middle, and end' },
+  { id: 'g_word', trait: 'word_choice', icon: '🎨', text: 'Swap plain words for exact, vivid ones' },
+  { id: 'g_voice', trait: 'voice', icon: '🎤', text: 'Let my voice come through and write to my reader' },
+  { id: 'g_fluency', trait: 'sentence_fluency', icon: '🌊', text: 'Vary my sentences so my writing flows when read aloud' },
+]
 
 const fmtDate = (d, locale = 'en-US') => d ? new Date(d).toLocaleDateString(locale, { month: 'short', day: 'numeric' }) : ''
 
@@ -100,428 +108,6 @@ function EcrCombined({ org, conv }) {
   )
 }
 
-/* ================= Writing conference: the RDTL protocol =================
- * Research → Decide → Teach → Link. A 4–7 minute teacher-and-writer conference
- * that ends by naming the next goal, so the goal is set WITH the teacher rather
- * than picked off a list. Teaching the writer, not fixing the draft.
- */
-const RDTL_STEPS = [
-  {
-    key: 'research', letter: 'R', label: 'Research', seconds: 120, time: '1–2 min', icon: '🔍',
-    aim: 'Tell your teacher what you are working on.',
-    moves: [
-      'Say what you are working on as a writer today.',
-      'Read a little of your writing out loud.',
-      'Say which part is giving you trouble.',
-      'Your teacher will ask questions — think out loud, there is no wrong answer.',
-    ],
-  },
-  {
-    key: 'decide', letter: 'D', label: 'Decide', seconds: 30, time: '30 sec', icon: '🎯',
-    aim: 'Hear one thing you did well, then pick one thing to learn.',
-    moves: [
-      'Your teacher names something you already did well — write it down so you remember it.',
-      'Together you pick ONE thing to work on today.',
-      'Just one. One thing you can actually use in your next piece.',
-    ],
-  },
-  {
-    key: 'teach', letter: 'T', label: 'Teach', seconds: 120, time: '2 min', icon: '🧑‍🏫',
-    aim: 'Watch how it works, then try it in your own writing.',
-    moves: [
-      'Your teacher shows you the strategy using an example.',
-      'Say the strategy back in your own words.',
-      'Try it right now in your own draft — you keep the pen.',
-    ],
-  },
-  {
-    key: 'link', letter: 'L', label: 'Link', seconds: 30, time: '30 sec', icon: '🔗',
-    aim: 'Turn what you learned into your goal.',
-    moves: [
-      'This is not just for today — you will use it every time you write.',
-      'Say your goal out loud in your own words so it sticks.',
-    ],
-  },
-]
-
-const mmss = (n) => `${Math.floor(n / 60)}:${String(n % 60).padStart(2, '0')}`
-
-/* One clock for the whole conference — it counts up and never stops, so the
- * teacher can see how long they have been sitting with this writer. */
-function MeetingClock() {
-  const t = useT()
-  const [secs, setSecs] = useState(0)
-  useEffect(() => {
-    const id = setInterval(() => setSecs((v) => v + 1), 1000)
-    return () => clearInterval(id)
-  }, [])
-  const long = secs >= 420 // the protocol asks for 4–7 minutes
-  return (
-    <span title={t('Time in this conference')}
-      style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 999, padding: '5px 13px', fontSize: 13, fontWeight: 800,
-        fontVariantNumeric: 'tabular-nums', background: long ? 'rgba(245,197,66,.2)' : 'rgba(255,255,255,.14)',
-        color: long ? '#f5c542' : '#a8dff5', border: `1px solid ${long ? 'rgba(245,197,66,.5)' : 'rgba(255,255,255,.22)'}` }}>
-      ⏱ {mmss(secs)}
-    </span>
-  )
-}
-
-function ConferenceEvidence({ state, me }) {
-  const t = useT()
-  const say = useSay()
-  const [openId, setOpenId] = useState(null)
-  const anchors = state.writingData?.ELA?.scr || []
-  const mine = state.submissions
-    .filter((s) => s.studentId === me.id && !s.isPeerRevision)
-    .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
-    .filter(({ a }) => a && !['free', 'quick'].includes(a.genre))
-  const rows = mine.filter(({ s }) => s.completedAt).sort((x, y) => (x.s.completedAt < y.s.completedAt ? 1 : -1))
-  const drafting = mine.filter(({ s }) => !s.completedAt)
-  const freeWrites = state.submissions
-    .filter((s) => s.studentId === me.id && !s.isPeerRevision)
-    .map((s) => ({ s, a: state.assignments.find((x) => x.id === s.assignmentId) }))
-    .filter(({ a }) => a && a.genre === 'free')
-    .sort((x, y) => ((y.s.completedAt || y.s.drafts[y.s.drafts.length - 1].createdAt) > (x.s.completedAt || x.s.drafts[x.s.drafts.length - 1].createdAt) ? 1 : -1))
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, height: '100%', overflowY: 'auto', paddingRight: 4 }}>
-      <div>
-        <div className="eyebrow" style={{ color: '#0f97c2' }}>{t('What the writing shows')}</div>
-        <div style={{ fontSize: 12.5, color: 'var(--muted)', marginTop: 2 }}><Directions text="Look at this together — it is the evidence for the conversation." /></div>
-      </div>
-
-      {/* the anchors, small enough to glance at mid-conversation */}
-      <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 14px' }}>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}><Glossed text={t('SCR · STRATEGY ANCHORS')} /></div>
-        {anchors.map((r) => (
-          <div key={r.k} style={{ display: 'flex', alignItems: 'center', gap: 9, marginTop: 6 }}>
-            <span style={{ width: 20, height: 20, borderRadius: 6, flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 800, color: '#fff', background: '#16386b' }}>{r.k}</span>
-            <span style={{ fontSize: 12, fontWeight: 700, width: 52, color: 'var(--ink)' }}>{t(r.label)}</span>
-            <div style={{ flex: 1, height: 8, background: '#e3ecf2', borderRadius: 5 }}>
-              <div style={{ height: '100%', width: `${r.pct}%`, borderRadius: 5, background: r.pct >= 75 ? 'var(--good)' : r.pct >= 50 ? '#e0a51c' : '#c0392b' }} />
-            </div>
-            <b style={{ fontSize: 11.5, width: 34, textAlign: 'right', color: r.pct >= 75 ? 'var(--good)' : r.pct >= 50 ? '#a37400' : '#c0392b' }}>{r.pct}%</b>
-          </div>
-        ))}
-      </div>
-
-      {drafting.length > 0 && (
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#a37400', marginBottom: 8 }}>
-            {t('IN PROGRESS RIGHT NOW · {n}', { n: drafting.length })}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {drafting.map(({ s, a }) => {
-              const draft = s.drafts[s.drafts.length - 1]
-              const open = openId === s.id
-              const wc = (draft.content || '').trim().split(/\s+/).filter(Boolean).length
-              return (
-                <div key={s.id} style={{ border: '1.5px solid #f0d9a8', borderRadius: 12, overflow: 'hidden', background: '#fffdf7' }}>
-                  <button onClick={() => setOpenId(open ? null : s.id)}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: 'transparent' }}>
-                    <span style={{ fontSize: 9.5, fontWeight: 800, color: '#fff', background: a.format === 'ECR' ? 'var(--ecr)' : 'var(--scr)', padding: '2px 7px', borderRadius: 6 }}>{a.format || 'SCR'}</span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#a37400', whiteSpace: 'nowrap' }}>{t('Draft {n}', { n: draft.n })} · {t('{n}w', { n: wc })}</span>
-                    <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
-                  </button>
-                  {open && (
-                    <div style={{ padding: '2px 12px 12px', borderTop: '1px solid #f0d9a8' }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>{t('WHERE THE DRAFT IS NOW')}</div>
-                      <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 170, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
-                        {(draft.content || '').trim() || <Glossed text={say('Nothing written yet — this is a good place to start the conference.')} />}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      <div>
-        <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: 'var(--muted)', marginBottom: 8 }}>
-          {t('FINISHED WRITING')}{rows.length ? ` · ${rows.length}` : ''}
-        </div>
-        {rows.length === 0 && (
-          <div style={{ fontSize: 12.5, color: 'var(--muted)', background: '#f4f8fb', borderRadius: 10, padding: '12px 14px' }}>
-            <Glossed text={say('Nothing turned in yet — talk about what is in progress instead.')} />
-          </div>
-        )}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {rows.map(({ s, a }) => {
-            const sc = scoreSubmission(a, s)
-            const open = openId === s.id
-            const tone = sc.pct >= 75 ? 'var(--good)' : sc.pct >= 50 ? '#a37400' : '#c0392b'
-            return (
-              <div key={s.id} style={{ border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', background: '#fff' }}>
-                <button onClick={() => setOpenId(open ? null : s.id)}
-                  style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: open ? '#f4f8fb' : '#fff' }}>
-                  <span style={{ fontSize: 9.5, fontWeight: 800, color: '#fff', background: a.format === 'ECR' ? 'var(--ecr)' : 'var(--scr)', padding: '2px 7px', borderRadius: 6 }}>{a.format || 'SCR'}</span>
-                  <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: tone, whiteSpace: 'nowrap' }}>{sc.rubricScore}/{sc.rubricMax} · {sc.pct}%</span>
-                  <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
-                </button>
-                {open && (
-                  <div style={{ padding: '2px 12px 12px', borderTop: '1px solid var(--line)' }}>
-                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>{t('WHAT THEY WROTE')}</div>
-                    <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fbfdfe', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 150, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
-                      {sc.questions[0].answer.trim() || t('No response recorded.')}
-                    </div>
-                    <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '11px 0 5px' }}>{sc.strategyName}</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                      {sc.questions[0].anchors.map((an) => (
-                        <div key={an.key} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 12, lineHeight: 1.4 }}>
-                          <span style={{ width: 17, height: 17, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 800, color: '#fff', background: an.hit ? 'var(--good)' : '#c0392b' }}>{an.hit ? '✓' : '✕'}</span>
-                          <span style={{ color: an.hit ? 'var(--muted)' : '#33566e', fontWeight: an.hit ? 600 : 700 }}>{t(an.label)}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {freeWrites.length > 0 && (
-        <div>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#3b5fb8', marginBottom: 8 }}>
-            {t('THEIR OWN FREE WRITES · {n}', { n: freeWrites.length })}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {freeWrites.map(({ s, a }) => {
-              const draft = s.drafts[s.drafts.length - 1]
-              const open = openId === s.id
-              const wc = (draft.content || '').trim().split(/\s+/).filter(Boolean).length
-              return (
-                <div key={s.id} style={{ border: '1px solid #d6dffa', borderRadius: 12, overflow: 'hidden', background: '#fbfcff' }}>
-                  <button onClick={() => setOpenId(open ? null : s.id)}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', textAlign: 'left', cursor: 'pointer', background: 'transparent' }}>
-                    <span style={{ fontSize: 14 }}>{s.published ? '🌟' : '✒️'}</span>
-                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, lineHeight: 1.25 }}>{a.title}</span>
-                    <span style={{ fontSize: 11.5, fontWeight: 800, color: '#3b5fb8', whiteSpace: 'nowrap' }}>
-                      {s.published ? t('Published') : t('Draft {n}', { n: draft.n })} · {t('{n}w', { n: wc })}
-                    </span>
-                    <span style={{ fontSize: 10, color: 'var(--muted)' }}>{open ? '▲' : '▼'}</span>
-                  </button>
-                  {open && (
-                    <div style={{ padding: '2px 12px 12px', borderTop: '1px solid #d6dffa' }}>
-                      <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .6, color: 'var(--muted)', margin: '10px 0 5px' }}>
-                        {s.published ? t('THE PIECE THEY PUBLISHED') : t('WHERE THIS ONE STANDS')}
-                      </div>
-                      <div style={{ fontSize: 12.5, lineHeight: 1.55, color: '#33566e', background: '#fff', border: '1px solid var(--line)', borderRadius: 9, padding: '9px 11px', maxHeight: 170, overflowY: 'auto', whiteSpace: 'pre-wrap' }}>
-                        {(draft.content || '').trim() || t('Started, but nothing written yet.')}
-                      </div>
-                      <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 7 }}>
-                        <Glossed text={say('Their own choice of topic — no rubric on this one.')} />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {me.goal && (
-        <div style={{ background: '#eef6f9', borderRadius: 12, padding: '11px 14px' }}>
-          <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: .8, color: '#0f97c2' }}>{t('THE GOAL WE SET LAST TIME')}</div>
-          <div style={{ fontSize: 13, fontWeight: 700, marginTop: 3, lineHeight: 1.4 }}>{t(me.goal.text)}</div>
-          {me.goal.teachingPoint && <div style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 3 }}>{t('Taught as:')} {me.goal.teachingPoint}</div>}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function ConferenceProtocol({ teacher, state, me, onClose, onSetGoal }) {
-  const t = useT()
-  const say = useSay()
-  const locale = useLocale()
-  const [i, setI] = useState(0)
-  const [notes, setNotes] = useState({ working: '', strength: '', teachingPoint: '', strategy: '', tried: false })
-  const [goalText, setGoalText] = useState('')
-  const [trait, setTrait] = useState('')
-  const [saving, setSaving] = useState(false)
-  const step = RDTL_STEPS[i]
-  const set = (k) => (e) => setNotes((n) => ({ ...n, [k]: e.target.value }))
-
-  // the goal starts life as the teaching point — the writer can reword it
-  useEffect(() => {
-    if (i === 3 && !goalText && notes.teachingPoint.trim()) setGoalText(notes.teachingPoint.trim())
-  }, [i])
-
-  async function finish() {
-    if (!goalText.trim()) return
-    setSaving(true)
-    try {
-      await onSetGoal({
-        text: goalText.trim(), trait: trait || null, source: 'conference',
-        strength: notes.strength.trim(), teachingPoint: notes.teachingPoint.trim(), strategy: notes.strategy.trim(),
-      })
-    } finally { setSaving(false) }
-  }
-
-  const field = { width: '100%', padding: '10px 12px', borderRadius: 10, border: '1px solid var(--line)', fontFamily: 'inherit', fontSize: 14, marginTop: 6 }
-  const lbl = { fontSize: 12, fontWeight: 800, letterSpacing: .6, textTransform: 'uppercase', color: '#16386b' }
-
-  return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.55)', display: 'grid', placeItems: 'center', zIndex: 70, padding: 16 }} onClick={onClose}>
-      <div className="card" style={{ width: 1180, maxWidth: '97vw', height: '92vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: 0 }} onClick={(e) => e.stopPropagation()}>
-
-        {/* header */}
-        <div style={{ padding: '18px 22px 14px', background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 62%,#0e2748 100%)', color: '#fff' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ fontSize: 22 }}>🤝</span>
-            <div style={{ flex: 1 }}>
-              <b style={{ fontSize: 18 }}>{t('Writing Conference')}</b>
-              <div style={{ fontSize: 12.5, color: '#a8dff5', fontWeight: 700, marginTop: 2 }}>
-                {t('You and {teacher}', { teacher })} · {t('about 5 minutes')} · {t('Research')} · {t('Decide')} · {t('Teach')} · {t('Link')}
-              </div>
-            </div>
-            <MeetingClock />
-            <button onClick={onClose} style={{ color: '#a8dff5', fontSize: 22, background: 'none', cursor: 'pointer', marginLeft: 4 }}>×</button>
-          </div>
-
-          {/* step rail */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 14 }}>
-            {RDTL_STEPS.map((st, idx) => {
-              const done = idx < i, cur = idx === i
-              return (
-                <React.Fragment key={st.key}>
-                  {idx > 0 && <span style={{ flex: 1, height: 3, borderRadius: 3, background: done || cur ? 'linear-gradient(90deg,#f5c542,#e89a00)' : 'rgba(255,255,255,.22)' }} />}
-                  <button onClick={() => setI(idx)} title={t(st.label)}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 7, borderRadius: 999, padding: '6px 13px', cursor: 'pointer',
-                      background: cur ? 'linear-gradient(120deg,#f5c542,#e89a00)' : done ? 'rgba(255,255,255,.9)' : 'rgba(255,255,255,.14)',
-                      color: cur ? '#3d2c00' : done ? '#16386b' : 'rgba(255,255,255,.8)', fontWeight: 800, fontSize: 12.5,
-                      border: cur ? '1.5px solid rgba(255,235,170,.9)' : '1.5px solid transparent' }}>
-                    <span style={{ fontSize: 13 }}>{done ? '✓' : st.letter}</span>{t(st.label)}
-                  </button>
-                </React.Fragment>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* evidence on the left, the protocol on the right */}
-        <div className="conf-split" style={{ flex: 1, minHeight: 0 }}>
-          <div style={{ borderRight: '1px solid var(--line)', background: '#fbfdfe', padding: '16px 18px', minHeight: 0, overflow: 'hidden' }}>
-            <ConferenceEvidence state={state} me={me} />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-        {/* body */}
-        <div style={{ padding: '20px 22px 8px', overflowY: 'auto', flex: 1, minHeight: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 22 }}>{step.icon}</span>
-            <b style={{ fontSize: 17 }}>{t(step.label)}</b>
-            <span className="pill" style={{ background: '#eef4f8', color: '#16386b' }}>{t('about {time}', { time: t(step.time) })}</span>
-          </div>
-          {/* RDTL_STEPS stays English at module scope; the level is applied here, at the render site */}
-          <div style={{ fontSize: 14, color: 'var(--muted)', fontWeight: 700, margin: '6px 0 12px' }}><Directions text={step.aim} /></div>
-
-          <div style={{ background: '#f4f8fb', borderRadius: 12, padding: '12px 16px', marginBottom: 16 }}>
-            {step.moves.map((m, mi) => (
-              <div key={mi} style={{ display: 'flex', gap: 9, alignItems: 'flex-start', fontSize: 13.5, lineHeight: 1.5, marginTop: mi ? 7 : 0 }}>
-                <span style={{ color: CONF_CYAN, fontWeight: 800 }}>›</span><span><Glossed text={say(m)} /></span>
-              </div>
-            ))}
-            {/* one Listen for the whole list of moves, not one per line */}
-            <Speak text={step.moves.map((m) => say(m)).join(' ')} style={{ marginTop: 10 }} />
-          </div>
-
-          {step.key === 'research' && (
-            <label style={{ display: 'block' }}>
-              <span style={lbl}>{t('What am I working on?')}</span>
-              <textarea value={notes.working} onChange={set('working')} rows={3} placeholder={t('In your own words…')} style={{ ...field, resize: 'vertical' }} />
-            </label>
-          )}
-
-          {step.key === 'decide' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <label style={{ display: 'block' }}>
-                <span style={lbl}>{t('What I already did well')}</span>
-                <input value={notes.strength} onChange={set('strength')} placeholder={t('I backed up my reason with a detail from the text…')} style={field} />
-              </label>
-              <label style={{ display: 'block' }}>
-                <span style={lbl}>{t('The one thing I am learning today')}</span>
-                <input value={notes.teachingPoint} onChange={set('teachingPoint')} placeholder={t('Say what the other side thinks before I answer it.')} style={field} />
-              </label>
-            </div>
-          )}
-
-          {step.key === 'teach' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <label style={{ display: 'block' }}>
-                <span style={lbl}>{t('The strategy I am trying')}</span>
-                <input value={notes.strategy} onChange={set('strategy')} placeholder={t('We used "The Big Move," paragraph 3, as our example')} style={field} />
-              </label>
-              <label style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 14, fontWeight: 700, background: '#f4f8fb', borderRadius: 10, padding: '11px 14px', cursor: 'pointer' }}>
-                <input type="checkbox" checked={notes.tried} onChange={(e) => setNotes((n) => ({ ...n, tried: e.target.checked }))} style={{ width: 17, height: 17 }} />
-                {t('I tried it in my own writing')}
-              </label>
-            </div>
-          )}
-
-          {step.key === 'link' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              {(notes.strength || notes.teachingPoint) && (
-                <div style={{ background: '#eef6f9', borderRadius: 12, padding: '12px 16px', fontSize: 13.5, lineHeight: 1.55 }}>
-                  {notes.strength && <div><b>{t('What I did well:')}</b> {notes.strength}</div>}
-                  {notes.teachingPoint && <div style={{ marginTop: 4 }}><b>{t('What I am learning:')}</b> {notes.teachingPoint}</div>}
-                </div>
-              )}
-              <label style={{ display: 'block' }}>
-                <span style={lbl}>{t('My goal, in my own words')}</span>
-                <textarea value={goalText} onChange={(e) => setGoalText(e.target.value)} rows={2} maxLength={140}
-                  placeholder={t('Say it the way you would say it to a friend…')} style={{ ...field, resize: 'vertical' }} />
-                <span style={{ fontSize: 11.5, color: 'var(--muted)', fontWeight: 700 }}>{goalText.length}/140</span>
-              </label>
-              <label style={{ display: 'block' }}>
-                <span style={lbl}>{t('Which part of writing is this? (optional)')}</span>
-                <select value={trait} onChange={(e) => setTrait(e.target.value)} style={{ ...field, background: '#fff' }}>
-                  <option value="">{t('Skip this — just my goal')}</option>
-                  {Object.entries(TRAIT_LABELS).map(([k, v]) => <option key={k} value={k}>{t(v)}</option>)}
-                </select>
-              </label>
-            </div>
-          )}
-        </div>
-
-        {/* footer */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '14px 22px 20px' }}>
-          <button onClick={() => (i === 0 ? onClose() : setI(i - 1))}
-            style={{ padding: '11px 18px', borderRadius: 11, fontWeight: 800, fontSize: 13.5, color: 'var(--muted)', background: '#eef3f6', cursor: 'pointer' }}>
-            {i === 0 ? t('Cancel') : t('← Back')}
-          </button>
-          <span style={{ flex: 1, fontSize: 12, color: 'var(--muted)', fontWeight: 700 }}>{say('Step {n} of 4 · work through it together', { n: i + 1 })}</span>
-          {i < 3 ? (
-            <button onClick={() => setI(i + 1)}
-              style={{ padding: '12px 24px', borderRadius: 12, fontWeight: 800, fontSize: 14, color: '#fff', cursor: 'pointer',
-                background: 'linear-gradient(180deg,#2c5a97 0%,#16386b 58%,#0e2748 100%)', boxShadow: 'inset 0 1.5px 0 rgba(255,255,255,.28), 0 5px 14px rgba(53,195,232,.42)' }}>
-              {t('Next: {step} →', { step: t(RDTL_STEPS[i + 1].label) })}
-            </button>
-          ) : (
-            <button onClick={finish} disabled={!goalText.trim() || saving}
-              style={{ padding: '12px 24px', borderRadius: 12, fontWeight: 800, fontSize: 14, cursor: goalText.trim() ? 'pointer' : 'default',
-                color: goalText.trim() ? '#3d2c00' : '#9db0c0', background: goalText.trim() ? 'linear-gradient(120deg,#f5c542,#e89a00)' : '#eef0f6',
-                boxShadow: goalText.trim() ? '0 0 16px rgba(245,180,0,.5)' : 'none' }}>
-              {t('🎯 This is my goal')}
-            </button>
-          )}
-        </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const CONF_CYAN = '#0f97c2'
-
 /* ================= Data & Goals tab ================= */
 export function DataGoalsTab({ state, me, onChange, onReview }) {
   const t = useT()
@@ -529,27 +115,21 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   const locale = useLocale() // was referenced below but never declared — crashed as soon as a goal existed
   const subs = state.submissions.filter((s) => s.studentId === me.id)
   const mp = state.monthlyProgress
-  // Goals and conferences (Kennady, 2026-10-14): "The conference is locked until the teacher unlocks it on their end. If it isn't
-  // time for a new conference, they can 'see my last conference'. I also don't want them to be able to change their goal until
-  // they reach it. And they should build their first goal with their teacher during their first conference." "I want every goal
-  // to come from a conference": there is no goal picker. Two prototype switches show each case (the teacher's side sets these).
-  const [confOpen, setConfOpen] = useState(() => { try { return localStorage.getItem('lscr.confOpen') === '1' } catch { return false } })
-  const [demoFirst, setDemoFirst] = useState(() => { try { return localStorage.getItem('lscr.demoFirstConf') === '1' } catch { return false } })
-  const setOpen = (v) => { setConfOpen(v); try { localStorage.setItem('lscr.confOpen', v ? '1' : '0') } catch { /* fine */ } }
-  const setFirst = (v) => { setDemoFirst(v); try { localStorage.setItem('lscr.demoFirstConf', v ? '1' : '0') } catch { /* fine */ } }
-  const [lastConf, setLastConf] = useState(false)
-  const goal = demoFirst ? null : me.goal
-  const history = demoFirst ? [] : (me.goalHistory || [])
-  const firstTime = !goal && !history.length
+  // Goals (Kennady, 2026-10-21): "remove the writer's conference and just make the goal back to what it was - they can pick one,
+  // say they reached it, or write one in." The conference, its prototype switches and "my last conference" are gone.
+  const [picking, setPicking] = useState(false)
+  const [custom, setCustom] = useState('')
+  const goal = me.goal
+  const history = me.goalHistory || []
   const [toast, setToast] = useState(null)
   const [mpTab, setMpTab] = useState('scr')
   const band = useBandValue()
-  const [conferring, setConferring] = useState(false)
   // The page is version C (Kennady, 2026-10-14: "I like version C - that's perfect"): My goal beside At a Glance (with a count of
-  // goals reached and their trophies), Conference with my teacher as its own bar, then the year's chart, RACE and the growth story.
+  // goals reached and their trophies), then the year's chart, RACE and the growth story.
 
+  async function choose(g) { await api.setGoal(g); setPicking(false); onChange && onChange() }
+  async function setCustomGoal() { if (!custom.trim()) return; await api.setGoal({ text: custom.trim(), trait: null }); setCustom(''); setPicking(false); onChange && onChange() }
   async function achieve() { const r = await api.achieveGoal(); setToast(r.coins); onChange && onChange() }
-  async function conferenceGoal(payload) { await api.setGoal(payload); setConferring(false); if (demoFirst) setFirst(false); onChange && onChange() }
 
   const revisions = subs.reduce((a, s) => a + Math.max(0, s.drafts.length - 1), 0)
   const finished = subs.filter((s) => s.completedAt).length
@@ -588,44 +168,12 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
           <h2 style={{ margin: '6px 0' }}>{t('Goal reached!')}</h2>
           <p style={{ color: 'var(--muted)', margin: '0 0 6px' }}>{say('Amazing work sticking with it. You earned')}</p>
           <div className="coin" style={{ fontSize: 22, justifyContent: 'center' }}><span className="disc" style={{ width: 20, height: 20 }} />+{toast}</div>
-          <p style={{ color: 'var(--muted)', margin: '10px 0 0', fontSize: 14 }}>{say('Your next goal will come from your next conference.')}</p>
-          <button className="btn" style={{ marginTop: 14 }} onClick={() => setToast(null)}>{t('Done')}</button>
+          <button className="btn" style={{ marginTop: 14 }} onClick={() => { setToast(null); setPicking(true) }}>{t('Pick my next goal')}</button>
         </div>
       </div>
     )}
-    {conferring && <ConferenceProtocol teacher={state.teacher?.name || t('your teacher')} state={state} me={me} onClose={() => setConferring(false)} onSetGoal={conferenceGoal} />}
   </>
 
-  const proto = (
-    <div className="dg-proto" role="group" aria-label={t('Prototype controls')}>
-      <span>{t('Prototype')}</span>
-      <div className="dg-proto-seg">
-        <button type="button" aria-pressed={!confOpen} className={!confOpen ? 'on' : ''} onClick={() => setOpen(false)}>🔒 {t('Locked')}</button>
-        <button type="button" aria-pressed={confOpen} className={confOpen ? 'on' : ''} onClick={() => setOpen(true)}>🔓 {t('Open')}</button>
-      </div>
-      <div className="dg-proto-seg">
-        <button type="button" aria-pressed={demoFirst} className={demoFirst ? 'on' : ''} onClick={() => setFirst(true)}>{t('First conference')}</button>
-        <button type="button" aria-pressed={!demoFirst} className={!demoFirst ? 'on' : ''} onClick={() => setFirst(false)}>{t('Has a goal')}</button>
-      </div>
-    </div>
-  )
-  // what the last conference saved with the goal it set (sample words stand in where the demo goal has none)
-  const lastSource = goal?.source === 'conference' ? goal : history.slice().reverse().find((g) => g.source === 'conference') || goal || history[history.length - 1]
-  const lastCard = lastConf && lastSource && (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.45)', display: 'grid', placeItems: 'center', zIndex: 55, padding: 16 }} onClick={() => setLastConf(false)}>
-      <div className="card dg-lastconf" role="dialog" aria-modal="true" aria-labelledby="dg-lastconf-title" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="sw2-reader-x" onClick={() => setLastConf(false)} aria-label={t('Close')}>×</button>
-        <span className="dg-kicker">🤝 {t('My last conference')} · {fmtDate(lastSource.setOn, locale)}</span>
-        <h2 id="dg-lastconf-title">{t('With {teacher}', { teacher: state.teacher?.name || t('your teacher') })}</h2>
-        <dl>
-          <dt>{t('What I did well')}</dt><dd>{lastSource.strength || say('You state your opinion clearly, right at the start.')}</dd>
-          <dt>{t('What we worked on')}</dt><dd>{lastSource.teachingPoint || say('Giving a real reason, then backing it up with an example.')}</dd>
-          <dt>{t('My strategy')}</dt><dd>{lastSource.strategy || say('Use "because" and "for example" in each body paragraph.')}</dd>
-          <dt>{t('The goal we set')}</dt><dd><b>{t(lastSource.text)}</b></dd>
-        </dl>
-      </div>
-    </div>
-  )
 
   const d = state.writingData?.ELA
   const series = mpTab === 'scr' ? mp.scr : mp.ecr
@@ -637,22 +185,19 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
   return (
     <div className="dg-b">
       {modals}
-      {lastCard}
-      {proto}
 
         <div className="dg-top">
           <div className="card dg-goal c">
             <span className="dg-kicker">🎯 {t('My goal')}</span>
             {goal ? <>
               <b className="dg-goal-text">{t(goal.text)}</b>
-              {/* no changing it until it is reached */}
-              <div className="dg-goal-acts"><button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button></div>
-            </> : firstTime ? <>
-              <b className="dg-goal-text">{t("You'll build your first goal with your teacher.")}</b>
-              <span className="dg-goal-note">{say('It happens in your first conference.')}</span>
+              <div className="dg-goal-acts">
+                <button className="btn gold" onClick={achieve}>{t('🎉 I reached it!')}</button>
+                {!picking && <button className="btn ghost" onClick={() => setPicking(true)}>{t('Change goal')}</button>}
+              </div>
             </> : <>
-              <b className="dg-goal-text">{t('🎉 Goal reached!')}</b>
-              <span className="dg-goal-note">{say('You and your teacher will set your next goal in your next conference.')}</span>
+              <b className="dg-goal-text">{history.length ? t('🎉 Goal reached! What is next?') : t('Pick one thing to focus on.')}</b>
+              {!picking && <div className="dg-goal-acts"><button className="btn" onClick={() => setPicking(true)}>{t('Pick my goal')}</button></div>}
             </>}
             {history.length > 0 && (
               <div className="dg-trophies" aria-label={t("Goals you've reached")}>
@@ -680,19 +225,35 @@ export function DataGoalsTab({ state, me, onChange, onReview }) {
             </div>
           </section>
         </div>
-        {/* the teacher opens a conference; until then it is locked and the last one can be read */}
-        <div className={'dg-confer' + (confOpen ? '' : ' locked')}>
-          <span className="dg-confer-icon" aria-hidden>{confOpen ? '🤝' : '🔒'}</span>
-          {confOpen ? <>
-            <div className="dg-confer-words"><b>{firstTime ? t('Your teacher is ready for your first conference!') : t('Your teacher is ready to meet!')}</b>
-              <span>{firstTime ? say('Look at your writing together and build your first goal.') : say('Look at your work together and talk about your next step.')}</span></div>
-            <button className="btn" onClick={() => setConferring(true)}>{firstTime ? t('Start my first conference →') : t('Start my conference →')}</button>
-          </> : <>
-            <div className="dg-confer-words"><b>{firstTime ? t('Your first conference is coming soon') : t('Your next conference is coming soon')}</b>
-              <span>{say('It opens when your teacher is ready to meet with you.')}</span></div>
-            {!firstTime && lastSource && <button className="btn ghost" onClick={() => setLastConf(true)}>{t('See my last conference')}</button>}
-          </>}
-        </div>
+        {picking && (
+          <div className="card dg-pick">
+            <div className="dg-row">
+              <b>{t('🎯 Pick my goal')}</b>
+              <button className="btn ghost" style={{ padding: '6px 14px' }} onClick={() => setPicking(false)}>{t('Back')}</button>
+            </div>
+            <p className="dg-pick-note"><Glossed text={say('Pick one thing to focus on, or write your own. You can change it anytime.')} /></p>
+            <div className="dg-pick-grid">
+              {PRESET_GOALS.map((g) => {
+                const on = goal?.id === g.id
+                return (
+                  <button key={g.id} className={'dg-pick-opt' + (on ? ' on' : '')} aria-pressed={on} onClick={() => choose(g)}>
+                    <span className="dg-pick-icon" aria-hidden>{g.icon}</span>
+                    <span>
+                      <span className="dg-pick-text">{t(g.text)}</span>
+                      <span className="dg-pick-trait">{t(TRAIT_LABELS[g.trait])}</span>
+                    </span>
+                  </button>
+                )
+              })}
+              <div className="dg-pick-own">
+                <span aria-hidden>✏️</span>
+                <input value={custom} onChange={(e) => setCustom(e.target.value)} placeholder={t('Or write your own goal…')} aria-label={t('Write your own goal')}
+                  maxLength={140} onKeyDown={(e) => e.key === 'Enter' && setCustomGoal()} />
+                <button className="btn" disabled={!custom.trim()} onClick={setCustomGoal}>{t('Set goal')}</button>
+              </div>
+            </div>
+          </div>
+        )}
 
       {!g2 && <div className="dg-main">
         <div className="card dg-chart">

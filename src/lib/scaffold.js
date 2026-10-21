@@ -121,8 +121,8 @@ export const SIMPLE = {
   "Judge it against the rubric, then rewrite it stronger. It's not yours, so revise boldly!":
     'Score it with the list. Then write it better. It is not your writing, so try big changes.',
   '{author} wrote something rough — can you fix it up?': '{author} wrote something with mistakes. Can you fix it?',
-  "You'll name your next goal in a writing conference with your teacher.":
-    'You will pick your next goal when you talk with your teacher.',
+  'Pick one thing to focus on in Data & Goals.': 'Go to Data & Goals and pick a goal.',
+  'Pick one thing to focus on, or write your own. You can change it anytime.': 'Pick a goal or write your own. You can change it later.',
   'Your class focus shows up here when your teacher sets one.': 'Your teacher can put a class goal here.',
   'Nothing here — try the other tab or clear filters.': 'Nothing here. Try the other tab.',
 

@@ -164,6 +164,7 @@ export default function App() {
         onLogo={goHome}
         band={band}
         onBand={setBand}
+        onTeacher={() => { location.hash = 'teacher' }}
       />
       <div className="content">{body}</div>
       {band === '2' && G2_READ_ALOUD && <ReadAloudSwitch />}

@@ -18,7 +18,7 @@ export function ReadAloudSwitch() {
   )
 }
 
-export function TopBar({ who, onArcade, onLogo, band, onBand }) {
+export function TopBar({ who, onArcade, onLogo, band, onBand, onTeacher }) {
   const t = useT()
   const [menu, setMenu] = useState(false)
   return (
@@ -55,6 +55,7 @@ export function TopBar({ who, onArcade, onLogo, band, onBand }) {
           <div className="nm">{who.name}</div>
           <div className="sub">{who.sub}</div>
         </div>
+        {onTeacher && <button className="acct-switch" onClick={onTeacher} title="Switch to the teacher account">⇄ <span>Teacher view</span></button>}
         <button className="pwr" title={t('Log out (demo)')}>⏻</button>
       </div>
 
@@ -69,6 +70,7 @@ export function TopBar({ who, onArcade, onLogo, band, onBand }) {
             <div className="who-panel" role="menu">
               <div className="nm">{who.name}</div>
               <div className="sub">{who.sub}</div>
+              {onTeacher && <button className="who-logout" role="menuitem" onClick={() => { setMenu(false); onTeacher() }}>⇄ Switch to teacher view</button>}
               <button className="who-logout" role="menuitem" title={t('Log out (demo)')} onClick={() => setMenu(false)}>⏻ {t('Log out (demo)')}</button>
             </div>
           </>

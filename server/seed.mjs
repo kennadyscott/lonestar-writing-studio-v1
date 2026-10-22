@@ -285,18 +285,19 @@ export function seedState() {
       { id: 'fg_wordwork', title: 'Word Work', icon: '🔤', skill: 'Word Parts', grades: '2–8', kind: 'builtin', game: 'wordwork' },
       { id: 'fg_spelling', title: 'Spelling', icon: '🐝', skill: 'Spelling', grades: '2–8', kind: 'builtin', game: 'spelling' },
       { id: 'fg_conventions', title: 'Conventions', icon: '✒️', skill: 'Punctuation & Capitalization', grades: '2–8', kind: 'builtin', game: 'conventions' },
+      { id: 'fg_mentor', title: 'Mentor Moves', icon: '✍️', skill: 'Sentence Patterns', grades: '2–8', kind: 'builtin', game: 'mentor' },
     ],
     // The Fluency grid: one tile per category. A tile picks a game from its
     // list at random; clearing every playable tile pays a bonus.
     fluencyCategories: [
-      { id: 'sentences', title: 'Sentence Builders', icon: '🧱', blurb: 'Stretch, combine and fix sentences.', games: ['stretch', 'combine', 'fragments'] },
+      { id: 'sentences', title: 'Sentence Builders', icon: '🧱', blurb: 'Stretch, combine and fix sentences.', games: ['stretch', 'combine', 'fragments', 'mentor'] },
       { id: 'flow', title: 'Smooth Transitions', icon: '🛣️', blurb: 'Bridge ideas so writing flows.', games: ['transitions'] },
       { id: 'wordswap', title: 'Word Upgrade', icon: '💎', blurb: 'Swap plain words for stronger ones.', games: ['wordswap'] },
       { id: 'context', title: 'Context Clues', icon: '🔍', blurb: 'Work out a word from the words around it.', games: ['context'] },
       { id: 'thisvsthat', title: 'This vs. That', icon: '⚖️', blurb: 'Their or there? Pick the right one.', games: ['thisvsthat'] },
       { id: 'wordwork', title: 'Word Work', icon: '🔤', blurb: 'Prefixes, suffixes and roots.', games: ['wordwork'] },
       { id: 'spelling', title: 'Spelling', icon: '🐝', blurb: 'Spell it right the first time.', games: ['spelling'] },
-      { id: 'conventions', title: 'Conventions', icon: '✒️', blurb: 'Capitals, commas and end marks.', games: ['conventions'] },
+      { id: 'conventions', title: 'Conventions', icon: '✒️', blurb: 'Capitals, commas and end marks.', games: ['conventions', 'mentor'] },
       { id: 'typing', title: 'Type Right', icon: '⌨️', blurb: 'Fast, accurate and correct.', games: ['typing'] },
     ],
     // Three tiles start finished, one bingo line (the diagonal), so the finished look shows in the demo (2026-10-14: "I'm not seeing

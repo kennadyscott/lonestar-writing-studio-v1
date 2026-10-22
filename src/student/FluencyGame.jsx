@@ -9,6 +9,7 @@ import { Directions, Glossed, Speak, useSay } from './Scaffold.jsx'
  *   transitions 🌉 Transition Bridge  — pick the transition that connects two ideas (quiz)
  *   fragments   🧩 Fragment Fixer     — spot the complete sentence (quiz)
  *   wordswap    💎 Word Upgrade       — swap a tired word for a vivid one (quiz)
+ *   mentor      ✍️ Mentor Moves       — notice how a strong sentence works, then write one like it
  */
 
 const STRETCH_ROUNDS = [
@@ -368,12 +369,160 @@ function StretchGame({ onClose, onFinished }) {
   )
 }
 
+/* ---------- Mentor Moves (Kennady, 2026-10-22) ----------
+ * Learn a sentence pattern from a strong sentence instead of fixing a broken one: Look (tap the part doing the work), Compare
+ * (which version reads better), Try it (write your own; the pattern is checked in code, never by guessing), then see it used.
+ * Our own sentences. It lives inside existing tiles (Conventions, Sentence Builders), not as a tile of its own.
+ */
+const words = (t) => t.trim().split(/\s+/).filter(Boolean)
+const PATTERNS = [
+  {
+    id: 'series', name: 'Commas in a list', teks: '2.11D (x)',
+    mentor: 'At the pond we spotted frogs, turtles, ducks, and a shy blue heron.',
+    look: { ask: 'Tap every comma in the sentence.', targets: (tok) => tok === ',', hint: 'That one is a word. Look for the small marks that sit between the animals.', got: 'Each comma keeps one animal apart from the next. The last comma comes right before "and."' },
+    compare: { ask: 'Which sentence is easier to read?', o: ['We packed apples, crackers, cheese, and juice.', 'We packed apples crackers cheese and juice.'], a: 0,
+      hint: 'Read both out loud. In which one can you hear where each food stops?', why: 'The commas show where one food ends and the next one begins.' },
+    tryIt: { ask: 'Write a sentence that lists three or more things.', starter: 'For my birthday I want', check: (text) => {
+      const t = text.trim()
+      if (words(t).length < 5) return 'Write a whole sentence that lists at least three things.'
+      if (!/^[A-Z]/.test(t)) return 'Start your sentence with a capital letter.'
+      if (!/[.!?]$/.test(t)) return 'End your sentence with a period, a question mark, or an exclamation mark.'
+      const commas = (t.match(/,/g) || []).length
+      if (!commas) return /\b(and|or)\b/i.test(t) ? 'Add a third thing to your list, with commas between the things.' : 'Put a comma between the things in your list.'
+      const after = t.slice(t.lastIndexOf(',') + 1)
+      if (!/\b(and|or)\b/i.test(after)) return 'Add "and" or "or" right before the last thing in your list.'
+      const items = /^\s*(and|or)\b/i.test(after) ? commas + 1 : commas + 2
+      if (items < 3) return 'That list has two things. Add one more, with a comma.'
+      return null
+    } },
+  },
+  {
+    id: 'twoactions', name: 'Two actions, one sentence', teks: '2.11D (viii)',
+    mentor: 'Rosa grabbed her net and raced down to the creek.',
+    look: { ask: "Tap the word that joins Rosa's two actions.", targets: (tok) => tok.toLowerCase() === 'and', hint: 'Find the two things Rosa did. Which small word sits between them?', got: '"And" lets one sentence hold two actions, so the writer doesn\'t have to say "Rosa" twice.' },
+    compare: { ask: 'Which one reads more smoothly?', o: ['Ben opened the box. Ben pulled out a puppy.', 'Ben opened the box and pulled out a puppy.'], a: 1,
+      hint: 'Which one says "Ben" only once?', why: 'One sentence holds both actions, and it doesn\'t repeat "Ben."' },
+    tryIt: { ask: 'Write one sentence where someone does two things. Join the two actions with "and."', starter: 'After school, my brother', check: (text) => {
+      const t = text.trim()
+      if (words(t).length < 6) return 'Tell a little more: who did it, and what two things did they do?'
+      if (!/^[A-Z]/.test(t)) return 'Start your sentence with a capital letter.'
+      if (!/[.!?]$/.test(t)) return 'End your sentence with a period, a question mark, or an exclamation mark.'
+      if (t.split(/[.!?]+/).filter((x) => x.trim()).length > 1) return 'Make it one sentence. Join the two actions with "and" instead of starting a new sentence.'
+      if (!/\band\b/i.test(t)) return 'Join the two things they did with the word "and."'
+      return null
+    } },
+  },
+]
+
+function MentorGame({ onClose, onFinished }) {
+  const t = useT()
+  const [p, setP] = useState(() => PATTERNS[Math.floor(Math.random() * PATTERNS.length)])
+  const [step, setStep] = useState('look')
+  const [found, setFound] = useState(() => new Set())
+  const [missLook, setMissLook] = useState(false)
+  const [missCompare, setMissCompare] = useState(false)
+  const [note, setNote] = useState(null) // { kind: 'hint' | 'good', text }
+  const [picked, setPicked] = useState(null)
+  const [draft, setDraft] = useState('')
+  const [mine, setMine] = useState('')
+  const tokens = p.mentor.match(/[A-Za-z']+|[^\sA-Za-z']/g)
+  const targets = tokens.map((tok, i) => (p.look.targets(tok) ? i : -1)).filter((i) => i >= 0)
+  const groups = tokens.reduce((gs, tok, i) => { if (/[A-Za-z']/.test(tok) || !gs.length) gs.push([i]); else gs[gs.length - 1].push(i); return gs }, [])
+  // Look 1 + Compare 1 on the first try, Try it 2 once it works: one miss still clears the tile, two do not.
+  const score = (missLook ? 0 : 1) + (missCompare ? 0 : 1) + 2
+  const total = 4
+
+  function tap(i) {
+    if (step !== 'look' || found.has(i)) return
+    if (targets.includes(i)) {
+      const next = new Set(found).add(i)
+      setFound(next)
+      setNote(next.size === targets.length ? { kind: 'good', text: p.look.got } : null)
+    } else { setMissLook(true); setNote({ kind: 'hint', text: p.look.hint }) }
+  }
+  function choose(i) {
+    if (picked === p.compare.a) return
+    setPicked(i)
+    if (i === p.compare.a) setNote({ kind: 'good', text: p.compare.why })
+    else { setMissCompare(true); setNote({ kind: 'hint', text: p.compare.hint }) }
+  }
+  function check() {
+    const problem = p.tryIt.check(draft)
+    if (problem) { setNote({ kind: 'hint', text: problem }); return }
+    setMine(draft.trim()); setNote(null); setStep('done')
+    onFinished && onFinished({ score, total })
+  }
+  function go(next) { setNote(null); setStep(next) }
+  function again() {
+    setP(PATTERNS[(PATTERNS.indexOf(p) + 1) % PATTERNS.length]); setStep('look'); setFound(new Set()); setMissLook(false); setMissCompare(false)
+    setNote(null); setPicked(null); setDraft(''); setMine('')
+  }
+  const steps = [['look', 'Look'], ['compare', 'Compare'], ['try', 'Try it'], ['done', 'Use it']]
+  const at = steps.findIndex(([k]) => k === step)
+  const earned = coinsFor(score, total)
+
+  return (
+    <div className="mm">
+      <div className="mm-steps" aria-label={t('Steps')}>
+        {steps.map(([k, l], i) => <span key={k} className={'mm-step' + (i < at ? ' done' : i === at ? ' on' : '')}>{i < at ? '✓ ' : ''}{t(l)}</span>)}
+        <span className="mm-pattern">{t(p.name)}</span>
+      </div>
+
+      {step === 'look' && <>
+        <p className="mm-ask"><Directions text={p.look.ask} /></p>
+        <div className="mm-mentor">
+          {/* each word keeps its punctuation on the same line */}
+          <span className="mm-tokens">{groups.map((g, gi) => <React.Fragment key={gi}>{gi > 0 ? ' ' : ''}<span className="mm-word">{g.map((i) => {
+            const punct = !/[A-Za-z']/.test(tokens[i])
+            return <button key={i} type="button" className={'mm-tok' + (punct ? ' punct' : '') + (found.has(i) ? ' found' : '')} onClick={() => tap(i)} aria-pressed={found.has(i)} aria-label={punct && tokens[i] === ',' ? t('comma') : undefined}>{tokens[i]}</button>
+          })}</span></React.Fragment>)}</span>
+          <Speak text={p.mentor} lang="en" />
+        </div>
+        {found.size === targets.length && <button className="btn" onClick={() => go('compare')}>{t('Next: compare →')}</button>}
+      </>}
+
+      {step === 'compare' && <>
+        <p className="mm-ask"><Directions text={p.compare.ask} /></p>
+        <div className="quiz-options">
+          {p.compare.o.map((opt, i) => {
+            const right = picked === p.compare.a && i === p.compare.a, wrong = picked === i && i !== p.compare.a
+            return <button key={i} className="quiz-option" onClick={() => choose(i)} disabled={picked === p.compare.a}
+              style={{ textAlign: 'left', border: right ? '2px solid var(--good)' : wrong ? '2px solid #e06c6c' : '1.5px solid var(--line)', background: right ? '#e6f6ee' : wrong ? '#fdecec' : '#fff' }}><Glossed text={opt} /></button>
+          })}
+        </div>
+        {picked === p.compare.a && <button className="btn" style={{ marginTop: 12 }} onClick={() => go('try')}>{t('Next: try it →')}</button>}
+      </>}
+
+      {step === 'try' && <>
+        <p className="mm-ask"><Directions text={p.tryIt.ask} /></p>
+        <div className="mm-model"><span>{t('The pattern')}</span><b>{p.mentor}</b></div>
+        <textarea className="mm-write" rows={3} value={draft} placeholder={`${p.tryIt.starter}…`} aria-label={t('Your sentence')}
+          onChange={(e) => { setDraft(e.target.value); if (note?.kind === 'hint') setNote(null) }} />
+        <button className="btn" disabled={!draft.trim()} onClick={check}>{t('Check my sentence')}</button>
+      </>}
+
+      {note && <div className={'mm-note ' + note.kind} role="status">{note.kind === 'hint' ? '💡 ' : '✓ '}<Glossed text={note.text} /></div>}
+
+      {step === 'done' && (
+        <div style={{ textAlign: 'center' }}>
+          <div className="mm-mine"><span>{t('Your sentence')} · {t(p.name)}</span><b>{mine}</b></div>
+          <p style={{ color: 'var(--muted)', fontSize: 14, margin: '10px 0 6px' }}><Glossed text={t('Next time you write, look for a place to use this move.')} /></p>
+          <CoinAward coins={earned} />
+          <p style={{ color: 'var(--muted)', fontSize: 14, margin: '0 0 16px' }}>{earned === 0 ? t('Under 70% — try again to clear this tile.') : t('You cleared this tile.')}</p>
+          <RoundActions onAgain={again} onClose={onClose} againFirst={earned === 0} />
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function FluencyGame({ gameKey = 'stretch', onClose, onFinished }) {
   const t = useT()
   const bank = BANKS[gameKey]
   // Game titles are product names — they stay in English in every language.
-  const title = bank ? `${bank.icon} ${bank.title}` : '✨ Sentence Stretch'
-  const skill = bank ? bank.skill : 'Sentence Fluency'
+  const mentor = gameKey === 'mentor'
+  const title = mentor ? '✍️ Mentor Moves' : bank ? `${bank.icon} ${bank.title}` : '✨ Sentence Stretch'
+  const skill = mentor ? 'Sentence Patterns' : bank ? bank.skill : 'Sentence Fluency'
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(10,20,30,.5)', display: 'grid', placeItems: 'center', zIndex: 60 }} onClick={onClose}>
       <div className="card fluency-play" onClick={(e) => e.stopPropagation()}>
@@ -384,8 +533,11 @@ export default function FluencyGame({ gameKey = 'stretch', onClose, onFinished }
           <button onClick={onClose} style={{ background: 'none', fontSize: 22, color: 'var(--muted)' }}>×</button>
         </div>
         {bank && <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}><Directions text={bank.intro} /></p>}
+        {mentor && <p style={{ fontSize: 13, color: 'var(--muted)', margin: '0 0 12px' }}><Directions text="See how a strong sentence works, then write one like it." /></p>}
         <div className="fluency-play-main">
-        {bank
+        {mentor
+          ? <MentorGame onClose={onClose} onFinished={onFinished} />
+          : bank
           ? <QuizGame bank={bank} onClose={onClose} onFinished={onFinished} />
           : <StretchGame onClose={onClose} onFinished={onFinished} />}
         </div>

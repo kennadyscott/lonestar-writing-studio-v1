@@ -80,6 +80,9 @@ function loadState() {
   for (const key of Object.keys(fresh)) {
     if (saved[key] === undefined) saved[key] = fresh[key]
   }
+  // The game roster and its tiles are product config, not student data: keep them current (2026-10-22, Mentor Moves).
+  saved.fluencyGames = fresh.fluencyGames
+  saved.fluencyCategories = fresh.fluencyCategories
   saved.students = saved.students.map((s) => {
     const base = fresh.students.find((x) => x.id === s.id)
     return base ? { ...base, ...s } : s

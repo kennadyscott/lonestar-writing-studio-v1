@@ -1162,6 +1162,17 @@ const ZONE_LINE_BONUS = 15
 // Each tile's own color for its finished side (her pick, 2026-10-14: "Fade in name and C2 for when they are done").
 const ZONE_COLOR = { sentences: '#0e9aa7', flow: '#6c5ce7', wordswap: '#e67e22', context: '#27ae60', thisvsthat: '#2f80ed', wordwork: '#d6457a', spelling: '#d4a017', conventions: '#e04848', typing: '#3d4fd6' }
 
+// A tile's next game: one this student hasn't played yet comes first (so a new game shows up), then any at random.
+function freshPick(options) {
+  let seen = []
+  try { seen = JSON.parse(localStorage.getItem('lscr.playedGames') || '[]') } catch { /* fine */ }
+  const unplayed = options.filter((g) => !seen.includes(g.game))
+  const pool = unplayed.length ? unplayed : options
+  const pick = pool[Math.floor(Math.random() * pool.length)]
+  try { localStorage.setItem('lscr.playedGames', JSON.stringify([...new Set([...seen, pick.game])])) } catch { /* fine */ }
+  return pick
+}
+
 function FluencyGridModal({ categories, games, grid, grade, busy, onPlay, onReset, onClose, lastReveal, lastLines }) {
   const t = useT()
   const say = useSay()
@@ -1605,7 +1616,7 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
       )}
       {gamePicker && (
         <FluencyGridModal categories={state.fluencyCategories || []} games={state.fluencyGames || []} grid={state.fluencyGrid} grade={me.gradeLevel ?? 6} busy={gridBusy} lastReveal={lastReveal} lastLines={lastLines}
-          onPlay={(tile) => { const pick = tile.options[Math.floor(Math.random() * tile.options.length)]; setLastReveal(null); setLastLines([]); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
+          onPlay={(tile) => { const pick = freshPick(tile.options); setLastReveal(null); setLastLines([]); setGameFinished(false); setGame({ key: pick.game, category: tile.id }) }}
           onReset={async () => { setGridBusy(true); try { await api.fluencyReset(); await onChange?.() } finally { setGridBusy(false); setLastReveal(null); setLastLines([]) } }}
           onClose={() => setGamePicker(false)} />
       )}

@@ -2609,3 +2609,29 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .head-b .ll-trail { min-height: 156px; }
 .head-b .ll-head { margin-bottom: 2px; }
 .ll-a.head-b { gap: 6px; }
+
+/* ---- Mentor Moves (2026-10-22): look, compare, try it, use it ---- */
+.mm { display: flex; flex-direction: column; gap: 12px; }
+.mm-steps { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.mm-step { font-size: 12px; font-weight: 800; padding: 4px 10px; border-radius: 999px; background: #eef3f6; color: var(--muted); }
+.mm-step.on { background: var(--navy); color: #fff; }
+.mm-step.done { background: #e6f6ee; color: var(--good); }
+.mm-pattern { margin-left: auto; font-size: 12px; font-weight: 800; color: var(--teal); }
+.mm-ask { margin: 0; font-size: 15px; font-weight: 700; }
+.mm-mentor { display: flex; gap: 10px; align-items: flex-start; background: #eef4f7; border-radius: 12px; padding: 16px 18px; }
+.mm-tokens { flex: 1; min-width: 0; font-size: 20px; line-height: 1.8; font-weight: 700; color: var(--ink); }
+.mm-tok { font: inherit; color: inherit; background: none; border: 0; padding: 0 2px; border-radius: 6px; cursor: pointer; }
+.mm-tok:hover { background: #d9ecf5; }
+.mm-word { white-space: nowrap; }
+.mm-tok.punct { padding: 0 5px; margin: 0 -3px 0 -4px; font-weight: 900; position: relative; }
+.mm-tok.found { background: #f5c542; color: #3d2c00; }
+.mm-model { display: grid; gap: 2px; background: #f4f8fb; border-radius: 10px; padding: 10px 14px; }
+.mm-model span, .mm-mine span { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.mm-model b { font-size: 15px; }
+.mm-write { width: 100%; font: inherit; font-size: 17px; line-height: 1.5; padding: 12px 14px; border-radius: 12px; border: 1.5px solid var(--line); resize: vertical; }
+.mm-write:focus { outline: none; border-color: var(--navy); }
+.mm-note { border-radius: 10px; padding: 10px 14px; font-size: 14.5px; font-weight: 600; }
+.mm-note.hint { background: #fff6e0; color: #6b4a00; border: 1px solid #f2d98e; }
+.mm-note.good { background: #e6f6ee; color: #1d5c3d; border: 1px solid #b9e2c9; }
+.mm-mine { display: grid; gap: 4px; background: #e6f6ee; border-radius: 12px; padding: 14px 16px; text-align: left; }
+.mm-mine b { font-size: 18px; color: var(--ink); }

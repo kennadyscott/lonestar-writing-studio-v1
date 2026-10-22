@@ -335,3 +335,36 @@ table.list{border-collapse:collapse;width:100%;min-width:760px}
 .rewards-card .rewards{grid-template-columns:minmax(0,1fr)}
 @media (max-width:1180px){.home{grid-template-columns:minmax(0,1fr)}.rewards-card .rewards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
 @media (max-width:760px){.zones{grid-template-columns:minmax(0,1fr)}}
+
+/* Mastery: domains, every standard, click a score to assign the path (2026-10-22) */
+.domains{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.dom{flex:none;display:inline-flex;align-items:center;gap:8px;border:1px solid #9fb6c3;background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;font-weight:500;white-space:nowrap}
+.dom:hover{border-color:var(--teal-2)}
+.dom.on{background:var(--teal);border-color:var(--teal);color:#fff}
+.dom .flag{min-width:20px;height:20px;border-radius:10px;background:var(--miss-bg);color:var(--miss);font-size:11.5px;font-weight:700;display:inline-grid;place-items:center;padding:0 6px}
+.dom.on .flag{background:#fff}
+table.mastery{min-width:1000px}
+.mastery th.std{min-width:300px;max-width:360px;font-weight:400;vertical-align:middle}
+.mastery th.std .code{display:inline-block;font:500 12.5px var(--mono);color:var(--teal-2);background:var(--wash);border-radius:4px;padding:2px 6px;margin-bottom:4px}
+.mastery th.std .txt{display:block;font-size:13.5px;line-height:1.35;color:var(--ink)}
+.mastery th.std .path{display:block;font-size:12px;color:var(--muted);margin-top:3px}
+.mastery thead th button{padding:2px}
+.mastery td.c{padding:6px 3px}
+.score{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;min-width:42px;height:34px;border:0;border-radius:7px;font:500 13px var(--mono);font-variant-numeric:tabular-nums;padding:0 6px;line-height:1}
+button.score{cursor:pointer}
+button.score:hover{box-shadow:0 0 0 2px var(--teal-2)}
+.score.b4{background:#cdebd8;color:#145c36}.score.b3{background:#e8f5ec;color:#22804f}.score.b2{background:#fcefd8;color:#8a5300}.score.b1{background:#fbe0d9;color:#a3301e}
+.score.sent{box-shadow:0 0 0 2px var(--teal-2)}
+.score i{font:700 8.5px var(--font);font-style:normal;text-transform:uppercase;letter-spacing:.04em;color:var(--teal-2);margin-top:2px}
+.dash{color:var(--faint)}
+.mastery tr.untaught th.std .txt{color:var(--muted)}
+.mastery td.nt{text-align:left;padding-left:14px;font-size:13px}
+.mastery td.cls{min-width:90px}
+.mastery td.cls b{font-size:14px;font-variant-numeric:tabular-nums}
+.mastery td.cls .mbar{display:block}
+.stdcard,.pathcard{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:grid;gap:6px}
+.stdcard .code{font:500 13px var(--mono);color:var(--teal-2)}
+.stdcard p{margin:0;font-size:14.5px}
+.stdcard .pct{font-size:13.5px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.pathcard b{font-size:16px}
+.pathcard span{font-size:13px;color:var(--muted)}

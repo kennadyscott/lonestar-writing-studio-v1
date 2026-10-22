@@ -110,12 +110,6 @@ const TOPICS = [
   { id:'dl', title:'Descriptive and Figurative Language', teks:'2.10D', grade:2, parts:'Pre-test · 2 lessons · 3 checkpoints · Skill Builders · Post-test' },
   { id:'vt', title:'Vowel Teams', teks:'2.2B(ii)', grade:2, parts:'Pre-test · 2 lessons · 3 checkpoints · Skill Builders · Post-test' },
 ]
-const TEKS = [
-  { code:'2.10A', label:"Author's purpose", taught:true },
-  { code:'2.10B', label:'Text structure', taught:true },
-  { code:'2.10C', label:'Print and graphic features', taught:true },
-  { code:'2.10D', label:'Descriptive and figurative language', taught:false },
-]
 const FEED = [
   ['lhouser','missed Skill Builder 1 practice again (70%)','12 min ago'],
   ['kscott','passed the Full Topic practice (85%)','25 min ago'],
@@ -157,16 +151,28 @@ const band = (v) => v >= PASS ? 'pass' : v >= 70 ? 'near' : 'miss'
 const byId = Object.fromEntries(STUDENTS.map(s => [s.id, s]))
 const avg = (xs) => xs.length ? Math.round(xs.reduce((a, b) => a + b, 0) / xs.length) : null
 const lastText = (s) => s.last === null ? 'Never signed in' : s.last === 0 ? 'Active today' : s.last === 1 ? 'Yesterday' : `${s.last} days ago`
-// TEKS mastery: 2.10A is the path in progress; B and C came from earlier paths.
-const MASTERY = Object.fromEntries(STUDENTS.map((s, i) => {
-  const cur = s.post ?? best(s.full?.tries) ?? best(s.c2?.tries) ?? best(s.c1?.tries) ?? s.pre ?? null
-  const b = s.id === 'scaffey' ? 62 : [88, 94, 71, 90, 58, 86, 82, 97, 64, 79, 85, 62, 74][i]
-  const c = s.id === 'scaffey' ? null : [80, 91, 77, 85, 66, 90, 88, 95, 60, 83, 81, null, 70][i]
-  return [s.id, { '2.10A': cur, '2.10B': b, '2.10C': c, '2.10D': undefined }]
-}))
+// Mastery (Kennady, 2026-10-22: "less assignment based ... switch from one domain to the next and see all the standards
+// associated with that domain. If they see a student is scoring low in a standard, they can click on it and assign that
+// learning path to that student"). Standards are the 2nd-grade ELAR TEKS from the ClearK12 Studio catalog (TEA ch110a).
+const DOMAINS = [
+  ["Foundational Language", [["2.1A", "Listen actively, ask relevant questions to clarify information, and answer questions using multi-word responses"], ["2.1B", "Follow, restate, and give oral instructions that involve a short, related sequence of actions"], ["2.1C", "Share information and ideas that focus on the topic under discussion, speaking clearly at an appropriate pace and using the conventions of language"], ["2.1D", "Work collaboratively with others by following agreed-upon rules for discussion, including listening to others, speaking when recognized, making appropriate contributions, and building on the ideas of others"], ["2.1E", "Develop social communication such as distinguishing between asking and telling"], ["2.2A", "Demonstrate phonological awareness"], ["2.2B", "Demonstrate and apply phonetic knowledge"], ["2.2C", "Demonstrate and apply spelling knowledge"], ["2.2D", "Alphabetize a series of words and use a dictionary or glossary to find words"], ["2.2E", "Develop handwriting by accurately forming all cursive letters using appropriate strokes when connecting letters"], ["2.3A", "Use print or digital resources to determine meaning and pronunciation of unknown words"], ["2.3B", "Use context within and beyond a sentence to determine the meaning of unfamiliar words"], ["2.3C", "Identify the meaning of and use words with affixes un-, re-, -ly, -er, and -est (comparative and superlative), and -ion/tion/sion"], ["2.3D", "Identify, use, and explain the meaning of antonyms, synonyms, idioms, and homographs in context"], ["2.4", "Use appropriate fluency (rate, accuracy, and prosody) when reading grade-level text"], ["2.5", "Self-select text and read independently for a sustained period of time"]]], ["Comprehension", [["2.6A", "Establish purpose for reading assigned and self-selected texts"], ["2.6B", "Generate questions about text before, during, and after reading to deepen understanding and gain information"], ["2.6C", "Make and correct or confirm predictions using text features, characteristics of genre, and structures"], ["2.6D", "Create mental images to deepen understanding"], ["2.6E", "Make connections to personal experiences, ideas in other texts, and society"], ["2.6F", "Make inferences and use evidence to support understanding"], ["2.6G", "Evaluate details read to determine key ideas"], ["2.6H", "Synthesize information to create new understanding"], ["2.6I", "Monitor comprehension and make adjustments such as re-reading, using background knowledge, checking for visual cues, and asking questions when understanding breaks down"]]], ["Response Skills", [["2.7A", "Describe personal connections to a variety of sources"], ["2.7B", "Write brief comments on literary or informational texts that demonstrate an understanding of the text"], ["2.7C", "Use text evidence to support an appropriate response"], ["2.7D", "Retell and paraphrase texts in ways that maintain meaning and logical order"], ["2.7E", "Interact with sources in meaningful ways such as illustrating or writing"], ["2.7F", "Respond using newly acquired vocabulary as appropriate"]]], ["Multiple Genres", [["2.8A", "Discuss topics and determine theme using text evidence with adult assistance"], ["2.8B", "Describe the main character's (characters') internal and external traits"], ["2.8C", "Describe and understand plot elements, including the main events, the conflict, and the resolution, for texts read aloud and independently"], ["2.8D", "Describe the importance of the setting"], ["2.9A", "Demonstrate knowledge of distinguishing characteristics of well-known children's literature such as folktales, fables, and fairy tales"], ["2.9B", "Explain visual patterns and structures in a variety of poems"], ["2.9C", "Discuss elements of drama such as characters, dialogue, and setting"], ["2.9D", "Recognize characteristics and structures of informational text"], ["2.9E", "Recognize characteristics of persuasive text"], ["2.9F", "Recognize characteristics of multimodal and digital texts"]]], ["Author's Purpose and Craft", [["2.10A", "Discuss the author's purpose for writing text"], ["2.10B", "Discuss how the use of text structure contributes to the author's purpose"], ["2.10C", "Discuss the author's use of print and graphic features to achieve specific purposes"], ["2.10D", "Discuss the use of descriptive, literal, and figurative language"], ["2.10E", "Identify the use of first or third person in a text"], ["2.10F", "Identify and explain the use of repetition"]]], ["Composition", [["2.11A", "Plan a first draft by generating ideas for writing such as drawing and brainstorming"], ["2.11B", "Develop drafts into a focused piece of writing"], ["2.11C", "Revise drafts by adding, deleting, or rearranging words, phrases, or sentences"], ["2.11D", "Edit drafts using standard English conventions"], ["2.11E", "Publish and share writing"], ["2.12A", "Compose literary texts, including personal narratives and poetry"], ["2.12B", "Compose informational texts, including procedural texts and reports"], ["2.12C", "Compose correspondence such as thank you notes or letters"]]], ["Inquiry and Research", [["2.13A", "Generate questions for formal and informal inquiry with adult assistance"], ["2.13B", "Develop and follow a research plan with adult assistance"], ["2.13C", "Identify and gather relevant sources and information to answer the questions"], ["2.13D", "Identify primary and secondary sources"], ["2.13E", "Demonstrate understanding of information gathered"], ["2.13F", "Cite sources appropriately"], ["2.13G", "Use an appropriate mode of delivery, whether written, oral, or multimodal, to present results"]]]]
+// The Lit Lab path that teaches each standard the class has been taught so far (sample).
+const PATHS = { '2.2A':'Syllables and Sounds', '2.2B':'Vowel Teams', '2.2C':'Spelling Patterns', '2.3B':'Context Clues', '2.3D':'Synonyms and Antonyms',
+  '2.6C':'Making Predictions', '2.6G':'Key Ideas', '2.7C':'Text Evidence', '2.7D':'Retelling', '2.8B':'Characters', '2.8C':'Plot',
+  '2.9D':'Informational Text', '2.10A':"Author's Purpose", '2.10B':'Text Structure', '2.10C':'Print and Graphic Features', '2.11A':'Planning a Draft',
+  '2.10D':'Descriptive and Figurative Language' }
+const TAUGHT = new Set(Object.keys(PATHS).filter(c => c !== '2.10D'))
+const LEVEL = { ahayes:62, ebenton:88, emontagne:66, hscott:84, hscott2:55, kscott:82, kscott2:80, kmcknight:95, lhouser:58, mwood:74, rgardner:80, scaffey:60, vhinton:70 }
+const hash = (t) => [...t].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7)
+function scoreOf(s, code) {
+  if (!TAUGHT.has(code)) return undefined
+  if (code === '2.10A') return s.post ?? best(s.full?.tries) ?? best(s.c2?.tries) ?? best(s.c1?.tries) ?? s.pre ?? null
+  if (s.id === 'scaffey' && code >= '2.10') return null
+  return Math.max(40, Math.min(100, LEVEL[s.id] + 6 + (hash(code + s.id) % 23) - 9))
+}
 
 /* ---------- ui state ---------- */
-const ui = { feed:'all', view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false, pview:'path', litOpen:true }
+const ui = { domain:4, assigned:new Set(), feed:'all', view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false, pview:'path', litOpen:true }
 const VIEWS = ['home','assignments','progress','skills','students','studio','reports','classes','bridge']
 
 const ICON = {
@@ -318,15 +324,56 @@ function viewProgress() {
 }
 
 function viewSkills() {
-  const cellOf = (v) => v === undefined ? `<td class="c nt">Not yet taught</td>` : v == null ? `<td class="c" style="color:var(--faint)">—</td>` : `<td class="c ${v >= 90 ? 'b4' : v >= PASS ? 'b3' : v >= 70 ? 'b2' : 'b1'}">${v}%</td>`
-  const classPct = (code) => { const xs = STUDENTS.map(s => MASTERY[s.id][code]).filter(v => v != null); return xs.length ? Math.round(100 * xs.filter(v => v >= PASS).length / xs.length) : null }
-  return head('Mastery', 'Each student\'s latest score on every TEKS taught this six weeks', `<select class="pick" aria-label="Standards"><option>2.10 Author's purpose and craft</option><option>2.9 Genres</option><option>2.6 Comprehension</option></select>${classPick}`, 'Lit Lab') + `
-  <div class="summary">${TEKS.map(t => { const p = classPct(t.code); return `<div class="sum"><div class="k"><span class="pill" style="background:var(--wash);color:var(--teal-2)">${t.code}</span> ${t.label}</div><div class="v">${p == null ? '<small>Not yet taught</small>' : `${p}% <small>at mastery</small>`}</div>${p == null ? '' : `<div class="mbar"><i style="width:${p}%"></i></div>`}</div>` }).join('')}</div>
-  <section class="card"><div class="gridwrap"><table class="grid heat">
-    <thead><tr><th class="stu" scope="col">Student</th>${TEKS.map(t => `<th scope="col"><span style="display:inline-block;padding:4px 6px">${t.code}<span class="ty">${t.label}</span></span></th>`).join('')}<th scope="col">Next step</th></tr></thead>
-    <tbody>${STUDENTS.map(s => { const m = MASTERY[s.id]; const low = TEKS.filter(t => m[t.code] != null && m[t.code] < 70).map(t => t.code); return `<tr><td class="stu"><button data-act="student" data-id="${s.id}">${fa(s, 30)}<span class="n">${s.name}</span></button></td>${TEKS.map(t => cellOf(m[t.code])).join('')}<td style="text-align:left;font-size:13px;color:var(--muted)">${low.length ? `Reteach ${low.join(', ')}` : s.id === 'scaffey' ? 'Start the path' : 'On track'}</td></tr>` }).join('')}</tbody>
-  </table></div></section>
-  <div class="legend"><span><span class="pill" style="background:#cdebd8;color:#145c36">90%+</span> mastered</span><span><span class="pill" style="background:#e8f5ec;color:#22804f">85–89%</span> passed</span><span><span class="pill" style="background:#fcefd8;color:#8a5300">70–84%</span> close</span><span><span class="pill" style="background:#fbe0d9;color:#a3301e">under 70%</span> reteach</span><span>Scores come from the latest checkpoint or post-test on that standard.</span></div>`
+  const dom = DOMAINS[ui.domain] || DOMAINS[0]
+  const low = (code) => STUDENTS.filter(s => { const v = scoreOf(s, code); return v != null && v < 70 })
+  const taught = dom[1].filter(([c]) => TAUGHT.has(c))
+  const reteach = taught.filter(([c]) => low(c).length).length
+  const cell = (s, code) => {
+    const v = scoreOf(s, code), sent = ui.assigned.has(s.id + '|' + code)
+    if (v == null) return `<td class="c"><span class="dash" title="${s.name} hasn't done this yet">—</span></td>`
+    const b = v >= 90 ? 'b4' : v >= PASS ? 'b3' : v >= 70 ? 'b2' : 'b1'
+    return `<td class="c"><button class="score ${b}${sent ? ' sent' : ''}" data-act="std" data-id="${s.id}" data-code="${code}" title="${s.name}: ${v}%${v < 70 ? ' · click to assign the path' : ''}">${v}${sent ? '<i>Assigned</i>' : ''}</button></td>`
+  }
+  const row = ([code, text]) => {
+    const path = PATHS[code]
+    if (!TAUGHT.has(code)) return `<tr class="untaught"><th scope="row" class="stu std"><span class="code">${code}</span><span class="txt">${text}</span></th><td colspan="${STUDENTS.length + 1}" class="nt">Not taught yet${path ? ` · Lit Lab path: ${path}` : ''}</td></tr>`
+    const xs = STUDENTS.map(s => scoreOf(s, code)).filter(v => v != null), pct = Math.round(100 * xs.filter(v => v >= PASS).length / xs.length)
+    return `<tr><th scope="row" class="stu std"><span class="code">${code}</span><span class="txt">${text}</span><span class="path">Lit Lab path: ${path}</span></th>${STUDENTS.map(s => cell(s, code)).join('')}<td class="cls"><b>${pct}%</b><span class="mbar"><i style="width:${pct}%"></i></span></td></tr>`
+  }
+  return head('Mastery', 'Pick a domain to see every standard in it. Click a low score to assign that student the path.', classPick, 'Lit Lab') + `
+  <div class="domains" role="tablist" aria-label="Domain">${DOMAINS.map(([name, list], k) => { const n = list.filter(([c]) => TAUGHT.has(c) && low(c).length).length; return `<button role="tab" aria-selected="${ui.domain === k}" class="dom${ui.domain === k ? ' on' : ''}" data-act="domain" data-k="${k}">${name}${n ? `<span class="flag" title="${n} to reteach">${n}</span>` : ''}</button>` }).join('')}</div>
+  <section class="card">
+    <div class="hd"><h2>${dom[0]}</h2><span class="meta">${dom[1].length} standards · ${taught.length} taught so far${reteach ? ` · ${reteach} with students under 70%` : ''}</span></div>
+    <div class="gridwrap"><table class="grid heat mastery">
+      <thead><tr><th class="stu" scope="col">Standard</th>${STUDENTS.map(s => `<th scope="col" title="${s.name}"><button data-act="student" data-id="${s.id}">${fa(s, 28)}</button></th>`).join('')}<th scope="col">At mastery</th></tr></thead>
+      <tbody>${dom[1].map(row).join('')}</tbody>
+    </table></div>
+  </section>
+  <div class="legend"><span><span class="score b4">90</span> mastered</span><span><span class="score b3">85</span> passed</span><span><span class="score b2">75</span> close</span><span><span class="score b1">60</span> under 70: click to assign the path</span><span>Scores are each student's latest checkpoint or post-test on that standard.</span></div>`
+}
+
+function drawerStd(id, code) {
+  const s = byId[id], v = scoreOf(s, code), path = PATHS[code]
+  const text = DOMAINS.flatMap(d => d[1]).find(([c]) => c === code)?.[1] || ''
+  const others = STUDENTS.filter(x => x.id !== id && scoreOf(x, code) != null && scoreOf(x, code) < 70 && !ui.assigned.has(x.id + '|' + code))
+  const sent = ui.assigned.has(id + '|' + code)
+  // the class is already on this path: show where the student is instead of assigning it again
+  const onIt = ASSIGNMENTS.some(a => a.status === 'active' && a.teks === code && !a.n)
+  const cur = current(s)
+  if (onIt) return `<div class="dh">${fa(s, 44)}<div><h2>${s.name}</h2><div style="color:var(--muted);font-size:13.5px">${lastText(s)}</div></div><button class="icon-btn x" data-act="close" aria-label="Close">✕</button></div>
+  <div class="db">
+    <div><h3>Standard</h3><div class="stdcard"><span class="code">${code}</span><p>${text}</p><div class="pct">${s.name.split(' ')[0]}'s latest score ${pill(v)}</div></div></div>
+    <div class="insight"><b>Already on this path.</b> The class is working through ${path} now. ${s.name} is at ${cur.step ? cur.step.label + (cur.sub && cur.sub !== 'Not started' ? ' (' + cur.sub + ')' : '') : 'the finish'}.</div>
+  </div>
+  <div class="dfoot"><button class="btn" data-act="close">Close</button><button class="btn primary" data-act="student" data-id="${id}">See ${s.name.split(' ')[0]}'s progress</button></div>`
+  return `<div class="dh">${fa(s, 44)}<div><h2>${s.name}</h2><div style="color:var(--muted);font-size:13.5px">${lastText(s)}</div></div><button class="icon-btn x" data-act="close" aria-label="Close">✕</button></div>
+  <div class="db">
+    <div><h3>Standard</h3><div class="stdcard"><span class="code">${code}</span><p>${text}</p><div class="pct">${s.name.split(' ')[0]}'s latest score ${pill(v)}</div></div></div>
+    <div><h3>Lit Lab path</h3><div class="pathcard"><b>${path}</b><span>Pre-test · lessons · checkpoints · Skill Builders · post-test</span><span>A pre-test score of 85% or more lets ${s.name.split(' ')[0]} skip lessons they already know.</span></div></div>
+    ${sent ? `<div class="insight"><b>Assigned.</b> ${path} is on ${s.name}'s path, due Oct 31.</div>` : `<div class="field"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"><div class="field"><label for="sstart">Start</label><input id="sstart" type="date" value="2026-10-23"></div><div class="field"><label for="sdue">Due</label><input id="sdue" type="date" value="2026-10-31"></div></div></div>`}
+    ${others.length && !sent ? `<label class="check"><input type="checkbox" id="also" checked> Also assign it to ${others.length} other student${others.length > 1 ? 's' : ''} under 70%: ${others.map(x => x.name).join(', ')}</label>` : ''}
+  </div>
+  <div class="dfoot"><button class="btn" data-act="close">${sent ? 'Close' : 'Cancel'}</button>${sent ? '' : `<button class="btn primary" data-act="assign-std" data-id="${id}" data-code="${code}">Assign ${path} to ${s.name}</button>`}</div>`
 }
 
 function roster() {
@@ -348,7 +395,8 @@ function viewAssignments() {
       return `<div class="prog"><span class="track">${parts.map(([n, col]) => `<i style="width:${n / 13 * 100}%;background:${col}"></i>`).join('')}</span><small>${c.done} done · ${c.working + c.help} working</small></div>`
     }
     const d = a.done ?? 0
-    return `<div class="prog"><span class="track"><i style="width:${d / 13 * 100}%;background:var(--pass)"></i></span><small>${d}/13${a.waiting ? ` · ${a.waiting} to score` : ''}</small></div>`
+    const n = a.n || 13
+    return `<div class="prog"><span class="track"><i style="width:${d / n * 100}%;background:var(--pass)"></i></span><small>${d}/${n}</small></div>`
   }
   return head('Assignments', 'The Lit Lab paths your class is working through', `${classPick}${newBtn}`, 'Lit Lab') + `
   <section class="card">
@@ -440,7 +488,7 @@ function render() {
   R.getElementById('page').innerHTML = v === 'home' ? viewHome() : v === 'progress' ? viewProgress() : v === 'skills' ? viewSkills() : v === 'assignments' ? viewAssignments() : viewExisting(v)
   const L = R.getElementById('layer')
   if (!ui.drawer) { L.innerHTML = ''; return }
-  const body = ui.drawer.kind === 'student' ? drawerStudent(ui.drawer.id) : ui.drawer.kind === 'items' ? drawerItems(ui.drawer.id) : drawerNew()
+  const body = ui.drawer.kind === 'student' ? drawerStudent(ui.drawer.id) : ui.drawer.kind === 'items' ? drawerItems(ui.drawer.id) : ui.drawer.kind === 'std' ? drawerStd(ui.drawer.id, ui.drawer.code) : drawerNew()
   L.innerHTML = `<div class="scrim" data-act="close"></div><aside class="drawer" role="dialog" aria-modal="true">${body}</aside>`
 }
 function go(k) {
@@ -473,6 +521,17 @@ function onClick(e) {
   if (act === 'filter') { ui.filter = a.dataset.f; if (ui.view !== 'progress') return go('progress'); return render() }
   if (act === 'progress-step') { ui.filter = 'at:' + a.dataset.step; return go('progress') }
   if (act === 'tab') { ui.tab = a.dataset.t; return render() }
+  if (act === 'domain') { ui.domain = Number(a.dataset.k); return render() }
+  if (act === 'std') { ui.drawer = { kind:'std', id:a.dataset.id, code:a.dataset.code }; return render() }
+  if (act === 'assign-std') {
+    const { id, code } = a.dataset, path = PATHS[code]
+    const also = R.getElementById('also')?.checked ? STUDENTS.filter(x => x.id !== id && scoreOf(x, code) != null && scoreOf(x, code) < 70 && !ui.assigned.has(x.id + '|' + code)) : []
+    const who = [byId[id], ...also]
+    who.forEach(x => ui.assigned.add(x.id + '|' + code))
+    ASSIGNMENTS.unshift({ id:'n' + Date.now(), type:'path', title:path, teks:code, cls:who.map(x => x.name).join(', '), n:who.length, assigned:'Oct 23', due:'Oct 31', status:'scheduled', done:0 })
+    ui.drawer = null; render()
+    return toast(`${path} assigned to ${who.length === 1 ? who[0].name : who.length + ' students'}`)
+  }
   if (act === 'pview') { ui.pview = a.dataset.v; return render() }
   if (act === 'litlab') { if (R.getElementById('app').classList.contains('collapsed')) return go('progress'); ui.litOpen = !ui.litOpen; return renderNav() }
   if (act === 'new') { draft = { type:'path', topic:a.dataset.for === 'finishers' ? 'pg' : 'pg', who:a.dataset.for === 'finishers' ? 1 : 0, for:a.dataset.for }; ui.drawer = { kind:'new' }; return render() }

@@ -154,25 +154,71 @@ const lastText = (s) => s.last === null ? 'Never signed in' : s.last === 0 ? 'Ac
 // Mastery (Kennady, 2026-10-22: "less assignment based ... switch from one domain to the next and see all the standards
 // associated with that domain. If they see a student is scoring low in a standard, they can click on it and assign that
 // learning path to that student"). Standards are the 2nd-grade ELAR TEKS from the ClearK12 Studio catalog (TEA ch110a).
+// Writing first (Kennady, 2026-10-22: "focus on the writing standards/domains and then those that support our crystal writing
+// platform like author's purpose, language, sentences"). Four groups, TEA wording from the ClearK12 Studio catalog (ch110a).
 const DOMAINS = [
-  ["Foundational Language", [["2.1A", "Listen actively, ask relevant questions to clarify information, and answer questions using multi-word responses"], ["2.1B", "Follow, restate, and give oral instructions that involve a short, related sequence of actions"], ["2.1C", "Share information and ideas that focus on the topic under discussion, speaking clearly at an appropriate pace and using the conventions of language"], ["2.1D", "Work collaboratively with others by following agreed-upon rules for discussion, including listening to others, speaking when recognized, making appropriate contributions, and building on the ideas of others"], ["2.1E", "Develop social communication such as distinguishing between asking and telling"], ["2.2A", "Demonstrate phonological awareness"], ["2.2B", "Demonstrate and apply phonetic knowledge"], ["2.2C", "Demonstrate and apply spelling knowledge"], ["2.2D", "Alphabetize a series of words and use a dictionary or glossary to find words"], ["2.2E", "Develop handwriting by accurately forming all cursive letters using appropriate strokes when connecting letters"], ["2.3A", "Use print or digital resources to determine meaning and pronunciation of unknown words"], ["2.3B", "Use context within and beyond a sentence to determine the meaning of unfamiliar words"], ["2.3C", "Identify the meaning of and use words with affixes un-, re-, -ly, -er, and -est (comparative and superlative), and -ion/tion/sion"], ["2.3D", "Identify, use, and explain the meaning of antonyms, synonyms, idioms, and homographs in context"], ["2.4", "Use appropriate fluency (rate, accuracy, and prosody) when reading grade-level text"], ["2.5", "Self-select text and read independently for a sustained period of time"]]], ["Comprehension", [["2.6A", "Establish purpose for reading assigned and self-selected texts"], ["2.6B", "Generate questions about text before, during, and after reading to deepen understanding and gain information"], ["2.6C", "Make and correct or confirm predictions using text features, characteristics of genre, and structures"], ["2.6D", "Create mental images to deepen understanding"], ["2.6E", "Make connections to personal experiences, ideas in other texts, and society"], ["2.6F", "Make inferences and use evidence to support understanding"], ["2.6G", "Evaluate details read to determine key ideas"], ["2.6H", "Synthesize information to create new understanding"], ["2.6I", "Monitor comprehension and make adjustments such as re-reading, using background knowledge, checking for visual cues, and asking questions when understanding breaks down"]]], ["Response Skills", [["2.7A", "Describe personal connections to a variety of sources"], ["2.7B", "Write brief comments on literary or informational texts that demonstrate an understanding of the text"], ["2.7C", "Use text evidence to support an appropriate response"], ["2.7D", "Retell and paraphrase texts in ways that maintain meaning and logical order"], ["2.7E", "Interact with sources in meaningful ways such as illustrating or writing"], ["2.7F", "Respond using newly acquired vocabulary as appropriate"]]], ["Multiple Genres", [["2.8A", "Discuss topics and determine theme using text evidence with adult assistance"], ["2.8B", "Describe the main character's (characters') internal and external traits"], ["2.8C", "Describe and understand plot elements, including the main events, the conflict, and the resolution, for texts read aloud and independently"], ["2.8D", "Describe the importance of the setting"], ["2.9A", "Demonstrate knowledge of distinguishing characteristics of well-known children's literature such as folktales, fables, and fairy tales"], ["2.9B", "Explain visual patterns and structures in a variety of poems"], ["2.9C", "Discuss elements of drama such as characters, dialogue, and setting"], ["2.9D", "Recognize characteristics and structures of informational text"], ["2.9E", "Recognize characteristics of persuasive text"], ["2.9F", "Recognize characteristics of multimodal and digital texts"]]], ["Author's Purpose and Craft", [["2.10A", "Discuss the author's purpose for writing text"], ["2.10B", "Discuss how the use of text structure contributes to the author's purpose"], ["2.10C", "Discuss the author's use of print and graphic features to achieve specific purposes"], ["2.10D", "Discuss the use of descriptive, literal, and figurative language"], ["2.10E", "Identify the use of first or third person in a text"], ["2.10F", "Identify and explain the use of repetition"]]], ["Composition", [["2.11A", "Plan a first draft by generating ideas for writing such as drawing and brainstorming"], ["2.11B", "Develop drafts into a focused piece of writing"], ["2.11C", "Revise drafts by adding, deleting, or rearranging words, phrases, or sentences"], ["2.11D", "Edit drafts using standard English conventions"], ["2.11E", "Publish and share writing"], ["2.12A", "Compose literary texts, including personal narratives and poetry"], ["2.12B", "Compose informational texts, including procedural texts and reports"], ["2.12C", "Compose correspondence such as thank you notes or letters"]]], ["Inquiry and Research", [["2.13A", "Generate questions for formal and informal inquiry with adult assistance"], ["2.13B", "Develop and follow a research plan with adult assistance"], ["2.13C", "Identify and gather relevant sources and information to answer the questions"], ["2.13D", "Identify primary and secondary sources"], ["2.13E", "Demonstrate understanding of information gathered"], ["2.13F", "Cite sources appropriately"], ["2.13G", "Use an appropriate mode of delivery, whether written, oral, or multimodal, to present results"]]]]
+  ['Composition', [
+    ['2.11A', 'Plan a first draft by generating ideas for writing such as drawing and brainstorming'],
+    ['2.11B (i)', 'Develop drafts into a focused piece of writing by organizing with structure'],
+    ['2.11B (ii)', 'Develop drafts into a focused piece of writing by developing an idea with specific and relevant details'],
+    ['2.11C', 'Revise drafts by adding, deleting, or rearranging words, phrases, or sentences'],
+    ['2.11E', 'Publish and share writing'],
+    ['2.12A', 'Compose literary texts, including personal narratives and poetry'],
+    ['2.12B', 'Compose informational texts, including procedural texts and reports'],
+    ['2.12C', 'Compose correspondence such as thank you notes or letters'],
+  ]],
+  ['Language and Conventions', [
+    ['2.11D (i)', 'Edit drafts for complete sentences with subject-verb agreement'],
+    ['2.11D (ii)', 'Edit drafts for past, present, and future verb tense'],
+    ['2.11D (iii)', 'Edit drafts for singular, plural, common, and proper nouns'],
+    ['2.11D (iv)', 'Edit drafts for adjectives, including articles'],
+    ['2.11D (v)', 'Edit drafts for adverbs that convey time and adverbs that convey place'],
+    ['2.11D (vi)', 'Edit drafts for prepositions and prepositional phrases'],
+    ['2.11D (vii)', 'Edit drafts for pronouns, including subjective, objective, and possessive cases'],
+    ['2.11D (viii)', 'Edit drafts for coordinating conjunctions to form compound subjects and predicates'],
+    ['2.11D (ix)', 'Edit drafts for capitalization of months, days of the week, and the salutation and conclusion of a letter'],
+    ['2.11D (x)', 'Edit drafts for end punctuation, apostrophes in contractions, and commas with items in a series and in dates'],
+    ['2.11D (xi)', 'Edit drafts for correct spelling of words with grade-appropriate orthographic patterns and rules and high-frequency words'],
+    ['2.3C', 'Identify the meaning of and use words with affixes un-, re-, -ly, -er, and -est (comparative and superlative), and -ion/tion/sion'],
+    ['2.3D', 'Identify, use, and explain the meaning of antonyms, synonyms, idioms, and homographs in context'],
+  ]],
+  ["Author's Purpose and Craft", [
+    ['2.10A', "Discuss the author's purpose for writing text"],
+    ['2.10B', "Discuss how the use of text structure contributes to the author's purpose"],
+    ['2.10C', "Discuss the author's use of print and graphic features to achieve specific purposes"],
+    ['2.10D', 'Discuss the use of descriptive, literal, and figurative language'],
+    ['2.10E', 'Identify the use of first or third person in a text'],
+    ['2.10F', 'Identify and explain the use of repetition'],
+  ]],
+  ['Response Skills', [
+    ['2.7A', 'Describe personal connections to a variety of sources'],
+    ['2.7B', 'Write brief comments on literary or informational texts that demonstrate an understanding of the text'],
+    ['2.7C', 'Use text evidence to support an appropriate response'],
+    ['2.7D', 'Retell and paraphrase texts in ways that maintain meaning and logical order'],
+    ['2.7E', 'Interact with sources in meaningful ways such as illustrating or writing'],
+    ['2.7F', 'Respond using newly acquired vocabulary as appropriate'],
+  ]],
+]
 // The Lit Lab path that teaches each standard the class has been taught so far (sample).
-const PATHS = { '2.2A':'Syllables and Sounds', '2.2B':'Vowel Teams', '2.2C':'Spelling Patterns', '2.3B':'Context Clues', '2.3D':'Synonyms and Antonyms',
-  '2.6C':'Making Predictions', '2.6G':'Key Ideas', '2.7C':'Text Evidence', '2.7D':'Retelling', '2.8B':'Characters', '2.8C':'Plot',
-  '2.9D':'Informational Text', '2.10A':"Author's Purpose", '2.10B':'Text Structure', '2.10C':'Print and Graphic Features', '2.11A':'Planning a Draft',
-  '2.10D':'Descriptive and Figurative Language' }
-const TAUGHT = new Set(Object.keys(PATHS).filter(c => c !== '2.10D'))
+const PATHS = {
+  '2.11A':'Planning a Draft', '2.11B (i)':'Organizing My Writing', '2.11B (ii)':'Details That Matter', '2.11C':'Revising', '2.12A':'Personal Narratives', '2.12B':'Informational Writing',
+  '2.11D (i)':'Complete Sentences', '2.11D (ii)':'Verb Tense', '2.11D (iii)':'Nouns', '2.11D (iv)':'Adjectives', '2.11D (viii)':'Joining Words', '2.11D (x)':'Punctuation', '2.11D (xi)':'Spelling Patterns',
+  '2.3C':'Prefixes and Suffixes', '2.3D':'Synonyms and Antonyms',
+  '2.10A':"Author's Purpose", '2.10B':'Text Structure', '2.10C':'Print and Graphic Features',
+  '2.7B':'Writing About Reading', '2.7C':'Text Evidence', '2.7D':'Retelling',
+}
+const TAUGHT = new Set(Object.keys(PATHS))
 const LEVEL = { ahayes:62, ebenton:88, emontagne:66, hscott:84, hscott2:55, kscott:82, kscott2:80, kmcknight:95, lhouser:58, mwood:74, rgardner:80, scaffey:60, vhinton:70 }
 const hash = (t) => [...t].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) >>> 0, 7)
 function scoreOf(s, code) {
   if (!TAUGHT.has(code)) return undefined
   if (code === '2.10A') return s.post ?? best(s.full?.tries) ?? best(s.c2?.tries) ?? best(s.c1?.tries) ?? s.pre ?? null
-  if (s.id === 'scaffey' && code >= '2.10') return null
+  if (s.id === 'scaffey') return null // hasn't signed in
   return Math.max(40, Math.min(100, LEVEL[s.id] + 6 + (hash(code + s.id) % 23) - 9))
 }
 
 /* ---------- ui state ---------- */
-const ui = { domain:4, assigned:new Set(), feed:'all', view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false, pview:'path', litOpen:true }
+const ui = { domain:0, assigned:new Set(), feed:'all', view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false, pview:'path', litOpen:true }
 const VIEWS = ['home','assignments','progress','skills','students','studio','reports','classes','bridge']
 
 const ICON = {
@@ -327,7 +373,6 @@ function viewSkills() {
   const dom = DOMAINS[ui.domain] || DOMAINS[0]
   const low = (code) => STUDENTS.filter(s => { const v = scoreOf(s, code); return v != null && v < 70 })
   const taught = dom[1].filter(([c]) => TAUGHT.has(c))
-  const reteach = taught.filter(([c]) => low(c).length).length
   const cell = (s, code) => {
     const v = scoreOf(s, code), sent = ui.assigned.has(s.id + '|' + code)
     if (v == null) return `<td class="c"><span class="dash" title="${s.name} hasn't done this yet">—</span></td>`
@@ -340,10 +385,10 @@ function viewSkills() {
     const xs = STUDENTS.map(s => scoreOf(s, code)).filter(v => v != null), pct = Math.round(100 * xs.filter(v => v >= PASS).length / xs.length)
     return `<tr><th scope="row" class="stu std"><span class="code">${code}</span><span class="txt">${text}</span><span class="path">Lit Lab path: ${path}</span></th>${STUDENTS.map(s => cell(s, code)).join('')}<td class="cls"><b>${pct}%</b><span class="mbar"><i style="width:${pct}%"></i></span></td></tr>`
   }
-  return head('Mastery', 'Pick a domain to see every standard in it. Click a low score to assign that student the path.', classPick, 'Lit Lab') + `
-  <div class="domains" role="tablist" aria-label="Domain">${DOMAINS.map(([name, list], k) => { const n = list.filter(([c]) => TAUGHT.has(c) && low(c).length).length; return `<button role="tab" aria-selected="${ui.domain === k}" class="dom${ui.domain === k ? ' on' : ''}" data-act="domain" data-k="${k}">${name}${n ? `<span class="flag" title="${n} to reteach">${n}</span>` : ''}</button>` }).join('')}</div>
+  return head('Mastery', 'The writing standards behind Crystal Writing. Click a low score to assign that student the path.', classPick, 'Lit Lab') + `
+  <div class="domains" role="tablist" aria-label="Domain">${DOMAINS.map(([name], k) => `<button role="tab" aria-selected="${ui.domain === k}" class="dom${ui.domain === k ? ' on' : ''}" data-act="domain" data-k="${k}">${name}</button>`).join('')}</div>
   <section class="card">
-    <div class="hd"><h2>${dom[0]}</h2><span class="meta">${taught.length} of ${dom[1].length} standards taught so far${reteach ? ` · ${reteach} with students under 70%` : ''}</span></div>
+    <div class="hd"><h2>${dom[0]}</h2><span class="meta">${taught.length} of ${dom[1].length} standards taught so far</span></div>
     ${taught.length ? '' : `<div class="empty"><b>Nothing taught in ${dom[0]} yet</b>Its standards show up here once the class starts a path that teaches them.</div>`}
     <div class="gridwrap"${taught.length ? '' : ' hidden'}><table class="grid heat mastery">
       <thead><tr><th class="stu" scope="col">Standard</th>${STUDENTS.map(s => `<th scope="col" title="${s.name}"><button data-act="student" data-id="${s.id}">${fa(s, 28)}</button></th>`).join('')}<th scope="col">At mastery</th></tr></thead>

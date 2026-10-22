@@ -343,10 +343,11 @@ function viewSkills() {
   return head('Mastery', 'Pick a domain to see every standard in it. Click a low score to assign that student the path.', classPick, 'Lit Lab') + `
   <div class="domains" role="tablist" aria-label="Domain">${DOMAINS.map(([name, list], k) => { const n = list.filter(([c]) => TAUGHT.has(c) && low(c).length).length; return `<button role="tab" aria-selected="${ui.domain === k}" class="dom${ui.domain === k ? ' on' : ''}" data-act="domain" data-k="${k}">${name}${n ? `<span class="flag" title="${n} to reteach">${n}</span>` : ''}</button>` }).join('')}</div>
   <section class="card">
-    <div class="hd"><h2>${dom[0]}</h2><span class="meta">${dom[1].length} standards · ${taught.length} taught so far${reteach ? ` · ${reteach} with students under 70%` : ''}</span></div>
-    <div class="gridwrap"><table class="grid heat mastery">
+    <div class="hd"><h2>${dom[0]}</h2><span class="meta">${taught.length} of ${dom[1].length} standards taught so far${reteach ? ` · ${reteach} with students under 70%` : ''}</span></div>
+    ${taught.length ? '' : `<div class="empty"><b>Nothing taught in ${dom[0]} yet</b>Its standards show up here once the class starts a path that teaches them.</div>`}
+    <div class="gridwrap"${taught.length ? '' : ' hidden'}><table class="grid heat mastery">
       <thead><tr><th class="stu" scope="col">Standard</th>${STUDENTS.map(s => `<th scope="col" title="${s.name}"><button data-act="student" data-id="${s.id}">${fa(s, 28)}</button></th>`).join('')}<th scope="col">At mastery</th></tr></thead>
-      <tbody>${dom[1].map(row).join('')}</tbody>
+      <tbody>${taught.map(row).join('')}</tbody>
     </table></div>
   </section>
   <div class="legend"><span><span class="score b4">90</span> mastered</span><span><span class="score b3">85</span> passed</span><span><span class="score b2">75</span> close</span><span><span class="score b1">60</span> under 70: click to assign the path</span><span>Scores are each student's latest checkpoint or post-test on that standard.</span></div>`

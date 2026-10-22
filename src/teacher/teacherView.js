@@ -8,7 +8,7 @@ const SHELL = `<div class="app" id="app">
   <nav class="rail" aria-label="Teacher">
     <img class="logo" src="__LOGO__" alt="LoneStar CR">
     <div id="nav"></div>
-    <p class="note">Prototype · sample class data. Use the account card to switch back to student view. Items marked <b>New</b> are proposed additions; the rest are the pages you have today.</p>
+    <p class="note">Prototype · sample class data</p>
   </nav>
   <div class="main">
     <header class="top">
@@ -166,7 +166,7 @@ const MASTERY = Object.fromEntries(STUDENTS.map((s, i) => {
 }))
 
 /* ---------- ui state ---------- */
-const ui = { view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false }
+const ui = { view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false, pview:'path', litOpen:true }
 const VIEWS = ['home','assignments','progress','skills','students','studio','reports','classes','bridge']
 
 const ICON = {
@@ -179,25 +179,29 @@ const ICON = {
   bridge:'<path d="M4 5h9M8.5 3v2M6 5c.5 3 3 6 6 7M11 5c-.5 3-3 6-6 7"/><path d="M13 21l4-9 4 9M14.5 18h5"/>',
   studio:'<path d="M14 4l6 6-11 11H3v-6z"/><path d="M12.5 5.5l6 6"/>',
   reports:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  litlab:'<path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5v13"/>',
 }
 const svg = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`
 const chev = '<svg class="chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5l4 4 4-4"/></svg>'
+// The menu (Kennady, 2026-10-22: "Lit Lab with assignments, progress, and Mastery underneath ... Then CR Studio, then Crystal
+// Reports, then Class Manager, then Language Bridge"). Students is a view inside Progress.
+const LIT = [['assignments','Assignments'],['progress','Progress'],['skills','Mastery']]
 const NAV = [
   ['home','Home'],
-  ['assignments','Assignments','New'],
-  ['progress','Lit Lab Progress','New'],
-  ['skills','TEKS Mastery','New'],
-  ['students','Students','New'],
-  ['sep','Today\'s pages'],
-  ['classes','Class Manager',null,true],
-  ['bridge','Language Bridge',null,true],
+  ['litlab','Lit Lab',LIT],
   ['studio','CR Studio',null,true],
   ['reports','Crystal Reports'],
+  ['classes','Class Manager',null,true],
+  ['bridge','Language Bridge',null,true],
 ]
 function renderNav() {
-  R.getElementById('nav').innerHTML = NAV.map(([k, l, tag, dd]) => k === 'sep'
-    ? `<div class="sep">${l}</div>`
-    : `<button class="nav${ui.view === k ? ' on' : ''}" data-go="${k}" ${ui.view === k ? 'aria-current="page"' : ''} title="${l}">${svg(k)}<span class="lbl">${l}</span>${tag ? `<span class="tag">${tag}</span>` : ''}${dd ? chev : ''}</button>`).join('')
+  const item = (k, l, dd, sub) => `<button class="nav${sub ? ' sub' : ''}${ui.view === k ? ' on' : ''}" data-go="${k}" ${ui.view === k ? 'aria-current="page"' : ''} title="${l}">${sub ? '' : svg(k)}<span class="lbl">${l}</span>${dd ? chev : ''}</button>`
+  R.getElementById('nav').innerHTML = NAV.map(([k, l, kids, dd]) => {
+    if (!kids) return item(k, l, dd)
+    const inside = kids.some(([c]) => c === ui.view)
+    return `<button class="nav group${inside ? ' within' : ''}" data-act="litlab" aria-expanded="${ui.litOpen}" title="${l}">${svg(k)}<span class="lbl">${l}</span>${chev}</button>`
+      + (ui.litOpen ? `<div class="subnav">${kids.map(([c, cl]) => item(c, cl, false, true)).join('')}</div>` : '')
+  }).join('')
 }
 
 const fa = (s, size) => `<span class="fa" style="background:${s.color}${size ? `;width:${size}px;height:${size}px` : ''}" title="${s.name}">${s.init}</span>`
@@ -210,8 +214,8 @@ function ring(done, total, size = 44) {
 const counts = () => STUDENTS.reduce((m, s) => (m[status(s)]++, m), { help:0, working:0, done:0, idle:0 })
 
 /* ---------- views ---------- */
-function head(title, sub, tools = '') {
-  return `<div class="head"><div><h1>${title}</h1>${sub ? `<div class="sub">${sub}</div>` : ''}</div><div class="tools">${tools}</div></div>`
+function head(title, sub, tools = '', eyebrow = '') {
+  return `<div class="head"><div>${eyebrow ? `<div class="eyebrow">${eyebrow}</div>` : ''}<h1>${title}</h1>${sub ? `<div class="sub">${sub}</div>` : ''}</div><div class="tools">${tools}</div></div>`
 }
 const classPick = `<select class="pick" id="cls" aria-label="Class"><option>2nd Grade · Room 104</option><option>All classes</option></select>`
 const newBtn = `<button class="btn primary" data-act="new"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>New assignment</button>`
@@ -226,44 +230,24 @@ function viewHome() {
     const here = at(i)
     return `<button class="stop${here.length ? ' has' : ''}" data-act="progress-step" data-step="${st.id}"><span class="dot">${here.length}</span><span class="nm">${st.label}</span><span class="ty">${st.ty}</span><span class="who">${here.map(s => fa(s)).join('')}</span></button>`
   }).join('') + `<button class="stop finish" data-act="filter" data-f="done"><span class="dot">${finishers.length}</span><span class="nm">Finished</span><span class="ty">Badge earned</span><span class="who">${finishers.map(s => fa(s)).join('')}</span></button>`
-  return head('Good morning, Kennady', 'Tuesday, October 21 · 2nd Grade · Room 104', `<span class="sample">Sample class</span>${classPick}${newBtn}`) + `
+  return head('Good morning, Kennady', 'Wednesday, October 22 · 2nd Grade · Room 104', `${classPick}${newBtn}`) + `
   <div class="cols">
-    <div class="stack">
-      <section class="card" aria-labelledby="needs">
-        <div class="hd"><h2 id="needs">Needs you today</h2><span class="meta">5 things, most urgent first</span></div>
-        <div class="need crit"><span class="bar"></span><div><div class="t">${fa(byId.lhouser)} L Houser has missed Checkpoint 1 four times</div><div class="d">Two tries at the checkpoint and two at the Skill Builder, all on the same question. More practice alone hasn't helped. A short conference might.</div></div><div class="acts"><button class="btn small" data-act="student" data-id="lhouser">Open L Houser</button></div></div>
-        <div class="need warn"><span class="bar"></span><div><div class="t"><span class="faces">${group.map(s => fa(s)).join('')}</span>Suggested small group: inform vs. persuade</div><div class="d">These 3 called "A dog needs to play to stay healthy" persuasive. "Needs to" sounded like an order to them. One 10-minute group could catch all three.</div></div><div class="acts"><button class="btn small" data-act="items" data-step="c1">See the question</button><button class="btn small primary" data-act="group">Pull this group</button></div></div>
-        <div class="need warn"><span class="bar"></span><div><div class="t"><span class="faces">${idle.map(s => fa(s)).join('')}</span>${idle.map(s => s.name).join(' and ')} ${idle.length > 1 ? 'haven\'t' : 'hasn\'t'} been on the path this week</div><div class="d">H Scott2 stopped at Lesson 1 six days ago. S Caffey hasn't signed in since it was assigned.</div></div><div class="acts"><button class="btn small" data-act="nudge">Send a nudge</button></div></div>
-        <div class="need info"><span class="bar"></span><div><div class="t">6 ECRs waiting for your score</div><div class="d">The Brave Little Lantern · due Thursday. Crystal has a suggested score ready for each one.</div></div><div class="acts"><button class="btn small" data-go="studio">Score in CR Studio</button></div></div>
-        <div class="need good"><span class="bar"></span><div><div class="t"><span class="faces">${finishers.map(s => fa(s)).join('')}</span>${finishers.length} finished Author's Purpose</div><div class="d">E Benton grew 35 points from pre-test to post-test; K McKnight grew 10. Both are ready for the next topic.</div></div><div class="acts"><button class="btn small" data-act="new" data-for="finishers">Assign next topic</button></div></div>
-      </section>
-      <section class="card" aria-labelledby="trailh">
-        <div class="hd"><h2 id="trailh">Author's Purpose: where the class is</h2><span class="meta">Due Friday, Oct 24 · tap a stop to see who's there</span></div>
-        <div class="bd"><div class="trail">${trail}</div></div>
-      </section>
-      <div class="tiles">
-        <div class="tile"><div class="k">Pre → Post growth</div><div class="v">+23</div><div class="s">points, average of the 2 who finished</div></div>
-        <div class="tile"><div class="k">Words written</div><div class="v">19.0k</div><div class="s">this school year</div></div>
-        <div class="tile"><div class="k">Prompts answered</div><div class="v">293</div><div class="s">this school year</div></div>
-      </div>
-    </div>
-    <div class="stack">
-      <section class="card" aria-labelledby="dueh">
-        <div class="hd"><h2 id="dueh">Due this week</h2><button class="btn small ghost" data-go="assignments" style="margin-left:auto">All assignments</button></div>
-        <div class="due">${ring(finishers.length, 13)}<div><div class="t"><span class="typ path">Path</span>Author's Purpose</div><div class="d">Due Fri, Oct 24 · ${c.working + c.help} still working</div></div></div>
-        <div class="due">${ring(4, 13)}<div><div class="t"><span class="typ ecr">ECR</span>The Brave Little Lantern</div><div class="d">Due Thu, Oct 23 · 6 to score</div></div></div>
-        <div class="due">${ring(9, 13)}<div><div class="t"><span class="typ qw">Quick Write</span>Daily Quick Write</div><div class="d">Today · 9 of 13 wrote</div></div></div>
-      </section>
-      <section class="card" aria-labelledby="feedh">
-        <div class="hd"><h2 id="feedh">Writer's Reel</h2><span class="meta">Recent activity</span></div>
-        <div class="feed">${FEED.map(([id, what, when]) => `<div class="it">${fa(byId[id])}<div><b>${byId[id].name}</b> ${what}</div><span class="when">${when}</span></div>`).join('')}</div>
-      </section>
-      <section class="card" aria-label="ClassCade Quick Rewards">
-        <div class="cc-hd"><b>Quick Rewards</b><small>ClassCade</small></div>
-        <div class="rewards">${STUDENTS.slice(0, 6).map(s => `<div class="rw"><span class="coin"></span><div><b>${s.name}</b>${s.coins} coins</div><button class="plus" data-act="coin" data-id="${s.id}">+5</button></div>`).join('')}</div>
-      </section>
-    </div>
-  </div>`
+    <section class="card" aria-labelledby="needs">
+      <div class="hd"><h2 id="needs">Needs you today</h2></div>
+      <div class="need crit"><span class="bar"></span><div><div class="t">${fa(byId.lhouser)} L Houser missed Checkpoint 1 four times</div><div class="d">Practice alone isn't working. Try a quick conference.</div></div><div class="acts"><button class="btn small" data-act="student" data-id="lhouser">Open</button></div></div>
+      <div class="need warn"><span class="bar"></span><div><div class="t"><span class="faces">${group.map(s => fa(s)).join('')}</span>3 students mix up inform and persuade</div><div class="d">One small group could catch all three.</div></div><div class="acts"><button class="btn small primary" data-act="group">Pull this group</button></div></div>
+      <div class="need info"><span class="bar"></span><div><div class="t">6 ECRs to score</div><div class="d">The Brave Little Lantern · due Thursday</div></div><div class="acts"><button class="btn small" data-go="studio">Score</button></div></div>
+    </section>
+    <section class="card" aria-labelledby="dueh">
+      <div class="hd"><h2 id="dueh">Due this week</h2></div>
+      <div class="due">${ring(finishers.length, 13)}<div><div class="t">Author's Purpose</div><div class="d">Lit Lab · Fri, Oct 24</div></div></div>
+      <div class="due">${ring(4, 13)}<div><div class="t">The Brave Little Lantern</div><div class="d">ECR · Thu, Oct 23</div></div></div>
+    </section>
+  </div>
+  <section class="card" aria-labelledby="trailh">
+    <div class="hd"><h2 id="trailh">Author's Purpose: where the class is</h2><button class="btn small ghost" data-go="progress" style="margin-left:auto">See progress</button></div>
+    <div class="bd"><div class="trail">${trail}</div></div>
+  </section>`
 }
 
 function viewProgress() {
@@ -286,7 +270,9 @@ function viewProgress() {
     return `<button class="cell" data-act="items" data-step="${st.id}" title="${w.tries.length} ${w.tries.length > 1 ? 'tries' : 'try'}: ${w.tries.join('%, ')}%">${pill(best(w.tries), w.tries.length > 1 ? w.tries.length : 0)}${sb}${retry}</button>`
   }
   const pres = STUDENTS.map(s => s.pre).filter(v => v != null), posts = STUDENTS.filter(s => s.post != null)
-  return head("Lit Lab Progress", "Every student's spot on the path, with scores and Skill Builder detours", `<select class="pick" aria-label="Topic"><option>Author's Purpose · 2.10A</option><option>Text Structure · 2.10B</option></select>${classPick}`) + `
+  const tools = `<div class="seg" role="group" aria-label="Show as">${[['path','Path'],['students','Students']].map(([k, l]) => `<button class="${ui.pview === k ? 'on' : ''}" aria-pressed="${ui.pview === k}" data-act="pview" data-v="${k}">${l}</button>`).join('')}</div><select class="pick" aria-label="Topic"><option>Author's Purpose · 2.10A</option><option>Text Structure · 2.10B</option></select>${classPick}`
+  if (ui.pview === 'students') return head('Progress', "Author's Purpose · tap a student for their full picture", tools, 'Lit Lab') + roster()
+  return head('Progress', "Author's Purpose · every student's spot on the path", tools, 'Lit Lab') + `
   <div class="summary">
     <div class="sum"><div class="k">Pre-test average</div><div class="v">${avg(pres)}% <small>${pres.length} took it</small></div></div>
     <div class="sum"><div class="k">Post-test average</div><div class="v">${avg(posts.map(s => s.post))}% <small>${posts.length} finished</small></div></div>
@@ -309,7 +295,7 @@ function viewProgress() {
 function viewSkills() {
   const cellOf = (v) => v === undefined ? `<td class="c nt">Not yet taught</td>` : v == null ? `<td class="c" style="color:var(--faint)">—</td>` : `<td class="c ${v >= 90 ? 'b4' : v >= PASS ? 'b3' : v >= 70 ? 'b2' : 'b1'}">${v}%</td>`
   const classPct = (code) => { const xs = STUDENTS.map(s => MASTERY[s.id][code]).filter(v => v != null); return xs.length ? Math.round(100 * xs.filter(v => v >= PASS).length / xs.length) : null }
-  return head('TEKS Mastery', 'Each student\'s latest score on every standard taught this six weeks', `<select class="pick" aria-label="Standards"><option>2.10 Author's purpose and craft</option><option>2.9 Genres</option><option>2.6 Comprehension</option></select>${classPick}`) + `
+  return head('Mastery', 'Each student\'s latest score on every TEKS taught this six weeks', `<select class="pick" aria-label="Standards"><option>2.10 Author's purpose and craft</option><option>2.9 Genres</option><option>2.6 Comprehension</option></select>${classPick}`, 'Lit Lab') + `
   <div class="summary">${TEKS.map(t => { const p = classPct(t.code); return `<div class="sum"><div class="k"><span class="pill" style="background:var(--wash);color:var(--teal-2)">${t.code}</span> ${t.label}</div><div class="v">${p == null ? '<small>Not yet taught</small>' : `${p}% <small>at mastery</small>`}</div>${p == null ? '' : `<div class="mbar"><i style="width:${p}%"></i></div>`}</div>` }).join('')}</div>
   <section class="card"><div class="gridwrap"><table class="grid heat">
     <thead><tr><th class="stu" scope="col">Student</th>${TEKS.map(t => `<th scope="col"><span style="display:inline-block;padding:4px 6px">${t.code}<span class="ty">${t.label}</span></span></th>`).join('')}<th scope="col">Next step</th></tr></thead>
@@ -318,8 +304,8 @@ function viewSkills() {
   <div class="legend"><span><span class="pill" style="background:#cdebd8;color:#145c36">90%+</span> mastered</span><span><span class="pill" style="background:#e8f5ec;color:#22804f">85–89%</span> passed</span><span><span class="pill" style="background:#fcefd8;color:#8a5300">70–84%</span> close</span><span><span class="pill" style="background:#fbe0d9;color:#a3301e">under 70%</span> reteach</span><span>Scores come from the latest checkpoint or post-test on that standard.</span></div>`
 }
 
-function viewStudents() {
-  return head('Students', '13 students · tap anyone for their full picture', classPick) + `
+function roster() {
+  return `
   <div class="roster">${STUDENTS.map(s => { const cur = current(s), st = status(s); return `<button class="rcard" data-act="student" data-id="${s.id}">
     <div class="top2">${fa(s, 40)}<div><div class="n">${s.name}</div><div class="s">${lastText(s)}${s.lang ? ' · Language Bridge ' + s.lang : ''}</div></div></div>
     <div class="kv"><span>Author's Purpose</span><b>${cur.step ? cur.step.label + (cur.sub && cur.sub !== 'Not started' ? ' · ' + cur.sub : '') : 'Finished ✓'}</b></div>
@@ -340,7 +326,7 @@ function viewAssignments() {
     const d = a.done ?? 0
     return `<div class="prog"><span class="track"><i style="width:${d / 13 * 100}%;background:var(--pass)"></i></span><small>${d}/13${a.waiting ? ` · ${a.waiting} to score` : ''}</small></div>`
   }
-  return head('Assignments', 'Lit Lab paths and writing, in one list', `${classPick}${newBtn}`) + `
+  return head('Assignments', 'Lit Lab paths and writing, in one list', `${classPick}${newBtn}`, 'Lit Lab') + `
   <section class="card">
     <div class="tabs" role="tablist">${[['active','Active'],['scheduled','Scheduled'],['past','Past']].map(([k, l]) => `<button class="tab${ui.tab === k ? ' on' : ''}" role="tab" aria-selected="${ui.tab === k}" data-act="tab" data-t="${k}">${l} <span style="color:var(--faint)">${ASSIGNMENTS.filter(a => a.status === k).length}</span></button>`).join('')}</div>
     <div class="gridwrap"><table class="list">
@@ -429,13 +415,15 @@ function drawerNew() {
 function render() {
   renderNav()
   const v = ui.view
-  R.getElementById('page').innerHTML = v === 'home' ? viewHome() : v === 'progress' ? viewProgress() : v === 'skills' ? viewSkills() : v === 'students' ? viewStudents() : v === 'assignments' ? viewAssignments() : viewExisting(v)
+  R.getElementById('page').innerHTML = v === 'home' ? viewHome() : v === 'progress' ? viewProgress() : v === 'skills' ? viewSkills() : v === 'assignments' ? viewAssignments() : viewExisting(v)
   const L = R.getElementById('layer')
   if (!ui.drawer) { L.innerHTML = ''; return }
   const body = ui.drawer.kind === 'student' ? drawerStudent(ui.drawer.id) : ui.drawer.kind === 'items' ? drawerItems(ui.drawer.id) : drawerNew()
   L.innerHTML = `<div class="scrim" data-act="close"></div><aside class="drawer" role="dialog" aria-modal="true">${body}</aside>`
 }
 function go(k) {
+  if (k === 'students') { ui.pview = 'students'; k = 'progress' }
+  if (LIT.some(([c]) => c === k)) ui.litOpen = true
   ui.view = VIEWS.includes(k) ? k : 'home'
   ui.drawer = null
   R.getElementById('app').classList.remove('open')
@@ -463,6 +451,8 @@ function onClick(e) {
   if (act === 'filter') { ui.filter = a.dataset.f; if (ui.view !== 'progress') return go('progress'); return render() }
   if (act === 'progress-step') { ui.filter = 'at:' + a.dataset.step; return go('progress') }
   if (act === 'tab') { ui.tab = a.dataset.t; return render() }
+  if (act === 'pview') { ui.pview = a.dataset.v; return render() }
+  if (act === 'litlab') { if (R.getElementById('app').classList.contains('collapsed')) return go('progress'); ui.litOpen = !ui.litOpen; return renderNav() }
   if (act === 'new') { draft = { type:'path', topic:a.dataset.for === 'finishers' ? 'pg' : 'pg', who:a.dataset.for === 'finishers' ? 1 : 0, for:a.dataset.for }; ui.drawer = { kind:'new' }; return render() }
   if (act === 'dtype') { draft.type = a.dataset.t; return render() }
   if (act === 'dtopic') { draft.topic = a.dataset.t; return render() }

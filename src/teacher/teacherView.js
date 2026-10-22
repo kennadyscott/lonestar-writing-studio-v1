@@ -258,7 +258,7 @@ function viewHome() {
           <div class="hd"><h2 id="zn">${svg('luna')}Luna</h2><span class="meta">Writing Adventure</span></div>
           <div class="bd">
             <div class="zk">Badges the class has earned</div>
-            <div class="badges">${LUNA.map(([m, l, n]) => `<div class="badge${n ? '' : ' none'}"><img src="${BASE}badges/${m}.webp" alt=""><b>${n}<small>/13</small></b><span>${l}</span></div>`).join('')}</div>
+            <div class="badges">${LUNA.map(([m, l, n]) => `<div class="badge${n ? '' : ' none'}"><img src="${BASE}badges/${m}.webp" alt=""><span class="bt"><span class="bl">${l}</span><b>${n}<small> of 13</small></b></span></div>`).join('')}</div>
             <div class="zfoot">4 badges earned this week</div>
           </div>
         </section>

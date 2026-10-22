@@ -185,12 +185,12 @@ const ICON = {
 const svg = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`
 const chev = '<svg class="chev" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 5l4 4 4-4"/></svg>'
 // The menu (Kennady, 2026-10-22: "Lit Lab with assignments, progress, and Mastery underneath ... Then CR Studio, then Crystal
-// Reports, then Class Manager, then Language Bridge"). Students is a view inside Progress.
+// Reports, then Class Manager, then Language Bridge"; later "Move Lit Lab under CR Studio"). Students is a view inside Progress.
 const LIT = [['assignments','Assignments'],['progress','Progress'],['skills','Mastery']]
 const NAV = [
   ['home','Home'],
-  ['litlab','Lit Lab',LIT],
   ['studio','CR Studio',null,true],
+  ['litlab','Lit Lab',LIT],
   ['reports','Crystal Reports'],
   ['classes','Class Manager',null,true],
   ['bridge','Language Bridge',null,true],

@@ -300,3 +300,36 @@ table.list{border-collapse:collapse;width:100%;min-width:760px}
 .seg{display:inline-flex;border:1px solid #9fb6c3;border-radius:8px;overflow:hidden;background:#fff}
 .seg button{border:0;background:none;padding:8px 14px;font-size:14px;font-weight:500;color:var(--muted)}
 .seg button.on{background:var(--teal);color:#fff}
+
+/* Home: one card per zone, Quick Rewards down the right (2026-10-22) */
+.home{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start}
+.zones{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.zone .hd h2,.card > .hd h2{display:flex;align-items:center;gap:8px}
+.zone .hd h2 svg{width:20px;height:20px;color:var(--teal-2)}
+.zk{font-size:14px;color:var(--muted);margin-bottom:12px}
+.prog.big .track{height:14px;border-radius:7px}
+.zlegend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px}
+.zlegend button{border:0;background:none;padding:2px 0;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--muted)}
+.zlegend button:hover{color:var(--ink)}
+.zlegend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.zlegend b{color:var(--ink);font-variant-numeric:tabular-nums}
+.zalert{margin-top:14px;width:100%;display:flex;align-items:center;gap:8px;border:1px solid #f1d9a6;background:#fff7e6;border-radius:10px;padding:9px 12px;font-size:14px;font-weight:500;text-align:left}
+.zalert:hover{border-color:#e09a2a}
+.badges{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.badge{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center}
+.badge img{width:44px;height:44px;object-fit:contain}
+.badge.none img{filter:grayscale(1);opacity:.45}
+.badge b{font-size:15px;font-variant-numeric:tabular-nums}
+.badge b small{font-size:11px;color:var(--muted);font-weight:500}
+.badge span{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.zfoot{margin-top:12px;font-size:13.5px;color:var(--muted)}
+.typ.luna{background:#fde7d3;color:#9a4a00}
+.rewards-card{overflow:hidden}
+.rewards-card .cc-hd{flex-wrap:wrap;gap:10px;padding:14px 16px}
+.rewards-card .cc-hd > div{display:grid;gap:2px}
+.rewards-card .cc-hd img{height:30px;width:auto}
+.rewards-card .cc-hd b{font-size:19px}
+.rewards-card .cc-hd .pick{font-size:13px;padding:7px 30px 7px 10px}
+.rewards-card .rewards{grid-template-columns:minmax(0,1fr)}
+@media (max-width:1180px){.home{grid-template-columns:minmax(0,1fr)}.rewards-card .rewards{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}}
+@media (max-width:760px){.zones{grid-template-columns:minmax(0,1fr)}}

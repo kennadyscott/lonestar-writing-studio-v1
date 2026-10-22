@@ -17,7 +17,7 @@ export default function TeacherView({ onStudent, studentLabel }) {
     }
     const el = host.current
     const root = el.shadowRoot || el.attachShadow({ mode: 'open' })
-    return mountTeacher(root, { css, logo: BRAND.logo, onStudent, studentLabel })
+    return mountTeacher(root, { css, logo: BRAND.logo, classcade: BRAND.classcade, base: import.meta.env.BASE_URL || '/', onStudent, studentLabel })
   }, [onStudent, studentLabel])
   return <div ref={host} />
 }

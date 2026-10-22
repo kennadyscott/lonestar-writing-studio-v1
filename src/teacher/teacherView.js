@@ -4,6 +4,7 @@
 // a Skill Builder detour under 85%, post-test). It draws into a shadow root so its styles and the student app's never mix.
 /* eslint-disable */
 let R = null
+let BASE = '/', CLASSCADE = ''
 const SHELL = `<div class="app" id="app">
   <nav class="rail" aria-label="Teacher">
     <img class="logo" src="__LOGO__" alt="LoneStar CR">
@@ -166,7 +167,7 @@ const MASTERY = Object.fromEntries(STUDENTS.map((s, i) => {
 }))
 
 /* ---------- ui state ---------- */
-const ui = { view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false, pview:'path', litOpen:true }
+const ui = { feed:'all', view:'home', filter:'all', tab:'active', small:new Set(), drawer:null, collapsed:false, pview:'path', litOpen:true }
 const VIEWS = ['home','assignments','progress','skills','students','studio','reports','classes','bridge']
 
 const ICON = {
@@ -179,6 +180,7 @@ const ICON = {
   bridge:'<path d="M4 5h9M8.5 3v2M6 5c.5 3 3 6 6 7M11 5c-.5 3-3 6-6 7"/><path d="M13 21l4-9 4 9M14.5 18h5"/>',
   studio:'<path d="M14 4l6 6-11 11H3v-6z"/><path d="M12.5 5.5l6 6"/>',
   reports:'<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  luna:'<path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/><path d="M16 3.5l.7 1.6 1.6.7-1.6.7-.7 1.6-.7-1.6-1.6-.7 1.6-.7z"/>',
   litlab:'<path d="M12 6.5C10 5 7 4.5 3.5 5v13c3.5-.5 6.5 0 8.5 1.5 2-1.5 5-2 8.5-1.5V5C17 4.5 14 5 12 6.5z"/><path d="M12 6.5v13"/>',
 }
 const svg = (k) => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[k]}</svg>`
@@ -220,34 +222,58 @@ function head(title, sub, tools = '', eyebrow = '') {
 const classPick = `<select class="pick" id="cls" aria-label="Class"><option>2nd Grade · Room 104</option><option>All classes</option></select>`
 const newBtn = `<button class="btn primary" data-act="new"><svg width="14" height="14" viewBox="0 0 14 14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M7 2v10M2 7h10"/></svg>New assignment</button>`
 
+// Home (Kennady, 2026-10-22: "The homescreen still needs to have the ClassCade quick rewards. And then I think just quick
+// overview of each zone: Lit Lab, Luna, Recent Writer's Activity"). One card per zone, Quick Rewards down the right.
+const LUNA = [['m1','SCR',9],['m2','ECR',5],['m3','Stellar',3],['m4','Process',2],['m5','Revision',1],['m6','Editing',0]]
+const WRITING = [
+  ['ecr','vhinton','submitted an ECR for The Brave Little Lantern','20 min ago'],
+  ['qw','kscott',"wrote today's Quick Write (142 words)",'35 min ago'],
+  ['luna','emontagne','earned the SCR badge in Luna','1 hr ago'],
+  ['scr','mwood','finished the SCR "Why Do Owls Hunt at Night?"','2 hr ago'],
+  ['ecr','ahayes','submitted an ECR for The Brave Little Lantern','3 hr ago'],
+  ['qw','lhouser',"wrote today's Quick Write (64 words)",'Yesterday'],
+  ['luna','kmcknight','earned the Stellar badge in Luna','Yesterday'],
+]
+const KINDS = { scr:'SCR', ecr:'ECR', qw:'Quick Write', luna:'Luna badge' }
+const gifts = {}
 function viewHome() {
   const c = counts()
-  const finishers = STUDENTS.filter(s => status(s) === 'done')
-  const group = ['ahayes','emontagne','lhouser'].map(id => byId[id])
-  const idle = STUDENTS.filter(s => status(s) === 'idle')
-  const at = (i) => STUDENTS.filter(s => { const cur = current(s); return cur.step ? STEPS.indexOf(cur.step) === i : false })
-  const trail = STEPS.map((st, i) => {
-    const here = at(i)
-    return `<button class="stop${here.length ? ' has' : ''}" data-act="progress-step" data-step="${st.id}"><span class="dot">${here.length}</span><span class="nm">${st.label}</span><span class="ty">${st.ty}</span><span class="who">${here.map(s => fa(s)).join('')}</span></button>`
-  }).join('') + `<button class="stop finish" data-act="filter" data-f="done"><span class="dot">${finishers.length}</span><span class="nm">Finished</span><span class="ty">Badge earned</span><span class="who">${finishers.map(s => fa(s)).join('')}</span></button>`
+  const help = STUDENTS.filter(s => status(s) === 'help')
+  const parts = [['done','Finished',c.done,'var(--pass)'],['working','Working',c.working,'var(--sky)'],['help','Need help',c.help,'#e09a2a'],['idle','Not active',c.idle,'var(--lock)']]
+  const feed = WRITING.filter(([k]) => ui.feed === 'all' || ui.feed === k).slice(0, 5)
   return head('Good morning, Kennady', 'Wednesday, October 22 · 2nd Grade · Room 104', `${classPick}${newBtn}`) + `
-  <div class="cols">
-    <section class="card" aria-labelledby="needs">
-      <div class="hd"><h2 id="needs">Needs you today</h2></div>
-      <div class="need crit"><span class="bar"></span><div><div class="t">${fa(byId.lhouser)} L Houser missed Checkpoint 1 four times</div><div class="d">Practice alone isn't working. Try a quick conference.</div></div><div class="acts"><button class="btn small" data-act="student" data-id="lhouser">Open</button></div></div>
-      <div class="need warn"><span class="bar"></span><div><div class="t"><span class="faces">${group.map(s => fa(s)).join('')}</span>3 students mix up inform and persuade</div><div class="d">One small group could catch all three.</div></div><div class="acts"><button class="btn small primary" data-act="group">Pull this group</button></div></div>
-      <div class="need info"><span class="bar"></span><div><div class="t">6 ECRs to score</div><div class="d">The Brave Little Lantern · due Thursday</div></div><div class="acts"><button class="btn small" data-go="studio">Score</button></div></div>
+  <div class="home">
+    <div class="stack">
+      <div class="zones">
+        <section class="card zone" aria-labelledby="zl">
+          <div class="hd"><h2 id="zl">${svg('litlab')}Lit Lab</h2><button class="btn small ghost" data-go="progress" style="margin-left:auto">Open</button></div>
+          <div class="bd">
+            <div class="zk">Author's Purpose · due Fri, Oct 24</div>
+            <div class="prog big"><span class="track">${parts.map(([, , n, col]) => `<i style="width:${n / 13 * 100}%;background:${col}"></i>`).join('')}</span></div>
+            <div class="zlegend">${parts.map(([k, l, n, col]) => `<button data-act="filter" data-f="${k}"><i style="background:${col}"></i><b>${n}</b> ${l}</button>`).join('')}</div>
+            ${help.length ? `<button class="zalert" data-act="filter" data-f="help"><span class="faces">${help.map(s => fa(s)).join('')}</span>${help.map(s => s.name).join(' and ')} need${help.length > 1 ? '' : 's'} help</button>` : ''}
+          </div>
+        </section>
+        <section class="card zone" aria-labelledby="zn">
+          <div class="hd"><h2 id="zn">${svg('luna')}Luna</h2><span class="meta">Writing Adventure</span></div>
+          <div class="bd">
+            <div class="zk">Badges the class has earned</div>
+            <div class="badges">${LUNA.map(([m, l, n]) => `<div class="badge${n ? '' : ' none'}"><img src="${BASE}badges/${m}.webp" alt=""><b>${n}<small>/13</small></b><span>${l}</span></div>`).join('')}</div>
+            <div class="zfoot">4 badges earned this week</div>
+          </div>
+        </section>
+      </div>
+      <section class="card" aria-labelledby="zw">
+        <div class="hd"><h2 id="zw">Recent Writer's Activity</h2><button class="btn small ghost" data-go="studio" style="margin-left:auto">6 ECRs to score</button></div>
+        <div class="bd" style="padding-bottom:6px"><div class="chips" role="group" aria-label="Show">${[['all','All'], ...Object.entries(KINDS)].map(([k, l]) => `<button class="chip${ui.feed === k ? ' on' : ''}" aria-pressed="${ui.feed === k}" data-act="feed" data-k="${k}">${l}</button>`).join('')}</div></div>
+        <div class="feed">${feed.map(([k, id, what, when]) => `<div class="it">${fa(byId[id])}<div><span class="typ ${k === 'luna' ? 'luna' : k}">${KINDS[k]}</span><b>${byId[id].name}</b> ${what}</div><span class="when">${when}</span></div>`).join('') || '<div class="empty"><b>Nothing yet</b>Try All.</div>'}</div>
+      </section>
+    </div>
+    <section class="card rewards-card" aria-label="ClassCade Quick Rewards">
+      <div class="cc-hd"><div><img src="${CLASSCADE}" alt="ClassCade"><b>Quick Rewards</b></div><select class="pick" aria-label="Class"><option>All Classes</option><option>2nd Grade · Room 104</option></select></div>
+      <div class="rewards">${STUDENTS.map(s => `<div class="rw"><span class="coin"></span><div><b>${s.name}</b>Gifted coins: ${gifts[s.id] || 0}</div><button class="plus" data-act="coin" data-id="${s.id}" aria-label="Gift ${s.name} 5 coins">+5</button></div>`).join('')}</div>
     </section>
-    <section class="card" aria-labelledby="dueh">
-      <div class="hd"><h2 id="dueh">Due this week</h2></div>
-      <div class="due">${ring(finishers.length, 13)}<div><div class="t">Author's Purpose</div><div class="d">Lit Lab · Fri, Oct 24</div></div></div>
-      <div class="due">${ring(4, 13)}<div><div class="t">The Brave Little Lantern</div><div class="d">ECR · Thu, Oct 23</div></div></div>
-    </section>
-  </div>
-  <section class="card" aria-labelledby="trailh">
-    <div class="hd"><h2 id="trailh">Author's Purpose: where the class is</h2><button class="btn small ghost" data-go="progress" style="margin-left:auto">See progress</button></div>
-    <div class="bd"><div class="trail">${trail}</div></div>
-  </section>`
+  </div>`
 }
 
 function viewProgress() {
@@ -468,7 +494,8 @@ function onClick(e) {
   if (act === 'small') { const id = a.dataset.id; ui.small.has(id) ? ui.small.delete(id) : ui.small.add(id); render(); return toast(ui.small.has(id) ? `${byId[id].name} added to your small group` : `${byId[id].name} removed from your small group`) }
   if (act === 'shout') { const v = R.getElementById('shout')?.value.trim(); return toast(v ? `Shout-out sent to ${byId[a.dataset.id].name}` : 'Write a shout-out first') }
   if (act === 'nudge') return toast('Nudge sent to H Scott2 and S Caffey: "Your Author\'s Purpose trail is waiting!"')
-  if (act === 'coin') { const s = byId[a.dataset.id]; s.coins += 5; render(); return toast(`+5 coins for ${s.name}`) }
+  if (act === 'coin') { const s = byId[a.dataset.id]; gifts[s.id] = (gifts[s.id] || 0) + 5; render(); return toast(`Gifted 5 coins to ${s.name}`) }
+  if (act === 'feed') { ui.feed = a.dataset.k; return render() }
   if (act === 'toast') return toast(a.dataset.msg)
 }
 function onKey(e) { if (e.key === 'Escape') { if (acctOpen) { acctOpen = false; return paintAcct() } if (ui.drawer) { ui.drawer = null; render() } } }
@@ -498,6 +525,8 @@ function switchAccount(e) {
 /** Draws the teacher side into a shadow root. Returns a function that takes it down. */
 export function mountTeacher(root, opts = {}) {
   R = root
+  BASE = opts.base || '/'
+  CLASSCADE = opts.classcade || ''
   studentLabel = opts.studentLabel || studentLabel
   onStudent = opts.onStudent || onStudent
   R.innerHTML = `<style>${opts.css || ''}</style><div class="tv-root">${SHELL.replace('__LOGO__', opts.logo || '').replace('__STUDENT__', studentLabel)}</div>`

@@ -96,13 +96,12 @@ const MISSES = {
   q2:{ q:'Checkpoint 2: "I know this because ___."', said:'"because hamsters are cute"', right:'a reason from the text', hint:'Point to the words in the story that made you laugh or wonder.' },
 }
 
+// Lit Lab assignments are Lit Lab paths only (Kennady, 2026-10-22: "they wouldn't have ECR or Quick Writes"); writing lives in CR Studio.
 let ASSIGNMENTS = [
   { id:'a1', type:'path', title:"Author's Purpose", teks:'2.10A', cls:'2nd Grade · Room 104', assigned:'Oct 14', due:'Oct 24', status:'active' },
-  { id:'a2', type:'ecr', title:'The Brave Little Lantern', teks:'2.12B', cls:'2nd Grade · Room 104', assigned:'Oct 16', due:'Oct 23', status:'active', done:4, scored:0, waiting:6 },
-  { id:'a3', type:'qw', title:'Daily Quick Write', teks:'2.11A', cls:'2nd Grade · Room 104', assigned:'Daily', due:'Ongoing', status:'active', done:9 },
-  { id:'a4', type:'scr', title:'Why Do Leaves Change Color?', teks:'2.9D(i)', cls:'2nd Grade · Room 104', assigned:'Oct 27', due:'Oct 31', status:'scheduled', done:0 },
+  { id:'a4', type:'path', title:'Print and Graphic Features', teks:'2.10C', cls:'2nd Grade · Room 104', assigned:'Oct 27', due:'Nov 7', status:'scheduled', done:0 },
   { id:'a5', type:'path', title:'Text Structure', teks:'2.10B', cls:'2nd Grade · Room 104', assigned:'Sep 29', due:'Oct 10', status:'past', done:12, avg:84 },
-  { id:'a6', type:'ecr', title:'A Day at the Fair', teks:'2.12A', cls:'2nd Grade · Room 104', assigned:'Sep 22', due:'Oct 1', status:'past', done:13, avg:2.6 },
+  { id:'a6', type:'path', title:'Vowel Teams', teks:'2.2B(ii)', cls:'2nd Grade · Room 104', assigned:'Sep 15', due:'Sep 26', status:'past', done:13, avg:88 },
 ]
 const TOPICS = [
   { id:'ap', title:"Author's Purpose", teks:'2.10A', grade:2, parts:'Pre-test · 2 lessons · 3 checkpoints · Skill Builders · Post-test' },
@@ -343,7 +342,6 @@ function roster() {
 function viewAssignments() {
   const c = counts()
   const list = ASSIGNMENTS.filter(a => a.status === ui.tab)
-  const TYPE = { path:'Lit Lab path', ecr:'ECR', scr:'SCR', qw:'Quick Write' }
   const progressOf = (a) => {
     if (a.type === 'path' && a.status === 'active') {
       const parts = [[c.done, 'var(--pass)'], [c.working, 'var(--sky)'], [c.help, '#e09a2a'], [c.idle, 'var(--lock)']]
@@ -352,16 +350,16 @@ function viewAssignments() {
     const d = a.done ?? 0
     return `<div class="prog"><span class="track"><i style="width:${d / 13 * 100}%;background:var(--pass)"></i></span><small>${d}/13${a.waiting ? ` · ${a.waiting} to score` : ''}</small></div>`
   }
-  return head('Assignments', 'Lit Lab paths and writing, in one list', `${classPick}${newBtn}`, 'Lit Lab') + `
+  return head('Assignments', 'The Lit Lab paths your class is working through', `${classPick}${newBtn}`, 'Lit Lab') + `
   <section class="card">
     <div class="tabs" role="tablist">${[['active','Active'],['scheduled','Scheduled'],['past','Past']].map(([k, l]) => `<button class="tab${ui.tab === k ? ' on' : ''}" role="tab" aria-selected="${ui.tab === k}" data-act="tab" data-t="${k}">${l} <span style="color:var(--faint)">${ASSIGNMENTS.filter(a => a.status === k).length}</span></button>`).join('')}</div>
     <div class="gridwrap"><table class="list">
       <thead><tr><th>Assignment</th><th>Class</th><th>Assigned</th><th>Due</th><th>Progress</th><th>${ui.tab === 'past' ? 'Class average' : ''}</th><th></th></tr></thead>
       <tbody>${list.length ? list.map(a => `<tr>
-        <td><span class="typ ${a.type}">${TYPE[a.type]}</span><span class="t">${a.title}</span><div style="font:500 12px var(--mono);color:var(--teal-2);margin-top:3px">${a.teks}</div></td>
+        <td><span class="t">${a.title}</span><div style="font:500 12px var(--mono);color:var(--teal-2);margin-top:3px">${a.teks}</div></td>
         <td>${a.cls}</td><td>${a.assigned}</td><td>${a.due}</td><td>${progressOf(a)}</td>
-        <td>${a.avg != null ? (a.type === 'ecr' ? `${a.avg} / 4` : `${a.avg}%`) : ''}</td>
-        <td style="text-align:right">${a.type === 'path' ? `<button class="btn small" data-go="progress">View progress</button>` : a.status === 'scheduled' ? `<button class="btn small" data-act="toast" data-msg="Editing a scheduled assignment opens the same form as New assignment">Edit</button>` : `<button class="btn small" data-go="studio">Open in CR Studio</button>`}</td>
+        <td>${a.avg != null ? `${a.avg}%` : ''}</td>
+        <td style="text-align:right">${a.status === 'scheduled' ? `<button class="btn small" data-act="toast" data-msg="Editing a scheduled path opens the same form as New assignment">Edit</button>` : `<button class="btn small" data-go="progress">View progress</button>`}</td>
       </tr>`).join('') : `<tr><td colspan="7"><div class="empty"><b>Nothing here yet</b>Use New assignment to add one.</div></td></tr>`}</tbody>
     </table></div>
   </section>`
@@ -421,10 +419,8 @@ function drawerItems(stepId) {
 let draft = null
 function drawerNew() {
   const d = draft
-  const TYPES = [['path','Lit Lab path','Pre-test, lessons, checkpoints, Skill Builders, post-test'],['ecr','ECR','Extended constructed response, scored with Crystal'],['scr','SCR','Short constructed response'],['qw','Quick Write','A short daily prompt']]
-  return `<div class="dh"><div><h2>New assignment</h2><div style="color:var(--muted);font-size:13.5px">${d.for === 'finishers' ? 'For E Benton and K McKnight, who finished Author\'s Purpose' : '2nd Grade · Room 104'}</div></div><button class="icon-btn x" data-act="close" aria-label="Close">✕</button></div>
+  return `<div class="dh"><div><h2>New Lit Lab path</h2><div style="color:var(--muted);font-size:13.5px">${d.for === 'finishers' ? 'For E Benton and K McKnight, who finished Author\'s Purpose' : '2nd Grade · Room 104'}</div></div><button class="icon-btn x" data-act="close" aria-label="Close">✕</button></div>
   <div class="db">
-    <div class="field"><span class="lab">What kind?</span><div class="opts">${TYPES.map(([k, l, s]) => `<button class="opt${d.type === k ? ' on' : ''}" data-act="dtype" data-t="${k}" aria-pressed="${d.type === k}"><b>${l}</b><span>${s}</span></button>`).join('')}</div></div>
     ${d.type === 'path' ? `<div class="field"><span class="lab">Topic</span><div class="topiclist">${TOPICS.map(t => `<button class="topic${d.topic === t.id ? ' on' : ''}" data-act="dtopic" data-t="${t.id}" aria-pressed="${d.topic === t.id}"><span class="teks">${t.teks}</span><span><b>${t.title}</b><small>${t.parts}</small></span>${t.id === 'ap' ? '<small style="margin-left:auto;color:var(--near)">Assigned now</small>' : t.id === 'ts' ? '<small style="margin-left:auto;color:var(--muted)">Done Oct 10</small>' : ''}</button>`).join('')}</div></div>` : `<div class="field"><label for="ptitle">Prompt title</label><input id="ptitle" placeholder="e.g. The Brave Little Lantern"></div>`}
     <div class="field"><span class="lab">Who</span><div class="chips">${['Whole class (13)','Finished Author\'s Purpose (2)','Small group'+(ui.small.size ? ` (${ui.small.size})` : ''),'Pick students'].map((l, i) => `<button class="chip${d.who === i ? ' on' : ''}" data-act="dwho" data-w="${i}">${l}</button>`).join('')}</div></div>
     <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"><div class="field"><label for="start">Start</label><input id="start" type="date" value="2026-10-22"></div><div class="field"><label for="due">Due</label><input id="due" type="date" value="2026-10-31"></div></div>
@@ -485,9 +481,9 @@ function onClick(e) {
   if (act === 'dwho') { draft.who = Number(a.dataset.w); return render() }
   if (act === 'assign') {
     const t = TOPICS.find(x => x.id === draft.topic)
-    const title = draft.type === 'path' ? t.title : (R.getElementById('ptitle')?.value.trim() || 'New prompt')
+    const title = t.title
     const who = [13, 2, ui.small.size || 3, 13][draft.who]
-    ASSIGNMENTS.unshift({ id:'n' + Date.now(), type:draft.type, title, teks:draft.type === 'path' ? t.teks : '2.12B', cls:'2nd Grade · Room 104', assigned:'Oct 22', due:'Oct 31', status:'scheduled', done:0 })
+    ASSIGNMENTS.unshift({ id:'n' + Date.now(), type:'path', title, teks:t.teks, cls:'2nd Grade · Room 104', assigned:'Oct 22', due:'Oct 31', status:'scheduled', done:0 })
     ui.drawer = null; ui.tab = 'scheduled'; go('assignments'); return toast(`${title} assigned to ${who} students, starting Oct 22`)
   }
   if (act === 'group') { ['ahayes','emontagne','lhouser'].forEach(id => ui.small.add(id)); ui.drawer = null; render(); return toast('Small group made: A Hayes, E Montagne, L Houser. They\'re tagged on Lit Lab Progress.') }

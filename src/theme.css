@@ -1883,7 +1883,10 @@ body { font-size: 16px; }
 .hs .gr-gbracket { border-color: var(--hs-line); }
 
 /* D: domain tiles across the top, each with a topics meter */
-.gre-tiles { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.gre-tiles { display: grid; grid-template-columns: repeat(var(--gre-n, 5), minmax(0, 1fr)); gap: 8px; }
+/* every area in one row, however many there are (Kennady, 2026-11-03: "make these chips smaller so they all fit in a row") */
+.gre-tiles.many { gap: 6px; }
+.gre-tiles.many .gre-tile-name { font-size: 12px; padding: 0 7px; }
 .gre-tile { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 0 0 9px; border-radius: 12px; overflow: hidden; background: #fff; border: 2px solid transparent; box-shadow: 0 2px 8px rgba(2,30,60,.1); font: inherit; text-align: left; cursor: pointer; }
 .gre-tile img { width: 100%; height: 48px; object-fit: cover; display: block; }
 .gre-tile-name { padding: 0 9px; font-size: 13px; font-weight: 800; color: #0d2f55; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

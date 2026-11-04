@@ -181,12 +181,23 @@ function LitLabBar({ onOpen }) {
       done = m.mastered
     }
   }
+  // The switch shows where the student is (Kennady, 2026-11-03: "The not started control wouldn't show a pathway yet?"): once a
+  // path is under way it reads Already started; Not started clears every unfinished path, worksheet scores included.
+  const lit = demo && litLabDemo() === 'open' ? 'open' : cur ? 'started' : 'new'
+  const pickDemo = (k) => {
+    if (k !== 'open') {
+      const ids = (tp) => [...(tp.core || []).map((w) => w.id), tp.full?.id, ...Object.values(tp.skillBuilders || {}).map((w) => w.id)].filter(Boolean)
+      const open = mine.filter(({ st }) => st.started && !st.finished).flatMap(({ tp }) => ids(tp))
+      if (open.length) { const next = { ...progress }; open.forEach((id) => delete next[id]); try { localStorage.setItem('proofProgress', JSON.stringify(next)) } catch { /* fine */ } }
+    }
+    setLitLabDemo(k); setDemo(k + ':' + Date.now())
+  }
   return (
     <div>
     <div className="jr-proto">
       <span className="style-pick" role="group" aria-label="Prototype: Lit Lab progress">
         <span className="lbl">Prototype</span>
-        {LITLAB_DEMOS.map(([k, label]) => <button key={k} type="button" className={demo === k ? 'on' : ''} aria-pressed={demo === k} onClick={() => { setLitLabDemo(k); setDemo(k) }}>{label}</button>)}
+        {LITLAB_DEMOS.map(([k, label]) => <button key={k} type="button" className={lit === k ? 'on' : ''} aria-pressed={lit === k} onClick={() => pickDemo(k)}>{label}</button>)}
       </span>
     </div>
     <div className="luna-bar lg journey one-lane jr-litlab">
@@ -690,7 +701,7 @@ function DomainStrip({ mine, progress, selD, onPick, next, onStart }) {
       {/* the stats line came out (her note, 2026-10-02: "Get rid of 1/5 domains mastered,
           32/65 topics mastered"); the average growth sits in the card's header */}
       {/* "put all the little domain boxes at the top with a little meter" */}
-      <div className="gre-tiles" role="tablist" aria-label={t('Domains')}>
+      <div className={'gre-tiles' + (doms.length > 5 ? ' many' : '')} style={{ '--gre-n': doms.length }} role="tablist" aria-label={t('Domains')}>
         {doms.map((x) => (
           <button key={x.d} role="tab" aria-selected={selD === x.d}
             className={'gre-tile' + (selD === x.d ? ' on' : '') + (x.mastered ? ' mastered' : '') + (x.list.length ? '' : ' nopath') + (x.mastered ? ' m-done' : x.done > 0 ? ' m-prog' : ' m-none')}

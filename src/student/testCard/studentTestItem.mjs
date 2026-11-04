@@ -3,8 +3,9 @@
 // 2026: "I want the preview box to be the same as what it would look like on the student screen").
 //
 // An item: { id, kind, prompt, text?, options: [{ id, text }], correct, groups?, left?, right?, picture?: { src, alt, focus?: { x, y } },
-//            passage?: { title, paragraphs }, layout?: 'side' | 'stack', pictureAt?: 'question' | 'passage', hint? }
-// A passage question's picture sits above the question unless pictureAt is 'passage'. A trimmed picture is centred on focus
+//            passage?: { title, paragraphs }, layout?: 'side' | 'stack', pictureAt?: 'question' | 'below' | 'passage', hint? }
+// A passage question's picture sits above the question, below its answers when pictureAt is 'below', or above the passage when it
+// is 'passage'. A trimmed picture is centred on focus
 // (percentages across and down; default the middle).
 // Answers are arrays of strings:
 //   single / inline   one option id                multi / hotspot   option ids
@@ -41,6 +42,15 @@ export function scoreStudentItem(item, answer) {
   if (item.kind === 'order') return got.length === want.length && got.every((id, i) => id === want[i])
   if (item.kind === 'single' || item.kind === 'inline') return got.length === 1 && want.length === 1 && got[0] === want[0]
   return sameSet(got, want)
+}
+
+/** The space before a hotspot segment, so the taps read as one paragraph. Punctuation stays against the word before it ("home."). */
+export function hotspotLead(prev, text) {
+  const before = String(prev ?? '')
+  const next = String(text ?? '')
+  if (!before || /\s$/.test(before) || /^\s/.test(next)) return ''
+  if (/^[,.;:!?)\]'’]/.test(next)) return ''
+  return ' '
 }
 
 /** A passage paragraph without the number typed at its start: the screen numbers paragraphs, so "1. Mia woke up" would show the 1

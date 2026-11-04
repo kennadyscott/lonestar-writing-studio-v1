@@ -9,9 +9,11 @@
 // A passage question's picture must be wide; any other shape is not shown (Kennady, October 12, 2026: "only allow horizontal layout
 // images"). It spans the question column above the question, or, when the publisher puts it there (`pictureAt: 'passage'`), the
 // passage column above the passage ("give the publisher the ability to move the picture above the passage or above the question").
+// `pictureAt: 'below'` puts it under the answers, filling the room the question leaves (Kennady, November 4, 2026: "All of that
+// space under the question seems like a huge waste when the image could come up in there?").
 // Sized for a Chromebook: --stc-avail is the height below the app's top bar (default: the screen less 94px).
 import { useMemo, useState } from 'react'
-import { readyToCheck, scoreStudentItem, seededOrder, unnumbered } from './studentTestItem.mjs'
+import { hotspotLead, readyToCheck, scoreStudentItem, seededOrder, unnumbered } from './studentTestItem.mjs'
 import './studentTestCard.css'
 
 const letter = (i) => String.fromCharCode(65 + i)
@@ -31,8 +33,9 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
   const focus = item.picture?.focus
   const focusStyle = focus ? { objectPosition: `${focus.x}% ${focus.y}%` } : undefined
   const picAtPassage = !!passagePic && item.pictureAt === 'passage'
+  const picBelow = !!passagePic && item.pictureAt === 'below'
   const passageFigure = passagePic && (
-    <figure className={'stc-qpic' + (picAtPassage ? ' at-passage' : '')} hidden={shape !== 'wide'}>
+    <figure className={'stc-qpic' + (picAtPassage ? ' at-passage' : picBelow ? ' below' : '')} hidden={shape !== 'wide'}>
       <img src={passagePic.src} alt={passagePic.alt || ''} style={focusStyle} onLoad={(e) => measured(shapeOf(e.currentTarget))} />
     </figure>
   )
@@ -66,7 +69,7 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
           </figure>
         )}
         <div className="stc-q">
-          {!picAtPassage && passageFigure}
+          {!picAtPassage && !picBelow && passageFigure}
           {inlineInAsk
             ? <h2 className="stc-ask stc-ask-inline">{item.prompt.split(/_{2,}/)[0]}<InlineSelect item={item} options={options} answer={answer} set={set} checked={checked} />{item.prompt.split(/_{2,}/).slice(1).join(' ')}</h2>
             : <h2 className={'stc-ask' + (String(item.prompt || '').length > 110 ? ' long' : '')}>{item.prompt}</h2>}
@@ -77,6 +80,7 @@ export function StudentTestCard({ item, answer = /** @type {string[]} */ ([]), o
               {!right && item.hint && <p>💡 {item.hint}</p>}
             </div>
           )}
+          {picBelow && passageFigure}
         </div>
       </div>
 
@@ -123,9 +127,9 @@ function Answer({ item, options, answer, set, checked }) {
   if (item.kind === 'hotspot') {
     return <>
       <p className="stc-how">Tap the words that answer the question.</p>
-      <p className="stc-hotspot">{options.map((o) => {
+      <p className="stc-hotspot">{options.map((o, i) => {
         const on = answer.includes(o.id)
-        return <button key={o.id} type="button" aria-pressed={on} className={'stc-seg' + (on ? ' selected' : '') + mark(o.id)} disabled={checked} onClick={() => set(on ? answer.filter((x) => x !== o.id) : [...answer, o.id])}>{o.text}</button>
+        return <span key={o.id}>{hotspotLead(options[i - 1]?.text, o.text)}<button type="button" aria-pressed={on} className={'stc-seg' + (on ? ' selected' : '') + mark(o.id)} disabled={checked} onClick={() => set(on ? answer.filter((x) => x !== o.id) : [...answer, o.id])}>{o.text}</button></span>
       })}</p>
     </>
   }

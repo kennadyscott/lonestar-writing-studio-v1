@@ -5,6 +5,7 @@ import { scoreStudentItem } from './testCard/studentTestItem.mjs'
 import { useBandValue } from '../lib/gradeBand.js'
 import './StudentPathway.css'
 import { Path45Trail, Path45Dashboard, samplePathRecord } from './Path45Looks.jsx'
+import { LitLabLesson } from './LitLabLesson.jsx'
 
 const names = { pre: 'Pre-test', lesson: 'Lesson', practice: 'Practice', post: 'Post-test' }
 const marks = { pre: '01', lesson: '▤', practice: '✦', post: '✓' }
@@ -56,9 +57,11 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   // at the top and then the student has to scroll to see the whole question"): no breadcrumb, note or toolbar row; the way back sits
   // in the test card's own header.
   const testing = !!active && (active.type === 'pre' || active.type === 'post')
+  // A lesson opens in Luna's lesson frame and, like a test, takes the whole screen (2026-11-04: "make the regular lit lab match this structure").
+  const immersive = testing || (!!active && active.type === 'lesson')
   return (
     <section className={'student-pathway' + (testing ? ' sp-testing' : '')} aria-label={`${topic.short || topic.title} pathway`}>
-      {!testing && <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span>
+      {!immersive && <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span>
         {is45 && !active && <span className="sp-proto">
           <span className="style-pick" role="group" aria-label="Prototype: sample progress"><span className="lbl">Sample</span>{[['new', 'New'], ['partway', 'Partway'], ['done', 'Done'], ['mine', 'Mine']].map(([k, n]) => <button key={k} className={sample === k ? 'on' : ''} onClick={() => setSample(k)}>{n}</button>)}</span>
         </span>}
@@ -66,7 +69,7 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
       {saveFailed && <p role="status">Progress is kept for this visit, but this browser could not save it for later.</p>}
       {active ? (
         <>
-          {!testing && <div className="sp-player-toolbar">
+          {!immersive && <div className="sp-player-toolbar">
             <button className="sp-button secondary" onClick={() => setActive(null)}>Back to my pathway</button>
             <span>{names[active.type]} · {topic.short || topic.title}</span>
             {active.type === 'practice' && <small style={{ flexBasis: '100%' }}>Finished activities are saved. Your current activity restarts if you leave.</small>}
@@ -77,7 +80,7 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
               onDone={(pct) => setRecord((r) => recordWorksheet(r, active.worksheetId, pct))}
               onQuit={() => setActive(null)} onClose={() => setActive(null)} onNext={() => setActive(null)} />
           ) : active.type === 'lesson' ? (
-            <Lesson key={active.id} step={active} complete={!!record.lessons?.[active.worksheetId]}
+            <Lesson key={active.id} step={active} topic={topic} complete={!!record.lessons?.[active.worksheetId]}
               draft={record.drafts?.[active.id]} onDraft={(draft) => saveDraft(active.id, draft)}
               onDone={() => completeLesson(active)} onBack={() => setActive(null)} />
           ) : (
@@ -454,17 +457,8 @@ function TestCard({ step, onOpen }) {
   </section>
 }
 
-function Lesson({ step, complete, draft, onDraft, onDone, onBack }) {
-  const pages = step.lesson.steps
-  const [page, setPage] = useState(Math.min(draft?.page || 0, pages.length - 1))
-  const go = (index) => { setPage(index); onDraft({ page: index }); window.scrollTo(0, 0) }
-  const current = pages[page]
-  return <article className="sp-player-card">
-    <div className="sp-player-head"><div><div className="sp-eyebrow">Lesson</div><h1>{step.lesson.title}</h1></div><span className="sp-counter">{page + 1} / {pages.length}</span></div>
-    <div className="sp-lesson-tabs" aria-label="Lesson progress">{pages.map((p, i) => <span key={i} className={i === page ? 'active' : i < page ? 'done' : ''}>{i < page ? '✓' : i + 1}<span>{p.title}</span></span>)}</div>
-    <div className="sp-lesson-copy"><h2>{current.title}</h2><p>{current.body}</p>{current.example && <blockquote className="sp-example"><small>See it in action</small><p>{current.example}</p></blockquote>}</div>
-    <div className="sp-player-footer"><button className="sp-button secondary" disabled={page === 0} onClick={() => go(page - 1)}>Previous</button>{page + 1 < pages.length ? <button className="sp-button" onClick={() => go(page + 1)}>Next</button> : <button className="sp-button" onClick={complete ? onBack : onDone}>{complete ? 'Back to my pathway' : 'Finish lesson & start practice'}</button>}</div>
-  </article>
+function Lesson({ step, topic, complete, draft, onDraft, onDone, onBack }) {
+  return <LitLabLesson lesson={step.lesson} topic={topic} complete={complete} draft={draft} onDraft={onDraft} onDone={onDone} onBack={onBack} />
 }
 
 // A pre-test or post-test, one question at a time on the shared student test card: answer, check (one try; a wrong answer shows the

@@ -528,3 +528,13 @@
 .student-pathway .p45b-score { flex: none; font-size: 13px; font-weight: 900; color: #bff0d8; background: rgba(47,158,111,.28); border-radius: 999px; padding: 3px 10px; }
 .student-pathway .p45b-sb { flex: none; font-size: 12px; font-weight: 900; color: #fff; background: #8b6ee0; border-radius: 999px; padding: 3px 9px; }
 .student-pathway .p45b-chev { flex: none; font-size: 22px; color: rgba(255,255,255,.7); }
+
+/* A Lit Lab lesson in Luna's lesson frame (2026-11-04): the step fills the right page. */
+.ll-step { display: flex; flex-direction: column; justify-content: center; gap: 18px; }
+.ll-step-n { font-size: 12px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase; color: #0a7dba; }
+.ll-step .ll-step-title { font-size: clamp(30px, 3.4vw, 48px); margin: 0; text-wrap: balance; }
+.ll-step-body { margin: 0; max-width: 46ch; font-size: clamp(19px, 1.7vw, 26px); line-height: 1.5; color: #22415e; text-wrap: pretty; }
+.ll-step-example { margin: 6px 0 0; max-width: 56ch; padding: 18px 22px; border-radius: 16px; background: #eaf6fd; border: 1.5px solid #bfe3f5; }
+.ll-step-example figcaption { font-size: 12px; font-weight: 800; letter-spacing: 1.2px; text-transform: uppercase; color: #0a7dba; margin-bottom: 6px; }
+.ll-step-example blockquote { margin: 0; font-family: Georgia, 'Times New Roman', serif; font-size: clamp(18px, 1.6vw, 24px); line-height: 1.45; color: #0d2f55; }
+.proof-page:has(.ll-lesson) .crumbs { display: none; }

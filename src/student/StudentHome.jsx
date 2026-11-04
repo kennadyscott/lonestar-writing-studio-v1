@@ -10,12 +10,15 @@ import { useT, useLocale } from '../lib/i18n/index.jsx'
 import { levelOf, MATRIX, SUPPORT_AREAS } from '../lib/languageBridge.js'
 import { useSay, Glossed, Directions } from './Scaffold.jsx'
 import { todaysQuickPrompt, completedQuickWrite } from './QuickWritePage.jsx'
-import { topicStatus, clearingTitle, buildStops, nextStopOf, kindLabel, landName, landImg, LAND_ORDER } from './ProofRoom.jsx'
+import { topicStatus, flowStatus, clearingTitle, buildStops, nextStopOf, kindLabel, landName, landImg, LAND_ORDER } from './ProofRoom.jsx'
 import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { isGrade2, useBandValue } from '../lib/gradeBand.js'
 import { TrailLook } from './LitLabLooks.jsx'
 import { writingStreak } from '../lib/streak.js'
 import { useLook } from '../lib/look.js'
+import { LITLAB_DEMOS, litLabDemo, litLabWritingOn, optionPathwayFor, setLitLabDemo, withOptionTopics } from '../lib/optionLitLabWriting.js'
+import { pathwayDemoFor } from '../lib/studentPathwayDemo.mjs'
+import { buildStudentPathway } from '../lib/studentPathway.mjs'
 import { MODULE_SHORT } from './LunaPage.jsx'
 
 
@@ -115,6 +118,111 @@ function LunaNook({ modules, onLuna }) {
           </button>
         </div>
       </div>
+    </div>
+  )
+}
+
+/*
+ * OPTION (Kennady, November 3, 2026): with ?option=litlab, Luna's bar is Lit Lab's ("I liked how it said 'Lit Lab - Writing' - I
+ * just think it could show their little current pathway/trail"). One path and one area at a time ("One path, one area"), so the
+ * bar shows the path under way, named for its area, with its stops where the module badges were, and Begin opens that path.
+ * Luna's modules are paths in Composition. With no path under way it offers the choice.
+ */
+function LitLabBar({ onOpen }) {
+  const t = useT()
+  const band = useBandValue()
+  const [topics, setTopics] = useState(null)
+  const [demo, setDemo] = useState(litLabDemo)
+  useEffect(() => {
+    let live = true
+    const load = api.proofStudio ? api.proofStudio() : api.proofContent()
+    load.then((r) => live && setTopics(withOptionTopics(r.topics || []))).catch(() => api.proofContent().then((r) => live && setTopics(withOptionTopics(r.topics || []))).catch(() => live && setTopics([])))
+    return () => { live = false }
+  }, [])
+  let progress = {}
+  try { progress = JSON.parse(localStorage.getItem('proofProgress') || '{}') } catch { /* fine */ }
+  const shown = pathsGrade(band, topics)
+  const mine = (topics || []).filter((tp) => Number(tp.grade) === shown).map((tp) => ({ tp, st: flowStatus(tp, progress) }))
+  const cur = mine.find(({ st }) => st.started && !st.finished)?.tp || null
+
+  let stops = [], done = 0, total = 0
+  if (cur) {
+    const content = pathwayDemoFor(cur) || optionPathwayFor(cur) || (cur.lessonsBySheet && Object.keys(cur.lessonsBySheet).length ? { lessons: cur.lessonsBySheet, tests: false } : null)
+    total = (cur.core || []).length
+    if (content) {
+      // a pathway path: its own record (pre-test, lessons, practice, post-test)
+      let record = {}
+      try { record = JSON.parse(localStorage.getItem(`lscr.pathway-preview.v1.${cur.id}`) || '{}') || {} } catch { /* fine */ }
+      const steps = buildStudentPathway(cur, record, content)
+      const now = steps.find((x) => x.state === 'current')
+      const sheetState = (sheet) => {
+        const own = steps.filter((x) => x.worksheetId === sheet.id && x.type === 'practice')
+        return own.length && own.every((x) => x.state === 'complete') ? 'done' : now?.worksheetId === sheet.id ? 'here' : 'locked'
+      }
+      const test = (type, label) => {
+        const st = steps.find((x) => x.type === type)
+        const state = st?.state === 'complete' ? 'done' : now?.type === type ? 'here' : 'locked'
+        return { key: type, label, cls: state, mark: state === 'done' ? '✓' : type === 'post' ? '🏆' : state === 'locked' ? '🔒' : '🚩', sub: state === 'done' && st?.score != null ? `${st.score}%` : null }
+      }
+      stops = [test('pre', t('Pre-test')), ...[...(cur.core || []), cur.full].filter(Boolean).map((sheet) => {
+        const cls = sheetState(sheet), best = record.worksheets?.[sheet.id]?.best
+        // the Full Topic reads as the pathway names it; Luna's keep their own (Complete SCR, Write an ECR)
+        const label = sheet === cur.full && !cur.option ? t('Put it together') : t(clearingTitle(sheet))
+        return { key: sheet.id, label, cls, mark: cls === 'done' ? '✓' : cls === 'locked' ? '🔒' : '', sub: cls === 'done' && best ? `${best}%` : null }
+      }), test('post', t('Post-test'))]
+      done = (cur.core || []).filter((sheet) => sheetState(sheet) === 'done').length
+    } else {
+      // a worksheet path: its clearings
+      const m = pathModel(cur, progress, nextStopOf(buildStops(cur, progress)))
+      const STOP = { mastered: 'done', boosted: 'done', next: 'here', sb: 'here', working: 'tried', locked: 'locked', open: 'open' }
+      stops = [{ key: 'pre', label: t('Pre-test'), cls: 'done', mark: '✓', sub: m.pre != null ? `${m.pre}%` : null },
+        ...m.skills.map((x) => ({ key: x.id, label: x.short, cls: STOP[x.state] || 'open', mark: STOP[x.state] === 'done' ? '✓' : x.state === 'sb' ? '⚡' : STOP[x.state] === 'locked' ? '🔒' : '', sub: x.score != null ? `${x.score}%` : null })),
+        ...(m.post ? [{ key: 'post', label: t('Post-test'), cls: m.post.state === 'done' ? 'done' : m.post.state === 'next' ? 'here' : 'locked', mark: m.post.state === 'done' ? '✓' : '🏆', sub: null }] : [])]
+      done = m.mastered
+    }
+  }
+  return (
+    <div>
+    <div className="jr-proto">
+      <span className="style-pick" role="group" aria-label="Prototype: Lit Lab progress">
+        <span className="lbl">Prototype</span>
+        {LITLAB_DEMOS.map(([k, label]) => <button key={k} type="button" className={demo === k ? 'on' : ''} aria-pressed={demo === k} onClick={() => { setLitLabDemo(k); setDemo(k) }}>{label}</button>)}
+      </span>
+    </div>
+    <div className="luna-bar lg journey one-lane jr-litlab">
+      <div className="journey-row">
+        <div className="journey-who">
+          <div style={{ minWidth: 0 }}>
+            <div className="journey-title-row">
+              <img className="journey-gem" src={BRAND.crystalSet} alt="" />
+              <div className="journey-title">{cur ? `${t('Lit Lab')} · ${t(landName(cur.domain))}` : t('Lit Lab')}</div>
+            </div>
+            <div className="journey-sub">{cur ? <span className="journey-modname">{t(cur.option ? `Module 1: ${cur.title}` : cur.title)}</span> : t('Choose your next path')}</div>
+            {cur && (
+              <div className="journey-progress" title={t('{done} of {total} skills', { done, total })}>
+                <div className="journey-track"><div className="journey-fill" style={{ width: `${(done / Math.max(1, total)) * 100}%` }} /></div>
+                <b>{done} / {total}</b>
+              </div>
+            )}
+          </div>
+        </div>
+        {cur ? (
+          <ol className="jr-path" aria-label={t('Your path')}>
+            {stops.map((x) => (
+              <li key={x.key} className={'jr-stop ' + x.cls} aria-current={x.cls === 'here' ? 'step' : undefined}>
+                <span className="jr-dot" aria-hidden>{x.mark}</span>
+                <span className="jr-label">{x.label}</span>
+                {x.sub && <span className="jr-sub">{x.sub}</span>}
+              </li>
+            ))}
+          </ol>
+        ) : <div className="jr-path jr-empty">{topics ? t('Pick one path to start. You’ll finish it before you choose another.') : t('Loading…')}</div>}
+        <span className="journey-divider" aria-hidden />
+        <button className="journey-btn" onClick={() => (cur ? onOpen?.(cur.id) : onOpen?.())}>
+          {cur ? t('Begin') : t('See my options')} <span aria-hidden>→</span>
+        </button>
+      </div>
+    </div>
     </div>
   )
 }
@@ -854,7 +962,7 @@ export function ProofRoomFeature({ onOpen, studio = false, variant = 'a' }) {
   useEffect(() => {
     let live = true
     const load = api.proofStudio ? api.proofStudio() : api.proofContent()
-    load.then((r) => live && setTopics(r.topics || [])).catch(() => api.proofContent().then((r) => live && setTopics(r.topics || [])).catch(() => live && setTopics([])))
+    load.then((r) => live && setTopics(withOptionTopics(r.topics || []))).catch(() => api.proofContent().then((r) => live && setTopics(withOptionTopics(r.topics || []))).catch(() => live && setTopics([])))
     return () => { live = false }
   }, [])
   let progress = {}
@@ -865,7 +973,7 @@ export function ProofRoomFeature({ onOpen, studio = false, variant = 'a' }) {
   const grade = bandGrade(band, topics)
   const shown = pathsGrade(band, topics)
   const mine = (topics || []).filter((tp) => Number(tp.grade) === shown)
-    .map((tp) => ({ tp, st: topicStatus(tp, progress) }))
+    .map((tp) => ({ tp, st: flowStatus(tp, progress) }))
     .sort((a, b) => (a.st.finished ? 2 : a.st.started ? 0 : 1) - (b.st.finished ? 2 : b.st.started ? 0 : 1))
   // The path under way leads the card; the list holds the rest.
   const resume = mine.find(({ st }) => st.started && !st.finished)
@@ -1649,7 +1757,8 @@ export default function StudentHome({ state, me, onOpen, onReview, onLuna, onQui
             : <AssignmentsCard rows={rows} busy={busy} begin={begin} />}
           <QuickWriteBlock state={state} me={me} onQuickWrite={onQuickWrite} busy={busy} />
         </div>
-        <LunaNook modules={state.modules} onLuna={onLuna} />
+        {/* OPTION (2026-11-03): with ?option=litlab, Home shows the Lit Lab path under way instead of Luna's module badges */}
+        {litLabWritingOn() ? <LitLabBar onOpen={onProofRoom} /> : <LunaNook modules={state.modules} onLuna={onLuna} />}
       </div>
       </>)}
 

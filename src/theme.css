@@ -2635,3 +2635,47 @@ html[data-band="2"] .btn { min-height: 46px; padding-left: 20px; padding-right: 
 .mm-note.good { background: #e6f6ee; color: #1d5c3d; border: 1px solid #b9e2c9; }
 .mm-mine { display: grid; gap: 4px; background: #e6f6ee; border-radius: 12px; padding: 14px 16px; text-align: left; }
 .mm-mine b { font-size: 18px; color: var(--ink); }
+
+/* One path at a time (2026-11-03): locked paths on a land, the options list, and the "opens after" note */
+.pm-node.locked .pm-orb { filter: grayscale(.7) brightness(.8); }
+.pm-node.locked .pm-pill { background: rgba(30,36,48,.85); border-color: rgba(255,255,255,.25); }
+.pm-options { display: flex; flex-direction: column; gap: 8px; margin-top: 6px; }
+.pm-option { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 10px 12px; border-radius: 12px; border: 1.5px solid var(--line); background: #fff; cursor: pointer; font: inherit; color: var(--ink); transition: border-color .15s, transform .15s; }
+.pm-option:hover { border-color: #0d2f55; transform: translateY(-1px); }
+.pm-option:focus-visible { outline: 3px solid #06AADE; outline-offset: 2px; }
+.pm-option-icon { font-size: 22px; line-height: 1; }
+.pm-option-words { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pm-option-words b { font-size: 14.5px; color: #0d2f55; }
+.pm-option-words small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.pm-option-go { font-weight: 800; color: #0d2f55; }
+.pm-flow-note { font-size: 12.5px; color: var(--muted); }
+.path-lock-veil { position: fixed; inset: 0; background: rgba(10,20,30,.55); display: grid; place-items: center; z-index: 96; padding: 16px; }
+.path-lock { width: 420px; max-width: 100%; padding: 22px 24px; text-align: center; display: flex; flex-direction: column; gap: 8px; }
+.path-lock-icon { font-size: 34px; }
+.path-lock-title { font-weight: 800; font-size: 17px; color: #0d2f55; }
+.path-lock-body { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.45; }
+.path-lock-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; align-items: center; }
+.path-lock-back { background: none; border: 0; color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: pointer; text-decoration: underline; }
+
+/* Home's Lit Lab bar with the option on (2026-11-03): Luna's navy bar, the path under way where the badges were */
+.jr-path { list-style: none; margin: 0 auto; padding: 4px 0 0; flex: 0 1 auto; min-width: 0; max-width: 100%; display: flex; align-items: flex-start; position: relative; overflow-x: auto; }
+.jr-path::before { content: ""; position: absolute; left: 46px; right: 46px; top: 25px; border-top: 3px dotted rgba(180,241,255,.4); }
+.jr-stop { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; width: 92px; flex: 0 0 auto; text-align: center; }
+.jr-dot { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 17px; font-weight: 800; color: #fff; background: #12385e; border: 2px solid rgba(180,241,255,.45); }
+.jr-label { font-size: 10px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--scene-sky, #b4f1ff); line-height: 1.25; }
+.jr-sub { font-size: 11px; font-weight: 800; color: #fff; opacity: .85; }
+.jr-stop.done .jr-dot { background: radial-gradient(circle at 40% 35%, #5be39a, #138a4c 70%); border-color: #c8f7da; }
+.jr-stop.here .jr-dot { background: #0d2f55; border: 3px solid #f5c542; box-shadow: 0 0 0 5px rgba(245,197,66,.2), 0 0 18px rgba(245,197,66,.7); }
+.jr-stop.here.sb .jr-dot { border-color: #b79cff; box-shadow: 0 0 0 5px rgba(139,110,224,.25), 0 0 18px rgba(139,110,224,.7); }
+.jr-stop.here .jr-label { color: #f5c542; }
+.jr-stop.locked .jr-dot { opacity: .7; font-size: 13px; }
+.jr-stop.locked .jr-label { opacity: .7; }
+.jr-stop.tried .jr-dot { border-color: #f5c542; }
+.jr-empty { flex: 1 1 auto; justify-content: center; align-items: center; color: var(--scene-sky, #b4f1ff); font-weight: 700; font-size: 14px; }
+.jr-empty::before { display: none; }
+/* the side card sits above the valley's trail drawing, so its buttons take the tap (2026-11-03) */
+.pm-immersive .pm-side { z-index: 3; }
+.pm-node.locked .pm-name { opacity: .7; }
+.pm-node.locked .pm-orb { filter: grayscale(1) brightness(.75); }
+.jr-proto { display: flex; justify-content: flex-end; margin: 0 0 8px; }
+.jr-proto .style-pick { background: #fff; border: 1px dashed #b9c7d6; }

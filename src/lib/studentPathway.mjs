@@ -6,7 +6,8 @@ export const PATHWAY_PASS_MARK = 85
 const hasAttempt = (work) => !!work && (work.attempts > 0 || work.best > 0 || work.passed === true)
 const passed = (work) => work?.passed === true
 const titleOf = (sheet) => String(sheet?.title || 'Practice').replace(/^(?:SB|Skill Builder|Full Topic)\s*:\s*/i, '')
-const hasLesson = (lesson) => Array.isArray(lesson?.steps) && lesson.steps.length > 0
+// A lesson is the demo's short steps, or a CMS walkthrough lesson (pages; 2026-10-20).
+const hasLesson = (lesson) => (Array.isArray(lesson?.steps) && lesson.steps.length > 0) || (Array.isArray(lesson?.pages) && lesson.pages.length > 0)
 const hasAssessment = (assessment) => Array.isArray(assessment?.items) && assessment.items.length > 0
 const hasPractice = (sheet) => Array.isArray(sheet?.activities) && sheet.activities.length > 0
 
@@ -27,6 +28,9 @@ export function buildStudentPathway(topic, record = {}, content = null) {
     score: record[type]?.score,
     done: record[type]?.complete === true,
     available: hasAssessment(content?.[type]),
+    // A topic whose lessons came from the CMS but whose tests have not yet (content.tests === false): the tests show as
+    // coming soon and do not hold the lessons back.
+    skip: content?.tests === false && !hasAssessment(content?.[type]),
   })
   const lesson = (sheet, extra = {}) => candidates.push({
     id: `lesson:${sheet.id}`,
@@ -77,8 +81,9 @@ export function buildStudentPathway(topic, record = {}, content = null) {
   test('post')
 
   let blocked = false
-  return candidates.map(({ done, available, ...step }) => {
+  return candidates.map(({ done, available, skip, ...step }) => {
     if (done) return { ...step, state: 'complete' }
+    if (skip) return { ...step, state: 'unavailable' }
     const state = blocked ? 'locked' : available ? 'current' : 'unavailable'
     blocked = true
     return { ...step, state }

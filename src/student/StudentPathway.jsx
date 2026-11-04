@@ -42,7 +42,8 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   }, [storageKey, record])
   useEffect(() => { window.scrollTo(0, 0) }, [active?.id])
 
-  const open = (step) => { if (available(step)) setActive(step) }
+  // Starting any step starts the path, so the rest of the Lit Lab locks behind it (November 3, 2026).
+  const open = (step) => { if (!available(step)) return; setActive(step); setRecord((r) => (r.started ? r : { ...r, started: true })) }
   const completeLesson = (step) => {
     const updated = { ...record, lessons: { ...record.lessons, [step.worksheetId]: true } }
     setRecord(updated)

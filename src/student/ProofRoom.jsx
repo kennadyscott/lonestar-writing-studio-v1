@@ -10,6 +10,8 @@ import { bandGrade, pathsGrade } from '../lib/proofDemo.js'
 import { canSpeak, sayText } from '../lib/readAloud.js'
 import StudentPathway from './StudentPathway.jsx'
 import { pathwayDemoFor } from '../lib/studentPathwayDemo.mjs'
+// OPTION (2026-11-03): Luna's SCR module as a Lit Lab writing path, only with ?option=litlab
+import { litLabAllOpen, litLabWritingOn, optionPathwayFor, withOptionTopics } from '../lib/optionLitLabWriting.js'
 
 /*
  * The Proof Room — pick a topic, walk its path.
@@ -273,6 +275,41 @@ export function topicStatus(tp, progress) {
   return { cleared, total: core.length, started, finished, next }
 }
 
+/* One path at a time (Kennady, November 3, 2026: "I don't want them to be able to open a bunch of topics and start a bunch of
+ * topics, I want there to be a flow to it"). A path is under way once any of its work is saved, in the worksheet scores or in
+ * the pathway's own record (pre-test, a lesson, practice), and finished once its post-test, or a worksheet path's Full Topic,
+ * is done. While one is under way the others stay closed; finished paths can always be opened again. */
+function pathwayRecord(id) {
+  try { const r = JSON.parse(localStorage.getItem(`lscr.pathway-preview.v1.${id}`) || '{}'); return r && typeof r === 'object' ? r : {} } catch { return {} }
+}
+export function flowStatus(tp, progress) {
+  const st = topicStatus(tp, progress), r = pathwayRecord(tp.id)
+  const touched = r.started === true || r.pre?.complete === true || Object.values(r.lessons || {}).some(Boolean) || Object.keys(r.worksheets || {}).length > 0
+  // practice passed on the pathway counts as a clearing reached, so every card agrees with Home's bar
+  const core = tp.core || [], passed = (w) => (progress[w.id] || {}).passed || r.worksheets?.[w.id]?.passed === true
+  const cleared = Math.max(st.cleared, core.filter(passed).length)
+  const next = st.finished ? null : core.find((w) => !passed(w)) || tp.full
+  return { ...st, cleared, next, started: st.started || touched, finished: st.finished || r.post?.complete === true }
+}
+// One path, one area, for every path, Luna's writing paths included (Kennady, November 3, 2026: "One path, one area").
+/** The path under way, if there is one. */
+export const currentPathOf = (topics) => topics.find(({ st }) => st.started && !st.finished) || null
+/** A path the student may not open yet: another is under way and this one is not finished, or it is a module in a sequence
+ * (Luna's, in Composition) whose module before it is not finished yet (`seq: true`). */
+export const lockedBy = (topics, id) => {
+  if (litLabAllOpen()) return null
+  const me = topics.find((x) => x.tp.id === id)
+  if (me?.st.finished) return null
+  const cur = currentPathOf(topics)
+  if (cur && cur.tp.id !== id) return cur
+  const tp = me?.tp
+  if (tp?.seqGroup && tp.seq > 1) {
+    const prev = topics.find((x) => x.tp.seqGroup === tp.seqGroup && x.tp.seq === tp.seq - 1)
+    if (prev && !prev.st.finished) return { ...prev, seq: true }
+  }
+  return null
+}
+
 /*
  * The Proof Room, as its own page (2026-09-24: "open up to a new page, not just
  * a popup — we will end up with a lot of topics and learning paths"). The
@@ -320,7 +357,7 @@ export default function ProofRoom({ band = '3-5', initialTopicId = null, initial
   const [progress, setProgress] = useState({})   // worksheetId -> { best, passed }
   const [running, setRunning] = useState(null)   // worksheet being played
   const [raw, setRaw] = useState(null)      // whatever the publisher has published
-  const openTopic = (tp) => setTopicId(tp.id)
+  const [locked, setLocked] = useState(null)   // { tp, cur }: a path asked for while another is under way
   // Students read APPROVED paths from the library. If the library is empty or
   // unreachable — the static demo build has no server — fall back to the content
   // that ships in the code, so the Proof Room is never a blank screen.
@@ -337,21 +374,49 @@ export default function ProofRoom({ band = '3-5', initialTopicId = null, initial
         all.forEach((tp) => byId.set(tp.id, tp))
         const merged = all.length ? [...byId.values()] : pub
         merged.forEach((tp) => registerMedia(tp.media))
-        if (merged.length) return live && setRaw(merged)
+        if (merged.length) return live && setRaw(withOptionTopics(merged))
         throw new Error('empty')
       })
-      .catch(() => api.proofContent().then((r) => live && setRaw(r.topics || [])).catch(() => live && setRaw([])))
+      .catch(() => api.proofContent().then((r) => live && setRaw(withOptionTopics(r.topics || []))).catch(() => live && setRaw([])))
     return () => { live = false }
   }, [])
+  // This grade's paths with their flow status, read again whenever the student comes back from a path.
+  const mine = useMemo(() => {
+    const shown = pathsGrade(band, raw)
+    return (raw || []).filter((tp) => Number(tp.grade) === shown).map((tp) => ({ tp, st: flowStatus(tp, progress) }))
+  }, [raw, band, progress, topicId]) // eslint-disable-line react-hooks/exhaustive-deps
+  const openTopic = (tp) => {
+    const cur = lockedBy(mine, tp.id)
+    if (cur) setLocked({ tp, cur: cur.tp, seq: !!cur.seq }); else setTopicId(tp.id)
+  }
+  // Into the Lit Lab with a path under way: straight to that pathway, not the map (November 3, 2026: "When they start a path,
+  // everything else is greyed out and locked and it should direct them straight into that pathway"). Once per visit, so the
+  // map is still one Back away.
+  const sentIn = React.useRef(false)
+  useEffect(() => {
+    if (!raw || sentIn.current) return
+    sentIn.current = true
+    if (topicId || litLabAllOpen()) return
+    const cur = currentPathOf(mine)
+    if (cur) setTopicId(cur.tp.id)
+  }, [raw]) // eslint-disable-line react-hooks/exhaustive-deps
+  // Sent straight to a path (from Home or Practice) that is not open yet: land on the map and say why.
+  useEffect(() => {
+    if (!raw || !topicId) return
+    const cur = lockedBy(mine, topicId)
+    if (cur) { setLocked({ tp: raw.find((x) => x.id === topicId) || { id: topicId }, cur: cur.tp, seq: !!cur.seq }); setTopicId(null) }
+  }, [raw]) // eslint-disable-line react-hooks/exhaustive-deps
   const topic = useMemo(() => {
     if (!topicId || !raw) return null
     return prepareTopic(raw.find((tp) => tp.id === topicId))
   }, [topicId, raw])
-  const pathwayContent = useMemo(() => pathwayDemoFor(topic), [topic])
+  // The demo's lessons and tests, or a topic's lessons downloaded from the CMS (data/studio-lessons; it has no tests yet).
+  const pathwayContent = useMemo(() => pathwayDemoFor(topic) || optionPathwayFor(topic) || (topic?.lessonsBySheet && Object.keys(topic.lessonsBySheet).length ? { lessons: topic.lessonsBySheet, tests: false } : null), [topic])
   // Started from the Practice page on one clearing: open it straight away, once.
   // Quitting it lands on the path map, so the map is one step in.
   // every way in from Practice plays the gate, Start this clearing included (her call, 2026-10-01)
   const [gate, setGate] = useState(() => !skipGate && gateWanted())
+  useEffect(() => { if (gate) gateSeen() }, [gate])
 
   const startedWs = React.useRef(false)
   useEffect(() => {
@@ -365,6 +430,12 @@ export default function ProofRoom({ band = '3-5', initialTopicId = null, initial
   useEffect(() => {
     try { setProgress(JSON.parse(localStorage.getItem('proofProgress') || '{}')) } catch { setProgress({}) }
   }, [])
+  // A worksheet path is started once a clearing is opened, like a pathway's first step (November 3, 2026).
+  useEffect(() => {
+    if (!running || !topic) return
+    const key = `lscr.pathway-preview.v1.${topic.id}`
+    try { const r = JSON.parse(localStorage.getItem(key) || '{}') || {}; if (!r.started) localStorage.setItem(key, JSON.stringify({ ...r, started: true })) } catch { /* fine */ }
+  }, [running, topic])
   // every screen change starts at the top of the page
   useEffect(() => { window.scrollTo(0, 0) }, [topicId, running])
   function record(wsId, pct) {
@@ -392,15 +463,15 @@ export default function ProofRoom({ band = '3-5', initialTopicId = null, initial
     // Students only ever see topics at their own grade level.
     const grade = bandGrade(band, raw)
     const shown = pathsGrade(band, raw)
-    const mineOnly = (raw || []).filter((tp) => Number(tp.grade) === shown)
-    const topics = mineOnly.map((tp) => ({ tp, st: topicStatus(tp, progress) }))
-    const resume = topics.find(({ st }) => st.started && !st.finished)
+    const topics = mine
+    const resume = currentPathOf(topics)
     const skills = topics.reduce((n, { tp }) => n + (tp.core || []).length, 0)
     body = (
       <>
         {!raw && <div className="card" style={{ padding: '30px 0', textAlign: 'center', color: 'var(--muted)' }}>{t("Loading today's jobs…")}</div>}
         {/* the strand map: the page is the valley (her pick of three, 2026-09-30) */}
-        {raw && <HomeStrands grade={grade} shown={shown} topics={topics} resume={resume} onOpen={openTopic} land={land} setLand={setLand} />}
+        {raw && <HomeStrands grade={grade} shown={shown} topics={topics} resume={resume} onOpen={openTopic} land={land} setLand={setLand}
+          onLockedZone={(d, cur) => setLocked({ tp: { short: t(landName(d)) }, cur })} />}
       </>
     )
   }
@@ -423,6 +494,7 @@ export default function ProofRoom({ band = '3-5', initialTopicId = null, initial
         {body}
       </div>
       {gate && <LabyrinthGate src={GATE_SRC} onDone={() => setGate(false)} />}
+      {locked && <PathLock tp={locked.tp} cur={locked.cur} seq={locked.seq} onGo={() => { setLocked(null); setTopicId(locked.cur.id) }} onClose={() => setLocked(null)} />}
     </PageMode.Provider>
   )
 }
@@ -441,10 +513,43 @@ export default function ProofRoom({ band = '3-5', initialTopicId = null, initial
 const GATE_SRC = (import.meta.env.BASE_URL || '/') + 'gate/lit-gate.mp4'
 const GATE_SECONDS = 3
 const GATE_POSTER = (import.meta.env.BASE_URL || '/') + 'gate/lit-gate.jpg'
+// The gate plays the first time, then on the first visit of each week (Kennady, November 3, 2026: "I like the cute gate for
+// the first time they open it, but then maybe only show that once a week on the first day they open it"). Weeks start Monday.
+const GATE_WEEK = 'lscr.gateWeek'
+function weekOf(d = new Date()) {
+  const x = new Date(d.getFullYear(), d.getMonth(), d.getDate())
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7))
+  return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`
+}
 function gateWanted() {
   try {
-    return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return false
+    return localStorage.getItem(GATE_WEEK) !== weekOf()
   } catch { return true }
+}
+const gateSeen = () => { try { localStorage.setItem(GATE_WEEK, weekOf()) } catch { /* fine */ } }
+
+/* Asked for a path while another is under way. */
+function PathLock({ tp, cur, seq = false, onGo, onClose }) {
+  const t = useT()
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+  return (
+    <div className="path-lock-veil" onClick={onClose}>
+      <div className="card path-lock" role="dialog" aria-modal="true" aria-labelledby="path-lock-title" onClick={(e) => e.stopPropagation()}>
+        <div className="path-lock-icon" aria-hidden>🔒</div>
+        <div id="path-lock-title" className="path-lock-title">{seq ? t('{name} opens after {prev}', { name: tp.short || tp.title, prev: cur.short || cur.title }) : t('{name} opens after your current path', { name: tp.short || tp.title || t('This path') })}</div>
+        <p className="path-lock-body">{seq ? t('The writing modules go in order. Finish {prev} first.', { prev: cur.short || cur.title }) : t('You are working on {name}. Finish it first, then you can choose your next path.', { name: cur.short || cur.title })}</p>
+        <div className="path-lock-actions">
+          <button className="btn" onClick={onGo}>{seq ? t('Go to {name} →', { name: cur.short || cur.title }) : t('Keep going on {name} →', { name: cur.short || cur.title })}</button>
+          <button className="path-lock-back" onClick={onClose}>{t('Back to the Labyrinth')}</button>
+        </div>
+      </div>
+    </div>
+  )
 }
 function LabyrinthGate({ src, onDone }) {
   const t = useT()
@@ -481,18 +586,41 @@ function LabyrinthGate({ src, onDone }) {
 
 /* ---------------- the front page: the strand map (chosen 2026-09-30 over a valley gate and a trail journal) ---------------- */
 
-// The lands students explore: her names for two of the TEKS strands (2026-10-01).
-// The content keeps its strand names; only what students see changes.
-const LAND_NAME = { 'Foundational Language': 'Rootwood', 'Multiple Genres': 'Genre Grove', Comprehension: 'Comprehension Skills' }
+// The areas students explore, named for students (Kennady, November 3, 2026: "Rename Rootwood to Foundations. So we have
+// Foundations, Author's Purpose, Composition, Genres, and Comprehension"; first named Rootwood and Genre Grove on 2026-10-01).
+// The content keeps its TEKS strand names; only what students see changes.
+const LAND_NAME = { 'Foundational Language': 'Foundations', 'Multiple Genres': 'Genres' }
 export const landName = (d) => LAND_NAME[d] || d
-// her order for the five lands (2026-10-01)
-export const LAND_ORDER = ['Foundational Language', "Author's Purpose", 'Composition', 'Comprehension', 'Multiple Genres']
-const STRAND_ICON = { Composition: '✍️', 'Foundational Language': '🔤', 'Multiple Genres': '📚', "Author's Purpose": '🎯', Comprehension: '🧠', 'Response Skills': '💬', 'Inquiry and Research': '🔎' }
+// her order for the five lands (2026-10-01). OPTION (November 3, 2026): with ?option=litlab, Luna's modules are a sixth land,
+// Writing, right after Composition ("pull the writing modules out of the composition standards and it is its own land that
+// they work through").
+export const LAND_ORDER = ['Foundational Language', "Author's Purpose", 'Composition', ...(litLabWritingOn() ? ['Writing'] : []), 'Comprehension', 'Multiple Genres']
+const STRAND_ICON = { Composition: '✍️', Writing: '🪶', 'Foundational Language': '🔤', 'Multiple Genres': '📚', "Author's Purpose": '🎯', Comprehension: '🧠', 'Response Skills': '💬', 'Inquiry and Research': '🔎' }
 
 function ContinueCard({ resume, topics, onOpen }) {
   const t = useT()
-  const first = resume || topics[0]
-  if (!first) return null
+  // Nothing under way: up to three paths to choose from, in land order (Kennady, November 3, 2026: "when we click into lit
+  // lab, I want them to see their options and get started").
+  if (!resume) {
+    const open = topics.filter(({ tp, st }) => !st.finished && !lockedBy(topics, tp.id)).sort((a, b) => LAND_ORDER.indexOf(a.tp.domain) - LAND_ORDER.indexOf(b.tp.domain)).slice(0, 3)
+    if (!open.length) return <div className="pm-card pm-next"><div className="pm-card-head">{t('✓ Every path is complete')}</div></div>
+    return (
+      <div className="pm-card pm-next">
+        <div className="pm-card-head">{t('Choose your next path')}</div>
+        <div className="pm-next-skill">{t('Pick one to start. You’ll finish it before you choose another.')}</div>
+        <div className="pm-options">
+          {open.map(({ tp }) => (
+            <button key={tp.id} type="button" className="pm-option" onClick={() => onOpen(tp)}>
+              <span className="pm-option-icon" aria-hidden>{tp.icon || '✦'}</span>
+              <span className="pm-option-words"><b>{tp.short || tp.title}</b><small>{t(landName(tp.domain) || 'Path')} · {t('{n} clearings', { n: (tp.core || []).length })}</small></span>
+              <span className="pm-option-go" aria-hidden>→</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    )
+  }
+  const first = resume
   return (
     <div className="pm-card pm-next">
       <div className="pm-card-head">{resume ? t('Continue Your Path') : t('Start here')}</div>
@@ -500,7 +628,8 @@ function ContinueCard({ resume, topics, onOpen }) {
       <div className="pm-next-title">{first.tp.short || first.tp.title}</div>
       {first.st.next && <div className="pm-next-skill">{t('Next clearing: {title}', { title: clearingTitle(first.st.next) })}</div>}
       <ProofBar st={first.st} />
-      <button className="btn pm-go" onClick={() => onOpen(first.tp)}>{resume ? t('Keep going →') : t('Begin this path →')}</button>
+      <button className="btn pm-go" onClick={() => onOpen(first.tp)}>{t('Keep going →')}</button>
+      <div className="pm-next-skill pm-flow-note">{t('Your other paths open when you finish this one.')}</div>
     </div>
   )
 }
@@ -534,7 +663,7 @@ export function strandInfo(topics) {
 
 // The valley with one medallion per strand on the trail, lit as far as the
 // student has gone. Used by the front page and the Practice card.
-export function StrandTrail({ topics, picked, onPick, children }) {
+export function StrandTrail({ topics, picked, onPick, zoneLock = null, onLockedZone = null, children }) {
   const t = useT()
   const livingRef = useLivingLoop()
   const BASE = import.meta.env.BASE_URL || '/'
@@ -562,17 +691,20 @@ export function StrandTrail({ topics, picked, onPick, children }) {
       </svg>
       {info.map((x, i) => {
         const [px, py] = at(i)
+        const shut = zoneLock ? zoneLock(x.d) : null
         return (
-          <button key={x.d} className={`pm-node ${x.cls}${x.d === picked ? ' picked' : ''}${py > LOW_Y ? ' low' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
+          <button key={x.d} className={`pm-node ${x.cls}${shut ? ' locked' : ''}${x.d === picked ? ' picked' : ''}${py > LOW_Y ? ' low' : ''}`} style={{ left: `${px / 10}%`, top: `${(py / 560) * 100}%` }}
+            aria-label={shut ? t('{zone}, locked until you finish {name}', { zone: t(landName(x.d)), name: shut.short || shut.title }) : undefined}
             onClick={(e) => {
+              if (shut) { onLockedZone?.(x.d, shut); return }
               const frame = (e.currentTarget.closest('.pm-immersive') || e.currentTarget.closest('.pm-map')).getBoundingClientRect()
               const orb = e.currentTarget.querySelector('.pm-orb').getBoundingClientRect()
               onPick(x.d, { x: ((orb.x + orb.width / 2 - frame.x) / frame.width) * 100,
                 y: ((orb.y + orb.height / 2 - frame.y) / frame.height) * 100 })
             }} aria-pressed={picked ? x.d === picked : undefined}>
-            <span className="pm-orb" aria-hidden>{STRAND_ICON[x.d] || '✦'}</span>
+            <span className="pm-orb" aria-hidden>{shut ? '🔒' : STRAND_ICON[x.d] || '✦'}</span>
             <span className="pm-name">{t(landName(x.d))}</span>
-            <span className="pm-pill">{x.list.length === 1 ? t('{a} of 1 path', { a: x.done }) : t('{a} of {b} paths', { a: x.done, b: x.list.length })}</span>
+            <span className="pm-pill">{shut ? t('Opens later') : x.list.length === 1 ? t('{a} of 1 path', { a: x.done }) : t('{a} of {b} paths', { a: x.done, b: x.list.length })}</span>
           </button>
         )
       })}
@@ -582,9 +714,13 @@ export function StrandTrail({ topics, picked, onPick, children }) {
   )
 }
 
-function HomeStrands({ grade, shown, topics, resume, onOpen, land, setLand }) {
+function HomeStrands({ grade, shown, topics, resume, onOpen, land, setLand, onLockedZone }) {
   const t = useT()
   const info = strandInfo(topics)
+  // One area at a time (Kennady, November 3, 2026: "they shouldn't be able to have more than one zone open at a time - so the
+  // others should show as greyed out with a lock"): only the area holding the path under way stays open.
+  const cur = currentPathOf(topics)
+  const zoneLock = (d) => (cur && !litLabAllOpen() && (cur.tp.domain || 'Other') !== d ? cur.tp : null)
   // click a land: the camera zooms into its medallion, then the land opens
   const [zoom, setZoom] = useState(null)
   function enter(d, at) {
@@ -600,14 +736,14 @@ function HomeStrands({ grade, shown, topics, resume, onOpen, land, setLand }) {
       <div className="lh-strands land-view">
         {/* Land layout A, her pick (2026-10-05: "I like Land A options across the board - turn off
             option B"). B, the storybook page with path cards, was removed. */}
-        <LandScene land={here} onOpen={onOpen} />
+        <LandScene land={here} onOpen={onOpen} all={topics} />
       </div>
     )
   }
   return (
     <div className="lh-strands">
       <div className={'pm-immersive pm-fill valley-zoom' + (zoom ? ' zooming' : '')} style={zoom ? { transformOrigin: `${zoom.x}% ${zoom.y}%` } : undefined}>
-        <StrandTrail topics={topics} onPick={enter}>
+        <StrandTrail topics={topics} onPick={enter} zoneLock={zoneLock} onLockedZone={onLockedZone}>
           <LabyrinthTitle grade={grade} shown={shown} topics={topics} skills={topics.reduce((m, { tp }) => m + (tp.core || []).length, 0)} />
         </StrandTrail>
         <div className="pm-side">
@@ -626,6 +762,8 @@ const LAND_META = {
   'Foundational Language': { key: 'rootwood', tag: 'Where every word puts down roots.', about: 'Grammar, spelling and word power: the roots every other land grows from.' },
   'Multiple Genres': { key: 'genre-grove', tag: 'Every tree tells a different kind of story.', about: 'Poems, plays, fiction and informational texts, and what makes each one work.' },
   Composition: { key: 'composition', tag: 'Where ideas become writing.', about: 'At the Quill Cliffs you plan, draft, revise and edit.' },
+  // OPTION: borrows Composition's painting until Writing has its own; starter copy for her to change
+  Writing: { key: 'composition', tag: 'Grow as a writer, one module at a time.', about: 'Six writing modules, in order: SCR, ECR, Stellar Writers, the Writing Process, Revision and Editing.' },
   "Author's Purpose": { key: 'authors-purpose', tag: 'See why writers write, and how.', about: 'Climb the watchtower and spot the choices authors make.' },
   Comprehension: { key: 'comprehension', tag: 'Look deep. See what the text really says.', about: 'Clear pools that show what a text means, and what it leaves for you to figure out.' },
 }
@@ -654,14 +792,18 @@ const pathState = (st) => (st.finished ? 'done' : st.started ? 'here' : 'fresh')
 const nextPathOf = (list) => list.find(({ st }) => st.started && !st.finished) || list.find(({ st }) => !st.finished)
 
 // A: the land's scene fills the screen and its paths are landmarks on it
-function LandScene({ land, onOpen }) {
+function LandScene({ land, onOpen, all = [] }) {
   const t = useT()
   const meta = LAND_META[land.d] || {}
   const list = land.list
   const n = list.length
   const slots = slotsFor(n)
   const at = (i) => (slots ? SLOTS[slots[i]].at : pointAt(0.04 + (0.92 * i) / Math.max(1, n - 1)))
-  const next = nextPathOf(list)
+  // the path under way, wherever it sits
+  const cur = currentPathOf(all)
+  const next = cur ? list.find(({ tp }) => tp.id === cur.tp.id) || null : list.find(({ tp, st }) => !st.finished && !lockedBy(all, tp.id)) || null
+  const shut = (tp) => !!lockedBy(all, tp.id)
+  const shutNote = (tp) => { const lk = lockedBy(all, tp.id); return lk?.seq ? t('After {name}', { name: lk.tp.short || lk.tp.title }) : t('Opens later') }
   const livingRef = useLivingLoop()
   const [loopOk, setLoopOk] = useState(true)
   const key = meta.key || 'rootwood'
@@ -696,11 +838,11 @@ function LandScene({ land, onOpen }) {
           const [x, y] = at(i)
           const cls = pathState(st)
           return (
-            <button key={tp.id} className={`pm-node land-mark ${cls}${y > LOW_Y ? ' low' : ''}`} style={{ left: `${x / 10}%`, top: `${(y / 560) * 100}%` }} onClick={() => onOpen(tp)}>
+            <button key={tp.id} className={`pm-node land-mark ${cls}${shut(tp) ? ' locked' : ''}${y > LOW_Y ? ' low' : ''}`} style={{ left: `${x / 10}%`, top: `${(y / 560) * 100}%` }} onClick={() => onOpen(tp)}>
               {tp === next?.tp && <span className="pm-lantern" aria-hidden />}
-              <span className="pm-orb" aria-hidden>{cls === 'done' ? '✓' : tp.icon || '✦'}</span>
+              <span className="pm-orb" aria-hidden>{cls === 'done' ? '✓' : shut(tp) ? '🔒' : tp.icon || '✦'}</span>
               <span className="pm-name">{tp.short || tp.title}</span>
-              <span className="pm-pill">{cls === 'done' ? t('Path complete') : t('{a} of {b} clearings', { a: st.cleared ?? 0, b: (tp.core || []).length })}</span>
+              <span className="pm-pill">{cls === 'done' ? t('Path complete') : shut(tp) ? shutNote(tp) : t('{a} of {b} clearings', { a: st.cleared ?? 0, b: (tp.core || []).length })}</span>
             </button>
           )
         })}
@@ -721,6 +863,13 @@ function LandScene({ land, onOpen }) {
               <div className="pm-next-title">{next.tp.short || next.tp.title}</div>
               <ProofBar st={next.st} />
               <button className="btn pm-go" onClick={() => onOpen(next.tp)}>{next.st.started ? t('Keep going →') : t('Begin this path →')}</button>
+            </>
+          ) : cur ? (
+            <>
+              <div className="pm-kicker" style={{ marginTop: 6 }}>{t('Your path now')}</div>
+              <div className="pm-next-title">{cur.tp.short || cur.tp.title}</div>
+              <button className="btn pm-go" onClick={() => onOpen(cur.tp)}>{t('Keep going →')}</button>
+              <div className="pm-next-skill pm-flow-note">{t('Paths here open when you finish it.')}</div>
             </>
           ) : <div className="pm-next-title">{t('✓ Every path here is complete')}</div>}
         </div>

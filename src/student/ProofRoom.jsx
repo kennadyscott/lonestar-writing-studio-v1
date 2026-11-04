@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react'
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react'
 import { api } from '../lib/api.js'
 import { library } from '../lib/library.js'
 import { joinStandards } from '../../lib/content/taxonomy.mjs'
@@ -1854,6 +1854,16 @@ function PassageActivity({ act, onDone, onPlay, doneLabel }) {
                       {(choices[i] || []).map((opt) => {
                         const chosen = norm(blanks[i]) === norm(opt)
                         const reveal = checked && norm(opt) === norm(q.answer)
+                        // a picture choice (an image selection on a story) shows its picture; the label stays for screen readers
+                        const pic = q.images && artSrc(q.images[(q.options || []).indexOf(opt)])
+                        if (pic) return (
+                          <button key={opt} disabled={checked} aria-label={opt} onClick={() => setBlanks((b) => ({ ...b, [i]: opt }))}
+                            style={{ borderRadius: 12, padding: 6, cursor: checked ? 'default' : 'pointer', background: '#fff',
+                              border: `2.5px solid ${reveal ? 'var(--good)' : chosen ? CYAN : 'var(--line)'}`,
+                              boxShadow: chosen ? '0 0 0 3px rgba(53,195,232,.18)' : 'none' }}>
+                            <img src={pic} alt={opt} style={{ display: 'block', maxWidth: 150, maxHeight: 90, objectFit: 'contain', borderRadius: 6 }} />
+                          </button>
+                        )
                         return (
                           <button key={opt} disabled={checked} onClick={() => setBlanks((b) => ({ ...b, [i]: opt }))}
                             style={{ borderRadius: 999, padding: '6px 14px', fontSize: 13, fontWeight: 800, cursor: checked ? 'default' : 'pointer',
@@ -1986,6 +1996,14 @@ function ComposeActivity({ act, onDone, onPlay, doneLabel }) {
 }
 
 /* --- activity: fill the blanks by typing, clicking, or dragging --- */
+/** An underlined word is stored as {{word}} (a word-bank sentence copied off the sheet). */
+function Marked({ text }) {
+  return String(text || '').split(/(\{\{[^{}]+\}\})/).map((bit, n) => {
+    const m = /^\{\{([^{}]+)\}\}$/.exec(bit)
+    return m ? <u key={n}>{m[1]}</u> : <React.Fragment key={n}>{bit}</React.Fragment>
+  })
+}
+
 function FixActivity({ act, onDone, onPlay, doneLabel }) {
   const t = useT()
   const mode = act.mode || 'type'
@@ -2065,7 +2083,7 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
               <div style={{ display: 'flex', alignItems: 'center', gap: 9, flexWrap: 'wrap' }}>
                 <span style={{ width: 20, fontSize: 11.5, fontWeight: 800, color: 'var(--muted)' }}>{i + 1}.</span>
                 <span style={{ flex: 1, minWidth: 190 }}>
-                  {before}
+                  <Marked text={before} />
                   {mode === 'type' ? (
                     <input value={answers[i]} disabled={checked} onChange={(e) => put(i, e.target.value)}
                       style={{ width: 132, margin: '0 4px', padding: '4px 9px', borderRadius: 7, border: '1.5px solid #cfe0ec', fontFamily: 'inherit', fontSize: 14 }} />
@@ -2085,7 +2103,7 @@ function FixActivity({ act, onDone, onPlay, doneLabel }) {
                       {filled || (mode === 'drag' ? t('drop here') : '?')}
                     </span>
                   )}
-                  {after}
+                  <Marked text={after} />
                 </span>
                 {checked && (
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8, whiteSpace: 'nowrap' }}>
@@ -2349,7 +2367,12 @@ function OrderActivity({ act, onDone, onPlay, doneLabel }) {
   )
 }
 
-/* Match: tap a card on the left, then its partner on the right. */
+/*
+ * Match: tap a card on the left, then its partner on the right, and a line is drawn between them (Kennady, October 20, 2026:
+ * "On matching, I'd love if it actually drew a line to connect from one to the next"). Each pairing has its own colour; after
+ * the check a right line is green and a wrong one red and dashed. Tapping a connected left card picks it up to draw again.
+ */
+const MATCH_INK = ['#1a8fb5', '#8b6ee0', '#e08a2b', '#d6456b', '#2f9e6f', '#3c6a86', '#c99312', '#0d2f55']
 function MatchActivity({ act, onDone, onPlay, doneLabel }) {
   const t = useT()
   const pairs = act.pairs || []
@@ -2366,21 +2389,63 @@ function MatchActivity({ act, onDone, onPlay, doneLabel }) {
     const src = pic(p)
     return src ? <img src={src} alt={p.b} style={{ height: size, width: size, objectFit: 'contain', display: 'block' }} /> : p.b
   }
+  // The lines: measured from the cards themselves, again whenever a pairing or the board's size changes.
+  const board = useRef(null), leftRef = useRef({}), rightRef = useRef({})
+  const [lines, setLines] = useState([])
+  const measure = () => {
+    const box = board.current?.getBoundingClientRect()
+    if (!box) return
+    setLines(Object.entries(made).map(([li, ri]) => {
+      const a = leftRef.current[li]?.getBoundingClientRect(), b = rightRef.current[ri]?.getBoundingClientRect()
+      if (!a || !b) return null
+      return { li: Number(li), ri, x1: a.right - box.left, y1: a.top + a.height / 2 - box.top, x2: b.left - box.left, y2: b.top + b.height / 2 - box.top }
+    }).filter(Boolean))
+  }
+  useLayoutEffect(measure, [made, checked, act])
+  useEffect(() => {
+    const el = board.current
+    if (!el || typeof ResizeObserver === 'undefined') return undefined
+    const ro = new ResizeObserver(() => measure())
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [made])
+  const ink = (li) => MATCH_INK[li % MATCH_INK.length]
+  const lineOf = (li) => (checked ? (made[li] === li ? 'var(--good)' : '#c0392b') : ink(li))
+  const leftOfRight = (ri) => { const e = Object.entries(made).find(([, r]) => r === ri); return e ? Number(e[0]) : null }
+  const pickLeft = (i) => {
+    if (checked) return
+    if (made[i] !== undefined && held !== i) { setMade((m) => { const n = { ...m }; delete n[i]; return n }); setHeld(i); return }
+    setHeld(held === i ? null : i)
+  }
   return (
     <WithArt act={act} art="" side="right">
       <Directions text={act.directions || 'Tap a card on the left, then the card on the right that goes with it.'} />
       <div style={{ fontSize: 13.5, fontWeight: 800, color: NAVY, marginBottom: 10 }}>{act.brief}</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      <div ref={board} style={{ position: 'relative', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px 64px' }}>
+        <svg aria-hidden="true" style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', overflow: 'visible', zIndex: 1 }}>
+          {lines.map((l) => {
+            const bend = Math.max(18, (l.x2 - l.x1) * 0.45)
+            const colour = lineOf(l.li), wrong = checked && made[l.li] !== l.li
+            return (
+              <g key={l.li}>
+                <path d={`M ${l.x1} ${l.y1} C ${l.x1 + bend} ${l.y1}, ${l.x2 - bend} ${l.y2}, ${l.x2} ${l.y2}`} fill="none" stroke={colour} strokeWidth="3" strokeLinecap="round" strokeDasharray={wrong ? '6 6' : undefined} />
+                <circle cx={l.x1} cy={l.y1} r="5" fill={colour} stroke="#fff" strokeWidth="2" />
+                <circle cx={l.x2} cy={l.y2} r="5" fill={colour} stroke="#fff" strokeWidth="2" />
+              </g>
+            )
+          })}
+        </svg>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
           {pairs.map((p, i) => {
             const good = checked && made[i] === i, bad = checked && made[i] !== undefined && made[i] !== i
+            const joined = made[i] !== undefined
             return (
               <div key={i}>
-                <button disabled={checked} onClick={() => setHeld(held === i ? null : i)}
+                <button ref={(el) => { leftRef.current[i] = el }} disabled={checked} onClick={() => pickLeft(i)} aria-pressed={held === i}
+                  aria-label={joined ? `${p.a}, matched to ${pairs[made[i]].b}` : undefined}
                   style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left', padding: '9px 12px', minHeight: pictures ? 58 : undefined, borderRadius: 10, fontSize: pictures ? 17 : 14, fontWeight: 700, color: good ? 'var(--good)' : bad ? '#c0392b' : NAVY,
-                    background: good ? '#e6f6ee' : bad ? '#fdecea' : held === i ? '#eaf4f9' : '#fff', border: `1.5px solid ${good ? 'var(--good)' : bad ? '#c0392b' : held === i ? CYAN : '#e3edf4'}` }}>
+                    background: good ? '#e6f6ee' : bad ? '#fdecea' : held === i ? '#eaf4f9' : '#fff', border: `1.5px solid ${good ? 'var(--good)' : bad ? '#c0392b' : held === i ? CYAN : joined ? ink(i) : '#e3edf4'}` }}>
                   <span style={{ flex: 1 }}>{p.a}</span>
-                  {made[i] !== undefined && <span style={{ color: '#93a3b3', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 4 }}>→ {cardB(pairs[made[i]], 36)}</span>}
                 </button>
                 {bad && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
@@ -2393,18 +2458,21 @@ function MatchActivity({ act, onDone, onPlay, doneLabel }) {
           })}
         </div>
         <div style={{ display: pictures ? 'grid' : 'flex', gridTemplateColumns: pictures ? 'repeat(auto-fill, minmax(96px, 1fr))' : undefined, flexDirection: 'column', gap: 7, alignContent: 'start' }}>
-          {right.map((r) => (
-            <button key={r.i} disabled={checked || held === null || taken.has(r.i)} onClick={() => { setMade((m) => ({ ...m, [held]: r.i })); setHeld(null) }}
-              aria-label={pic(pairs[r.i]) ? pairs[r.i].b : undefined}
-              style={{ textAlign: 'left', padding: pic(pairs[r.i]) ? 8 : '9px 12px', display: pic(pairs[r.i]) ? 'grid' : 'block', placeItems: 'center', borderRadius: 10, fontSize: 14, fontWeight: 600, color: NAVY, opacity: taken.has(r.i) ? 0.45 : 1,
-                background: '#fbfdfe', border: `1.5px solid ${held !== null && !taken.has(r.i) && !checked ? '#cfe6f0' : '#e3edf4'}`, cursor: held === null || taken.has(r.i) ? 'default' : 'pointer' }}>
-              {cardB(pairs[r.i], 80)}
-            </button>
-          ))}
+          {right.map((r) => {
+            const by = leftOfRight(r.i)
+            return (
+              <button key={r.i} ref={(el) => { rightRef.current[r.i] = el }} disabled={checked || held === null || taken.has(r.i)} onClick={() => { setMade((m) => ({ ...m, [held]: r.i })); setHeld(null) }}
+                aria-label={pic(pairs[r.i]) ? pairs[r.i].b : undefined}
+                style={{ textAlign: 'left', padding: pic(pairs[r.i]) ? 8 : '9px 12px', display: pic(pairs[r.i]) ? 'grid' : 'block', placeItems: 'center', borderRadius: 10, fontSize: 14, fontWeight: 600, color: NAVY,
+                  background: '#fbfdfe', border: `1.5px solid ${by !== null ? (checked ? lineOf(by) : ink(by)) : held !== null && !checked ? '#cfe6f0' : '#e3edf4'}`, cursor: held === null || taken.has(r.i) ? 'default' : 'pointer' }}>
+                {cardB(pairs[r.i], 80)}
+              </button>
+            )
+          })}
         </div>
       </div>
       <Footer hint={act.hint}>
-        {!checked && Object.keys(made).length > 0 && <button className="btn ghost" onClick={() => setMade({})}>{t('Start over')}</button>}
+        {!checked && Object.keys(made).length > 0 && <button className="btn ghost" onClick={() => { setMade({}); setHeld(null) }}>{t('Start over')}</button>}
         {!checked
           ? <button className="btn" disabled={Object.keys(made).length < pairs.length} onClick={() => setChecked(true)}>{t('Check my answers ✓')}</button>
           : <button className="btn" onClick={() => onDone(score)}>{doneLabel || t('Done with this one →')}</button>}

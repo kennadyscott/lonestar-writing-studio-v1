@@ -6,6 +6,13 @@ import { fallbackConference, fallbackTraits, isBegging } from '../../server/fall
 import { PEER_TASKS, bandFor, todaysTask, evaluateChecklist, answerKey, checklistText } from '../../server/peerTasks.mjs'
 import { rawTopics } from '../../server/proofRoom.mjs'
 import { SHIPPED } from '../../data/topics.mjs'
+// A topic's lessons, downloaded from the CMS Lessons tab ("Download lessons for the student app") into data/studio-lessons/*.json
+// as { topic, lessons: { worksheetId: lesson } }, built into the static site; the local server merges the same files.
+const STUDIO_LESSONS = Object.values(import.meta.glob('../../data/studio-lessons/*.json', { eager: true, import: 'default' }))
+const withLessons = (topics) => topics.map((t) => {
+  const files = STUDIO_LESSONS.filter((f) => f && f.topic === t.id && f.lessons && typeof f.lessons === 'object')
+  return files.length ? { ...t, lessonsBySheet: Object.assign({}, t.lessonsBySheet, ...files.map((f) => f.lessons)) } : t
+})
 import { localDay } from '../../server/day.mjs'
 
 const ME = 'stu_kscott'
@@ -384,7 +391,7 @@ export const localApi = {
   // converted decks), as the local server's /api/proof/studio serves them. Kept
   // apart from proofContent, whose copy is saved in the browser and edited by
   // the publisher console.
-  proofStudio: async () => ({ topics: [...rawTopics(), ...clone(SHIPPED)] }),
+  proofStudio: async () => ({ topics: withLessons([...rawTopics(), ...clone(SHIPPED)]) }),
   proofContent: async () => {
     if (!state.proofTopics) state.proofTopics = rawTopics()
     return { topics: clone(state.proofTopics) }

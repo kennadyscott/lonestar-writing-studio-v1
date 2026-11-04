@@ -91,7 +91,7 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
           )}
         </>
       ) : (
-        <Path45Look look={look} topic={topic} record={sample === 'mine' ? record : samplePathRecord(sample, topic)}
+        <Path45Look look={look} tapToGo={band === '2'} topic={topic} record={sample === 'mine' ? record : samplePathRecord(sample, topic)}
           model={pathModel(topic, content, sample === 'mine' ? record : samplePathRecord(sample, topic))} onOpen={open} onBack={onBackToMap} />
       )}
     </section>

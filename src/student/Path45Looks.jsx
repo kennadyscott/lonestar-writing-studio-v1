@@ -150,11 +150,38 @@ function TrailStones({ model, stops, pick, onPick, className = '' }) {
 }
 
 /* ---------- A · Trail ---------- */
-export function Path45Trail({ model, record, topic, onOpen, onBack }) {
+/*
+ * Grade 2 taps the map (2026-11-04: "2nd grade seems to be overflowing - they need to just click on the map where they go next and
+ * it opens"): no card under the trail; tapping the stop you are on opens its next part (the lesson, then the practice), and a
+ * finished stop opens its lesson again to look back.
+ */
+const nextPartOf = (stop) => stop.parts.find((p) => p.step && p.step.state === 'current') || stop.parts.find((p) => canOpen(p.step))
+
+export function Path45Trail({ model, record, topic, onOpen, onBack, tapToGo = false }) {
   const stops = stopsOf(model, record)
   const nowKey = stops.find((s) => s.state === 'now')?.key || stops[stops.length - 1].key
   const [sel, setSel] = useState(null)
   const pick = stops.find((s) => s.key === (sel || nowKey))
+  if (tapToGo) {
+    const go = (key) => { const part = nextPartOf(stops.find((s) => s.key === key)); if (part) onOpen(part.step) }
+    const now = stops.find((s) => s.key === nowKey)
+    return (
+      <div className="p45 p45-a p45-tap">
+        <header className="p45-hero" style={{ '--p45-land': `url(${landImg(topic.domain)})` }}>
+          <div className="p45-hero-top">
+            <div>
+              <p className="p45-kicker">Your path</p>
+              <h2>{model.title}</h2>
+            </div>
+            <span style={{ flex: 1 }} />
+            <Back onBack={onBack} />
+          </div>
+          <p className="p45-tap-hint">{now && nextPartOf(now) ? <>Tap <b>{now.label}</b> to {nextPartOf(now).label === 'Practice' ? 'practice' : 'start'}!</> : 'Tap a stop to look back.'}</p>
+          <TrailStones model={model} stops={stops} pick={null} onPick={go} className="p45-tap-trail" />
+        </header>
+      </div>
+    )
+  }
   return (
     <div className="p45 p45-a">
       <header className="p45-hero" style={{ '--p45-land': `url(${landImg(topic.domain)})` }}>

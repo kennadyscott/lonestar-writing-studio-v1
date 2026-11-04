@@ -668,3 +668,13 @@ body:has(.ll-lesson) .ll-option-toggle { bottom: 88px !important; }
 /* the palettes set a light accent-soft even in the dark theme, so dark mode marks the open step with an outline instead */
 :root[data-band="9-12"][data-hs-theme="dark"] .llx-step.on { background: var(--hs-sunk); border-color: var(--hs-accent); }
 :root[data-band="9-12"][data-hs-theme="dark"] .llx .lsn-btn.done { color: #0b1622; }
+
+/* Grade 2 taps the map (2026-11-04): the trail fills the page and the stones are big; the one to tap already pulses. */
+.student-pathway .p45-tap .p45-hero { min-height: calc(100vh - 300px); display: flex; flex-direction: column; padding: 18px 26px 24px; }
+.student-pathway .p45-tap-hint { margin: 6px 0 0 !important; font-size: 22px; font-weight: 700; color: #0d2f55; }
+.student-pathway .p45-tap-hint b { color: #0a7dba; }
+.student-pathway .p45-tap .p45-tap-trail { flex: 1; height: auto; min-height: 260px; margin-top: 8px; }
+.student-pathway .p45-tap .ll-stone { transform: scale(1.35); }
+.student-pathway .p45-tap .ll-stone-under { margin-top: 12px; }
+.student-pathway .p45-tap .p45-stone .ll-stone-label { font-size: 17px; }
+.student-pathway .p45-tap .p45-stone:disabled, .student-pathway .p45-tap .p45-stone:has(.ll-stone.locked) { cursor: default; }

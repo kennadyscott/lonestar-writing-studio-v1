@@ -160,7 +160,8 @@ export function Path45Trail({ model, record, topic, onOpen, onBack }) {
       <header className="p45-hero" style={{ '--p45-land': `url(${landImg(topic.domain)})` }}>
         <div className="p45-hero-top">
           <div>
-            <p className="p45-kicker">Your path · Grade {topic.grade}</p>
+            {/* no grade here: every band walks the trail now, and a topic's grade need not be the band's (2026-11-04) */}
+            <p className="p45-kicker">Your path</p>
             <h2>{model.title}</h2>
           </div>
           <Growth model={model} />

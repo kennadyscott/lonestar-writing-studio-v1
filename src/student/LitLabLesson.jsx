@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { BRAND } from '../lib/brand.js'
+import { lookBand, useBandValue } from '../lib/gradeBand.js'
 import { CSS as WALK_CSS, LessonPageView, pageGate, pageTitle, sectionOf, walkPages, youngReader } from './LessonWalkthrough.jsx'
 import { ActivityPreview } from './ProofRoom.jsx'
 
@@ -19,6 +20,20 @@ const tipFor = (step, i, total) =>
     : i === 0 ? 'One step at a time. Read it, then say it in your own words.'
       : i === total - 1 ? 'That is every step. You are ready to practice!'
         : 'Good! Keep going. Each step builds on the last one.'
+
+/**
+ * The guide under the steps: Luna for grades 2-7; the grade 8 and high-school Writer's Studio has no mascot, so its tip stands
+ * on its own (2026-11-04: each band's lesson "based on the grade level and overall style of that grade level").
+ */
+function Guide({ text }) {
+  const studio = lookBand(useBandValue()) === '9-12'
+  return (
+    <div className={'llx-tip' + (studio ? ' studio' : '')}>
+      {!studio && <img src={BRAND.luna} alt="" />}
+      <p><b>{studio ? 'Tip' : 'Luna'}</b>{text}</p>
+    </div>
+  )
+}
 
 export function LitLabLesson(props) {
   return props.lesson?.pages ? <LitLabWalk {...props} /> : <LitLabSteps {...props} />
@@ -96,10 +111,7 @@ function LitLabWalk({ lesson, topic, complete, draft, onDraft, onDone, onBack })
               )
             })}
           </div>
-          <div className="llx-tip">
-            <img src={BRAND.luna} alt="" />
-            <p><b>Luna</b>{walkTip(page)}</p>
-          </div>
+          <Guide text={walkTip(page)} />
         </aside>
         <main className="llx-page">
           <div className={'llw llw-wide' + (youngReader(lesson) ? ' llw-young' : '')}>
@@ -165,10 +177,7 @@ function LitLabSteps({ lesson, topic, complete, draft, onDraft, onDone, onBack }
               )
             })}
           </ol>
-          <div className="llx-tip">
-            <img src={BRAND.luna} alt="" />
-            <p><b>Luna</b>{tipFor(cur, step, steps.length)}</p>
-          </div>
+          <Guide text={tipFor(cur, step, steps.length)} />
         </aside>
         <main className="llx-stage">
           <span className="llx-kicker">Step {step + 1}</span>

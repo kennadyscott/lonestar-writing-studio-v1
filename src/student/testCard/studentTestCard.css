@@ -63,6 +63,7 @@
 .stc-pcol .stc-passage { flex: 1 1 auto; min-height: 0; max-height: none; }
 .stc-body.with-passage.stack .stc-pcol { max-height: none; }
 .stc-body.with-passage.stack .stc-pcol .stc-passage { max-height: 34vh; }
+.stc-qpic.below { margin: 14px 0 0; max-height: 380px; }
 .stc-qpic.at-passage { flex: none; height: clamp(120px, calc(var(--stc-avail) * 0.34), 260px); min-height: 0; max-height: none; }
 .stc-body.with-passage.side .stc-qpic.at-passage { margin-right: 18px; }
 .stc-qpic img { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; border-radius: 14px; }
@@ -87,10 +88,13 @@
 .stc-select.right { border-color: #1e7a4a; background: #e7f6ee; }
 .stc-select.wrong { border-color: #c0392b; background: #fdecea; }
 
-.stc-hotspot { margin: 6px 0 0; font-size: 20px; line-height: 2.1; }
-.stc-seg { display: inline; padding: 2px 4px; margin: 0 1px; border: 2px solid transparent; border-radius: 7px; background: transparent; color: #274b42; font-weight: 600; }
+/* A hotspot is the excerpt the student taps. It reads as one left-aligned paragraph, the same kind of type as the passage
+   (Kennady, October 16, 2026: the sentences were large, centered, and stacked). */
+.stc-hotspot { margin: 2px 0 0; font-size: 16px; font-weight: 500; line-height: 1.65; text-align: left; color: #274b42; }
+.stc-seg { display: inline; padding: 0 1px; margin: 0; border: 0; border-bottom: 1.5px solid #c5d6cc; border-radius: 2px; background: transparent; color: inherit; font: inherit; font-weight: inherit; line-height: inherit; text-align: left; vertical-align: baseline; white-space: normal; box-decoration-break: clone; -webkit-box-decoration-break: clone; appearance: none; }
 .stc-seg:hover:not(:disabled) { background: var(--stc-soft); }
-.stc-seg.selected { background: #fff3c4; border-color: #e0b84a; }
+.stc-seg:disabled { opacity: 1; color: inherit; }
+.stc-seg.selected:not(.right):not(.wrong) { background: #fff3c4; border-bottom-color: #e0b84a; }
 
 .stc-order { display: grid; gap: 8px; margin: 8px 0 0; padding: 0; list-style: none; }
 .stc-order.right .stc-piece { border-color: #1e7a4a; }

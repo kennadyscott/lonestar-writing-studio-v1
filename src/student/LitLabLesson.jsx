@@ -1,14 +1,15 @@
 import React, { useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 
-/*
- * A Lit Lab lesson in Luna's lesson frame (2026-11-04: "We are going to weave Luna into Lit Lab. I like how the lessons/framework is
- * set up for Luna once you go into the lesson - can we make the regular lit lab match this structure?"). The same open book as
- * LessonPage.jsx and its lsn-* styles: the lesson's steps down a slim left page, the open one showing what it is about, Luna's tip
- * under them, the step across the rest of the screen, and Back / Step n of N / Continue pinned to the bottom.
- */
-
 const BASE = import.meta.env.BASE_URL || '/'
+
+/*
+ * A Lit Lab lesson in Luna's lesson structure (2026-11-04: "We are going to weave Luna into Lit Lab. I like how the lessons/framework
+ * is set up for Luna once you go into the lesson - can we make the regular lit lab match this structure?"), in a modern look rather
+ * than the open book ("I don't really like the 'book pages' vibe - can we go something a bit more modern looking?"): the lesson's
+ * steps in a card down the left with a progress meter and Luna's tip, the step in a wide card beside it, and Back / Step n of N /
+ * Continue pinned to the bottom (the Luna lesson's bar).
+ */
 
 // Luna's line under the steps: the step's example when it has one, otherwise where the student is in the lesson.
 const tipFor = (step, i, total) =>
@@ -19,7 +20,8 @@ const tipFor = (step, i, total) =>
 
 export function LitLabLesson({ lesson, topic, complete, draft, onDraft, onDone, onBack }) {
   const steps = lesson.steps || []
-  const [step, setStep] = useState(Math.min(draft?.page || 0, Math.max(0, steps.length - 1)))
+  const total = Math.max(1, steps.length)
+  const [step, setStep] = useState(Math.min(draft?.page || 0, total - 1))
   const [reached, setReached] = useState(Math.max(draft?.reached || 0, step))
   const go = (i) => {
     const r = Math.max(reached, i)
@@ -27,44 +29,45 @@ export function LitLabLesson({ lesson, topic, complete, draft, onDraft, onDone, 
   }
   const cur = steps[step] || { title: lesson.title, body: '' }
   const last = step === steps.length - 1
-  const pct = Math.round(((step + 1) / Math.max(1, steps.length)) * 100)
+  const pct = Math.round(((step + 1) / total) * 100)
   const finish = complete ? onBack : onDone
   return (
-    <div className="lsn lsn-b ll-lesson">
-      <div aria-hidden className="lsn-bg" style={{ '--bg': `url(${BASE}bg-nook.jpg)` }} />
-      <div className="lsn-book">
-        <aside className="lsn-page lsn-left">
-          <div className="lsn-kicker">Lit Lab · {topic?.short || topic?.title || 'Lesson'}</div>
-          <h1 className="lsn-title">{lesson.title}</h1>
-          <ol className="lsn-tabs">
+    <div className="llx ll-lesson">
+      {/* the student home's scene, faint behind the cards */}
+      <div aria-hidden className="scene-bg" style={{ backgroundImage: `url(${BASE}bg-enchanted.jpg)` }} />
+      <div className="llx-in">
+        <aside className="llx-rail" aria-label="Lesson steps">
+          <span className="llx-chip">Lit Lab · {topic?.short || topic?.title || 'Lesson'}</span>
+          <h1 className="llx-title">{lesson.title}</h1>
+          <div className="llx-meter" aria-label={`${step + 1} of ${total} steps`}>
+            <span className="llx-meter-txt"><b>{step + 1}</b> of {total} steps</span>
+            <span className="llx-meter-bar"><span style={{ width: `${pct}%` }} /></span>
+          </div>
+          <ol className="llx-steps">
             {steps.map((s, i) => {
               const on = i === step, past = i < reached && !on
               return (
                 <li key={i}>
-                  <button className={'lsn-tab' + (on ? ' cur' : '') + (past ? ' past' : '')} disabled={i > reached} onClick={() => i <= reached && go(i)} aria-current={on ? 'step' : undefined}>
-                    <span className="lsn-tab-n">{past ? '✓' : i + 1}</span>{s.title}
+                  <button className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={i > reached} onClick={() => i <= reached && go(i)} aria-current={on ? 'step' : undefined}>
+                    <span className="llx-step-n" aria-hidden="true">{past ? '✓' : i + 1}</span>
+                    <span className="llx-step-name">{s.title}</span>
                   </button>
-                  {on && (
-                    <div className="lsn-tab-detail">
-                      <div className="lsn-step-sub">{s.body}</div>
-                    </div>
-                  )}
                 </li>
               )
             })}
           </ol>
-          <div className="lsn-tip">
-            <img src={BRAND.luna} alt="" className="lsn-tip-luna" />
-            <div className="lsn-tip-bubble">{tipFor(cur, step, steps.length)}</div>
+          <div className="llx-tip">
+            <img src={BRAND.luna} alt="" />
+            <p><b>Luna</b>{tipFor(cur, step, steps.length)}</p>
           </div>
         </aside>
-        <main className="lsn-page lsn-right ll-step">
-          <div className="ll-step-n">Step {step + 1} of {steps.length}</div>
-          <h2 className="lsn-step-title ll-step-title">{cur.title}</h2>
-          <p className="ll-step-body">{cur.body}</p>
+        <main className="llx-stage">
+          <span className="llx-kicker">Step {step + 1}</span>
+          <h2 className="llx-h">{cur.title}</h2>
+          <p className="llx-body">{cur.body}</p>
           {cur.example && (
-            <figure className="ll-step-example">
-              <figcaption>See it in action</figcaption>
+            <figure className="llx-example">
+              <figcaption><span aria-hidden="true">✨</span> See it in action</figcaption>
               <blockquote>{cur.example}</blockquote>
             </figure>
           )}

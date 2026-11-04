@@ -174,7 +174,7 @@ export default function App() {
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
       {/* OPTION (2026-11-03): says when the Lit Lab Writing option is showing, and turns it off */}
       {litLabWritingOn() && (
-        <a href={location.pathname + location.hash} style={{ position: 'fixed', right: 'max(16px, env(safe-area-inset-right, 0px))', bottom: 'max(16px, env(safe-area-inset-bottom, 0px))', zIndex: 90, background: '#0d2f55', color: '#fff', borderRadius: 999, padding: '8px 14px', fontSize: 12.5, fontWeight: 800, textDecoration: 'none', boxShadow: '0 6px 18px rgba(2,20,50,.3)' }}>
+        <a className="ll-option-toggle" href={location.pathname + location.hash} style={{ position: 'fixed', right: 'max(16px, env(safe-area-inset-right, 0px))', bottom: 'max(16px, env(safe-area-inset-bottom, 0px))', zIndex: 90, background: '#0d2f55', color: '#fff', borderRadius: 999, padding: '8px 14px', fontSize: 12.5, fontWeight: 800, textDecoration: 'none', boxShadow: '0 6px 18px rgba(2,20,50,.3)' }}>
           Option on: Lit Lab Writing · Turn off
         </a>
       )}

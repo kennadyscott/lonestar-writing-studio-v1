@@ -591,3 +591,80 @@ body:has(.ll-lesson) .ll-option-toggle { bottom: 88px !important; }
 .llx-page { min-width: 0; }
 .llx-page .llw { font-size: 17px; }
 .ll-walk .lsn-btn:not(.ghost):disabled { background: #9fb3c4; box-shadow: none; cursor: not-allowed; }
+
+/* ---- The trail and the lesson, dressed for each band (2026-11-04: "Adjust the other grade levels to match this style - both the
+   pathway and what the lesson looks like when you open it up. Adjust based on the grade level and overall style of that grade
+   level.") Grades 3-5 and 6-7 share the Lit Labyrinth home, so they share this look as it is. ---- */
+
+/* Grade 2: the same world, bigger and simpler — large type, large targets. */
+:root[data-band="2"] .student-pathway .p45-kicker { font-size: 14px; }
+:root[data-band="2"] .student-pathway .p45-hero h2 { font-size: 38px; }
+:root[data-band="2"] .student-pathway .p45-trail { height: 172px; }
+:root[data-band="2"] .student-pathway .p45-stone .ll-stone-label { font-size: 15px; font-weight: 800; }
+:root[data-band="2"] .student-pathway .p45-nc-title { font-size: 27px; }
+:root[data-band="2"] .student-pathway .p45-nc-line { font-size: 16.5px; }
+:root[data-band="2"] .student-pathway .p45-nc-list .assign-row { padding: 14px 20px !important; }
+:root[data-band="2"] .student-pathway .p45-nc-list .assign-title { font-size: 21px; }
+:root[data-band="2"] .student-pathway .p45-nc-list .btn { padding: 12px 24px; font-size: 16.5px; border-radius: 12px; }
+:root[data-band="2"] .llx-in { grid-template-columns: clamp(220px, 19vw, 270px) minmax(0, 1fr); }
+:root[data-band="2"] .llx-title { font-size: 25px; }
+:root[data-band="2"] .llx-meter-txt { font-size: 14.5px; }
+:root[data-band="2"] .llx-step { padding: 10px 12px; }
+:root[data-band="2"] .llx-step-n { width: 34px; height: 34px; font-size: 16px; }
+:root[data-band="2"] .llx-step-name { font-size: 16.5px; }
+:root[data-band="2"] .llx-sec-head span { font-size: 13px; }
+:root[data-band="2"] .llx-tip img { width: 62px; height: 62px; }
+:root[data-band="2"] .llx-tip p { font-size: 15px; }
+:root[data-band="2"] .llx-kicker { font-size: 14px; }
+:root[data-band="2"] .llx-h { font-size: clamp(40px, 4.4vw, 66px); }
+:root[data-band="2"] .llx-body { max-width: 38ch; font-size: clamp(25px, 2.3vw, 36px); line-height: 1.45; }
+:root[data-band="2"] .llx-example blockquote { font-size: clamp(25px, 2.3vw, 34px); }
+:root[data-band="2"] .llx .lsn-btn { padding: 15px 32px; font-size: 18px; border-radius: 14px; }
+:root[data-band="2"] .llx .lsn-nav-step { font-size: 14.5px; }
+
+/* Grades 8 and 9-12: the Writer's Studio — no scene or mascot, Source Serif headings, its own tokens (light / dark, palettes). */
+:root[data-band="9-12"] .student-pathway .p45 { color: var(--hs-ink); }
+:root[data-band="9-12"] .student-pathway .p45-hero { background: var(--hs-hero); border: 0; border-radius: 14px; color: var(--hs-hero-ink); padding: 18px 24px 10px; }
+:root[data-band="9-12"] .student-pathway .p45-kicker { color: var(--hs-hero-muted); letter-spacing: .12em; }
+:root[data-band="9-12"] .student-pathway .p45-hero h2 { font-family: var(--hs-serif); font-weight: 600; font-size: 32px; letter-spacing: -.01em; color: var(--hs-hero-ink); }
+:root[data-band="9-12"] .student-pathway .p45-back { background: rgba(255, 255, 255, .12); border-color: rgba(255, 255, 255, .28); color: var(--hs-hero-ink); }
+:root[data-band="9-12"] .student-pathway .p45-growth { background: rgba(255, 255, 255, .95); color: #15202b; }
+:root[data-band="9-12"] .student-pathway .p45-nextcard { background: var(--hs-surface); border: 1px solid var(--hs-line); border-radius: 14px; box-shadow: none; }
+:root[data-band="9-12"] .student-pathway .p45-nc-k { color: var(--hs-accent); }
+:root[data-band="9-12"] .student-pathway .p45-nc-title { font-family: var(--hs-serif); font-weight: 600; font-size: 24px; color: var(--hs-ink); }
+:root[data-band="9-12"] .student-pathway .p45-nc-line { color: var(--hs-muted); }
+:root[data-band="9-12"] .llx { color: var(--hs-ink); }
+:root[data-band="9-12"] .llx-rail, :root[data-band="9-12"] .llx-stage { background: var(--hs-surface); border-color: var(--hs-line); border-radius: 14px; box-shadow: 0 1px 2px rgba(15, 32, 43, .05); }
+:root[data-band="9-12"] .llx-chip, :root[data-band="9-12"] .llx-kicker { color: var(--hs-accent); }
+:root[data-band="9-12"] .llx-title, :root[data-band="9-12"] .llx-h { font-family: var(--hs-serif); font-weight: 600; letter-spacing: -.01em; color: var(--hs-ink); }
+:root[data-band="9-12"] .llx-body { font-family: var(--hs-serif); color: var(--hs-ink); }
+:root[data-band="9-12"] .llx-meter-txt, :root[data-band="9-12"] .llx-meter-txt b { color: var(--hs-muted); }
+:root[data-band="9-12"] .llx-meter-bar { background: var(--hs-sunk); }
+:root[data-band="9-12"] .llx-meter-bar > span { background: var(--hs-accent); }
+:root[data-band="9-12"] .llx-sec-head { color: var(--hs-muted); }
+:root[data-band="9-12"] .llx-sec.on .llx-sec-head { color: var(--hs-accent); }
+:root[data-band="9-12"] .llx-step { color: var(--hs-muted); }
+:root[data-band="9-12"] .llx-step.past { color: var(--hs-ink); }
+:root[data-band="9-12"] .llx-step:hover:not(:disabled) { background: var(--hs-sunk); }
+:root[data-band="9-12"] .llx-step.on { background: var(--hs-accent-soft); border-color: transparent; box-shadow: none; color: var(--hs-ink); }
+:root[data-band="9-12"] .llx-step-n { border-radius: 8px; background: var(--hs-surface); border-color: var(--hs-line); color: var(--hs-muted); }
+:root[data-band="9-12"] .llx-step.on .llx-step-n { background: var(--hs-accent); border-color: var(--hs-accent); color: var(--hs-accent-ink); box-shadow: none; }
+:root[data-band="9-12"] .llx-step.past .llx-step-n { background: var(--hs-good-soft); border-color: var(--hs-good-soft); color: var(--hs-good); }
+:root[data-band="9-12"] .llx-tip { border-top-color: var(--hs-line); }
+:root[data-band="9-12"] .llx-tip.studio p { width: 100%; border: 0; border-radius: 10px; background: var(--hs-sunk); color: var(--hs-ink); font-weight: 500; }
+:root[data-band="9-12"] .llx-tip.studio b { color: var(--hs-accent); }
+:root[data-band="9-12"] .llx-example { background: var(--hs-hero); box-shadow: none; border-radius: 12px; }
+:root[data-band="9-12"] .llx-example figcaption { color: var(--hs-c1); background: rgba(0, 0, 0, .22); border: 1px solid rgba(255, 193, 94, .55); box-shadow: none; }
+:root[data-band="9-12"] .llx-example blockquote { font-family: var(--hs-serif); font-weight: 600; }
+:root[data-band="9-12"] .llx .lsn-nav { background: color-mix(in srgb, var(--hs-surface) 94%, transparent); border-top: 1px solid var(--hs-line); }
+:root[data-band="9-12"] .llx .lsn-nav-step { color: var(--hs-ink); }
+:root[data-band="9-12"] .llx .lsn-nav-bar { background: var(--hs-sunk); }
+:root[data-band="9-12"] .llx .lsn-nav-bar > span { background: var(--hs-accent); }
+:root[data-band="9-12"] .llx .lsn-exit { color: var(--hs-muted); }
+:root[data-band="9-12"] .llx .lsn-btn { border-radius: 10px; }
+:root[data-band="9-12"] .llx .lsn-btn:not(.ghost):not(.done) { background: var(--hs-accent); color: var(--hs-accent-ink); box-shadow: none; }
+:root[data-band="9-12"] .llx .lsn-btn.ghost { background: var(--hs-surface); color: var(--hs-ink); border-color: var(--hs-line); }
+:root[data-band="9-12"] .llx .lsn-btn.done { background: var(--hs-good); }
+/* the palettes set a light accent-soft even in the dark theme, so dark mode marks the open step with an outline instead */
+:root[data-band="9-12"][data-hs-theme="dark"] .llx-step.on { background: var(--hs-sunk); border-color: var(--hs-accent); }
+:root[data-band="9-12"][data-hs-theme="dark"] .llx .lsn-btn.done { color: #0b1622; }

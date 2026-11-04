@@ -4,7 +4,7 @@ import { StudentTestCard } from './testCard/StudentTestCard.jsx'
 import { scoreStudentItem } from './testCard/studentTestItem.mjs'
 import { useBandValue } from '../lib/gradeBand.js'
 import './StudentPathway.css'
-import { Path45Trail, Path45Dashboard, PATH45_LOOKS, samplePathRecord } from './Path45Looks.jsx'
+import { Path45Trail, Path45Dashboard, samplePathRecord } from './Path45Looks.jsx'
 
 const names = { pre: 'Pre-test', lesson: 'Lesson', practice: 'Practice', post: 'Post-test' }
 const marks = { pre: '01', lesson: '▤', practice: '✦', post: '✓' }
@@ -31,8 +31,8 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
   const [active, setActive] = useState(null)
   const [saveFailed, setSaveFailed] = useState(false)
   // PROTOTYPE (grades 3-5, 2026-10-14): A Trail or B Dashboard, and sample progress to see it new / partway / done (display only)
-  const [look, setLookRaw] = useState(() => { try { const v = localStorage.getItem('lscr.path45Look'); return PATH45_LOOKS.some(([k]) => k === v) ? v : 'a' } catch { return 'a' } })
-  const setLook = (v) => { setLookRaw(v); try { localStorage.setItem('lscr.path45Look', v) } catch { /* fine */ } }
+  // Kennady chose A Trail (2026-11-03: "I prefer Trail"); the A/B switch is gone. B Dashboard stays in Path45Looks.jsx.
+  const look = 'a'
   const is45 = band === '3-5' || band === '4-5'
   const [sample, setSampleRaw] = useState(() => { try { return localStorage.getItem('lscr.pathSample') || 'partway' } catch { return 'partway' } })
   const setSample = (v) => { setSampleRaw(v); try { localStorage.setItem('lscr.pathSample', v) } catch { /* fine */ } }
@@ -60,7 +60,6 @@ export default function StudentPathway({ topic, content, Worksheet, onBackToMap 
     <section className={'student-pathway' + (testing ? ' sp-testing' : '')} aria-label={`${topic.short || topic.title} pathway`}>
       {!testing && <div className="sp-preview-note"><b>Pathway preview</b><span>Sample lessons and tests · Existing practice activities</span>
         {is45 && !active && <span className="sp-proto">
-          <span className="style-pick" role="group" aria-label="Prototype: pathway look">{PATH45_LOOKS.map(([k, n], i) => <button key={k} className={look === k ? 'on' : ''} onClick={() => setLook(k)}>{'AB'[i]}<small>{n}</small></button>)}</span>
           <span className="style-pick" role="group" aria-label="Prototype: sample progress"><span className="lbl">Sample</span>{[['new', 'New'], ['partway', 'Partway'], ['done', 'Done'], ['mine', 'Mine']].map(([k, n]) => <button key={k} className={sample === k ? 'on' : ''} onClick={() => setSample(k)}>{n}</button>)}</span>
         </span>}
       </div>}

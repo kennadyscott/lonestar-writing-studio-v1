@@ -182,7 +182,7 @@ function pathModel(topic, content, record) {
       lesson,
       practice,
       extra,
-      lessonSteps: lesson?.lesson?.steps?.length || 0,
+      lessonSteps: lesson?.lesson?.steps?.length || lesson?.lesson?.pages?.length || 0,
       activities: practice?.sheet?.activities?.length || 0,
     }
   })
@@ -443,7 +443,7 @@ function Path912({ model, onOpen, onBack }) {
 function WorkStep({ step, onOpen, retry }) {
   return <button className={`sp-work-step is-${step.state}`} disabled={!available(step)} onClick={() => onOpen(step)}>
     <span className="sp-work-icon" aria-hidden>{done(step) ? '✓' : marks[step.type]}</span>
-    <span className="sp-work-copy"><strong>{retry ? 'Try the practice again' : names[step.type]}</strong><small>{step.type === 'lesson' ? `${step.lesson?.steps.length || 0} short steps` : `${step.sheet?.activities.length || 0} activities`}{done(step) && step.score != null ? ` · ${step.score}%` : ''}</small></span>
+    <span className="sp-work-copy"><strong>{retry ? 'Try the practice again' : names[step.type]}</strong><small>{step.type === 'lesson' ? (step.lesson?.pages ? `${step.lesson.pages.length} pages` : `${step.lesson?.steps?.length || 0} short steps`) : `${step.sheet?.activities.length || 0} activities`}{done(step) && step.score != null ? ` · ${step.score}%` : ''}</small></span>
     <span className="sp-work-state">{attempted(step) ? 'Attempted' : done(step) ? step.type === 'practice' ? 'Again' : 'Review' : statusOf(step)}</span>
   </button>
 }

@@ -713,6 +713,18 @@ const server = http.createServer(async (req, res) => {
       } catch { /* no folder yet */ }
       const seen = new Set()
       const topics = [...rawTopics(), ...JSON.parse(JSON.stringify(SHIPPED)), ...extra].filter((t) => !seen.has(t.id) && seen.add(t.id))
+      // A topic's lessons, downloaded from the CMS Lessons tab ("Download lessons for the student app", 2026-10-20) into
+      // data/studio-lessons/*.json as { topic, lessons: { worksheetId: lesson } }; the pathway plays each before its worksheet.
+      try {
+        const ldir = path.join(__dirname, '..', 'data', 'studio-lessons')
+        for (const f of fs.readdirSync(ldir).filter((x) => x.endsWith('.json')).sort()) {
+          try {
+            const file = JSON.parse(fs.readFileSync(path.join(ldir, f), 'utf8'))
+            const t = topics.find((x) => x.id === file.topic)
+            if (t && file.lessons && typeof file.lessons === 'object') t.lessonsBySheet = { ...(t.lessonsBySheet || {}), ...file.lessons }
+          } catch { /* skip a bad file */ }
+        }
+      } catch { /* no folder yet */ }
       return send(res, 200, { topics })
     }
 

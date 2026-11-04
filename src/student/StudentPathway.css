@@ -576,3 +576,16 @@
 .proof-page:has(.ll-lesson) .crumbs { display: none; }
 /* the prototype's option switch rides above the lesson's bottom bar instead of covering Continue */
 body:has(.ll-lesson) .ll-option-toggle { bottom: 88px !important; }
+/* A CMS lesson's pages, grouped into sections down the left; the page itself fills the middle (2026-11-04). */
+.llx-sections { display: grid; gap: 8px; }
+.llx-sec { display: grid; gap: 6px; }
+.llx-sec-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; padding: 8px 10px; border: 0; border-radius: 10px; background: transparent; font: inherit; cursor: pointer; color: #557489; }
+.llx-sec-head span { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+.llx-sec-head small { font-size: 12px; font-weight: 700; color: #7d93a6; }
+.llx-sec.on .llx-sec-head { color: var(--teal); cursor: default; }
+.llx-sec.done .llx-sec-head small { color: #16935a; }
+.llx-sec-head:disabled { cursor: default; opacity: .6; }
+.llx-sec-head:hover:not(:disabled) { background: rgba(255, 255, 255, .8); }
+.llx-page { min-width: 0; }
+.llx-page .llw { font-size: 17px; }
+.ll-walk .lsn-btn:not(.ghost):disabled { background: #9fb3c4; box-shadow: none; cursor: not-allowed; }

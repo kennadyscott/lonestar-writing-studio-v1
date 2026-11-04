@@ -532,46 +532,48 @@
 /* A Lit Lab lesson in Luna's lesson structure, in the student home's look (2026-11-04: "I don't really like the 'book pages' vibe"
    ... "Match more of our main homepage vibe/style"): the scene shows through, white cards edged in gold, teal eyebrows, navy
    buttons, and the example in a dark card with a gold pill like Quick Write. */
-.llx { position: relative; padding: 4px 0 112px; color: var(--ink); }
-.llx-in { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(260px, 320px) minmax(0, 1fr); gap: 20px; align-items: start; }
+/* The lesson spans the whole window (2026-11-04: "the side rail could be further over and smaller and the lesson/activity window
+   could then be larger"): a narrow rail near the left edge, the page filling the rest down to the bottom bar. */
+.llx { position: relative; margin: -26px calc(50% - 50vw) -70px; padding: 16px clamp(12px, 1.6vw, 24px) 96px; color: var(--ink); }
+.llx-in { position: relative; z-index: 1; display: grid; grid-template-columns: clamp(200px, 17vw, 250px) minmax(0, 1fr); gap: clamp(12px, 1.4vw, 20px); align-items: stretch; }
 .llx-rail, .llx-stage { background: var(--card, #fff); border: 1px solid var(--gold-line); border-radius: 20px; box-shadow: var(--shadow); }
-.llx-rail { position: sticky; top: 84px; display: grid; gap: 14px; padding: 20px 18px; background: linear-gradient(160deg, #eef6f9, #fff 45%); }
+.llx-rail { position: sticky; top: 80px; align-self: start; display: grid; gap: 12px; padding: 16px 14px; background: linear-gradient(160deg, #eef6f9, #fff 45%); }
 .llx-chip { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
-.llx-title { margin: -4px 0 0; font-size: 26px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; color: var(--navy); text-wrap: balance; }
+.llx-title { margin: -4px 0 0; font-size: 21px; font-weight: 800; letter-spacing: -.02em; line-height: 1.15; color: var(--navy); text-wrap: balance; }
 .llx-meter { display: grid; gap: 7px; }
 .llx-meter-txt { font-size: 13px; font-weight: 700; color: #557489; }
 .llx-meter-txt b { color: var(--navy); }
 .llx-meter-bar { height: 8px; border-radius: 999px; background: #e3eef3; overflow: hidden; }
 .llx-meter-bar > span { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, #02b2d5, var(--teal)); transition: width .35s ease; }
 .llx-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.llx-step { width: 100%; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1px solid transparent; border-radius: 14px; background: transparent; text-align: left; font: inherit; color: #557489; cursor: pointer; transition: background .15s, border-color .15s; }
+.llx-step { width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid transparent; border-radius: 14px; background: transparent; text-align: left; font: inherit; color: #557489; cursor: pointer; transition: background .15s, border-color .15s; }
 .llx-step:hover:not(:disabled) { background: rgba(255, 255, 255, .8); }
 .llx-step:disabled { cursor: default; opacity: .6; }
 .llx-step.on { background: #fff; border-color: var(--gold-line); color: var(--navy); box-shadow: 0 2px 8px rgba(2, 56, 77, .08); }
 .llx-step.past { color: var(--ink); }
 .llx-step:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
-.llx-step-n { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: #fff; border: 1.5px solid #cfdfe7; color: #7d93a6; font-size: 13.5px; font-weight: 800; }
+.llx-step-n { flex: none; display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 1.5px solid #cfdfe7; color: #7d93a6; font-size: 13.5px; font-weight: 800; }
 .llx-step.on .llx-step-n { background: var(--navy); border-color: var(--navy); color: #fff; box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--gold); }
 .llx-step.past .llx-step-n { background: #d9f2fb; border-color: #d9f2fb; color: var(--teal); }
-.llx-step-name { font-size: 14.5px; font-weight: 700; line-height: 1.3; }
+.llx-step-name { font-size: 13.5px; font-weight: 700; line-height: 1.3; }
 .llx-tip { display: flex; align-items: flex-end; gap: 10px; margin-top: 2px; padding-top: 14px; border-top: 1px solid var(--gold-line); }
-.llx-tip img { width: 54px; height: 54px; object-fit: contain; flex: none; filter: drop-shadow(0 4px 8px rgba(2, 30, 60, .25)); }
-.llx-tip p { margin: 0; padding: 10px 12px; border-radius: 14px 14px 14px 4px; background: #fff; border: 1px solid var(--gold-line); font-size: 13.5px; font-weight: 600; line-height: 1.4; color: var(--ink); }
+.llx-tip img { width: 44px; height: 44px; object-fit: contain; flex: none; filter: drop-shadow(0 4px 8px rgba(2, 30, 60, .25)); }
+.llx-tip p { margin: 0; padding: 9px 11px; border-radius: 14px 14px 14px 4px; background: #fff; border: 1px solid var(--gold-line); font-size: 12.5px; font-weight: 600; line-height: 1.4; color: var(--ink); }
 .llx-tip b { display: block; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-bottom: 2px; }
-.llx-stage { min-height: min(60vh, 540px); display: flex; flex-direction: column; justify-content: center; gap: 16px; padding: clamp(26px, 3.6vw, 52px); }
+.llx-stage { min-height: calc(100vh - 64px - 16px - 96px); display: flex; flex-direction: column; justify-content: center; gap: 18px; padding: clamp(28px, 4.5vw, 80px); }
 .llx-kicker { font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); }
-.llx-h { margin: 0; font-size: clamp(30px, 3.2vw, 44px); font-weight: 800; letter-spacing: -.025em; line-height: 1.1; color: var(--navy); text-wrap: balance; }
-.llx-body { margin: 0; max-width: 50ch; font-size: clamp(19px, 1.6vw, 23px); line-height: 1.55; color: var(--ink); text-wrap: pretty; }
-.llx-example { margin: 10px 0 0; max-width: 60ch; padding: 22px 24px 22px; border-radius: 18px; color: #fff;
+.llx-h { margin: 0; font-size: clamp(32px, 3.6vw, 56px); font-weight: 800; letter-spacing: -.025em; line-height: 1.1; color: var(--navy); text-wrap: balance; }
+.llx-body { margin: 0; max-width: 56ch; font-size: clamp(20px, 1.8vw, 28px); line-height: 1.55; color: var(--ink); text-wrap: pretty; }
+.llx-example { margin: 10px 0 0; max-width: 64ch; padding: 22px 24px 22px; border-radius: 18px; color: #fff;
   background: radial-gradient(500px 200px at 100% 0%, rgba(2, 178, 213, .22), transparent 70%), linear-gradient(135deg, var(--scene-deep), #023a52);
   box-shadow: 0 10px 26px rgba(1, 23, 45, .28), 0 0 0 1px rgba(245, 180, 0, .35); }
 .llx-example figcaption { display: inline-flex; align-items: center; gap: 7px; padding: 5px 14px; border-radius: 999px; margin-bottom: 12px;
   font-size: 12px; font-weight: 800; letter-spacing: 1.6px; text-transform: uppercase; color: #ffe08a;
   background: rgba(1, 23, 45, .66); border: 1.5px solid rgba(245, 197, 66, .8); box-shadow: 0 0 14px rgba(245, 180, 0, .3); }
-.llx-example blockquote { margin: 0; font-size: clamp(19px, 1.6vw, 24px); font-weight: 700; line-height: 1.45; color: #fff; }
+.llx-example blockquote { margin: 0; font-size: clamp(20px, 1.8vw, 28px); font-weight: 700; line-height: 1.45; color: #fff; }
 .llx .lsn-btn:not(.ghost):not(.done) { background: var(--navy); color: #fff; box-shadow: 0 1px 2px rgba(2, 56, 77, .14), 0 0 0 1px var(--gold-line); }
 .llx .lsn-btn:not(.ghost):not(.done):hover { background: #024a64; }
-@media (max-width: 860px) { .llx-in { grid-template-columns: 1fr; } .llx-rail { position: static; } }
+@media (max-width: 860px) { .llx-in { grid-template-columns: 1fr; } .llx-rail { position: static; } .llx-stage { min-height: 0; } }
 @media (prefers-reduced-motion: reduce) { .llx * { transition: none !important; } }
 .proof-page:has(.ll-lesson) .crumbs { display: none; }
 /* the prototype's option switch rides above the lesson's bottom bar instead of covering Continue */

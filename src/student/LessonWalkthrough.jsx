@@ -839,3 +839,169 @@ export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabe
     </div>
   )
 }
+
+/*
+ * The student site's lesson frame (November 9, 2026: "I also want the student preview to show like this exact structure from the
+ * site it is going to live within"), shared by the CMS student preview and the LoneStar student app (src/student/LitLabLesson.jsx):
+ * the lesson's pages down a narrow rail (grouped Get ready / Part 1 / Part 2, a "1 of 9 steps" meter, the guide's tip under them),
+ * the slides in the wide stage beside it on the scene, and Back / Step n of N / Continue pinned to the bottom. The student app
+ * styles these classes in its own stylesheet (with each grade band's look); `styled` adds the same rules here for the CMS.
+ */
+const frameName = (p) => (p.type === 'breakout_title' ? 'Welcome' : String(p.label || '').replace(/\s+\d+$/, ''))
+export const frameTip = (p) => ({ breakout_title: 'Welcome! Let us find out what today is about.', learning_target: 'This is what you will be able to do by the end.', warm_up: 'A quick warm-up to wake up your brain!', vocabulary: 'Tap a word to see what it means.', instruction: 'Watch and read closely. This is the big idea.', group_instruction: 'Talk it over. Explaining it helps you learn it.', example: 'Follow along with the example, then try it.', checkpoint: 'Your turn! Show what you know.', checkpoint_b: 'One more try to lock it in.', exit_ticket: 'Last stop! Show what you learned today.' })[p.type] || 'Keep going. You have got this!'
+function FrameTip({ page, guide }) {
+  return (
+    <div className="llx-tip">
+      {guide?.img && <img src={guide.img} alt="" />}
+      <p><b>{guide?.name || 'Tip'}</b>{frameTip(page)}</p>
+    </div>
+  )
+}
+/** @param {{ lesson: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, chip?: string, background?: string, guide?: { img?: string, name?: string }, Tip?: any, complete?: boolean, draft?: any, onDraft?: (d: any) => void, onDone?: () => void, onBack?: () => void, backLabel?: string, exitLabel?: string, finishLabel?: string, styled?: boolean }} props */
+export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase = '/', chip = 'Lit Lab', background = '', guide = null, Tip = null, complete = false, draft = null, onDraft = () => {}, onDone = () => {}, onBack = () => {}, backLabel = '← Back to my pathway', exitLabel = 'Exit to my pathway', finishLabel = 'Finish lesson & start practice ✓', styled = false }) {
+  const pages = useMemo(() => walkPages(lesson), [lesson])
+  // Slide by slide (slidesOf): a page's next part opens under the last one; a new page starts at the top.
+  const slides = useMemo(() => lessonSlides(pages), [pages])
+  const total = Math.max(1, slides.length)
+  const [at, setAt] = useState(Math.min(draft?.slide || 0, total - 1))
+  const [done, setDone] = useState(draft?.done || {})
+  const [reached, setReached] = useState(Math.max(draft?.reached || 0, at))
+  const save = (patch) => onDraft({ slide: at, done, reached, ...patch })
+  const go = (i) => {
+    const r = Math.max(reached, i)
+    const samePage = slides[i]?.pageAt === slides[at]?.pageAt
+    setAt(i); setReached(r); save({ slide: i, reached: r }); if (!samePage && typeof window !== 'undefined') window.scrollTo(0, 0)
+  }
+  const slide = slides[at]
+  if (!slide) return null
+  const { page, pageAt } = slide
+  const mine = done[pageAt] || {}
+  const { open, wait } = slideGate(slide, mine)
+  const last = at === slides.length - 1
+  const pct = Math.round(((at + 1) / total) * 100)
+  const firstOf = pages.map((_, p) => slides.findIndex((sl) => sl.pageAt === p))
+  const sections = pages.reduce((out, p, i) => { const name = sectionOf(p); const prev = out[out.length - 1]; if (prev && prev.name === name) prev.pages.push(i); else out.push({ name, pages: [i] }); return out }, [])
+  const finish = complete ? onBack : onDone
+  return (
+    <div className={'llx ll-lesson ll-walk' + (styled ? ' llx-own' : '')}>
+      {styled && <style>{FRAME_CSS}</style>}
+      {background && <div aria-hidden className="scene-bg" style={{ backgroundImage: `url(${background})` }} />}
+      <div className="llx-in">
+        <aside className="llx-rail" aria-label="Lesson steps">
+          <span className="llx-chip">{chip}</span>
+          <h1 className="llx-title">{lesson.title}</h1>
+          <div className="llx-meter" aria-label={`Step ${at + 1} of ${total}`}>
+            <span className="llx-meter-txt"><b>{at + 1}</b> of {total} steps</span>
+            <span className="llx-meter-bar"><span style={{ width: `${pct}%` }} /></span>
+          </div>
+          <div className="llx-sections">
+            {sections.map((sec) => {
+              const here = sec.pages.includes(pageAt), finished = !here && sec.pages.every((p) => firstOf[p] < reached)
+              return (
+                <section key={sec.name} className={'llx-sec' + (here ? ' on' : '') + (finished ? ' done' : '')}>
+                  <button type="button" className="llx-sec-head" disabled={firstOf[sec.pages[0]] > reached} onClick={() => !here && firstOf[sec.pages[0]] <= reached && go(firstOf[sec.pages[0]])} aria-expanded={here}>
+                    <span>{sec.name}</span><small>{finished ? '✓ Done' : `${sec.pages.length} ${sec.pages.length === 1 ? 'page' : 'pages'}`}</small>
+                  </button>
+                  {here && (
+                    <ol className="llx-steps">
+                      {sec.pages.map((p) => {
+                        const on = p === pageAt, past = p < pageAt
+                        return (
+                          <li key={p}>
+                            <button type="button" className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={firstOf[p] > reached} onClick={() => firstOf[p] <= reached && !on && go(firstOf[p])} aria-current={on ? 'step' : undefined} title={pageTitle(pages[p])}>
+                              <span className="llx-step-n" aria-hidden="true">{past ? '✓' : p + 1}</span>
+                              <span className="llx-step-name">{frameName(pages[p])}</span>
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ol>
+                  )}
+                </section>
+              )
+            })}
+          </div>
+          {Tip ? <Tip page={page} text={frameTip(page)} /> : <FrameTip page={page} guide={guide} />}
+        </aside>
+        <main className="llx-page">
+          <div className={'llw llw-wide' + (youngReader(lesson) ? ' llw-young' : '')}>
+            <style>{CSS}</style>
+            <LessonPageView key={pageAt} lesson={lesson} page={page} picture={picture} student done={mine} Play={Play} assetBase={assetBase} wide only={shownOn(slides, at)} slideOf={slide} reveal={slide.only[0]}
+              onCheck={(i) => { const next = { ...done, [pageAt]: { ...(done[pageAt] || {}), [i]: true } }; setDone(next); save({ done: next }) }} />
+          </div>
+        </main>
+      </div>
+      <div className="lsn-nav">
+        <div className="lsn-nav-in">
+          <button type="button" className="lsn-btn ghost" onClick={at === 0 ? onBack : () => go(at - 1)}>{at === 0 ? backLabel : '← Back'}</button>
+          {at > 0 && <button type="button" className="lsn-exit" onClick={onBack}>{exitLabel}</button>}
+          <div className="lsn-nav-prog" aria-label={`Step ${at + 1} of ${total}`}>
+            <span className="lsn-nav-step">{open ? `Step ${at + 1} of ${total} · ${slideTitle(page)}` : wait}</span>
+            <span className="lsn-nav-bar"><span style={{ width: `${pct}%` }} /></span>
+          </div>
+          {last
+            ? <button type="button" className="lsn-btn done" disabled={!open} title={open ? '' : wait} onClick={finish}>{complete ? backLabel.replace(/^←\s*/, '') : finishLabel}</button>
+            : <button type="button" className="lsn-btn" disabled={!open} title={open ? '' : wait} onClick={() => go(at + 1)}>Continue →</button>}
+        </div>
+      </div>
+    </div>
+  )
+}
+// The student site's rules for the frame (LoneStar src/theme.css .scene-bg, .lsn-nav*, .lsn-btn, .lsn-exit and
+// src/student/StudentPathway.css .llx*), for the CMS preview, where that stylesheet is not loaded.
+const FRAME_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+.llx-own{--scene-deep:#01172d;--navy:#02384d;--teal:#035c78;--ink:#14344a;--gold:#f5b400;--gold-line:rgba(245,180,0,.45);--shadow:0 1px 3px rgba(2,56,77,.07),0 8px 24px rgba(2,56,77,.06);position:relative;min-height:100vh;padding:16px clamp(12px,1.6vw,24px) 96px;color:var(--ink);font-family:'Manrope',system-ui,sans-serif;background:#f6f9fb}
+.llx-own button{font-family:inherit;cursor:pointer;border:none;background:none}
+.llx-own .scene-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-position:center;background-size:cover;background-repeat:no-repeat;opacity:.22}
+.llx-own .llx-in{position:relative;z-index:1;display:grid;grid-template-columns:clamp(200px,17vw,250px) minmax(0,1fr);gap:clamp(12px,1.4vw,20px);align-items:stretch}
+.llx-own .llx-rail{background:linear-gradient(160deg,#eef6f9,#fff 45%);border:1px solid var(--gold-line);border-radius:20px;box-shadow:var(--shadow);position:sticky;top:80px;align-self:start;display:grid;gap:12px;padding:16px 14px}
+.llx-own .llx-chip{font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal)}
+.llx-own .llx-title{margin:-4px 0 0;font-size:21px;font-weight:800;letter-spacing:-.02em;line-height:1.15;color:var(--navy);text-wrap:balance;font-family:inherit}
+.llx-own .llx-meter{display:grid;gap:7px}
+.llx-own .llx-meter-txt{font-size:13px;font-weight:700;color:#557489}
+.llx-own .llx-meter-txt b{color:var(--navy)}
+.llx-own .llx-meter-bar{height:8px;border-radius:999px;background:#e3eef3;overflow:hidden}
+.llx-own .llx-meter-bar>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#02b2d5,var(--teal));transition:width .35s ease}
+.llx-own .llx-steps{list-style:none;margin:0;padding:0;display:grid;gap:6px}
+.llx-own .llx-step{width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid transparent;border-radius:14px;background:transparent;text-align:left;font:inherit;color:#557489;cursor:pointer;transition:background .15s,border-color .15s}
+.llx-own .llx-step:hover:not(:disabled){background:rgba(255,255,255,.8)}
+.llx-own .llx-step:disabled{cursor:default;opacity:.6}
+.llx-own .llx-step.on{background:#fff;border-color:var(--gold-line);color:var(--navy);box-shadow:0 2px 8px rgba(2,56,77,.08)}
+.llx-own .llx-step.past{color:var(--ink)}
+.llx-own .llx-step:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.llx-own .llx-step-n{flex:none;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid #cfdfe7;color:#7d93a6;font-size:13.5px;font-weight:800}
+.llx-own .llx-step.on .llx-step-n{background:var(--navy);border-color:var(--navy);color:#fff;box-shadow:0 0 0 2px #fff,0 0 0 4px var(--gold)}
+.llx-own .llx-step.past .llx-step-n{background:#d9f2fb;border-color:#d9f2fb;color:var(--teal)}
+.llx-own .llx-step-name{font-size:13.5px;font-weight:700;line-height:1.3}
+.llx-own .llx-tip{display:flex;align-items:flex-end;gap:10px;margin-top:2px;padding-top:14px;border-top:1px solid var(--gold-line)}
+.llx-own .llx-tip img{width:44px;height:44px;object-fit:contain;flex:none;filter:drop-shadow(0 4px 8px rgba(2,30,60,.25))}
+.llx-own .llx-tip p{margin:0;padding:9px 11px;border-radius:14px 14px 14px 4px;background:#fff;border:1px solid var(--gold-line);font-size:12.5px;font-weight:600;line-height:1.4;color:var(--ink)}
+.llx-own .llx-tip b{display:block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--teal);margin-bottom:2px}
+.llx-own .llx-sections{display:grid;gap:8px}
+.llx-own .llx-sec{display:grid;gap:6px}
+.llx-own .llx-sec-head{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;padding:8px 10px;border:0;border-radius:10px;background:transparent;font:inherit;cursor:pointer;color:#557489}
+.llx-own .llx-sec-head span{font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.llx-own .llx-sec-head small{font-size:12px;font-weight:700;color:#7d93a6}
+.llx-own .llx-sec.on .llx-sec-head{color:var(--teal);cursor:default}
+.llx-own .llx-sec.done .llx-sec-head small{color:#16935a}
+.llx-own .llx-sec-head:disabled{cursor:default;opacity:.6}
+.llx-own .llx-sec-head:hover:not(:disabled){background:rgba(255,255,255,.8)}
+.llx-own .llx-page{min-width:0}
+.llx-own .llx-page .llw{font-size:17px}
+.llx-own .lsn-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border-top:1px solid rgba(188,217,236,.8);box-shadow:0 -6px 20px rgba(2,20,50,.08)}
+.llx-own .lsn-nav-in{margin:0 auto;padding:12px clamp(16px,2vw,32px);display:flex;align-items:center;gap:16px}
+.llx-own .lsn-nav-prog{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0}
+.llx-own .lsn-nav-step{font-size:12.5px;font-weight:800;color:#0d2f55;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.llx-own .lsn-nav-bar{width:min(360px,100%);height:8px;border-radius:999px;background:#e6eef3;overflow:hidden}
+.llx-own .lsn-nav-bar>span{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#02b2d5,#0a7dba);transition:width .3s}
+.llx-own .lsn-btn{padding:12px 26px;border-radius:12px;font-weight:800;font-size:15px;color:#fff;background:var(--navy);white-space:nowrap;box-shadow:0 1px 2px rgba(2,56,77,.14),0 0 0 1px var(--gold-line)}
+.llx-own .lsn-btn:hover:not(:disabled){background:#024a64}
+.llx-own .lsn-btn:disabled{background:#9fb3c4;box-shadow:none;cursor:not-allowed}
+.llx-own .lsn-btn.ghost{background:#fff;color:#0d2f55;border:1.5px solid #bcd9ec;box-shadow:none}
+.llx-own .lsn-btn.done{background:#2e9e6b}
+.llx-own .lsn-btn:focus-visible{outline:3px solid #f0b429;outline-offset:2px}
+.llx-own .lsn-exit{font-size:13px;font-weight:800;color:#0a7dba;background:none;padding:6px 4px;white-space:nowrap}
+.llx-own .lsn-exit:hover{text-decoration:underline}
+@media (max-width:860px){.llx-own .llx-in{grid-template-columns:1fr}.llx-own .llx-rail{position:static}}
+@media (prefers-reduced-motion:reduce){.llx-own *{transition:none!important}}
+`

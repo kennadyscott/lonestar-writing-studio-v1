@@ -1,7 +1,7 @@
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import { lookBand, useBandValue } from '../lib/gradeBand.js'
-import { CSS as WALK_CSS, LessonPageView, lessonSlides, pageTitle, sectionOf, shownOn, slideGate, walkPages, youngReader } from './LessonWalkthrough.jsx'
+import { LessonFrame } from './LessonWalkthrough.jsx'
 import { ActivityPreview } from './ProofRoom.jsx'
 
 const BASE = import.meta.env.BASE_URL || '/'
@@ -50,101 +50,16 @@ const lessonPicture = (v) => (!v ? null
   : /^https:\/\//i.test(v) ? v
     : /^\/lit-lab\/themes\/[a-z0-9-]+\/[a-z0-9-]+\.webp$/.test(v) ? BASE + v.slice(1)
       : /^art-[A-Za-z0-9_-]+$/.test(v) ? `https://assets.cleark12.com/proof-room/v1/${v}.webp` : null)
-// A page's name on the left: its kind, without the part number the section already gives.
-const pageName = (p) => (p.type === 'breakout_title' ? 'Welcome' : String(p.label || '').replace(/\s+\d+$/, ''))
-const walkTip = (p) => ({ breakout_title: 'Welcome! Let us find out what today is about.', learning_target: 'This is what you will be able to do by the end.', warm_up: 'A quick warm-up to wake up your brain!', vocabulary: 'Tap a word to see what it means.', instruction: 'Watch and read closely. This is the big idea.', group_instruction: 'Talk it over. Explaining it helps you learn it.', example: 'Follow along with the example, then try it.', checkpoint: 'Your turn! Show what you know.', checkpoint_b: 'One more try to lock it in.', exit_ticket: 'Last stop! Show what you learned today.' })[p.type] || 'Keep going. You have got this!'
 
 function LitLabWalk({ lesson, topic, complete, draft, onDraft, onDone, onBack }) {
-  const pages = useMemo(() => walkPages(lesson), [lesson])
-  // Slide by slide (2026-11-09: "think more slide by slide based rather than a scrolling lesson"): each page plays as short
-  // slides (slidesOf), one thing at a time on its theme's scene, and Continue steps through them.
-  const slides = useMemo(() => lessonSlides(pages), [pages])
-  const total = Math.max(1, slides.length)
-  const [at, setAt] = useState(Math.min(draft?.slide || 0, total - 1))
-  const [done, setDone] = useState(draft?.done || {})
-  const [reached, setReached] = useState(Math.max(draft?.reached || 0, at))
-  const save = (patch) => onDraft({ slide: at, done, reached, ...patch })
-  const go = (i) => {
-    const r = Math.max(reached, i)
-    // A new page starts at the top; the next part of the same page opens under the last one (LessonPageView `reveal`).
-    const samePage = slides[i]?.pageAt === slides[at]?.pageAt
-    setAt(i); setReached(r); save({ slide: i, reached: r }); if (!samePage) window.scrollTo(0, 0)
-  }
-  const slide = slides[at]
-  if (!slide) return null
-  const { page, pageAt } = slide
-  const mine = done[pageAt] || {}
-  const { open, wait } = slideGate(slide, mine)
-  const last = at === slides.length - 1
-  const pct = Math.round(((at + 1) / total) * 100)
-  // Each page's first slide, and the furthest slide the student has opened on it.
-  const firstOf = pages.map((_, p) => slides.findIndex((sl) => sl.pageAt === p))
-  const sections = pages.reduce((out, p, i) => { const name = sectionOf(p); const prev = out[out.length - 1]; if (prev && prev.name === name) prev.pages.push(i); else out.push({ name, pages: [i] }); return out }, [])
-  const finish = complete ? onBack : onDone
+  // The lesson frame is shared with the CMS student preview (2026-11-09: "this exact structure from the site it is going to live
+  // within"); this site styles it in StudentPathway.css with each band's look, and its guide is Luna or the high-school tip.
   return (
-    <div className="llx ll-lesson ll-walk">
-      <div aria-hidden className="scene-bg" style={{ backgroundImage: `url(${BASE}bg-enchanted.jpg)` }} />
-      <div className="llx-in">
-        <aside className="llx-rail" aria-label="Lesson steps">
-          <span className="llx-chip">Lit Lab · {topic?.short || topic?.title || 'Lesson'}</span>
-          <h1 className="llx-title">{lesson.title}</h1>
-          <div className="llx-meter" aria-label={`Step ${at + 1} of ${total}`}>
-            <span className="llx-meter-txt"><b>{at + 1}</b> of {total} steps</span>
-            <span className="llx-meter-bar"><span style={{ width: `${pct}%` }} /></span>
-          </div>
-          <div className="llx-sections">
-            {sections.map((sec) => {
-              const here = sec.pages.includes(pageAt), finished = sec.pages.every((p) => firstOf[p] < reached && p !== pageAt) && !here
-              return (
-                <section key={sec.name} className={'llx-sec' + (here ? ' on' : '') + (finished ? ' done' : '')}>
-                  <button className="llx-sec-head" disabled={firstOf[sec.pages[0]] > reached} onClick={() => !here && firstOf[sec.pages[0]] <= reached && go(firstOf[sec.pages[0]])} aria-expanded={here}>
-                    <span>{sec.name}</span><small>{finished ? '✓ Done' : `${sec.pages.length} ${sec.pages.length === 1 ? 'page' : 'pages'}`}</small>
-                  </button>
-                  {here && (
-                    <ol className="llx-steps">
-                      {sec.pages.map((p) => {
-                        const on = p === pageAt, past = p < pageAt
-                        return (
-                          <li key={p}>
-                            <button className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={firstOf[p] > reached} onClick={() => firstOf[p] <= reached && !on && go(firstOf[p])} aria-current={on ? 'step' : undefined} title={pageTitle(pages[p])}>
-                              <span className="llx-step-n" aria-hidden="true">{past ? '✓' : p + 1}</span>
-                              <span className="llx-step-name">{pageName(pages[p])}</span>
-                            </button>
-                          </li>
-                        )
-                      })}
-                    </ol>
-                  )}
-                </section>
-              )
-            })}
-          </div>
-          <Guide text={walkTip(page)} />
-        </aside>
-        <main className="llx-page">
-          <div className={'llw llw-wide' + (youngReader(lesson) ? ' llw-young' : '')}>
-            <style>{WALK_CSS}</style>
-            <LessonPageView key={pageAt} lesson={lesson} page={page} picture={lessonPicture} student done={mine} Play={ActivityPreview} assetBase={BASE} wide only={shownOn(slides, at)} slideOf={slide} reveal={slide.only[0]}
-              onCheck={(i) => { const next = { ...done, [pageAt]: { ...(done[pageAt] || {}), [i]: true } }; setDone(next); save({ done: next }) }} />
-          </div>
-        </main>
-      </div>
-      <div className="lsn-nav">
-        <div className="lsn-nav-in">
-          <button className="lsn-btn ghost" onClick={at === 0 ? onBack : () => go(at - 1)}>{at === 0 ? '← Back to my pathway' : '← Back'}</button>
-          {at > 0 && <button className="lsn-exit" onClick={onBack}>Exit to my pathway</button>}
-          <div className="lsn-nav-prog" aria-label={`Step ${at + 1} of ${total}`}>
-            <span className="lsn-nav-step">{open ? `Step ${at + 1} of ${total} · ${pageTitle(page)}` : wait}</span>
-            <span className="lsn-nav-bar"><span style={{ width: `${pct}%` }} /></span>
-          </div>
-          {last
-            ? <button className="lsn-btn done" disabled={!open} title={open ? '' : wait} onClick={finish}>{complete ? 'Back to my pathway' : 'Finish lesson & start practice ✓'}</button>
-            : <button className="lsn-btn" disabled={!open} title={open ? '' : wait} onClick={() => go(at + 1)}>Continue →</button>}
-        </div>
-      </div>
-    </div>
+    <LessonFrame lesson={lesson} picture={lessonPicture} Play={ActivityPreview} assetBase={BASE} chip={`Lit Lab · ${topic?.short || topic?.title || 'Lesson'}`}
+      background={`${BASE}bg-enchanted.jpg`} Tip={GuideTip} complete={complete} draft={draft} onDraft={onDraft} onDone={onDone} onBack={onBack} />
   )
 }
+const GuideTip = ({ text }) => <Guide text={text} />
 
 /** A short sample lesson (the Lit Lab option's): a few steps, each a title, a line and an example. */
 function LitLabSteps({ lesson, topic, complete, draft, onDraft, onDone, onBack }) {

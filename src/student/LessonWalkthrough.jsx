@@ -303,6 +303,8 @@ export function slidesOf(page) {
 export function lessonSlides(pages) {
   return pages.flatMap((page, pageAt) => { const all = slidesOf(page); return all.map((only, n) => ({ page, pageAt, only, n, of: all.length })) })
 }
+/** The pieces on screen at a slide: every slide of its page up to and including it, so the page builds down as the student goes. */
+export const shownOn = (slides, at) => { const cur = slides[at]; return cur ? slides.filter((sl) => sl.pageAt === cur.pageAt && sl.n <= cur.n).flatMap((sl) => sl.only) : [] }
 /** What a slide waits for before Continue: its activity, its cards to turn over, its video to the end. */
 export function slideGate(slide, mine = {}) {
   const blocks = slide.page.walk || []
@@ -495,9 +497,20 @@ export function pageTitle(page) {
  * `picture(value)` turns a stored picture (an https address, an art id, a picture still inside the deck) into a URL.
  */
 /** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, student?: boolean, onCheck?: (block: number) => void, done?: Record<number, boolean>, Play?: any, assetBase?: string, wide?: boolean, arranging?: boolean }} props */
-export function LessonPageView({ lesson, page, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only = null, slideOf = null }) {
+export function LessonPageView({ lesson, page, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only = null, slideOf = null, reveal = null }) {
   // One slide of the page (slidesOf): only its pieces, none of the page's own in-page stages.
   const slide = Array.isArray(only)
+  /*
+   * A page's next slide opens under the ones before it (November 9, 2026: "when they click next on a multi-part example, maybe it
+   * could scroll them down rather than onto a fully new slide"): the walkthrough shows every slide of the page so far, and the
+   * newest one scrolls into view.
+   */
+  const slideRef = useRef(null)
+  useEffect(() => {
+    if (reveal === null || reveal === undefined || !slideRef.current) return
+    const el = slideRef.current.querySelector(`[data-blk="${reveal}"]`)
+    if (el && el.previousElementSibling) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }, [reveal])
   const [term, setTerm] = useState(null)
   const [shown, setShown] = useState({})
   const [turned, setTurned] = useState({})
@@ -712,7 +725,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
     <div className={'llw' + (wide ? ' llw-wide' : '') + (youngReader(lesson) ? ' llw-young' : '')}>
       <style>{CSS}</style>
       {student && cardsStaged && videoStage ? piece(blocks[vid], vid) : slide && page.type !== 'breakout_title' && !page.arrangement ? (
-        <section className={'llw-slide' + (scene ? ' has-scene' : '')} aria-label={pageTitle(page)}>
+        <section ref={slideRef} className={'llw-slide' + (scene ? ' has-scene' : '')} aria-label={pageTitle(page)}>
           {/* the page's scene from its theme or slide fills the slide behind the white panel (November 9, 2026: "I want their cute little backgrounds") */}
           {scene && <img className="llw-slide-bg" src={scene} alt="" />}
           <div className="llw-slide-panel">
@@ -723,7 +736,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
           </header>
           <div className="llw-slide-body llw-flow">
             {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
-            {blocks.map((b, i) => (hiddenBlock(b, i) ? null : <div key={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>))}
+            {blocks.map((b, i) => (hiddenBlock(b, i) ? null : <div key={i} data-blk={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>))}
           </div>
           {wordDef}
           </div>
@@ -792,7 +805,9 @@ export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabe
   const slides = useMemo(() => lessonSlides(pages), [lesson]) // eslint-disable-line react-hooks/exhaustive-deps
   const [at, setAt] = useState(0)
   const [done, setDone] = useState({})
-  useEffect(() => { if (typeof window !== 'undefined') window.scrollTo?.({ top: 0, behavior: 'smooth' }) }, [at])
+  // A new page starts at the top; the next slide of the same page opens under the last one (LessonPageView `reveal`).
+  const pageNow = slides[at]?.pageAt
+  useEffect(() => { if (typeof window !== 'undefined') window.scrollTo?.({ top: 0, behavior: 'smooth' }) }, [pageNow])
   const slide = slides[at]
   if (!slide) return null
   const { page, pageAt } = slide
@@ -814,7 +829,7 @@ export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabe
           ))}
         </nav>
       ) : <div className="llw-progress" aria-hidden="true"><i style={{ width: `${((at + 1) / slides.length) * 100}%` }} /></div>}
-      <LessonPageView key={at} lesson={lesson} page={page} picture={picture} student done={mine} Play={Play} assetBase={assetBase} wide={wide} only={slide.only} slideOf={slide}
+      <LessonPageView key={pageAt} lesson={lesson} page={page} picture={picture} student done={mine} Play={Play} assetBase={assetBase} wide={wide} only={shownOn(slides, at)} slideOf={slide} reveal={slide.only[0]}
         onCheck={(i) => setDone((d) => ({ ...d, [pageAt]: { ...(d[pageAt] || {}), [i]: true } }))} />
       <div className="llw-nav">
         <button type="button" className="llw-btn" disabled={at === 0} onClick={() => setAt(at - 1)}>← Back</button>

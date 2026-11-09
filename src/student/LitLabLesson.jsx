@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import { lookBand, useBandValue } from '../lib/gradeBand.js'
-import { CSS as WALK_CSS, LessonPageView, lessonSlides, pageTitle, sectionOf, slideGate, walkPages, youngReader } from './LessonWalkthrough.jsx'
+import { CSS as WALK_CSS, LessonPageView, lessonSlides, pageTitle, sectionOf, shownOn, slideGate, walkPages, youngReader } from './LessonWalkthrough.jsx'
 import { ActivityPreview } from './ProofRoom.jsx'
 
 const BASE = import.meta.env.BASE_URL || '/'
@@ -66,7 +66,9 @@ function LitLabWalk({ lesson, topic, complete, draft, onDraft, onDone, onBack })
   const save = (patch) => onDraft({ slide: at, done, reached, ...patch })
   const go = (i) => {
     const r = Math.max(reached, i)
-    setAt(i); setReached(r); save({ slide: i, reached: r }); window.scrollTo(0, 0)
+    // A new page starts at the top; the next part of the same page opens under the last one (LessonPageView `reveal`).
+    const samePage = slides[i]?.pageAt === slides[at]?.pageAt
+    setAt(i); setReached(r); save({ slide: i, reached: r }); if (!samePage) window.scrollTo(0, 0)
   }
   const slide = slides[at]
   if (!slide) return null
@@ -122,7 +124,7 @@ function LitLabWalk({ lesson, topic, complete, draft, onDraft, onDone, onBack })
         <main className="llx-page">
           <div className={'llw llw-wide' + (youngReader(lesson) ? ' llw-young' : '')}>
             <style>{WALK_CSS}</style>
-            <LessonPageView key={at} lesson={lesson} page={page} picture={lessonPicture} student done={mine} Play={ActivityPreview} assetBase={BASE} wide only={slide.only} slideOf={slide}
+            <LessonPageView key={pageAt} lesson={lesson} page={page} picture={lessonPicture} student done={mine} Play={ActivityPreview} assetBase={BASE} wide only={shownOn(slides, at)} slideOf={slide} reveal={slide.only[0]}
               onCheck={(i) => { const next = { ...done, [pageAt]: { ...(done[pageAt] || {}), [i]: true } }; setDone(next); save({ done: next }) }} />
           </div>
         </main>

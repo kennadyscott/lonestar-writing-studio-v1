@@ -223,10 +223,25 @@ export const CSS = `
 .llw-cover-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-2}
 .llw-cover::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(20,10,40,.62) 0%,rgba(20,10,40,.18) 42%,rgba(20,10,40,0) 60%,rgba(20,10,40,.38) 100%)}
 .llw-cover-copy{padding:clamp(22px,4vw,48px) clamp(22px,4vw,48px) 0;max-width:760px}
-.llw-cover-copy span{display:inline-block;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:5px 14px}
+.llw-slide{position:relative;overflow:hidden;background:#fff;border-radius:26px;min-height:min(72vh,680px);display:flex;flex-direction:column;justify-content:center;box-shadow:0 1px 2px rgba(25,23,35,.04),0 8px 24px -8px rgba(25,23,35,.12)}
+.llw-slide.has-scene{background:linear-gradient(135deg,#01172d,#035c78 60%,#06aade);padding:clamp(22px,5vh,64px) clamp(18px,5vw,84px)}
+.llw-slide-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 45%;display:block}
+.llw-slide-panel{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.4vh,28px);padding:clamp(26px,4vw,56px) clamp(24px,4.5vw,72px)}
+.llw-slide.has-scene .llw-slide-panel{background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:24px;padding:clamp(22px,3.4vw,48px) clamp(22px,3.8vw,60px);box-shadow:0 18px 50px -18px rgba(10,20,40,.55);max-width:1040px;width:100%;margin:0 auto}
+.llw-slide-head{display:grid;gap:10px}
+.llw-slide-head>span{font-size:.92rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-dark,#0f6f8f)}
+.llw-slide-head h2{margin:0;font-family:var(--display);font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.06;letter-spacing:-.015em;color:var(--navy);font-weight:700;text-wrap:balance}
+.llw-slide-body{font-size:clamp(1.1rem,1.6vw,1.4rem);line-height:1.5;display:grid;gap:18px}
+.llw-slide-body .llw-blk.k-text p{margin:0;font-size:1.15em;color:var(--ink)}
+.llw-slide-body .llw-target{margin:0}
+.llw-young .llw-slide-head h2{font-size:clamp(2.2rem,5vw,3.8rem)}
+.llw-cover-copy>span{display:inline-block;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:5px 14px}
 .llw-cover-copy h1{margin:12px 0 10px;font-family:var(--display);font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;font-weight:700;letter-spacing:-.01em;text-shadow:0 4px 24px rgba(0,0,0,.35);text-wrap:balance}
 .llw-cover-copy p{margin:0;font-size:clamp(1.1rem,2.2vw,1.45rem);font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.45);max-width:34ch}
 .llw-cover-copy .llw-term{color:#fff;border-bottom-color:#fff}
+.llw-cover-copy .llw-cover-goal{margin:0 0 14px;display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.94);color:var(--ink);border-radius:16px;padding:12px 18px;font-size:clamp(1.05rem,2vw,1.3rem);font-weight:700;line-height:1.35;text-shadow:none;max-width:40ch;box-shadow:0 10px 30px -12px rgba(0,0,0,.45)}
+.llw-cover-copy .llw-cover-goal b{flex:none;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brand-dark);padding-top:.35em}
+.llw-cover-copy .llw-cover-goal .llw-term{color:var(--ink);border-bottom-color:currentColor}
 .llw-cover-say{margin:18px auto 0;background:#fff;color:var(--ink);border-radius:18px;padding:10px 18px;font-size:1.05rem;line-height:1.4;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);position:relative;width:max-content;max-width:min(320px,80vw);text-align:left}
 .llw-cover-say b{display:block;color:var(--brand-dark);font-size:.85rem}
 .llw-cover-say::after{content:"";position:absolute;bottom:-8px;left:calc(50% - 8px);width:16px;height:16px;background:#fff;transform:rotate(45deg)}
@@ -261,6 +276,42 @@ const wordsOn = (page) => [...new Set((page.walk || []).flatMap((b) => [b.text, 
 
 /** Where a page sits in the lesson, for the student's trail: getting ready, a part, or the exit tickets. */
 export const sectionOf = (page) => (page.type === 'exit_ticket' ? 'Show what you know' : page.block ? `Part ${page.block}` : 'Get ready')
+
+/*
+ * A page as slides (November 9, 2026: "think more slide by slide based rather than a scrolling lesson"): each slide is one thing
+ * to look at or do (cards, a passage, worked steps, a video, a picture, a talk prompt or an activity), with the short lines that
+ * lead into it (the target, a teaching line, a character's line). An activity stays on the slide of the passage or picture it is
+ * about. The cover and a page the publisher arranged by hand are one slide each.
+ */
+const SLIDE_MAIN = new Set(['cards', 'read', 'steps', 'video', 'picture', 'check', 'connect'])
+export function slidesOf(page) {
+  const blocks = page.walk || []
+  if (page.type === 'breakout_title' || page.arrangement || !blocks.length) return [blocks.map((_, i) => i)]
+  const out = []
+  let lead = []
+  blocks.forEach((b, i) => {
+    if (!SLIDE_MAIN.has(b.kind)) { lead.push(i); return }
+    const prev = out[out.length - 1]
+    if (b.kind === 'check' && !lead.length && prev && prev.some((k) => blocks[k].kind === 'read' || blocks[k].kind === 'picture') && !prev.some((k) => blocks[k].kind === 'check')) { prev.push(i); return }
+    out.push([...lead, i])
+    lead = []
+  })
+  if (lead.length) { if (out.length) out[out.length - 1].push(...lead); else out.push(lead) }
+  return out
+}
+/** The lesson as one list of slides: each with its page, the page's place in the lesson, and the pieces it shows. */
+export function lessonSlides(pages) {
+  return pages.flatMap((page, pageAt) => { const all = slidesOf(page); return all.map((only, n) => ({ page, pageAt, only, n, of: all.length })) })
+}
+/** What a slide waits for before Continue: its activity, its cards to turn over, its video to the end. */
+export function slideGate(slide, mine = {}) {
+  const blocks = slide.page.walk || []
+  const flips = (b) => b.kind === 'cards' && (b.flip || slide.page.flow === 'cards-video' || (slide.page.type === 'example' && slide.page.flow === 'cards-attempt'))
+  const waits = slide.only.filter((i) => blocks[i] && (gates(blocks[i]) || flips(blocks[i])) && !mine[i])
+  const open = !waits.length
+  const wait = open ? '' : waits.some((i) => blocks[i].kind === 'cards') ? 'Turn over every card to go on' : waits.some((i) => blocks[i].kind === 'video') ? 'Watch the video to go on' : 'Finish the activity to go on'
+  return { open, wait }
+}
 
 /** A video's clips, however it was saved: `clips`, or the one-clip shape (src, times, job) videos were first saved in. */
 const clipsOf = (p) => (p.clips?.length ? p.clips : p.src || p.job ? [{ from: 0, src: p.src, times: p.times, job: p.job }] : [])
@@ -428,6 +479,8 @@ export function youngReader(lesson) {
  * (October 26, 2026: "it could just be Example: Author's Purpose. It doesn't need the 1 or 'Another'"). The rail in the CMS
  * keeps the numbered labels so a publisher can tell the pages apart.
  */
+/** A slide's big heading: the skill the page is about ("Say why it proves your answer"); the line above it names the page. */
+export const slideTitle = (page) => (typeof page.title === 'string' && page.title.trim()) || String(page.heading || '').split(' — ').slice(1).join(' — ').trim() || pageTitle(page)
 export function pageTitle(page) {
   // The title the publisher wrote, when there is one (November 2, 2026: "I need all parts to be editable - even the title").
   if (typeof page.title === 'string' && page.title.trim()) return page.title.trim()
@@ -442,7 +495,9 @@ export function pageTitle(page) {
  * `picture(value)` turns a stored picture (an https address, an art id, a picture still inside the deck) into a URL.
  */
 /** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, student?: boolean, onCheck?: (block: number) => void, done?: Record<number, boolean>, Play?: any, assetBase?: string, wide?: boolean, arranging?: boolean }} props */
-export function LessonPageView({ lesson, page, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false }) {
+export function LessonPageView({ lesson, page, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only = null, slideOf = null }) {
+  // One slide of the page (slidesOf): only its pieces, none of the page's own in-page stages.
+  const slide = Array.isArray(only)
   const [term, setTerm] = useState(null)
   const [shown, setShown] = useState({})
   const [turned, setTurned] = useState({})
@@ -489,7 +544,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
   ) : null
   const blocks = page.walk || []
   const exampleFlow = page.type === 'example' ? (page.flow || 'static-attempt') : null
-  const exampleStage = student && !!exampleFlow
+  const exampleStage = student && !!exampleFlow && !slide
   const exampleCardIndexes = blocks.map((b, i) => b.kind === 'cards' ? i : -1).filter((i) => i >= 0)
   const exampleVideoIndexes = blocks.map((b, i) => b.kind === 'video' ? i : -1).filter((i) => i >= 0)
   const exampleTeachingExists = blocks.some((b) => b.kind !== 'check' && b.kind !== 'video') || (!blocks.length && !!String(page.body || '').trim())
@@ -505,16 +560,18 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
   const vid = blocks.findIndex((b) => b.kind === 'video' && videoReady(b))
   const videoFirst = vid >= 0
   const cardsFirst = page.flow === 'cards-video' && blocks.some((b) => b.kind === 'cards')
+  const cardsStaged = cardsFirst && !slide
   const exampleCardsFirst = student && exampleFlow === 'cards-attempt'
   const cardsDone = blocks.every((b, i) => b.kind !== 'cards' || turned[i] || done[i])
-  const waiting = videoFirst && student && !done[vid]
+  const waiting = videoFirst && student && !done[vid] && !slide
   const hiddenBlock = (b, i) => {
+    if (slide) return !only.includes(i)
     if (exampleStage) {
       if (exampleAttempt) return b.kind !== 'check'
       if (exampleFlow === 'video-attempt') return b.kind !== 'video'
       return b.kind === 'check' || b.kind === 'video'
     }
-    return student && cardsFirst ? (videoStage ? b.kind !== 'video' : b.kind === 'video') : waiting && i > vid
+    return student && cardsStaged ? (videoStage ? b.kind !== 'video' : b.kind === 'video') : waiting && i > vid
   }
   const revealRef = useRef(null)
   // Scrolls to what the video uncovered, once, when it ends on this visit (not when the page opens already watched).
@@ -589,7 +646,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
             const src = picture(b.art)
             return src ? <figure key={i} className="llw-figure"><img src={src} alt={b.caption || ''} />{b.caption && <figcaption>{b.caption}</figcaption>}</figure> : null
           }
-          if (b.kind === 'video') return <LessonVideo key={i} piece={b} autoPlay={student && cardsFirst && videoStage} done={!!done[i]} onDone={() => onCheck && onCheck(i)} />
+          if (b.kind === 'video') return <LessonVideo key={i} piece={b} autoPlay={student && cardsStaged && videoStage} done={!!done[i]} onDone={() => onCheck && onCheck(i)} />
           if (b.kind === 'check') return (
             <section key={i} className={'llw-check' + (done[i] ? ' done' : '')} aria-label="Check">
               {student && done[i] && <div className="llw-cheer" role="status"><span aria-hidden="true">⭐</span> Nice work! You finished this one.</div>}
@@ -622,7 +679,9 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
   // the whole page, the title large on it, and one character with the opening line in a little speech bubble (October 26,
   // 2026: the whole cast lined up with name labels "looks weird"; "just one character with a little dialogue box").
   const flat = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
-  const hook = page.type === 'breakout_title' ? blocks.find((b) => (b.kind === 'text' || b.kind === 'target') && flat(b.text) !== flat(page.heading)) : null
+  // The lesson's I can statement sits on the cover, under the title (November 9, 2026: "include the learning target directly on the title slide").
+  const goal = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'target' && String(b.text || '').trim()) : null
+  const hook = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'text' && flat(b.text) !== flat(page.heading)) || (goal ? null : blocks.find((b) => b.kind === 'target' && flat(b.text) !== flat(page.heading))) : null
   const line = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'say') : null
   const lineup = (lesson.cast || []).map((c) => ({ ...c, src: c.art ? picture(c.art) : null })).filter((c) => c.src)
   const speaker = line ? lineup.findIndex((c) => c.name.toLowerCase() === String(line.who).toLowerCase()) : -1
@@ -634,6 +693,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
       <div className="llw-cover-copy">
         <span>Today’s lesson</span>
         <h1>{page.heading}</h1>
+        {goal && <div className="llw-cover-goal"><b>Goal</b><div><Rich text={goal.text} onTerm={setTerm} /></div></div>}
         {hook && <p><Rich text={hook.text} onTerm={setTerm} /></p>}
       </div>
       <div>
@@ -651,7 +711,24 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
   return (
     <div className={'llw' + (wide ? ' llw-wide' : '') + (youngReader(lesson) ? ' llw-young' : '')}>
       <style>{CSS}</style>
-      {student && cardsFirst && videoStage ? piece(blocks[vid], vid) : page.arrangement ? <>
+      {student && cardsStaged && videoStage ? piece(blocks[vid], vid) : slide && page.type !== 'breakout_title' && !page.arrangement ? (
+        <section className={'llw-slide' + (scene ? ' has-scene' : '')} aria-label={pageTitle(page)}>
+          {/* the page's scene from its theme or slide fills the slide behind the white panel (November 9, 2026: "I want their cute little backgrounds") */}
+          {scene && <img className="llw-slide-bg" src={scene} alt="" />}
+          <div className="llw-slide-panel">
+          <header className="llw-slide-head">
+            <span>{sectionOf(page)} · {String(page.label || '').replace(/\s+\d+$/, '')}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
+            <h2>{slideTitle(page)}</h2>
+            {speak && <ReadAloud text={slideTitle(page)} label="Read aloud: the page title" />}
+          </header>
+          <div className="llw-slide-body llw-flow">
+            {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
+            {blocks.map((b, i) => (hiddenBlock(b, i) ? null : <div key={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>))}
+          </div>
+          {wordDef}
+          </div>
+        </section>
+      ) : page.arrangement ? <>
         {/* The scene stays above an arranged page (October 29, 2026: arranging had dropped the background). */}
         {scene && <figure className="llw-scene"><img src={scene} alt="" /></figure>}
         <div className="llw-canvas-viewport" ref={viewportRef} style={{ height: canvasHeight || page.arrangement.height * canvasScale }}>{card}</div>
@@ -676,7 +753,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
           {wordDef}
         </>
       )}
-      {student && cardsFirst && <div className="llw-next-video">{!videoStage ? <><button type="button" className="llw-btn" disabled={!cardsDone || !videoFirst} onClick={() => setVideoStage(true)}>Next: Watch video →</button><span>{!cardsDone ? 'Turn over every card to continue.' : !videoFirst ? 'Your video is not ready yet.' : ''}</span></> : <button type="button" className="llw-btn" onClick={() => setVideoStage(false)}>← Review the cards</button>}</div>}
+      {student && cardsStaged && <div className="llw-next-video">{!videoStage ? <><button type="button" className="llw-btn" disabled={!cardsDone || !videoFirst} onClick={() => setVideoStage(true)}>Next: Watch video →</button><span>{!cardsDone ? 'Turn over every card to continue.' : !videoFirst ? 'Your video is not ready yet.' : ''}</span></> : <button type="button" className="llw-btn" onClick={() => setVideoStage(false)}>← Review the cards</button>}</div>}
       {exampleStage && <div className="llw-next-video llw-example-stage" aria-live="polite">{exampleAttempt ? (
         <button type="button" className="llw-btn" onClick={() => setExampleAttempt(false)}>← Review the instruction</button>
       ) : (
@@ -688,52 +765,60 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
 }
 
 /** The pages a student walks through: pages with nothing on them stay out of the way; the title page always opens the lesson. */
-export const walkPages = (lesson) => (lesson.pages || []).filter((p) => p.type === 'breakout_title' || (p.walk && p.walk.length) || String(p.body || '').trim())
+export const walkPages = (lesson) => withoutExtras(lesson).pages?.filter((p) => p.type === 'breakout_title' || (p.walk && p.walk.length) || String(p.body || '').trim()) || []
 
 /**
- * Whether Next opens on a page, given the pieces the student has finished on it (`mine`, piece index → true), and what to say
- * while it waits. Shared with the student app's lesson frame, which keeps its own Next.
+ * A lesson without its Learning Target, Warm-Up and Exit Ticket pages (November 9, 2026: "remove the warmup and the exit ticket
+ * and I want to include the learning target directly on the title slide"), whenever it was written: the I can statement moves
+ * to the title page. A lesson already in that shape comes back as it is.
  */
-export function pageGate(page, mine = {}) {
-  const exampleFlow = page.type === 'example' ? (page.flow || 'static-attempt') : null
-  const checks = (page.walk || []).map((b, i) => (gates(b) || (page.flow === 'cards-video' && b.kind === 'cards') || (exampleFlow === 'cards-attempt' && b.kind === 'cards') ? i : -1)).filter((i) => i >= 0)
-  const open = checks.every((i) => mine[i]) && (!exampleFlow || (page.walk || []).some((b) => b.kind === 'check')) && !(page.flow === 'cards-video' && (page.walk || []).some((b) => b.kind === 'cards') && !(page.walk || []).some((b) => b.kind === 'video' && videoReady(b)))
-  const wait = open ? '' : checks.some((i) => !mine[i] && page.walk[i].kind === 'cards') ? 'Turn over every card to go on' : 'Finish the activity to go on'
-  return { open, wait }
+export function withoutExtras(lesson) {
+  const pages = lesson?.pages || []
+  const dropped = (p) => p.type === 'learning_target' || p.type === 'warm_up' || p.type === 'exit_ticket'
+  if (!pages.some(dropped)) return lesson
+  const targetBlock = (p) => (p?.walk || []).find((b) => b.kind === 'target' && String(b.text || '').trim())
+  const old = pages.find((p) => p.type === 'learning_target')
+  const line = String(old?.body || '').split('\n').map((l) => l.trim()).find((l) => /^(learning target\b|i can\b)/i.test(l)) || ''
+  const target = targetBlock(old)?.text || line.replace(/^learning target\s*[:.]?\s*/i, '')
+  return { ...lesson, pages: pages.filter((p) => !dropped(p)).map((p) => (p.type !== 'breakout_title' || !target || targetBlock(p) ? p : { ...p, walk: [{ kind: 'target', text: target }, ...(p.walk || [])] })) }
 }
 
 /** A whole lesson, page by page. Next opens once every check on the page is done. */
 /** @param {{ lesson: any, picture: (value?: string) => string | null, onFinish?: () => void, finishLabel?: string, Play?: any, assetBase?: string, wide?: boolean, arranging?: boolean }} props */
-export function LessonWalkthrough({ lesson, picture, onFinish, finishLabel = "Finish lesson", Play = ActivityPreview, assetBase = '/', wide = false }) {
+export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabel = "Finish lesson", Play = ActivityPreview, assetBase = '/', wide = false }) {
+  const lesson = useMemo(() => withoutExtras(given), [given])
   const pages = walkPages(lesson)
+  // The lesson plays slide by slide (slidesOf): one thing at a time, nothing to scroll through.
+  const slides = useMemo(() => lessonSlides(pages), [lesson]) // eslint-disable-line react-hooks/exhaustive-deps
   const [at, setAt] = useState(0)
   const [done, setDone] = useState({})
   useEffect(() => { if (typeof window !== 'undefined') window.scrollTo?.({ top: 0, behavior: 'smooth' }) }, [at])
-  const page = pages[at]
-  if (!page) return null
-  const mine = done[at] || {}
-  const { open, wait } = pageGate(page, mine)
-  const last = at === pages.length - 1
-  // The trail: the lesson's sections in order, a dot a page, the student's page lit.
-  const sections = pages.reduce((out, p, i) => { const name = sectionOf(p); const lastOne = out[out.length - 1]; if (lastOne && lastOne.name === name) lastOne.pages.push(i); else out.push({ name, pages: [i] }); return out }, [])
+  const slide = slides[at]
+  if (!slide) return null
+  const { page, pageAt } = slide
+  const mine = done[pageAt] || {}
+  const { open, wait } = slideGate(slide, mine)
+  const last = at === slides.length - 1
+  // The trail: the lesson's sections in order, a dot a slide, the student's slide lit.
+  const sections = slides.reduce((out, sl, i) => { const name = sectionOf(sl.page); const lastOne = out[out.length - 1]; if (lastOne && lastOne.name === name) lastOne.slides.push(i); else out.push({ name, slides: [i] }); return out }, [])
   return (
     <div className={'llw' + (wide ? ' llw-wide' : '') + (youngReader(lesson) ? ' llw-young' : '')}>
       <style>{CSS}</style>
       {wide ? (
         <nav className="llw-trail" aria-label="Lesson progress">
           {sections.map((sec) => (
-            <section key={sec.name} className={sec.pages.includes(at) ? 'on' : ''}>
+            <section key={sec.name} className={sec.slides.includes(at) ? 'on' : ''}>
               <small>{sec.name}</small>
-              <div>{sec.pages.map((i) => <i key={i} className={i === at ? 'on' : i < at ? 'seen' : ''} title={pageTitle(pages[i])} />)}</div>
+              <div>{sec.slides.map((i) => <i key={i} className={i === at ? 'on' : i < at ? 'seen' : ''} title={pageTitle(slides[i].page)} />)}</div>
             </section>
           ))}
         </nav>
-      ) : <div className="llw-progress" aria-hidden="true"><i style={{ width: `${((at + 1) / pages.length) * 100}%` }} /></div>}
-      <LessonPageView key={at} lesson={lesson} page={page} picture={picture} student done={mine} Play={Play} assetBase={assetBase} wide={wide}
-        onCheck={(i) => setDone((d) => ({ ...d, [at]: { ...(d[at] || {}), [i]: true } }))} />
+      ) : <div className="llw-progress" aria-hidden="true"><i style={{ width: `${((at + 1) / slides.length) * 100}%` }} /></div>}
+      <LessonPageView key={at} lesson={lesson} page={page} picture={picture} student done={mine} Play={Play} assetBase={assetBase} wide={wide} only={slide.only} slideOf={slide}
+        onCheck={(i) => setDone((d) => ({ ...d, [pageAt]: { ...(d[pageAt] || {}), [i]: true } }))} />
       <div className="llw-nav">
         <button type="button" className="llw-btn" disabled={at === 0} onClick={() => setAt(at - 1)}>← Back</button>
-        <span className="llw-wait">{open ? `${at + 1} of ${pages.length}` : wait}</span>
+        <span className="llw-wait">{open ? `${at + 1} of ${slides.length}` : wait}</span>
         <button type="button" className="llw-btn llw-go" disabled={!open} onClick={() => (last ? onFinish && onFinish() : setAt(at + 1))}>{last ? finishLabel : 'Next →'}</button>
       </div>
     </div>

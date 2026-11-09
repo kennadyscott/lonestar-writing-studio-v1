@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { BRAND } from '../lib/brand.js'
 import { lookBand, useBandValue } from '../lib/gradeBand.js'
-import { CSS as WALK_CSS, LessonPageView, pageGate, pageTitle, sectionOf, walkPages, youngReader } from './LessonWalkthrough.jsx'
+import { CSS as WALK_CSS, LessonPageView, lessonSlides, pageTitle, sectionOf, slideGate, walkPages, youngReader } from './LessonWalkthrough.jsx'
 import { ActivityPreview } from './ProofRoom.jsx'
 
 const BASE = import.meta.env.BASE_URL || '/'
@@ -56,51 +56,57 @@ const walkTip = (p) => ({ breakout_title: 'Welcome! Let us find out what today i
 
 function LitLabWalk({ lesson, topic, complete, draft, onDraft, onDone, onBack }) {
   const pages = useMemo(() => walkPages(lesson), [lesson])
-  const total = Math.max(1, pages.length)
-  const [at, setAt] = useState(Math.min(draft?.page || 0, total - 1))
+  // Slide by slide (2026-11-09: "think more slide by slide based rather than a scrolling lesson"): each page plays as short
+  // slides (slidesOf), one thing at a time on its theme's scene, and Continue steps through them.
+  const slides = useMemo(() => lessonSlides(pages), [pages])
+  const total = Math.max(1, slides.length)
+  const [at, setAt] = useState(Math.min(draft?.slide || 0, total - 1))
   const [done, setDone] = useState(draft?.done || {})
   const [reached, setReached] = useState(Math.max(draft?.reached || 0, at))
-  const save = (patch) => onDraft({ page: at, done, reached, ...patch })
+  const save = (patch) => onDraft({ slide: at, done, reached, ...patch })
   const go = (i) => {
     const r = Math.max(reached, i)
-    setAt(i); setReached(r); save({ page: i, reached: r }); window.scrollTo(0, 0)
+    setAt(i); setReached(r); save({ slide: i, reached: r }); window.scrollTo(0, 0)
   }
-  const page = pages[at]
-  if (!page) return null
-  const mine = done[at] || {}
-  const { open, wait } = pageGate(page, mine)
-  const last = at === pages.length - 1
+  const slide = slides[at]
+  if (!slide) return null
+  const { page, pageAt } = slide
+  const mine = done[pageAt] || {}
+  const { open, wait } = slideGate(slide, mine)
+  const last = at === slides.length - 1
   const pct = Math.round(((at + 1) / total) * 100)
+  // Each page's first slide, and the furthest slide the student has opened on it.
+  const firstOf = pages.map((_, p) => slides.findIndex((sl) => sl.pageAt === p))
   const sections = pages.reduce((out, p, i) => { const name = sectionOf(p); const prev = out[out.length - 1]; if (prev && prev.name === name) prev.pages.push(i); else out.push({ name, pages: [i] }); return out }, [])
   const finish = complete ? onBack : onDone
   return (
     <div className="llx ll-lesson ll-walk">
       <div aria-hidden className="scene-bg" style={{ backgroundImage: `url(${BASE}bg-enchanted.jpg)` }} />
       <div className="llx-in">
-        <aside className="llx-rail" aria-label="Lesson pages">
+        <aside className="llx-rail" aria-label="Lesson steps">
           <span className="llx-chip">Lit Lab · {topic?.short || topic?.title || 'Lesson'}</span>
           <h1 className="llx-title">{lesson.title}</h1>
-          <div className="llx-meter" aria-label={`Page ${at + 1} of ${total}`}>
-            <span className="llx-meter-txt"><b>{at + 1}</b> of {total} pages</span>
+          <div className="llx-meter" aria-label={`Step ${at + 1} of ${total}`}>
+            <span className="llx-meter-txt"><b>{at + 1}</b> of {total} steps</span>
             <span className="llx-meter-bar"><span style={{ width: `${pct}%` }} /></span>
           </div>
           <div className="llx-sections">
             {sections.map((sec) => {
-              const here = sec.pages.includes(at), finished = sec.pages.every((i) => i < reached && i !== at)
+              const here = sec.pages.includes(pageAt), finished = sec.pages.every((p) => firstOf[p] < reached && p !== pageAt) && !here
               return (
                 <section key={sec.name} className={'llx-sec' + (here ? ' on' : '') + (finished ? ' done' : '')}>
-                  <button className="llx-sec-head" disabled={sec.pages[0] > reached} onClick={() => !here && sec.pages[0] <= reached && go(sec.pages[0])} aria-expanded={here}>
+                  <button className="llx-sec-head" disabled={firstOf[sec.pages[0]] > reached} onClick={() => !here && firstOf[sec.pages[0]] <= reached && go(firstOf[sec.pages[0]])} aria-expanded={here}>
                     <span>{sec.name}</span><small>{finished ? '✓ Done' : `${sec.pages.length} ${sec.pages.length === 1 ? 'page' : 'pages'}`}</small>
                   </button>
                   {here && (
                     <ol className="llx-steps">
-                      {sec.pages.map((i) => {
-                        const on = i === at, past = i < reached && !on
+                      {sec.pages.map((p) => {
+                        const on = p === pageAt, past = p < pageAt
                         return (
-                          <li key={i}>
-                            <button className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={i > reached} onClick={() => i <= reached && go(i)} aria-current={on ? 'step' : undefined} title={pageTitle(pages[i])}>
-                              <span className="llx-step-n" aria-hidden="true">{past ? '✓' : i + 1}</span>
-                              <span className="llx-step-name">{pageName(pages[i])}</span>
+                          <li key={p}>
+                            <button className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={firstOf[p] > reached} onClick={() => firstOf[p] <= reached && !on && go(firstOf[p])} aria-current={on ? 'step' : undefined} title={pageTitle(pages[p])}>
+                              <span className="llx-step-n" aria-hidden="true">{past ? '✓' : p + 1}</span>
+                              <span className="llx-step-name">{pageName(pages[p])}</span>
                             </button>
                           </li>
                         )
@@ -116,8 +122,8 @@ function LitLabWalk({ lesson, topic, complete, draft, onDraft, onDone, onBack })
         <main className="llx-page">
           <div className={'llw llw-wide' + (youngReader(lesson) ? ' llw-young' : '')}>
             <style>{WALK_CSS}</style>
-            <LessonPageView key={at} lesson={lesson} page={page} picture={lessonPicture} student done={mine} Play={ActivityPreview} assetBase={BASE} wide
-              onCheck={(i) => { const next = { ...done, [at]: { ...(done[at] || {}), [i]: true } }; setDone(next); save({ done: next }) }} />
+            <LessonPageView key={at} lesson={lesson} page={page} picture={lessonPicture} student done={mine} Play={ActivityPreview} assetBase={BASE} wide only={slide.only} slideOf={slide}
+              onCheck={(i) => { const next = { ...done, [pageAt]: { ...(done[pageAt] || {}), [i]: true } }; setDone(next); save({ done: next }) }} />
           </div>
         </main>
       </div>
@@ -125,8 +131,8 @@ function LitLabWalk({ lesson, topic, complete, draft, onDraft, onDone, onBack })
         <div className="lsn-nav-in">
           <button className="lsn-btn ghost" onClick={at === 0 ? onBack : () => go(at - 1)}>{at === 0 ? '← Back to my pathway' : '← Back'}</button>
           {at > 0 && <button className="lsn-exit" onClick={onBack}>Exit to my pathway</button>}
-          <div className="lsn-nav-prog" aria-label={`Page ${at + 1} of ${total}`}>
-            <span className="lsn-nav-step">{open ? `Page ${at + 1} of ${total} · ${pageTitle(page)}` : wait}</span>
+          <div className="lsn-nav-prog" aria-label={`Step ${at + 1} of ${total}`}>
+            <span className="lsn-nav-step">{open ? `Step ${at + 1} of ${total} · ${pageTitle(page)}` : wait}</span>
             <span className="lsn-nav-bar"><span style={{ width: `${pct}%` }} /></span>
           </div>
           {last

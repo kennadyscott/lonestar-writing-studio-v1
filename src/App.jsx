@@ -10,7 +10,6 @@ import WritingStudio from './student/WritingStudio.jsx'
 import RevisionStudio from './student/RevisionStudio.jsx'
 import ArcadePage from './student/ArcadePage.jsx'
 import LunaPage from './student/LunaPage.jsx'
-import { litLabWritingOn } from './lib/optionLitLabWriting.js'
 import LessonPage from './student/LessonPage.jsx'
 import QuickWritePage from './student/QuickWritePage.jsx'
 import WritingBankPage from './student/WritingBankPage.jsx'
@@ -172,12 +171,6 @@ export default function App() {
       <DemoTools onResetDemo={resetDemo} onPublisher={() => setPublisher(true)}
         settings={{ lang: me.lang, supportLevel: me.supportLevel }} onSettings={saveSettings} />
       {publisher && <PublisherConsole onClose={() => setPublisher(false)} />}
-      {/* OPTION (2026-11-03): says when the Lit Lab Writing option is showing, and turns it off */}
-      {litLabWritingOn() && (
-        <a className="ll-option-toggle" href={location.pathname + location.hash} style={{ position: 'fixed', right: 'max(16px, env(safe-area-inset-right, 0px))', bottom: 'max(16px, env(safe-area-inset-bottom, 0px))', zIndex: 90, background: '#0d2f55', color: '#fff', borderRadius: 999, padding: '8px 14px', fontSize: 12.5, fontWeight: 800, textDecoration: 'none', boxShadow: '0 6px 18px rgba(2,20,50,.3)' }}>
-          Option on: Lit Lab Writing · Turn off
-        </a>
-      )}
       <CoinBurst key={coinBurst?.key || 'none'} burst={coinBurst} onDone={clearCoinBurst} />
     </div>
     </BridgeProvider>

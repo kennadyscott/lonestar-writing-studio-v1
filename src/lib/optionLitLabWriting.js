@@ -18,9 +18,10 @@ export const OPTION_TOPIC_ID = 'opt_litlab_scr_g5'
 /** Luna's modules run in order (Kennady, November 3, 2026: "really be followed in a sequence"), in their own Writing land. `seq` is the module number; a module opens once the one before it is finished. */
 export const LUNA_SEQUENCE = 'luna'
 
-/** On only when the address asks for it. */
+/** Always on: the Lit Lab direction is the product now (Kennady, November 9, 2026: "that is the full direction I want to go, so that
+ *  link should be the only link that we can use"). The plain address and ?option=litlab show the same site. */
 export function litLabWritingOn() {
-  try { return new URLSearchParams(window.location.search).get('option') === 'litlab' } catch { return false }
+  return true
 }
 
 const need = (label, rule) => ({ label, rule })

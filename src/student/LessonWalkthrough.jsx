@@ -237,6 +237,20 @@ export const CSS = `
 .llw-young .llw-slide-head h2{font-size:clamp(2.2rem,5vw,3.8rem)}
 /* in the student site's frame the slide reaches down to the bottom bar */
 .llx-page .llw-slide{min-height:calc(100vh - 190px)}
+/*
+ * The cover fits the window too (November 10, 2026, at Chromebook size, 1366 x 768: "it just doesn't quite fit how I want it to"):
+ * exactly the stage's height, the title sized by the window's height as well as its width, the words on a soft panel so the
+ * scene's own signs do not fight them, and the character standing in the corner at a height the window has room for.
+ */
+.llx-page .llw-cover{height:calc(100vh - 190px);min-height:340px;justify-content:flex-start}
+.llx-page .llw-cover-copy{margin:clamp(12px,2.4vh,26px);padding:clamp(14px,2.4vh,24px) clamp(16px,2vw,28px);max-width:min(640px,62%);background:rgba(1,23,45,.42);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);border-radius:22px}
+.llx-page .llw-cover-copy h1{font-size:clamp(2rem,min(5.2vw,8vh),4.2rem);margin:8px 0 12px}
+.llx-page .llw-cover-copy p{font-size:clamp(1rem,min(1.8vw,2.8vh),1.35rem)}
+.llx-page .llw-cover-copy .llw-cover-goal{font-size:clamp(.98rem,min(1.6vw,2.6vh),1.25rem);padding:10px 16px;margin-bottom:10px}
+.llx-page .llw-cover>div:last-child{position:absolute;right:0;bottom:0}
+.llx-page .llw-cover-cast{margin:0;padding:0 clamp(16px,4vw,56px) 0 0}
+.llx-page .llw-cover-cast img{height:clamp(140px,40vh,320px);max-width:34vw}
+.llx-page .llw-cover-say{max-width:min(280px,30vw);font-size:clamp(.92rem,1.4vw,1.05rem)}
 .llw-slide-panel.split{display:grid;grid-template-columns:minmax(240px,30%) minmax(0,1fr);gap:clamp(18px,2.4vw,36px);align-items:center}
 .llw-slide.has-scene .llw-slide-panel.split{max-width:1500px}
 .llw-slide.has-scene:has(.llw-slide-panel.split){padding:clamp(12px,2.4vh,28px) clamp(12px,1.8vw,28px)}

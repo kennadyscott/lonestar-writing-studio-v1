@@ -22,7 +22,14 @@ export const CONNECT_ICON = (base, k) => `${String(base || '/').replace(/\/?$/, 
 
 /** The walkthrough's styles; the CMS page editor draws its pieces with the same ones. */
 export const CSS = `
-.llw-canvas-viewport{width:100%;position:relative;overflow:hidden}.llw-canvas{position:relative;width:1200px;transform-origin:top left;background:white;border-radius:22px;overflow:hidden}
+.llw-canvas-viewport{width:100%;position:relative;overflow:hidden;border-radius:22px}.llw-canvas{position:relative;width:1200px;transform-origin:top left;background:linear-gradient(135deg,#01172d,#035c78 60%,#06aade);border-radius:22px;overflow:hidden;padding:0!important}
+.llw-canvas-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 45%;z-index:0;pointer-events:none}
+.llw-canvas [data-layout-key]{z-index:1}
+.llw-canvas .llw-h[data-layout-key],.llw-canvas .llw-blk[data-layout-key]:not(.k-picture):not(.k-video):not(.k-cards){background:rgba(255,255,255,.95);border-radius:18px;padding:12px 18px;box-shadow:0 10px 28px -14px rgba(2,30,60,.45)}
+.llw-canvas .llw-blk[data-layout-key] .llw-target{margin:0}
+/* an arranged slide's words are one size everywhere, so the editor and the student see the same slide */
+.llw .llw-card.llw-canvas.llw-canvas{font-size:22px;line-height:1.4}
+.llw .llw-card.llw-canvas.llw-canvas .llw-h{font-size:40px;line-height:1.1;margin:0}
 .llw-scene+.llw-canvas-viewport{margin-top:-56px;position:relative;z-index:1}
 .llw-canvas .llw-flow,.llw-canvas .llw-blk:has(>.llw-says),.llw-canvas .llw-blk:has(>.llw-cards),.llw-canvas .llw-blk:has(>.llw-flipset),.llw-canvas .llw-says,.llw-canvas .llw-cards{display:contents}
 .llw-canvas [data-layout-key]{position:absolute!important;margin:0!important;max-width:none!important;min-width:0!important;box-sizing:border-box;overflow:auto}
@@ -555,17 +562,19 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
     const fit = () => {
       const canvas = view.querySelector('.llw-canvas')
       if (!canvas) return
-      const scale = view.clientWidth / 1200
-      // The card's padding sits outside the arrangement height, so the window has to follow the whole card.
+      // An arranged page is a slide: in the lesson it fits the window's width and height, as a slide does (November 10, 2026).
+      const room = slide && typeof window !== 'undefined' ? Math.max(260, window.innerHeight - 200) / Math.max(1, canvas.offsetHeight) : Infinity
+      const scale = Math.min(view.parentElement ? view.parentElement.clientWidth / 1200 : view.clientWidth / 1200, room)
       const next = canvas.offsetHeight * scale
       setCanvasScale((old) => Math.abs(old - scale) < 0.001 ? old : scale)
       setCanvasHeight((old) => Math.abs(old - next) < 0.5 ? old : next)
     }
     fit()
     const obs = new ResizeObserver(fit)
-    obs.observe(view)
-    return () => obs.disconnect()
-  }, [page.arrangement])
+    obs.observe(view.parentElement || view)
+    window.addEventListener('resize', fit)
+    return () => { obs.disconnect(); window.removeEventListener('resize', fit) }
+  }, [page.arrangement, slide])
   const boxProps = (key) => {
     const box = page.arrangement?.items?.[key]
     return { 'data-layout-key': key, ...(box ? { style: { left: box.x, top: box.y, width: box.w, height: box.h } } : {}) }
@@ -701,9 +710,11 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
   }
   const card = (
       <article className={'llw-card' + (page.arrangement ? ' llw-canvas' : '') + (scene && !wide && !page.arrangement ? ' llw-over' : '')} style={page.arrangement ? { height: page.arrangement.height, transform: `scale(${canvasScale})` } : undefined}>
-        {speak ? <div className="llw-h-row"><h2 className="llw-h">{pageTitle(page)}</h2><ReadAloud text={pageTitle(page)} label="Read aloud: the page title" /></div> : <h2 className="llw-h" {...boxProps("heading")}>{pageTitle(page)}</h2>}
+        {/* an arranged page is a slide: its scene fills it, behind the pieces (November 10, 2026: "I want to actually edit the slide") */}
+        {page.arrangement && scene && <img className="llw-canvas-bg" src={scene} alt="" />}
+        {speak ? <div className="llw-h-row"><h2 className="llw-h">{pageTitle(page)}</h2><ReadAloud text={pageTitle(page)} label="Read aloud: the page title" /></div> : <h2 className="llw-h" {...boxProps("heading")}>{page.arrangement ? slideTitle(page) : pageTitle(page)}</h2>}
         {!blocks.length && (page.body ? paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>) : page.type === 'breakout_title' ? null : <p className="llw-empty">This page has nothing on it yet.</p>)}
-        <div className="llw-flow">{blocks.map((b, i) => (hiddenBlock(b, i) ? null : <div key={i} {...(["say", "cards"].includes(b.kind) ? {} : boxProps(`b${i}`))} ref={videoFirst && i === vid + 1 ? revealRef : undefined} className={`llw-blk w-${b.width || 'full'} tone-${b.tone || TONE_OF[b.kind] || 'teal'}` + (videoFirst && student && i > vid ? ' llw-after' : '') + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>))}</div>
+        <div className="llw-flow">{blocks.map((b, i) => (hiddenBlock(b, i) ? null : <div key={i} {...(["say", "cards"].includes(b.kind) ? {} : boxProps(`b${i}`))} ref={videoFirst && i === vid + 1 ? revealRef : undefined} className={`llw-blk w-${b.width || 'full'} tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (videoFirst && student && i > vid ? ' llw-after' : '') + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>))}</div>
         {page.arrangement && Object.entries(page.arrangement.items).map(([key, box]) => {
           if (!box.readAloud || key.endsWith('-character')) return null
           const match = /^b(\d+)(?:-card(\d+)|-bubble)?$/.exec(key)
@@ -798,9 +809,8 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
           })()}
         </section>
       ) : page.arrangement ? <>
-        {/* The scene stays above an arranged page (October 29, 2026: arranging had dropped the background). */}
-        {scene && <figure className="llw-scene"><img src={scene} alt="" /></figure>}
-        <div className="llw-canvas-viewport" ref={viewportRef} style={{ height: canvasHeight || page.arrangement.height * canvasScale }}>{card}</div>
+        {/* The scene is the arranged slide's own background now (November 10, 2026), not a picture above it. */}
+        <div className="llw-canvas-viewport" ref={viewportRef} style={{ height: canvasHeight || page.arrangement.height * canvasScale, width: 1200 * canvasScale, margin: '0 auto' }}>{card}</div>
         {wordDef}
       </> : page.type === 'breakout_title' && !arranging ? cover : wide ? (
         <>

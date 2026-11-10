@@ -235,6 +235,17 @@ export const CSS = `
 .llw-slide-body .llw-blk.k-text p{margin:0;font-size:1.15em;color:var(--ink)}
 .llw-slide-body .llw-target{margin:0}
 .llw-young .llw-slide-head h2{font-size:clamp(2.2rem,5vw,3.8rem)}
+/* in the student site's frame the slide reaches down to the bottom bar */
+.llx-page .llw-slide{min-height:calc(100vh - 190px)}
+.llw-slide-panel.split{display:grid;grid-template-columns:minmax(240px,30%) minmax(0,1fr);gap:clamp(18px,2.4vw,36px);align-items:center}
+.llw-slide.has-scene .llw-slide-panel.split{max-width:1500px}
+.llw-slide.has-scene:has(.llw-slide-panel.split){padding:clamp(12px,2.4vh,28px) clamp(12px,1.8vw,28px)}
+.llw-slide-side{display:grid;gap:16px;align-content:start;max-height:calc(100vh - 230px);overflow:auto;padding-right:4px}
+.llw-slide-side .llw-slide-head h2,.llw-young .llw-slide-side .llw-slide-head h2{font-size:clamp(1.5rem,2.5vw,2.3rem)}
+.llw-slide-side .llw-slide-body{font-size:clamp(1rem,1.25vw,1.15rem);gap:12px}
+.llw-slide-main{min-width:0;max-height:calc(100vh - 230px);overflow:auto}
+.llw-slide-main .llv{margin:0 auto;width:min(100%,calc((100vh - 290px) * 16 / 9))}
+@media(max-width:900px){.llw-slide-panel.split{grid-template-columns:1fr}.llw-slide-side,.llw-slide-main{max-height:none}}
 .llw-cover-copy>span{display:inline-block;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:5px 14px}
 .llw-cover-copy h1{margin:12px 0 10px;font-family:var(--display);font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;font-weight:700;letter-spacing:-.01em;text-shadow:0 4px 24px rgba(0,0,0,.35);text-wrap:balance}
 .llw-cover-copy p{margin:0;font-size:clamp(1.1rem,2.2vw,1.45rem);font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.45);max-width:34ch}
@@ -733,18 +744,44 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
         <section ref={slideRef} className={'llw-slide' + (scene ? ' has-scene' : '')} aria-label={pageTitle(page)}>
           {/* the page's scene from its theme or slide fills the slide behind the white panel (November 9, 2026: "I want their cute little backgrounds") */}
           {scene && <img className="llw-slide-bg" src={scene} alt="" />}
-          <div className="llw-slide-panel">
-          <header className="llw-slide-head">
-            <span>{sectionOf(page)} · {shownLabel(page)}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
-            <h2>{slideTitle(page)}</h2>
-            {speak && <ReadAloud text={slideTitle(page)} label="Read aloud: the page title" />}
-          </header>
-          <div className="llw-slide-body llw-flow">
-            {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
-            {blocks.map((b, i) => (hiddenBlock(b, i) ? null : <div key={i} data-blk={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>))}
-          </div>
-          {wordDef}
-          </div>
+          {(() => {
+            const head = (
+              <header className="llw-slide-head">
+                <span>{sectionOf(page)} · {shownLabel(page)}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
+                <h2>{slideTitle(page)}</h2>
+                {speak && <ReadAloud text={slideTitle(page)} label="Read aloud: the page title" />}
+              </header>
+            )
+            const blockEl = (b, i) => <div key={i} data-blk={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>
+            const shown = blocks.map((b, i) => (hiddenBlock(b, i) ? null : i)).filter((i) => i !== null)
+            /*
+             * The slide's main piece fills the window beside a side column (November 10, 2026: "format a little differently so the
+             * instruction is just right there in the window? We can use the sides as needed for whatever info we are scrolling up or
+             * down for"): the heading, the target, the lines that lead in and the page's earlier parts (the poster an activity is
+             * about) stay in the side column; the video, the cards or the activity is in the window, sized to fit it.
+             */
+            const mainAt = [...(slideOf?.only || only || [])].reverse().find((i) => blocks[i] && SLIDE_MAIN.has(blocks[i].kind) && shown.includes(i))
+            if (mainAt === undefined) return (
+              <div className="llw-slide-panel">
+                {head}
+                <div className="llw-slide-body llw-flow">
+                  {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
+                  {shown.map((i) => blockEl(blocks[i], i))}
+                </div>
+                {wordDef}
+              </div>
+            )
+            return (
+              <div className="llw-slide-panel split">
+                <aside className="llw-slide-side">
+                  {head}
+                  <div className="llw-slide-body llw-flow">{shown.filter((i) => i !== mainAt).map((i) => blockEl(blocks[i], i))}</div>
+                  {wordDef}
+                </aside>
+                <div className={`llw-slide-main k-${blocks[mainAt].kind}`}>{blockEl(blocks[mainAt], mainAt)}</div>
+              </div>
+            )
+          })()}
         </section>
       ) : page.arrangement ? <>
         {/* The scene stays above an arranged page (October 29, 2026: arranging had dropped the background). */}

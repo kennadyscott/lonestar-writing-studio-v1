@@ -266,6 +266,12 @@ export const CSS = `
 .llw-slide-side .llw-slide-body{font-size:clamp(1rem,1.25vw,1.15rem);gap:12px}
 .llw-slide-main{min-width:0;max-height:calc(100vh - 230px);overflow:auto}
 .llw-slide-main .llv{margin:0 auto;width:min(100%,calc((100vh - 290px) * 16 / 9))}
+.llw-slide-panel.solo{gap:clamp(10px,1.6vh,18px);max-width:none}
+.llw-slide.has-scene:has(.llw-slide-panel.solo){padding:clamp(10px,2vh,24px) clamp(10px,1.6vw,24px)}
+.llw-slide-panel.solo .llw-slide-head{display:flex;align-items:baseline;gap:4px 16px;flex-wrap:wrap}
+.llw-slide-panel.solo .llw-slide-head h2{font-size:clamp(1.4rem,2.4vw,2.1rem)}
+.llw-slide-panel.solo .llw-slide-main{max-height:none;overflow:visible}
+.llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc((100vh - 330px) * 16 / 9))}
 @media(max-width:900px){.llw-slide-panel.split{grid-template-columns:1fr}.llw-slide-side,.llw-slide-main{max-height:none}}
 .llw-cover-copy>span{display:inline-block;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:5px 14px}
 .llw-cover-copy h1{margin:12px 0 10px;font-family:var(--display);font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;font-weight:700;letter-spacing:-.01em;text-shadow:0 4px 24px rgba(0,0,0,.35);text-wrap:balance}
@@ -793,6 +799,16 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
                   {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
                   {shown.map((i) => blockEl(blocks[i], i))}
                 </div>
+                {wordDef}
+              </div>
+            )
+            // Nothing to keep beside it (November 10, 2026: "If we don't have anything important to say on the side here, better to
+            // just use the full space for a video"): the heading sits above, and the piece takes the whole width.
+            const beside = shown.filter((i) => i !== mainAt)
+            if (!beside.length) return (
+              <div className="llw-slide-panel solo">
+                {head}
+                <div className={`llw-slide-main k-${blocks[mainAt].kind}`}>{blockEl(blocks[mainAt], mainAt)}</div>
                 {wordDef}
               </div>
             )

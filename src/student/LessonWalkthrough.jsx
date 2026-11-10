@@ -526,6 +526,8 @@ export const slideTitle = (page) => (typeof page.title === 'string' && page.titl
  * 'Another Example' It should just be 'Example', 'Example'"). The stored label still marks it as the guided one.
  */
 export const shownLabel = (page) => String(page.label || '').replace(/^Another\s+/i, '').replace(/\s+\d+$/, '')
+  // A Skill Builder from a file reads as the lesson's pages do: Instruction, Example, Checkpoint (November 10, 2026).
+  .replace(/^Skill Builder$/i, 'Instruction').replace(/^Skill Builder\s+/i, '')
 export function pageTitle(page) {
   // The title the publisher wrote, when there is one (November 2, 2026: "I need all parts to be editable - even the title").
   if (typeof page.title === 'string' && page.title.trim()) return page.title.trim()

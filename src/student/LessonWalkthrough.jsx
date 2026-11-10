@@ -483,6 +483,11 @@ export function youngReader(lesson) {
  */
 /** A slide's big heading: the skill the page is about ("Say why it proves your answer"); the line above it names the page. */
 export const slideTitle = (page) => (typeof page.title === 'string' && page.title.trim()) || String(page.heading || '').split(' — ').slice(1).join(' — ').trim() || pageTitle(page)
+/**
+ * A page's name as people see it, without its number: the second Example is "Example" too (November 10, 2026: "I don't like
+ * 'Another Example' It should just be 'Example', 'Example'"). The stored label still marks it as the guided one.
+ */
+export const shownLabel = (page) => String(page.label || '').replace(/^Another\s+/i, '').replace(/\s+\d+$/, '')
 export function pageTitle(page) {
   // The title the publisher wrote, when there is one (November 2, 2026: "I need all parts to be editable - even the title").
   if (typeof page.title === 'string' && page.title.trim()) return page.title.trim()
@@ -730,7 +735,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
           {scene && <img className="llw-slide-bg" src={scene} alt="" />}
           <div className="llw-slide-panel">
           <header className="llw-slide-head">
-            <span>{sectionOf(page)} · {String(page.label || '').replace(/\s+\d+$/, '')}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
+            <span>{sectionOf(page)} · {shownLabel(page)}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
             <h2>{slideTitle(page)}</h2>
             {speak && <ReadAloud text={slideTitle(page)} label="Read aloud: the page title" />}
           </header>
@@ -847,7 +852,7 @@ export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabe
  * the slides in the wide stage beside it on the scene, and Back / Step n of N / Continue pinned to the bottom. The student app
  * styles these classes in its own stylesheet (with each grade band's look); `styled` adds the same rules here for the CMS.
  */
-const frameName = (p) => (p.type === 'breakout_title' ? 'Welcome' : String(p.label || '').replace(/\s+\d+$/, ''))
+const frameName = (p) => (p.type === 'breakout_title' ? 'Welcome' : shownLabel(p))
 export const frameTip = (p) => ({ breakout_title: 'Welcome! Let us find out what today is about.', learning_target: 'This is what you will be able to do by the end.', warm_up: 'A quick warm-up to wake up your brain!', vocabulary: 'Tap a word to see what it means.', instruction: 'Watch and read closely. This is the big idea.', group_instruction: 'Talk it over. Explaining it helps you learn it.', example: 'Follow along with the example, then try it.', checkpoint: 'Your turn! Show what you know.', checkpoint_b: 'One more try to lock it in.', exit_ticket: 'Last stop! Show what you learned today.' })[p.type] || 'Keep going. You have got this!'
 function FrameTip({ page, guide }) {
   return (
@@ -857,8 +862,10 @@ function FrameTip({ page, guide }) {
     </div>
   )
 }
-/** @param {{ lesson: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, chip?: string, background?: string, guide?: { img?: string, name?: string }, Tip?: any, complete?: boolean, draft?: any, onDraft?: (d: any) => void, onDone?: () => void, onBack?: () => void, backLabel?: string, exitLabel?: string, finishLabel?: string, styled?: boolean }} props */
-export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase = '/', chip = 'Lit Lab', background = '', guide = null, Tip = null, complete = false, draft = null, onDraft = () => {}, onDone = () => {}, onBack = () => {}, backLabel = '← Back to my pathway', exitLabel = 'Exit to my pathway', finishLabel = 'Finish lesson & start practice ✓', styled = false }) {
+/** @param {{ lesson: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, chip?: string, background?: string, guide?: { img?: string, name?: string }, Tip?: any, complete?: boolean, draft?: any, onDraft?: (d: any) => void, onDone?: () => void, onBack?: () => void, backLabel?: string, exitLabel?: string, finishLabel?: string, styled?: boolean, preview?: boolean }} props */
+export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase = '/', chip = 'Lit Lab', background = '', guide = null, Tip = null, complete = false, draft = null, onDraft = () => {}, onDone = () => {}, onBack = () => {}, backLabel = '← Back to my pathway', exitLabel = 'Exit to my pathway', finishLabel = 'Finish lesson & start practice ✓', styled = false, preview = false }) {
+  // A publisher previewing (November 10, 2026: "When I am previewing, I need to be able to just continue without watching the
+  // video/doing the activity"): Continue never waits, and every page in the rail opens. Students still wait.
   const pages = useMemo(() => walkPages(lesson), [lesson])
   // Slide by slide (slidesOf): a page's next part opens under the last one; a new page starts at the top.
   const slides = useMemo(() => lessonSlides(pages), [pages])
@@ -882,6 +889,8 @@ export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase
   const firstOf = pages.map((_, p) => slides.findIndex((sl) => sl.pageAt === p))
   const sections = pages.reduce((out, p, i) => { const name = sectionOf(p); const prev = out[out.length - 1]; if (prev && prev.name === name) prev.pages.push(i); else out.push({ name, pages: [i] }); return out }, [])
   const finish = complete ? onBack : onDone
+  const canGo = open || preview
+  const opened = preview ? slides.length - 1 : reached
   return (
     <div className={'llx ll-lesson ll-walk' + (styled ? ' llx-own' : '')}>
       {styled && <style>{FRAME_CSS}</style>}
@@ -899,7 +908,7 @@ export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase
               const here = sec.pages.includes(pageAt), finished = !here && sec.pages.every((p) => firstOf[p] < reached)
               return (
                 <section key={sec.name} className={'llx-sec' + (here ? ' on' : '') + (finished ? ' done' : '')}>
-                  <button type="button" className="llx-sec-head" disabled={firstOf[sec.pages[0]] > reached} onClick={() => !here && firstOf[sec.pages[0]] <= reached && go(firstOf[sec.pages[0]])} aria-expanded={here}>
+                  <button type="button" className="llx-sec-head" disabled={firstOf[sec.pages[0]] > opened} onClick={() => !here && firstOf[sec.pages[0]] <= opened && go(firstOf[sec.pages[0]])} aria-expanded={here}>
                     <span>{sec.name}</span><small>{finished ? '✓ Done' : `${sec.pages.length} ${sec.pages.length === 1 ? 'page' : 'pages'}`}</small>
                   </button>
                   {here && (
@@ -908,7 +917,7 @@ export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase
                         const on = p === pageAt, past = p < pageAt
                         return (
                           <li key={p}>
-                            <button type="button" className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={firstOf[p] > reached} onClick={() => firstOf[p] <= reached && !on && go(firstOf[p])} aria-current={on ? 'step' : undefined} title={pageTitle(pages[p])}>
+                            <button type="button" className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={firstOf[p] > opened} onClick={() => firstOf[p] <= opened && !on && go(firstOf[p])} aria-current={on ? 'step' : undefined} title={pageTitle(pages[p])}>
                               <span className="llx-step-n" aria-hidden="true">{past ? '✓' : p + 1}</span>
                               <span className="llx-step-name">{frameName(pages[p])}</span>
                             </button>
@@ -936,12 +945,12 @@ export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase
           <button type="button" className="lsn-btn ghost" onClick={at === 0 ? onBack : () => go(at - 1)}>{at === 0 ? backLabel : '← Back'}</button>
           {at > 0 && <button type="button" className="lsn-exit" onClick={onBack}>{exitLabel}</button>}
           <div className="lsn-nav-prog" aria-label={`Step ${at + 1} of ${total}`}>
-            <span className="lsn-nav-step">{open ? `Step ${at + 1} of ${total} · ${slideTitle(page)}` : wait}</span>
+            <span className="lsn-nav-step">{open ? `Step ${at + 1} of ${total} · ${slideTitle(page)}` : preview ? `${wait} · preview: you can skip` : wait}</span>
             <span className="lsn-nav-bar"><span style={{ width: `${pct}%` }} /></span>
           </div>
           {last
-            ? <button type="button" className="lsn-btn done" disabled={!open} title={open ? '' : wait} onClick={finish}>{complete ? backLabel.replace(/^←\s*/, '') : finishLabel}</button>
-            : <button type="button" className="lsn-btn" disabled={!open} title={open ? '' : wait} onClick={() => go(at + 1)}>Continue →</button>}
+            ? <button type="button" className="lsn-btn done" disabled={!canGo} title={open ? '' : wait} onClick={finish}>{complete ? backLabel.replace(/^←\s*/, '') : finishLabel}</button>
+            : <button type="button" className={'lsn-btn' + (open ? '' : ' lsn-skip')} disabled={!canGo} title={open ? '' : wait} onClick={() => go(at + 1)}>{open ? 'Continue →' : 'Skip ahead →'}</button>}
         </div>
       </div>
     </div>
@@ -999,6 +1008,8 @@ const FRAME_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manrope
 .llx-own .lsn-btn:disabled{background:#9fb3c4;box-shadow:none;cursor:not-allowed}
 .llx-own .lsn-btn.ghost{background:#fff;color:#0d2f55;border:1.5px solid #bcd9ec;box-shadow:none}
 .llx-own .lsn-btn.done{background:#2e9e6b}
+.llx-own .lsn-btn.lsn-skip{background:#fff;color:var(--navy);border:1.5px dashed #9fb3c4;box-shadow:none}
+.llx-own .lsn-btn.lsn-skip:hover{background:#f3f8fb}
 .llx-own .lsn-btn:focus-visible{outline:3px solid #f0b429;outline-offset:2px}
 .llx-own .lsn-exit{font-size:13px;font-weight:800;color:#0a7dba;background:none;padding:6px 4px;white-space:nowrap}
 .llx-own .lsn-exit:hover{text-decoration:underline}

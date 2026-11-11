@@ -115,9 +115,31 @@ export const CSS = `
 .llw-says.left{flex-direction:row}
 .llw-says.left .llw-bubble::before{right:auto;left:-9px;transform:rotate(45deg)}
 .llw-bubble b{display:block;color:var(--tone-ink);font-size:.85rem}
-.llw-steps{list-style:none;padding:0;margin:0 0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
-.llw-steps li{position:relative;padding:14px 14px 14px 56px;background:var(--brand-wash);border-radius:16px;font-weight:700;line-height:1.3}
-.llw-steps li::before{content:attr(data-n);position:absolute;left:12px;top:12px;width:34px;height:34px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:800}
+.llw-steps{list-style:none;padding:0;margin:0 0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:clamp(10px,1.4vw,18px);align-items:stretch}
+.llw-steps li{position:relative;border-radius:22px;min-height:clamp(170px,26vh,260px);display:flex;flex-direction:column;scroll-margin:90px 0 120px}
+.llw-steps li.open{background:#fff;border:3px solid var(--c);padding:clamp(14px,1.6vw,22px);gap:10px;box-shadow:0 10px 24px -14px rgba(2,30,60,.45);animation:llw-step-open .45s cubic-bezier(.2,1.2,.4,1) both}
+.llw-step-n{flex:none;display:grid;place-items:center;width:clamp(40px,3.4vw,54px);height:clamp(40px,3.4vw,54px);border-radius:50%;background:var(--c);color:#fff;font-family:var(--display);font-size:clamp(1.3rem,2vw,1.8rem);font-weight:700;box-shadow:0 4px 10px -4px rgba(0,0,0,.4)}
+.llw-step-t{font-size:clamp(1.05rem,1.45vw,1.35rem);font-weight:800;line-height:1.25;color:var(--ink);overflow-wrap:anywhere}
+.llw-steps .llw-why{margin:auto 0 0;background:color-mix(in srgb,var(--c) 12%,#fff);border-radius:14px;padding:10px 12px;font-size:clamp(.95rem,1.2vw,1.1rem);font-weight:600;line-height:1.35;color:var(--ink);overflow-wrap:anywhere}
+.llw-steps li button{all:unset;box-sizing:border-box;flex:1;display:grid;place-items:center;align-content:center;gap:8px;text-align:center;border-radius:22px;padding:16px;font-family:inherit;cursor:pointer;color:#fff;background:var(--c);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18),0 12px 24px -14px rgba(2,30,60,.55);transition:transform .15s}
+.llw-steps li button .llw-step-n{background:rgba(255,255,255,.22);box-shadow:none;width:clamp(52px,4.4vw,70px);height:clamp(52px,4.4vw,70px);font-size:clamp(1.6rem,2.6vw,2.3rem)}
+.llw-steps li button b{font-family:var(--display);font-size:clamp(1.2rem,1.9vw,1.6rem);font-weight:700}
+.llw-steps li button em{font-style:normal;font-size:clamp(.9rem,1.1vw,1.05rem);font-weight:800;background:rgba(0,0,0,.32);border-radius:999px;padding:4px 14px}
+.llw-steps li.next button{animation:llw-step-nudge 1.6s ease-in-out infinite}
+.llw-steps li.next button:hover{transform:translateY(-3px) scale(1.02)}
+.llw-steps li.next button:focus-visible{outline:4px solid #f5b400;outline-offset:3px}
+.llw-steps li.later button{cursor:default;background:#dfe7ee;color:#6b8296;box-shadow:inset 0 -6px 0 rgba(0,0,0,.06)}
+.llw-steps li.later button{color:#41586b}.llw-steps li.later button .llw-step-n,.llw-steps li.later button em{background:rgba(255,255,255,.7);color:#41586b}
+@keyframes llw-step-nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+@keyframes llw-step-open{from{transform:rotateY(70deg) scale(.96);opacity:.2}to{transform:none;opacity:1}}
+@media(max-width:700px){.llw-steps{grid-template-columns:1fr}.llw-steps li{min-height:120px}}
+.llw-slide-main.k-steps{max-height:none;overflow:visible}
+.llw-canvas .llw-steps{margin:0;min-height:100%;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.llw-canvas .llw-steps li{min-height:auto}
+.llw-canvas .llw-steps li.open{padding:12px;gap:6px}.llw-canvas .llw-step-n{width:36px;height:36px;font-size:18px}.llw-canvas .llw-step-t{font-size:18px}.llw-canvas .llw-steps .llw-why{font-size:14px;padding:6px 10px}
+.llw-canvas .llw-steps li button .llw-step-n{width:44px;height:44px;font-size:22px}.llw-canvas .llw-steps li button b{font-size:18px}.llw-canvas .llw-steps li button em{font-size:13px}
+.llw-slide-side .llw-steps{grid-template-columns:1fr;gap:8px;margin:0}.llw-slide-side .llw-steps li{min-height:0}.llw-slide-side .llw-steps li.open{padding:10px 12px;flex-direction:row;flex-wrap:wrap;align-items:center;border-width:2px}
+.llw-slide-side .llw-step-n{width:32px;height:32px;font-size:1rem}.llw-slide-side .llw-step-t{font-size:1rem;flex:1}.llw-slide-side .llw-steps .llw-why{flex-basis:100%;margin:0;font-size:.9rem;padding:6px 10px}
+@media(prefers-reduced-motion:reduce){.llw-steps li.next button,.llw-steps li.open{animation:none}}
 .llw-why{color:var(--muted);font-size:.9rem;font-weight:600;margin-top:4px}
 .llw-more{font:inherit;font-size:.82em;font-weight:800;border:0;color:var(--brand);background:var(--brand-wash);border-radius:999px;padding:6px 14px;cursor:pointer;margin:-8px 0 20px 52px}
 .llw-more:hover{background:var(--brand);color:#fff}
@@ -259,6 +281,8 @@ export const CSS = `
 .llx-page .llw-cover-cast img{height:clamp(140px,40vh,320px);max-width:34vw}
 .llx-page .llw-cover-say{max-width:min(280px,30vw);font-size:clamp(.92rem,1.4vw,1.05rem)}
 .llw-listen{display:inline-flex;align-items:center;justify-content:center;width:auto!important;min-width:44px;height:40px;padding:0 14px!important;border-radius:999px!important;font-size:1rem;justify-self:start;align-self:flex-start;margin:0 0 4px}
+.llw-canvas-listen{display:flex;margin:0 auto 8px;background:#fff}
+.llw-cover-copy .llw-cover-listen{display:inline-flex;vertical-align:middle;margin:0 0 0 10px;height:30px;background:#fff;color:var(--navy)}
 .llw-listen::after{content:"Listen";font-size:.85rem;font-weight:800;margin-left:6px;color:var(--navy)}
 .llw-slide-main>.llw-listen{margin:0 0 10px}
 .llw-slide-panel.split{display:grid;grid-template-columns:minmax(240px,30%) minmax(0,1fr);gap:clamp(18px,2.4vw,36px);align-items:center}
@@ -325,12 +349,37 @@ export const sectionOf = (page) => (page.type === 'exit_ticket' ? 'Show what you
  * about. The cover and a page the publisher arranged by hand are one slide each.
  */
 const SLIDE_MAIN = new Set(['cards', 'read', 'steps', 'video', 'picture', 'check', 'connect'])
+/**
+ * The page's arrangement, when it is one the slide can use (November 10, 2026: an Alphabetization cover arranged on the old page
+ * showed its speech bubble over the title, "What happened here?"). An arrangement made on the old scrolling card (any height, its
+ * positions measured there) no longer fits the 16:9 slide, and one whose pieces no longer match the page's pieces (the goal was
+ * added to the title page; a piece was added or removed) puts boxes on the wrong pieces: both are ignored, and the page lays itself
+ * out as every other slide does until it is arranged again.
+ */
+export const SLIDE_HEIGHT = 675
+export function slideArrangement(page) {
+  const a = page?.arrangement
+  if (!a || typeof a !== 'object' || !a.items || typeof a.items !== 'object') return null
+  if (a.slide !== true && a.height !== SLIDE_HEIGHT) return null
+  const walk = page.walk || []
+  const want = new Set(['heading', ...walk.flatMap((b, i) => (b.kind === 'say' ? [`b${i}-character`, `b${i}-bubble`] : b.kind === 'cards' ? (b.cards || []).map((_, j) => `b${i}-card${j}`) : [`b${i}`]))])
+  const have = Object.keys(a.items)
+  // every box sits on a piece the page has, and every piece of the page has its box
+  return have.length && have.every((k) => want.has(k)) && [...want].every((k) => a.items[k]) ? a : null
+}
 export function slidesOf(page) {
   const blocks = page.walk || []
-  if (page.type === 'breakout_title' || page.arrangement || !blocks.length) return [blocks.map((_, i) => i)]
+  if (page.type === 'breakout_title' || slideArrangement(page) || !blocks.length) return [blocks.map((_, i) => i)]
+  // "Cards → Video" (the structure every Instruction page starts with): the cards come before the video, wherever the video was
+  // written (November 10, 2026 audit: slides followed the written order and played the video first).
+  const firstCards = blocks.findIndex((b) => b.kind === 'cards')
+  const early = page.flow === 'cards-video' && firstCards > 0 ? blocks.map((b, i) => (b.kind === 'video' && i < firstCards ? i : -1)).filter((i) => i >= 0) : []
+  const order = blocks.map((_, i) => i).filter((i) => !early.includes(i))
+  if (early.length) order.splice(order.indexOf(firstCards) + 1, 0, ...early)
   const out = []
   let lead = []
-  blocks.forEach((b, i) => {
+  order.forEach((i) => {
+    const b = blocks[i]
     if (!SLIDE_MAIN.has(b.kind)) { lead.push(i); return }
     const prev = out[out.length - 1]
     if (b.kind === 'check' && !lead.length && prev && prev.some((k) => blocks[k].kind === 'read' || blocks[k].kind === 'picture') && !prev.some((k) => blocks[k].kind === 'check')) { prev.push(i); return }
@@ -348,11 +397,15 @@ export function lessonSlides(pages) {
 export const shownOn = (slides, at) => { const cur = slides[at]; return cur ? slides.filter((sl) => sl.pageAt === cur.pageAt && sl.n <= cur.n).flatMap((sl) => sl.only) : [] }
 /** What a slide waits for before Continue: its activity, its cards to turn over, its video to the end. */
 export function slideGate(slide, mine = {}) {
+  // The cover draws its title, goal, line and character, never an activity or cards, so nothing on it can hold the student
+  // (November 10, 2026 audit: a cover with a check on it locked the lesson on its first slide). An arranged cover shows its pieces.
+  if (slide.page.type === 'breakout_title' && !slideArrangement(slide.page)) return { open: true, wait: '' }
   const blocks = slide.page.walk || []
   const flips = (b) => b.kind === 'cards' && (b.flip || slide.page.flow === 'cards-video' || (slide.page.type === 'example' && slide.page.flow === 'cards-attempt'))
   const waits = slide.only.filter((i) => blocks[i] && (gates(blocks[i]) || flips(blocks[i])) && !mine[i])
   const open = !waits.length
-  const wait = open ? '' : waits.some((i) => blocks[i].kind === 'cards') ? 'Turn over every card to go on' : waits.some((i) => blocks[i].kind === 'video') ? 'Watch the video to go on' : 'Finish the activity to go on'
+  const kinds = new Set(waits.map((i) => blocks[i].kind))
+  const wait = open ? '' : kinds.has('steps') ? 'Open every step to go on' : kinds.has('cards') ? 'Turn over every card to go on' : kinds.has('video') ? 'Watch the video to go on' : 'Finish the activity to go on'
   return { open, wait }
 }
 
@@ -364,7 +417,7 @@ const videoReady = (p) => { const c = clipsOf(p); return c.length > 0 && c.every
 // An activity whose directions and first line are the same sentence says it once.
 const said = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 const onceSaid = (act) => (act && act.brief && said(act.brief) === said(act.directions) ? { ...act, brief: '' } : act)
-const gates = (b) => b.kind === 'check' || (b.kind === 'cards' && b.flip) || (b.kind === 'video' && videoReady(b))
+const gates = (b) => b.kind === 'check' || (b.kind === 'cards' && b.flip) || (b.kind === 'video' && videoReady(b)) || (b.kind === 'steps' && (b.steps || []).length > 1)
 
 /**
  * A lesson video (October 22, 2026: "they are watching little videos along the way"): the animated clips, played back to
@@ -493,8 +546,25 @@ function FlipCards({ cards, onTerm, onAll, done, itemProps = () => ({}), speak =
  */
 /** @type {React.Context<null | ((words: string) => Promise<string | null>)>} */
 export const ReadAloudVoice = React.createContext(/** @type {null | ((words: string) => Promise<string | null>)} */ (null))
+/** The most one recording holds; longer words are read in parts, cut at sentence ends. The server refuses more. */
+export const READ_ALOUD_MAX = 2000
+export function readAloudParts(words, max = READ_ALOUD_MAX) {
+  const out = []
+  let rest = String(words || '').trim()
+  while (rest.length > max) {
+    const head = rest.slice(0, max)
+    const cut = Math.max(head.lastIndexOf('. '), head.lastIndexOf('! '), head.lastIndexOf('? '))
+    const at = cut > max * 0.4 ? cut + 1 : (head.lastIndexOf(' ') > 0 ? head.lastIndexOf(' ') : max)
+    out.push(rest.slice(0, at).trim())
+    rest = rest.slice(at).trim()
+  }
+  if (rest) out.push(rest)
+  return out
+}
+// One thing is read at a time, on the whole page: the newest Listen press wins (`asked`), and whatever was playing stops.
 let playing = null
-const stopPlaying = () => { if (playing) { playing.stop(); playing = null } }
+let asked = 0
+const stopPlaying = () => { const p = playing; playing = null; if (p) p.stop() }
 const bestVoice = () => {
   const voices = (window.speechSynthesis?.getVoices() || []).filter((v) => /^en[-_]US/i.test(v.lang))
   for (const want of [/natural/i, /google us english/i, /samantha/i, /\bava\b/i, /allison/i, /aria/i, /jenny/i]) { const v = voices.find((x) => want.test(x.name)); if (v) return v }
@@ -506,32 +576,56 @@ export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-
   const [state, setState] = useState('idle')
   const supported = useSyncExternalStore(() => () => {}, () => 'speechSynthesis' in window || 'Audio' in window, () => false)
   const mine = useRef(null)
-  useEffect(() => () => { if (playing && playing === mine.current) stopPlaying() }, [])
-  function browserVoice(words) {
-    if (!('speechSynthesis' in window)) { setState('idle'); return }
+  const mounted = useRef(false)
+  useEffect(() => {
+    mounted.current = true
+    return () => { mounted.current = false; if (mine.current && playing === mine.current) stopPlaying() }
+  }, [])
+  const idle = () => { if (mounted.current) setState('idle') }
+  // The browser's own voice, for the words from `from` on. The utterance stays on the handle so the browser cannot drop it mid-speech.
+  function browserVoice(words, me) {
+    if (me !== asked || !mounted.current || !('speechSynthesis' in window)) { idle(); return }
+    stopPlaying()
     const u = new SpeechSynthesisUtterance(words)
     u.lang = 'en-US'; u.rate = .92
     const v = bestVoice(); if (v) u.voice = v
-    u.onend = u.onerror = () => { setState('idle'); if (playing === mine.current) playing = null }
-    mine.current = { stop: () => { window.speechSynthesis.cancel(); setState('idle') } }; playing = mine.current
+    const handle = { u, stop: () => { window.speechSynthesis.cancel(); idle() } }
+    u.onend = u.onerror = () => { if (playing === handle) playing = null; if (mine.current === handle) idle() }
+    mine.current = handle; playing = handle
     setState('playing'); window.speechSynthesis.speak(u)
   }
   async function play() {
+    const me = ++asked
     if (state !== 'idle') { stopPlaying(); setState('idle'); return }
     stopPlaying()
     const words = plainWords(text)
     if (!words) return
-    if (!voice) { browserVoice(words); return }
+    if (!voice) { browserVoice(words, me); return }
+    const parts = readAloudParts(words)
     setState('loading')
-    let url = null
-    try { url = await voice(words) } catch { url = null }
-    if (!url) { browserVoice(words); return }
-    const audio = new Audio(url)
-    mine.current = { stop: () => { audio.pause(); setState('idle') } }; playing = mine.current
-    audio.onended = () => { setState('idle'); if (playing === mine.current) playing = null }
-    audio.onerror = () => { if (playing === mine.current) playing = null; browserVoice(words) }
-    setState('playing')
-    audio.play().catch(() => browserVoice(words))
+    // Each part is asked for as the one before it plays; a newer press, Stop or leaving the page ends the run.
+    const live = () => me === asked && mounted.current
+    for (let k = 0; k < parts.length; k++) {
+      let url = null
+      try { url = await voice(parts[k]) } catch { url = null }
+      if (!live()) { idle(); return }
+      if (!url) { browserVoice(parts.slice(k).join(' '), me); return }
+      const ok = await new Promise((done) => {
+        stopPlaying()
+        const audio = new Audio(url)
+        let settled = false
+        const finish = (result) => { if (settled) return; settled = true; if (playing === handle) playing = null; done(result) }
+        const handle = { stop: () => { audio.pause(); finish('stopped') } }
+        mine.current = handle; playing = handle
+        audio.onended = () => finish('ended')
+        audio.onerror = () => finish('failed')
+        if (mounted.current) setState('playing')
+        audio.play().catch((e) => finish(e && e.name === 'AbortError' ? 'stopped' : 'failed'))
+      })
+      if (ok === 'stopped' || !live()) { idle(); return }
+      if (ok === 'failed') { browserVoice(parts.slice(k).join(' '), me); return }
+    }
+    idle()
   }
   return <button type="button" className={className} style={style} disabled={!supported} aria-label={state === 'idle' ? label : 'Stop reading'} title={supported ? label : 'Read aloud is unavailable in this browser'} onClick={() => void play()}>{state === 'loading' ? '…' : state === 'playing' ? '■' : '🔊'}</button>
 }
@@ -542,7 +636,10 @@ export function spokenActivity(act) {
   for (const q of act.quiz || []) bits.push(q.q, (q.options || []).length ? `${q.options.slice(0, -1).join(', ')}, or ${q.options.at(-1)}` : '')
   for (const it of act.items || []) bits.push(it.given || it.prompt || it.text)
   for (const pr of act.pairs || []) bits.push(pr.a)
-  for (const o of act.order || []) bits.push(o.text || o)
+  // an ordering or sorting activity: its things are read in ABC order, since the saved order (and group) is the answer
+  const abc = (list) => [...list].filter((x) => typeof x === 'string' && x.trim()).sort((x, y) => x.localeCompare(y))
+  for (const o of act.order || []) bits.push(o.prompt, abc(o.steps || []).join(', '))
+  if (Array.isArray(act.words) && act.words.length) bits.push(abc(act.words.map((w) => (w && typeof w === 'object' ? w.w : w))).join(', '))
   for (const q of act.questions || []) bits.push(q.ask || q.q)
   if (Array.isArray(act.bank) && act.bank.length) bits.push(`Words: ${act.bank.join(', ')}`)
   if (Array.isArray(act.groups) && act.groups.length) bits.push(`Groups: ${act.groups.map((g) => g.name || g).join(', ')}`)
@@ -567,14 +664,24 @@ export function youngReader(lesson) {
  * keeps the numbered labels so a publisher can tell the pages apart.
  */
 /** A slide's big heading: the skill the page is about ("Say why it proves your answer"); the line above it names the page. */
-export const slideTitle = (page) => (typeof page.title === 'string' && page.title.trim()) || String(page.heading || '').split(' — ').slice(1).join(' — ').trim() || pageTitle(page)
+export const slideTitle = (page) => {
+  // A title saved from the old editor began with the page's name ("Instruction: Finding the Main Idea"); the slide already names the
+  // page on the line above, so the name comes off (November 10, 2026 audit).
+  const own = typeof page.title === 'string' ? page.title.trim() : ''
+  const name = String(page.label || '').replace(/^Another\s+/i, '').replace(/\s+\d+$/, '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const bare = own && name ? own.replace(new RegExp(`^(?:Another\\s+)?${name}(?:\\s+\\d+)?(?:\\s*:\\s*|\\s+[\\u2014\\u2013-]\\s+)`, 'i'), '').trim() : own
+  return bare || own || String(page.heading || '').split(' — ').slice(1).join(' — ').trim() || pageTitle(page)
+}
 /**
  * A page's name as people see it, without its number: the second Example is "Example" too (November 10, 2026: "I don't like
  * 'Another Example' It should just be 'Example', 'Example'"). The stored label still marks it as the guided one.
  */
-export const shownLabel = (page) => String(page.label || '').replace(/^Another\s+/i, '').replace(/\s+\d+$/, '')
-  // A Skill Builder from a file reads as the lesson's pages do: Instruction, Example, Checkpoint (November 10, 2026).
-  .replace(/^Skill Builder$/i, 'Instruction').replace(/^Skill Builder\s+/i, '')
+export const shownLabel = (page, part = '') => {
+  const name = String(page.label || '').replace(/^Another\s+/i, '').replace(/\s+\d+$/, '')
+  // A Skill Builder lesson from a file reads as the lesson's pages do: Instruction, Example, Checkpoint (November 10, 2026). In an
+  // older lesson that still holds Skill Builder pages beside its own, they keep their name so the two can be told apart.
+  return part === 'skill_builder' ? name.replace(/^Skill Builder$/i, 'Instruction').replace(/^Skill Builder\s+/i, '') : name
+}
 export function pageTitle(page) {
   // The title the publisher wrote, when there is one (November 2, 2026: "I need all parts to be editable - even the title").
   if (typeof page.title === 'string' && page.title.trim()) return page.title.trim()
@@ -589,7 +696,9 @@ export function pageTitle(page) {
  * `picture(value)` turns a stored picture (an https address, an art id, a picture still inside the deck) into a URL.
  */
 /** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, student?: boolean, onCheck?: (block: number) => void, done?: Record<number, boolean>, Play?: any, assetBase?: string, wide?: boolean, arranging?: boolean }} props */
-export function LessonPageView({ lesson, page, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only = null, slideOf = null, reveal = null }) {
+export function LessonPageView({ lesson, page: given, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only = null, slideOf = null, reveal = null }) {
+  // An arrangement the slide cannot use is left out (slideArrangement); the page then lays itself out.
+  const page = useMemo(() => (given.arrangement && !slideArrangement(given) ? { ...given, arrangement: undefined } : given), [given])
   // One slide of the page (slidesOf): only its pieces, none of the page's own in-page stages.
   const slide = Array.isArray(only)
   /*
@@ -691,8 +800,10 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
   // Read aloud (November 2, 2026: "I need the option to have things read aloud to students"): the lesson turns it on, and every
   // piece with words gets a listen button. An arranged page places its own (Arrange page, per box).
   const speak = !!lesson.readAloud && !page.arrangement
-  const spoken = (b) => b.kind === 'read' ? [b.title, b.text].filter(Boolean).join('. ')
-    : b.kind === 'steps' ? b.steps.map((st, k) => `Step ${k + 1}. ${st.text}${st.why ? ` ${st.why}` : ''}`).join(' ')
+  // How many of a steps piece's cards are open: all of them for a publisher, and for a student who has opened them all before.
+  const stepsOpen = (b, i) => (!student || done[i] ? b.steps.length : Math.min(b.steps.length, Math.max(1, shown[i] ?? 1)))
+  const spoken = (b, i = blocks.indexOf(b)) => b.kind === 'read' ? [b.title, b.text].filter(Boolean).join('. ')
+    : b.kind === 'steps' ? b.steps.slice(0, stepsOpen(b, i)).map((st, k) => `Step ${k + 1}. ${st.text}${st.why ? ` ${st.why}` : ''}`).join(' ')
     : b.kind === 'connect' ? `${CONNECT_LABEL[b.connect] || 'Talk about it'}. ${b.text}`
     : ['target', 'text', 'callout'].includes(b.kind) ? b.text : ''
   // On a slide one listen button reads a whole chunk (November 10, 2026: "can we have audio buttons that chunk things together? Three
@@ -738,16 +849,39 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
             )
           }
           if (b.kind === 'steps') {
-            const upTo = student ? (shown[i] ?? 1) : b.steps.length
+            /*
+             * The worked steps are big cards the student opens one at a time, in order (November 10, 2026: "These cards could be
+             * larger/more interesting so kids actually want to click on them"; "Kids are just going to hit continue instead of the
+             * next"): the first is open, the next one invites a tap, the rest wait their turn, and the slide's Continue opens only
+             * when every step is open (slideGate). The CMS review shows them all open.
+             */
+            const upTo = stepsOpen(b, i)
+            const open = (k, el) => {
+              if (k !== upTo) return
+              setShown((m) => ({ ...m, [i]: k + 1 }))
+              if (k + 1 >= b.steps.length && onCheck) onCheck(i)
+              // the card that opens next comes into view, so a long run of steps never hides the one to tap
+              const next = el?.closest('li')?.nextElementSibling
+              if (next) setTimeout(() => next.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60)
+            }
             return (
-              <React.Fragment key={i}>
-                <ol className="llw-steps">
-                  {b.steps.slice(0, upTo).map((s, k) => (
-                    <li key={k} data-n={k + 1}><Rich text={s.text} onTerm={setTerm} />{s.why && <div className="llw-why"><Rich text={s.why} onTerm={setTerm} /></div>}</li>
-                  ))}
-                </ol>
-                {upTo < b.steps.length && <button type="button" className="llw-more" onClick={() => setShown((m) => ({ ...m, [i]: upTo + 1 }))}>Next step →</button>}
-              </React.Fragment>
+              <ol key={i} className="llw-steps" style={{ '--steps': Math.min(b.steps.length, 4) }}>
+                {b.steps.map((s, k) => (k < upTo ? (
+                  <li key={k} className="open" style={{ '--c': CARD_INK[k % CARD_INK.length] }}>
+                    <span className="llw-step-n" aria-hidden="true">{k + 1}</span>
+                    <div className="llw-step-t"><Rich text={s.text} onTerm={setTerm} /></div>
+                    {s.why && <div className="llw-why"><Rich text={s.why} onTerm={setTerm} /></div>}
+                  </li>
+                ) : (
+                  <li key={k} className={k === upTo ? 'next' : 'later'} style={{ '--c': CARD_INK[k % CARD_INK.length] }}>
+                    <button type="button" disabled={k !== upTo} onClick={(e) => open(k, e.currentTarget)} aria-label={k === upTo ? `Open step ${k + 1}` : `Step ${k + 1} opens after step ${k}`}>
+                      <span className="llw-step-n" aria-hidden="true">{k + 1}</span>
+                      <b>Step {k + 1}</b>
+                      <em>{k === upTo ? 'Tap to open' : 'Coming up'}</em>
+                    </button>
+                  </li>
+                )))}
+              </ol>
             )
           }
           if (b.kind === 'connect') return (
@@ -808,7 +942,9 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
       {scene && <img className="llw-cover-bg" src={scene} alt="" />}
       <div className="llw-cover-copy">
         <span>Today’s lesson</span>
-        <h1>{page.heading}</h1>
+        {/* one Listen for the whole cover (November 10, 2026 audit: the cover could not be heard) */}
+        {!!lesson.readAloud && <ReadAloud text={[(typeof page.title === 'string' && page.title.trim()) || page.heading, goal?.text, hook?.text, line && `${one?.name || line.who} says: ${line.text}`].filter(Boolean).join('. ')} label="Read this page aloud" className="llw-read-button llw-listen llw-cover-listen" />}
+        <h1>{(typeof page.title === 'string' && page.title.trim()) || page.heading}</h1>
         {goal && <div className="llw-cover-goal"><b>Goal</b><div><Rich text={goal.text} onTerm={setTerm} /></div></div>}
         {hook && <p><Rich text={hook.text} onTerm={setTerm} /></p>}
       </div>
@@ -834,7 +970,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
           {(() => {
             const head = (
               <header className="llw-slide-head">
-                <span>{sectionOf(page)} · {shownLabel(page)}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
+                <span>{sectionOf(page)} · {shownLabel(page, lesson.part)}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
                 <h2>{slideTitle(page)}</h2>
               </header>
             )
@@ -889,6 +1025,8 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
         </section>
       ) : page.arrangement ? <>
         {/* The scene is the arranged slide's own background now (November 10, 2026), not a picture above it. */}
+        {/* one Listen for an arranged slide, its activity included (November 10, 2026 audit: an arranged page's activity could not be heard) */}
+        {!!lesson.readAloud && !arranging && <ReadAloud text={[slideTitle(page), ...blocks.map((b) => chunkSpoken(b))].filter((t) => String(t || '').trim()).join('. ')} label="Read this slide aloud" className="llw-read-button llw-listen llw-canvas-listen" />}
         <div className="llw-canvas-viewport" ref={viewportRef} style={{ height: canvasHeight || page.arrangement.height * canvasScale, width: 1200 * canvasScale, margin: '0 auto' }}>{card}</div>
         {wordDef}
       </> : page.type === 'breakout_title' && !arranging ? cover : wide ? (
@@ -933,12 +1071,13 @@ export const walkPages = (lesson) => withoutExtras(lesson).pages?.filter((p) => 
 export function withoutExtras(lesson) {
   const pages = lesson?.pages || []
   const dropped = (p) => p.type === 'learning_target' || p.type === 'warm_up' || p.type === 'exit_ticket'
-  if (!pages.some(dropped)) return lesson
+  // A lesson trimmed down to only those pages keeps them, as the CMS does when it reads it: an empty lesson would play as nothing.
+  if (!pages.some(dropped) || pages.every(dropped)) return lesson
   const targetBlock = (p) => (p?.walk || []).find((b) => b.kind === 'target' && String(b.text || '').trim())
   const old = pages.find((p) => p.type === 'learning_target')
   const line = String(old?.body || '').split('\n').map((l) => l.trim()).find((l) => /^(learning target\b|i can\b)/i.test(l)) || ''
   const target = targetBlock(old)?.text || line.replace(/^learning target\s*[:.]?\s*/i, '')
-  return { ...lesson, pages: pages.filter((p) => !dropped(p)).map((p) => (p.type !== 'breakout_title' || !target || targetBlock(p) ? p : { ...p, walk: [{ kind: 'target', text: target }, ...(p.walk || [])] })) }
+  return { ...lesson, pages: pages.filter((p) => !dropped(p)).map((p) => (p.type !== 'breakout_title' || !target || targetBlock(p) ? p : { ...p, arrangement: undefined, walk: [{ kind: 'target', text: target }, ...(p.walk || [])] })) }
 }
 
 /** A whole lesson, page by page. Next opens once every check on the page is done. */
@@ -985,6 +1124,43 @@ export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabe
   )
 }
 
+/**
+ * One page drawn as the student's slides, for the builder (November 10, 2026: "The builder needs to reflect what it looks like for
+ * the student, so when we edit, it makes sense of what it will look like as the final product"): the same slide the lesson frame
+ * shows (label and skill heading, the side column beside the main piece, the scene behind, the cover, an arranged slide), at a
+ * Chromebook's size, with a stepper through the page's slides. Everything is open to read (steps, cards' words), as in a review.
+ */
+/** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, note?: string }} props */
+export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, assetBase = '/', note = 'As students see it' }) {
+  const slides = useMemo(() => slidesOf(page), [page])
+  const [at, setAt] = useState(0)
+  const n = Math.min(at, slides.length - 1)
+  const only = slides.slice(0, n + 1).flat()
+  return (
+    <div className="llx-page lls">
+      <style>{`.lls{display:grid;gap:10px}
+.lls-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700;color:#557489}
+.lls-bar b{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#035c78}
+.lls-bar button{font:inherit;font-weight:800;border:1.5px solid #cfdfe7;background:#fff;color:#14344a;border-radius:999px;min-width:34px;height:30px;padding:0 10px;cursor:pointer}
+.lls-bar button[aria-current=true]{background:#02384d;border-color:#02384d;color:#fff}
+.lls-bar button:disabled{opacity:.45;cursor:default}
+.llx-page.lls .llw-slide{min-height:578px}.llx-page.lls .llw-cover{height:578px}
+.llx-page.lls .llw-slide-side,.llx-page.lls .llw-slide-main{max-height:520px}.llx-page.lls .llw-slide-main.k-steps,.llx-page.lls .llw-slide-panel.solo .llw-slide-main{max-height:none}
+.llx-page.lls .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}.llx-page.lls .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc(438px * 16 / 9))}`}</style>
+      <div className="lls-bar">
+        <b>{note}</b>
+        {slides.length > 1 && <>
+          <button type="button" disabled={n === 0} onClick={() => setAt(n - 1)} aria-label="The slide before">‹</button>
+          {slides.map((_, k) => <button key={k} type="button" aria-current={k === n} onClick={() => setAt(k)}>{k + 1}</button>)}
+          <button type="button" disabled={n === slides.length - 1} onClick={() => setAt(n + 1)} aria-label="The next slide">›</button>
+          <span>Slide {n + 1} of {slides.length} on this page. Each part opens beside the one before.</span>
+        </>}
+      </div>
+      <LessonPageView lesson={lesson} page={page} picture={picture} Play={Play} assetBase={assetBase} wide only={only} slideOf={{ n, of: slides.length, only: slides[n] }} reveal={null} />
+    </div>
+  )
+}
+
 /*
  * The student site's lesson frame (November 9, 2026: "I also want the student preview to show like this exact structure from the
  * site it is going to live within"), shared by the CMS student preview and the LoneStar student app (src/student/LitLabLesson.jsx):
@@ -992,7 +1168,7 @@ export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabe
  * the slides in the wide stage beside it on the scene, and Back / Step n of N / Continue pinned to the bottom. The student app
  * styles these classes in its own stylesheet (with each grade band's look); `styled` adds the same rules here for the CMS.
  */
-const frameName = (p) => (p.type === 'breakout_title' ? 'Welcome' : shownLabel(p))
+const frameName = (p, part) => (p.type === 'breakout_title' ? 'Welcome' : shownLabel(p, part))
 export const frameTip = (p) => ({ breakout_title: 'Welcome! Let us find out what today is about.', learning_target: 'This is what you will be able to do by the end.', warm_up: 'A quick warm-up to wake up your brain!', vocabulary: 'Tap a word to see what it means.', instruction: 'Watch and read closely. This is the big idea.', group_instruction: 'Talk it over. Explaining it helps you learn it.', example: 'Follow along with the example, then try it.', checkpoint: 'Your turn! Show what you know.', checkpoint_b: 'One more try to lock it in.', exit_ticket: 'Last stop! Show what you learned today.' })[p.type] || 'Keep going. You have got this!'
 function FrameTip({ page, guide }) {
   return (
@@ -1059,7 +1235,7 @@ export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase
                           <li key={p}>
                             <button type="button" className={'llx-step' + (on ? ' on' : '') + (past ? ' past' : '')} disabled={firstOf[p] > opened} onClick={() => firstOf[p] <= opened && !on && go(firstOf[p])} aria-current={on ? 'step' : undefined} title={pageTitle(pages[p])}>
                               <span className="llx-step-n" aria-hidden="true">{past ? '✓' : p + 1}</span>
-                              <span className="llx-step-name">{frameName(pages[p])}</span>
+                              <span className="llx-step-name">{frameName(pages[p], lesson.part)}</span>
                             </button>
                           </li>
                         )
@@ -1090,7 +1266,7 @@ export function LessonFrame({ lesson, picture, Play = ActivityPreview, assetBase
           </div>
           {last
             ? <button type="button" className="lsn-btn done" disabled={!canGo} title={open ? '' : wait} onClick={finish}>{complete ? backLabel.replace(/^←\s*/, '') : finishLabel}</button>
-            : <button type="button" className={'lsn-btn' + (open ? '' : ' lsn-skip')} disabled={!canGo} title={open ? '' : wait} onClick={() => go(at + 1)}>{open ? 'Continue →' : 'Skip ahead →'}</button>}
+            : <button type="button" className={'lsn-btn' + (open || !preview ? '' : ' lsn-skip')} disabled={!canGo} title={open ? '' : wait} onClick={() => go(at + 1)}>{open || !preview ? 'Continue →' : 'Skip ahead →'}</button>}
         </div>
       </div>
     </div>
@@ -1148,6 +1324,7 @@ const FRAME_CSS = `@import url('https://fonts.googleapis.com/css2?family=Manrope
 .llx-own .lsn-btn:disabled{background:#9fb3c4;box-shadow:none;cursor:not-allowed}
 .llx-own .lsn-btn.ghost{background:#fff;color:#0d2f55;border:1.5px solid #bcd9ec;box-shadow:none}
 .llx-own .lsn-btn.done{background:#2e9e6b}
+.llx-own .lsn-btn:disabled,.llx-own .lsn-btn.done:disabled{background:#9fb3c4;color:#fff;border:0;box-shadow:none;cursor:not-allowed}
 .llx-own .lsn-btn.lsn-skip{background:#fff;color:var(--navy);border:1.5px dashed #9fb3c4;box-shadow:none}
 .llx-own .lsn-btn.lsn-skip:hover{background:#f3f8fb}
 .llx-own .lsn-btn:focus-visible{outline:3px solid #f0b429;outline-offset:2px}

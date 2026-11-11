@@ -258,6 +258,9 @@ export const CSS = `
 .llx-page .llw-cover-cast{margin:0;padding:0 clamp(16px,4vw,56px) 0 0}
 .llx-page .llw-cover-cast img{height:clamp(140px,40vh,320px);max-width:34vw}
 .llx-page .llw-cover-say{max-width:min(280px,30vw);font-size:clamp(.92rem,1.4vw,1.05rem)}
+.llw-listen{display:inline-flex;align-items:center;justify-content:center;width:auto!important;min-width:44px;height:40px;padding:0 14px!important;border-radius:999px!important;font-size:1rem;justify-self:start;align-self:flex-start;margin:0 0 4px}
+.llw-listen::after{content:"Listen";font-size:.85rem;font-weight:800;margin-left:6px;color:var(--navy)}
+.llw-slide-main>.llw-listen{margin:0 0 10px}
 .llw-slide-panel.split{display:grid;grid-template-columns:minmax(240px,30%) minmax(0,1fr);gap:clamp(18px,2.4vw,36px);align-items:center}
 .llw-slide.has-scene .llw-slide-panel.split{max-width:1500px}
 .llw-slide.has-scene:has(.llw-slide-panel.split){padding:clamp(12px,2.4vh,28px) clamp(12px,1.8vw,28px)}
@@ -483,23 +486,67 @@ function FlipCards({ cards, onTerm, onAll, done, itemProps = () => ({}), speak =
 }
 
 /** Read only the selected item's words, using the device's voice. No audio is sent to a service. */
+/**
+ * Where the narrator's recording of some words is (November 10, 2026: "This voice is AWFUL"): the CMS hands in a function that has
+ * them voiced once in the lesson videos' narrator voice and returns the recording's address; without one, or when it cannot answer,
+ * the browser reads them in the most natural voice it has.
+ */
+/** @type {React.Context<null | ((words: string) => Promise<string | null>)>} */
+export const ReadAloudVoice = React.createContext(/** @type {null | ((words: string) => Promise<string | null>)} */ (null))
+let playing = null
+const stopPlaying = () => { if (playing) { playing.stop(); playing = null } }
+const bestVoice = () => {
+  const voices = (window.speechSynthesis?.getVoices() || []).filter((v) => /^en[-_]US/i.test(v.lang))
+  for (const want of [/natural/i, /google us english/i, /samantha/i, /\bava\b/i, /allison/i, /aria/i, /jenny/i]) { const v = voices.find((x) => want.test(x.name)); if (v) return v }
+  return voices.find((v) => v.localService) || voices[0] || null
+}
+const plainWords = (text) => String(text).replace(/\[\[|\]\]|\{\{|\}\}|\*\*|==/g, '').replace(/\s+/g, ' ').trim()
 export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-read-button' }) {
-  const [speaking, setSpeaking] = useState(false)
-  const supported = useSyncExternalStore(() => () => {}, () => 'speechSynthesis' in window && 'SpeechSynthesisUtterance' in window, () => false)
-  const utterance = useRef(null)
-  useEffect(() => {
-    return () => { if (utterance.current) window.speechSynthesis?.cancel() }
-  }, [])
-  function play() {
-    if (!supported) return
-    window.speechSynthesis.cancel()
-    if (speaking) { setSpeaking(false); utterance.current = null; return }
-    const u = new SpeechSynthesisUtterance(String(text).replace(/\[\[|\]\]|\{\{|\}\}|\*\*|==/g, ''))
-    u.lang = 'en-US'; u.rate = .85
-    u.onend = u.onerror = () => { setSpeaking(false); utterance.current = null }
-    utterance.current = u; setSpeaking(true); window.speechSynthesis.speak(u)
+  const voice = React.useContext(ReadAloudVoice)
+  const [state, setState] = useState('idle')
+  const supported = useSyncExternalStore(() => () => {}, () => 'speechSynthesis' in window || 'Audio' in window, () => false)
+  const mine = useRef(null)
+  useEffect(() => () => { if (playing && playing === mine.current) stopPlaying() }, [])
+  function browserVoice(words) {
+    if (!('speechSynthesis' in window)) { setState('idle'); return }
+    const u = new SpeechSynthesisUtterance(words)
+    u.lang = 'en-US'; u.rate = .92
+    const v = bestVoice(); if (v) u.voice = v
+    u.onend = u.onerror = () => { setState('idle'); if (playing === mine.current) playing = null }
+    mine.current = { stop: () => { window.speechSynthesis.cancel(); setState('idle') } }; playing = mine.current
+    setState('playing'); window.speechSynthesis.speak(u)
   }
-  return <button type="button" className={className} style={style} disabled={!supported} aria-label={speaking ? 'Stop reading' : label} title={supported ? label : 'Read aloud is unavailable in this browser'} onClick={play}>{speaking ? '■' : '🔊'}</button>
+  async function play() {
+    if (state !== 'idle') { stopPlaying(); setState('idle'); return }
+    stopPlaying()
+    const words = plainWords(text)
+    if (!words) return
+    if (!voice) { browserVoice(words); return }
+    setState('loading')
+    let url = null
+    try { url = await voice(words) } catch { url = null }
+    if (!url) { browserVoice(words); return }
+    const audio = new Audio(url)
+    mine.current = { stop: () => { audio.pause(); setState('idle') } }; playing = mine.current
+    audio.onended = () => { setState('idle'); if (playing === mine.current) playing = null }
+    audio.onerror = () => { if (playing === mine.current) playing = null; browserVoice(words) }
+    setState('playing')
+    audio.play().catch(() => browserVoice(words))
+  }
+  return <button type="button" className={className} style={style} disabled={!supported} aria-label={state === 'idle' ? label : 'Stop reading'} title={supported ? label : 'Read aloud is unavailable in this browser'} onClick={() => void play()}>{state === 'loading' ? '…' : state === 'playing' ? '■' : '🔊'}</button>
+}
+/** What an activity says out loud: its directions, its question and each thing the student works with. */
+export function spokenActivity(act) {
+  if (!act) return ''
+  const bits = [act.directions, act.brief]
+  for (const q of act.quiz || []) bits.push(q.q, (q.options || []).length ? `${q.options.slice(0, -1).join(', ')}, or ${q.options.at(-1)}` : '')
+  for (const it of act.items || []) bits.push(it.given || it.prompt || it.text)
+  for (const pr of act.pairs || []) bits.push(pr.a)
+  for (const o of act.order || []) bits.push(o.text || o)
+  for (const q of act.questions || []) bits.push(q.ask || q.q)
+  if (Array.isArray(act.bank) && act.bank.length) bits.push(`Words: ${act.bank.join(', ')}`)
+  if (Array.isArray(act.groups) && act.groups.length) bits.push(`Groups: ${act.groups.map((g) => g.name || g).join(', ')}`)
+  return bits.filter((b) => typeof b === 'string' && b.trim()).map((b) => b.replace(/_{2,}/g, 'blank')).join('. ').replace(/\.\s*\./g, '.')
 }
 
 /** The page's title the way the deck says it: "Instruction 1: Author's Purpose". */
@@ -648,11 +695,18 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
     : b.kind === 'steps' ? b.steps.map((st, k) => `Step ${k + 1}. ${st.text}${st.why ? ` ${st.why}` : ''}`).join(' ')
     : b.kind === 'connect' ? `${CONNECT_LABEL[b.connect] || 'Talk about it'}. ${b.text}`
     : ['target', 'text', 'callout'].includes(b.kind) ? b.text : ''
+  // On a slide one listen button reads a whole chunk (November 10, 2026: "can we have audio buttons that chunk things together? Three
+  // audio buttons seems ridiculous"; "They need audio for activities too"): a character's line, the cards and the activity too.
+  const chunkSpoken = (b) => spoken(b)
+    || (b.kind === 'say' ? `${b.who} says: ${b.text}`
+      : b.kind === 'cards' ? b.cards.map((c) => [c.title, c.text, c.example && `For example: ${c.example}`].filter(Boolean).join('. ')).join('. ')
+        : b.kind === 'check' ? spokenActivity(b.activity) : '')
+  const speakEach = speak && !slide
   // One piece as the student sees it; the editor (the CMS) draws the same pieces.
   const piece = (b, i) => {
           if (b.kind === 'target') return <div key={i} className="llw-target"><Rich text={b.text} onTerm={setTerm} /></div>
           if (b.kind === 'text') return paragraphs(b.text).map((p, k) => <p key={`${i}-${k}`}><Rich text={p} onTerm={setTerm} /></p>)
-          if (b.kind === 'cards' && (b.flip || cardsFirst || exampleCardsFirst)) return <FlipCards key={i} cards={b.cards} speak={speak} itemProps={(k) => boxProps(`b${i}-card${k}`)} onTerm={setTerm} done={!!done[i]} onAll={() => { setTurned((old) => ({ ...old, [i]: true })); if (onCheck) onCheck(i) }} />
+          if (b.kind === 'cards' && (b.flip || cardsFirst || exampleCardsFirst)) return <FlipCards key={i} cards={b.cards} speak={speakEach} itemProps={(k) => boxProps(`b${i}-card${k}`)} onTerm={setTerm} done={!!done[i]} onAll={() => { setTurned((old) => ({ ...old, [i]: true })); if (onCheck) onCheck(i) }} />
           if (b.kind === 'cards') return (
             <div key={i} className="llw-cards">
               {b.cards.map((c, k) => (
@@ -660,7 +714,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
                   <h3>{c.title}</h3>
                   <p><Rich text={c.text} onTerm={setTerm} /></p>
                   {c.example && <p className="eg"><b>Example:</b><Rich text={c.example} onTerm={setTerm} /></p>}
-                  {speak && <ReadAloud text={[c.title, c.text, c.example && `For example: ${c.example}`].filter(Boolean).join('. ')} label={`Read aloud: ${c.title}`} className="llw-read-button llw-read-corner" />}
+                  {speakEach && <ReadAloud text={[c.title, c.text, c.example && `For example: ${c.example}`].filter(Boolean).join('. ')} label={`Read aloud: ${c.title}`} className="llw-read-button llw-read-corner" />}
                 </section>
               ))}
             </div>
@@ -679,7 +733,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
             return (
               <div key={i} className={'llw-says' + (src ? '' : ' noart') + (who?.faces === 'right' ? ' left' : '')}>
                 {src && <img src={src} alt={b.who} {...boxProps(`b${i}-character`)} />}
-                <div className="llw-bubble" {...boxProps(`b${i}-bubble`)}><b>{b.who}</b><Rich text={b.text} onTerm={setTerm} />{speak && <ReadAloud text={b.text} label={`Read aloud: what ${b.who} says`} className="llw-read-button llw-read-corner" />}</div>
+                <div className="llw-bubble" {...boxProps(`b${i}-bubble`)}><b>{b.who}</b><Rich text={b.text} onTerm={setTerm} />{speakEach && <ReadAloud text={b.text} label={`Read aloud: what ${b.who} says`} className="llw-read-button llw-read-corner" />}</div>
               </div>
             )
           }
@@ -782,10 +836,14 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
               <header className="llw-slide-head">
                 <span>{sectionOf(page)} · {shownLabel(page)}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
                 <h2>{slideTitle(page)}</h2>
-                {speak && <ReadAloud text={slideTitle(page)} label="Read aloud: the page title" />}
               </header>
             )
-            const blockEl = (b, i) => <div key={i} data-blk={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>
+            const blockEl = (b, i) => <div key={i} data-blk={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}`}>{piece(b, i)}</div>
+            // One listen button a chunk: the side column's words together, the main piece on its own.
+            const listen = (idx, withTitle, label) => {
+              const words = [withTitle ? slideTitle(page) : '', ...idx.map((i) => chunkSpoken(blocks[i]))].filter((t) => String(t || '').trim()).join('. ')
+              return speak && words ? <ReadAloud text={words} label={label} className="llw-read-button llw-listen" /> : null
+            }
             const shown = blocks.map((b, i) => (hiddenBlock(b, i) ? null : i)).filter((i) => i !== null)
             /*
              * The slide's main piece fills the window beside a side column (November 10, 2026: "format a little differently so the
@@ -797,6 +855,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
             if (mainAt === undefined) return (
               <div className="llw-slide-panel">
                 {head}
+                {listen(shown, true, 'Read this page aloud')}
                 <div className="llw-slide-body llw-flow">
                   {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
                   {shown.map((i) => blockEl(blocks[i], i))}
@@ -810,6 +869,7 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
             if (!beside.length) return (
               <div className="llw-slide-panel solo">
                 {head}
+                {listen([mainAt], true, 'Read this page aloud')}
                 <div className={`llw-slide-main k-${blocks[mainAt].kind}`}>{blockEl(blocks[mainAt], mainAt)}</div>
                 {wordDef}
               </div>
@@ -818,10 +878,11 @@ export function LessonPageView({ lesson, page, picture, student = false, onCheck
               <div className="llw-slide-panel split">
                 <aside className="llw-slide-side">
                   {head}
-                  <div className="llw-slide-body llw-flow">{shown.filter((i) => i !== mainAt).map((i) => blockEl(blocks[i], i))}</div>
+                  {listen(beside, true, 'Read this side aloud')}
+                  <div className="llw-slide-body llw-flow">{beside.map((i) => blockEl(blocks[i], i))}</div>
                   {wordDef}
                 </aside>
-                <div className={`llw-slide-main k-${blocks[mainAt].kind}`}>{blockEl(blocks[mainAt], mainAt)}</div>
+                <div className={`llw-slide-main k-${blocks[mainAt].kind}`}>{listen([mainAt], false, blocks[mainAt].kind === 'check' ? 'Read the activity aloud' : 'Read this aloud')}{blockEl(blocks[mainAt], mainAt)}</div>
               </div>
             )
           })()}

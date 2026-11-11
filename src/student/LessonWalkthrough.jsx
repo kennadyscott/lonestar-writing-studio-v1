@@ -25,7 +25,20 @@ export const CSS = `
 .llw-canvas-viewport{width:100%;position:relative;overflow:hidden;border-radius:22px}.llw-canvas{position:relative;width:1200px;transform-origin:top left;background:linear-gradient(135deg,#01172d,#035c78 60%,#06aade);border-radius:22px;overflow:hidden;padding:0!important}
 .llw-canvas-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 45%;z-index:0;pointer-events:none}
 .llw-canvas [data-layout-key]{z-index:1}
-.llw-canvas .llw-h[data-layout-key],.llw-canvas .llw-blk[data-layout-key]:not(.k-picture):not(.k-video):not(.k-cards){background:rgba(255,255,255,.95);border-radius:18px;padding:12px 18px;box-shadow:0 10px 28px -14px rgba(2,30,60,.45)}
+/* One panel sits behind an arranged slide's pieces, as on every other slide (November 10, 2026: a white box per piece "just looks
+   really bad ... At one point, it had a nice darker box that everything was in together"): white on a teaching slide; on the cover,
+   the dark box of the designed cover, with the title and opening line in white and the goal in its white pill. It follows the pieces. */
+.llw-canvas-back{position:absolute;z-index:0;border-radius:26px;background:rgba(255,255,255,.95);box-shadow:0 18px 50px -18px rgba(10,20,40,.55);pointer-events:none}
+.llw-canvas-back.dark{background:rgba(1,23,45,.46);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);box-shadow:none}
+.llw-canvas .llw-h[data-layout-key],.llw-canvas .llw-blk[data-layout-key]:not(.k-picture):not(.k-video){padding:4px 6px}
+.llw .llw-card.llw-canvas.llw-canvas.llw-cover-canvas .llw-h{color:#fff;font-size:50px;line-height:1.06;letter-spacing:-.01em;text-shadow:0 4px 24px rgba(0,0,0,.35);text-wrap:balance}
+.llw-canvas.llw-cover-canvas .llw-blk.k-text{color:#fff;font-weight:700;font-size:26px;text-shadow:0 2px 12px rgba(0,0,0,.45)}
+.llw-canvas.llw-cover-canvas .llw-blk.k-text p{margin:0}
+.llw-canvas.llw-cover-canvas .llw-blk.k-text .llw-term,.llw-canvas.llw-cover-canvas .llw-h .llw-term{color:#fff;border-bottom-color:#fff}
+.llw-canvas.llw-cover-canvas .llw-blk.k-text .llw-term:hover,.llw-canvas.llw-cover-canvas .llw-blk.k-text .llw-term:focus-visible,.llw-canvas.llw-cover-canvas .llw-h .llw-term:hover,.llw-canvas.llw-cover-canvas .llw-h .llw-term:focus-visible{background:rgba(255,255,255,.22)}
+.llw-canvas.llw-cover-canvas .llw-thing>figcaption{color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.45)}
+.llw-canvas.llw-cover-canvas .llw-target{background:rgba(255,255,255,.94);border-left:0;border-radius:16px;padding:12px 18px;font-weight:700;color:var(--ink);box-shadow:0 10px 30px -12px rgba(0,0,0,.45)}
+.llw-canvas.llw-cover-canvas .llw-target::before{content:"GOAL";font-size:.6em;font-weight:800;letter-spacing:.1em;color:var(--brand-dark);margin-right:12px;vertical-align:middle}
 .llw-canvas .llw-blk[data-layout-key] .llw-target{margin:0}
 /* an arranged slide's words are one size everywhere, so the editor and the student see the same slide */
 .llw .llw-card.llw-canvas.llw-canvas{font-size:22px;line-height:1.4}
@@ -304,9 +317,11 @@ export const CSS = `
 .llw-cover-copy h1{margin:12px 0 10px;font-family:var(--display);font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;font-weight:700;letter-spacing:-.01em;text-shadow:0 4px 24px rgba(0,0,0,.35);text-wrap:balance}
 .llw-cover-copy p{margin:0;font-size:clamp(1.1rem,2.2vw,1.45rem);font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.45);max-width:34ch}
 .llw-cover-copy .llw-term{color:#fff;border-bottom-color:#fff}
+.llw-cover-copy .llw-term:hover,.llw-cover-copy .llw-term:focus-visible{background:rgba(255,255,255,.22)}
 .llw-cover-copy .llw-cover-goal{margin:0 0 14px;display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.94);color:var(--ink);border-radius:16px;padding:12px 18px;font-size:clamp(1.05rem,2vw,1.3rem);font-weight:700;line-height:1.35;text-shadow:none;max-width:40ch;box-shadow:0 10px 30px -12px rgba(0,0,0,.45)}
 .llw-cover-copy .llw-cover-goal b{flex:none;font-size:.72rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--brand-dark);padding-top:.35em}
 .llw-cover-copy .llw-cover-goal .llw-term{color:var(--ink);border-bottom-color:currentColor}
+.llw-cover-copy .llw-cover-goal .llw-term:hover,.llw-cover-copy .llw-cover-goal .llw-term:focus-visible{background:var(--brand-wash)}
 .llw-cover-say{margin:18px auto 0;background:#fff;color:var(--ink);border-radius:18px;padding:10px 18px;font-size:1.05rem;line-height:1.4;box-shadow:0 10px 30px -10px rgba(0,0,0,.4);position:relative;width:max-content;max-width:min(320px,80vw);text-align:left}
 .llw-cover-say b{display:block;color:var(--brand-dark);font-size:.85rem}
 .llw-cover-say::after{content:"";position:absolute;bottom:-8px;left:calc(50% - 8px);width:16px;height:16px;background:#fff;transform:rotate(45deg)}
@@ -620,6 +635,8 @@ export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-
         audio.onended = () => finish('ended')
         audio.onerror = () => finish('failed')
         if (mounted.current) setState('playing')
+        // The next part is asked for while this one plays (the narrator keeps one request per passage), so there is no silent gap.
+        if (parts[k + 1]) void Promise.resolve(voice(parts[k + 1])).catch(() => null)
         audio.play().catch((e) => finish(e && e.name === 'AbortError' ? 'stopped' : 'failed'))
       })
       if (ok === 'stopped' || !live()) { idle(); return }
@@ -904,10 +921,29 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
           )
           return null
   }
+  // The panel behind an arranged slide's pieces: around the title and the words on the cover (the character and their line stand
+  // outside it, as on the designed cover); around every piece but a character and their words on a teaching slide.
+  const backPanel = (() => {
+    const a = page.arrangement
+    if (!a) return null
+    const cover = page.type === 'breakout_title'
+    const keys = Object.keys(a.items).filter((k) => {
+      if (k === 'heading') return true
+      const b = blocks[Number(/^b(\d+)/.exec(k)?.[1])]
+      if (!b || b.kind === 'say') return false // the character and their speech bubble carry their own look
+      return cover ? ['target', 'text', 'callout'].includes(b.kind) : true
+    })
+    if (!keys.length) return null
+    const pad = 22, boxes = keys.map((k) => a.items[k])
+    const left = Math.max(0, Math.min(...boxes.map((b) => b.x)) - pad), top = Math.max(0, Math.min(...boxes.map((b) => b.y)) - pad)
+    const right = Math.min(1200, Math.max(...boxes.map((b) => b.x + b.w)) + pad), bottom = Math.min(a.height, Math.max(...boxes.map((b) => b.y + b.h)) + pad)
+    return { left, top, width: right - left, height: bottom - top }
+  })()
   const card = (
-      <article className={'llw-card' + (page.arrangement ? ' llw-canvas' : '') + (scene && !wide && !page.arrangement ? ' llw-over' : '')} style={page.arrangement ? { height: page.arrangement.height, transform: `scale(${canvasScale})` } : undefined}>
+      <article className={'llw-card' + (page.arrangement ? ' llw-canvas' + (page.type === 'breakout_title' ? ' llw-cover-canvas' : '') : '') + (scene && !wide && !page.arrangement ? ' llw-over' : '')} style={page.arrangement ? { height: page.arrangement.height, transform: `scale(${canvasScale})` } : undefined}>
         {/* an arranged page is a slide: its scene fills it, behind the pieces (November 10, 2026: "I want to actually edit the slide") */}
         {page.arrangement && scene && <img className="llw-canvas-bg" src={scene} alt="" />}
+        {backPanel && <div className={'llw-canvas-back' + (page.type === 'breakout_title' ? ' dark' : '')} style={backPanel} aria-hidden="true" />}
         {speak ? <div className="llw-h-row"><h2 className="llw-h">{pageTitle(page)}</h2><ReadAloud text={pageTitle(page)} label="Read aloud: the page title" /></div> : <h2 className="llw-h" {...boxProps("heading")}>{page.arrangement ? slideTitle(page) : pageTitle(page)}</h2>}
         {!blocks.length && (page.body ? paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>) : page.type === 'breakout_title' ? null : <p className="llw-empty">This page has nothing on it yet.</p>)}
         <div className="llw-flow">{blocks.map((b, i) => (hiddenBlock(b, i) ? null : <div key={i} {...(["say", "cards"].includes(b.kind) ? {} : boxProps(`b${i}`))} ref={videoFirst && i === vid + 1 ? revealRef : undefined} className={`llw-blk w-${b.width || 'full'} tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}` + (videoFirst && student && i > vid ? ' llw-after' : '') + (speak && spoken(b) ? ' llw-can-read' : '')}>{piece(b, i)}{speak && spoken(b) && <ReadAloud text={spoken(b)} label={`Read aloud: ${b.kind === 'read' && b.title ? b.title : 'this part'}`} className="llw-read-button llw-read-corner" />}</div>))}</div>

@@ -93,7 +93,7 @@ export const CSS = `
 .llw-back .eg b{display:block;color:var(--c);font-size:.95rem}
 .llw-fliphint{margin:-8px 0 18px;font-size:.88rem;font-weight:700;color:var(--muted)}
 @media(prefers-reduced-motion:reduce){.llw-flip-in{transition:none}}
-.llw-callout{background:var(--tone-wash);border:1.5px solid color-mix(in srgb,var(--tone) 45%,transparent);border-radius:14px;padding:12px 18px;margin:0 0 20px}
+.llw-callout{background:var(--tone-wash);border:1.5px solid color-mix(in srgb,var(--tone) 45%,transparent);border-radius:14px;padding:12px 18px;margin:0 0 20px;white-space:pre-line}
 .llw-read{background:#fbfaf6;border:1.5px solid #ece6d6;border-radius:14px;padding:14px 20px;margin:0 0 20px;white-space:pre-line}
 .llw-read b{display:block;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:#8a6d1f;margin-bottom:4px}
 /* a text that is a real thing in the story, drawn as that thing (October 27, 2026: "could we have an actual image of a sign?") */
@@ -715,7 +715,7 @@ export function pageTitle(page) {
  * One lesson page. `student`: steps appear one at a time and each check reports when it is done (`onCheck(blockIndex)`).
  * `picture(value)` turns a stored picture (an https address, an art id, a picture still inside the deck) into a URL.
  */
-/** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, student?: boolean, onCheck?: (block: number) => void, done?: Record<number, boolean>, Play?: any, assetBase?: string, wide?: boolean, arranging?: boolean }} props */
+/** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, student?: boolean, onCheck?: (block: number) => void, done?: Record<number, boolean>, Play?: any, assetBase?: string, wide?: boolean, arranging?: boolean, only?: number[] | null, slideOf?: { n: number, of: number, only: number[] } | null, reveal?: number | null }} props */
 export function LessonPageView({ lesson, page: given, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only = null, slideOf = null, reveal = null }) {
   // An arrangement the slide cannot use is left out (slideArrangement); the page then lays itself out.
   const page = useMemo(() => (given.arrangement && !slideArrangement(given) ? { ...given, arrangement: undefined } : given), [given])
@@ -983,17 +983,17 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
         <span>Today’s lesson</span>
         {/* one Listen for the whole cover (November 10, 2026 audit: the cover could not be heard) */}
         {!!lesson.readAloud && <ReadAloud text={[(typeof page.title === 'string' && page.title.trim()) || page.heading, goal?.text, hook?.text, line && `${one?.name || line.who} says: ${line.text}`].filter(Boolean).join('. ')} label="Read this page aloud" className="llw-read-button llw-listen llw-cover-listen" />}
-        <h1>{(typeof page.title === 'string' && page.title.trim()) || page.heading}</h1>
-        {goal && <div className="llw-cover-goal"><b>Goal</b><div><Rich text={goal.text} onTerm={setTerm} /></div></div>}
-        {hook && <p><Rich text={hook.text} onTerm={setTerm} /></p>}
+        <h1 data-edit-key="heading">{(typeof page.title === 'string' && page.title.trim()) || page.heading}</h1>
+        {goal && <div className="llw-cover-goal" data-edit-key={`b${blocks.indexOf(goal)}`}><b>Goal</b><div><Rich text={goal.text} onTerm={setTerm} /></div></div>}
+        {hook && <p data-edit-key={`b${blocks.indexOf(hook)}`}><Rich text={hook.text} onTerm={setTerm} /></p>}
       </div>
       <div>
-        {line && !one && <div className="llw-cover-say"><b>{line.who}</b><Rich text={line.text} onTerm={setTerm} /></div>}
+        {line && !one && <div className="llw-cover-say" data-edit-key={`b${blocks.indexOf(line)}-bubble`}><b>{line.who}</b><Rich text={line.text} onTerm={setTerm} /></div>}
         {one && <div className="llw-cover-cast">
           <figure>
             {/* the chosen cover character says the opening line, whoever Claude first gave it to */}
-            {line && <div className="llw-cover-say"><b>{one.name}</b><Rich text={line.text} onTerm={setTerm} /></div>}
-            <img src={one.src} alt={one.name} />
+            {line && <div className="llw-cover-say" data-edit-key={`b${blocks.indexOf(line)}-bubble`}><b>{one.name}</b><Rich text={line.text} onTerm={setTerm} /></div>}
+            <img src={one.src} alt={one.name} data-edit-key={line ? `b${blocks.indexOf(line)}-character` : undefined} />
           </figure>
         </div>}
       </div>
@@ -1010,10 +1010,10 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             const head = (
               <header className="llw-slide-head">
                 <span>{sectionOf(page)} · {shownLabel(page, lesson.part)}{slideOf && slideOf.of > 1 ? ` · ${slideOf.n + 1} of ${slideOf.of}` : ''}</span>
-                <h2>{slideTitle(page)}</h2>
+                <h2 data-edit-key="heading">{slideTitle(page)}</h2>
               </header>
             )
-            const blockEl = (b, i) => <div key={i} data-blk={i} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}`}>{piece(b, i)}</div>
+            const blockEl = (b, i) => <div key={i} data-blk={i} data-edit-key={['say', 'cards'].includes(b.kind) ? undefined : `b${i}`} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}`}>{piece(b, i)}</div>
             // One listen button a chunk: the side column's words together, the main piece on its own.
             const listen = (idx, withTitle, label) => {
               const words = [withTitle ? slideTitle(page) : '', ...idx.map((i) => chunkSpoken(blocks[i]))].filter((t) => String(t || '').trim()).join('. ')
@@ -1166,6 +1166,16 @@ export function LessonWalkthrough({ lesson: given, picture, onFinish, finishLabe
  * shows (label and skill heading, the side column beside the main piece, the scene behind, the cover, an arranged slide), at a
  * Chromebook's size, with a stepper through the page's slides. Everything is open to read (steps, cards' words), as in a review.
  */
+/** The builder's slide: a Chromebook's size wherever it is shown (the page view, and the editor that edits on it). */
+export const SLIDES_CSS = `.lls{display:grid;gap:10px}
+.lls-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700;color:#557489}
+.lls-bar b{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#035c78}
+.lls-bar button{font:inherit;font-weight:800;border:1.5px solid #cfdfe7;background:#fff;color:#14344a;border-radius:999px;min-width:34px;height:30px;padding:0 10px;cursor:pointer}
+.lls-bar button[aria-current=true]{background:#02384d;border-color:#02384d;color:#fff}
+.lls-bar button:disabled{opacity:.45;cursor:default}
+.llx-page.lls .llw-slide{min-height:578px}.llx-page.lls .llw-cover{height:578px}
+.llx-page.lls .llw-slide-side,.llx-page.lls .llw-slide-main{max-height:520px}.llx-page.lls .llw-slide-main.k-steps,.llx-page.lls .llw-slide-panel.solo .llw-slide-main{max-height:none}
+.llx-page.lls .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}.llx-page.lls .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}`
 /** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, note?: string }} props */
 export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, assetBase = '/', note = 'As students see it' }) {
   const slides = useMemo(() => slidesOf(page), [page])
@@ -1174,15 +1184,7 @@ export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, as
   const only = slides.slice(0, n + 1).flat()
   return (
     <div className="llx-page lls">
-      <style>{`.lls{display:grid;gap:10px}
-.lls-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:700;color:#557489}
-.lls-bar b{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#035c78}
-.lls-bar button{font:inherit;font-weight:800;border:1.5px solid #cfdfe7;background:#fff;color:#14344a;border-radius:999px;min-width:34px;height:30px;padding:0 10px;cursor:pointer}
-.lls-bar button[aria-current=true]{background:#02384d;border-color:#02384d;color:#fff}
-.lls-bar button:disabled{opacity:.45;cursor:default}
-.llx-page.lls .llw-slide{min-height:578px}.llx-page.lls .llw-cover{height:578px}
-.llx-page.lls .llw-slide-side,.llx-page.lls .llw-slide-main{max-height:520px}.llx-page.lls .llw-slide-main.k-steps,.llx-page.lls .llw-slide-panel.solo .llw-slide-main{max-height:none}
-.llx-page.lls .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}.llx-page.lls .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}`}</style>
+      <style>{SLIDES_CSS}</style>
       <div className="lls-bar">
         <b>{note}</b>
         {slides.length > 1 && <>

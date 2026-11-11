@@ -42,7 +42,7 @@ export const CSS = `
 .llw-canvas .llw-blk[data-layout-key] .llw-target{margin:0}
 /* an arranged slide's words are one size everywhere, so the editor and the student see the same slide */
 .llw .llw-card.llw-canvas.llw-canvas{font-size:22px;line-height:1.4}
-.llw .llw-card.llw-canvas.llw-canvas .llw-h{font-size:40px;line-height:1.1;margin:0}
+.llw .llw-card.llw-canvas.llw-canvas .llw-h{font-size:26px;line-height:1.15;margin:0}
 .llw-scene+.llw-canvas-viewport{margin-top:-56px;position:relative;z-index:1}
 .llw-canvas .llw-flow,.llw-canvas .llw-blk:has(>.llw-says),.llw-canvas .llw-blk:has(>.llw-cards),.llw-canvas .llw-blk:has(>.llw-flipset),.llw-canvas .llw-says,.llw-canvas .llw-cards{display:contents}
 .llw-canvas [data-layout-key]{position:absolute!important;margin:0!important;max-width:none!important;min-width:0!important;box-sizing:border-box;overflow:auto}
@@ -270,13 +270,19 @@ export const CSS = `
 .llw-slide-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 45%;display:block}
 .llw-slide-panel{position:relative;z-index:1;display:flex;flex-direction:column;justify-content:center;gap:clamp(16px,2.4vh,28px);padding:clamp(26px,4vw,56px) clamp(24px,4.5vw,72px)}
 .llw-slide.has-scene .llw-slide-panel{background:rgba(255,255,255,.95);backdrop-filter:blur(6px);border-radius:24px;padding:clamp(22px,3.4vw,48px) clamp(22px,3.8vw,60px);box-shadow:0 18px 50px -18px rgba(10,20,40,.55);max-width:1040px;width:100%;margin:0 auto}
-.llw-slide-head{display:grid;gap:10px}
-.llw-slide-head>span{font-size:.92rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--brand-dark,#0f6f8f)}
-.llw-slide-head h2{margin:0;font-family:var(--display);font-size:clamp(2rem,4.4vw,3.4rem);line-height:1.06;letter-spacing:-.015em;color:var(--navy);font-weight:700;text-wrap:balance}
+/*
+ * A slide's label and the skill's name are one small strip, with Listen beside them (November 10, 2026: "These titles are probably
+ * the least meaningful thing to the kid - can they be smaller and take less real estate so the important stuff shows?"). The
+ * window belongs to the goal, the teaching and the activity.
+ */
+.llw-slide-top{display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap}
+.llw-slide-top .llw-listen{margin:0;align-self:center;flex:none;height:34px}
+.llw-slide-head{display:flex;align-items:baseline;gap:2px 12px;flex-wrap:wrap;min-width:0}
+.llw-slide-head>span{font-size:.72rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--brand-dark,#0f6f8f)}
+.llw-slide-head h2{margin:0;font-family:var(--display);font-size:clamp(1.1rem,1.6vw,1.4rem);line-height:1.15;color:var(--navy);font-weight:700}
 .llw-slide-body{font-size:clamp(1.1rem,1.6vw,1.4rem);line-height:1.5;display:grid;gap:18px}
 .llw-slide-body .llw-blk.k-text p{margin:0;font-size:1.15em;color:var(--ink)}
 .llw-slide-body .llw-target{margin:0}
-.llw-young .llw-slide-head h2{font-size:clamp(2.2rem,5vw,3.8rem)}
 /* in the student site's frame the slide reaches down to the bottom bar */
 .llx-page .llw-slide{min-height:calc(100vh - 190px)}
 /*
@@ -302,16 +308,13 @@ export const CSS = `
 .llw-slide.has-scene .llw-slide-panel.split{max-width:1500px}
 .llw-slide.has-scene:has(.llw-slide-panel.split){padding:clamp(12px,2.4vh,28px) clamp(12px,1.8vw,28px)}
 .llw-slide-side{display:grid;gap:16px;align-content:start;max-height:calc(100vh - 230px);overflow:auto;padding-right:4px}
-.llw-slide-side .llw-slide-head h2,.llw-young .llw-slide-side .llw-slide-head h2{font-size:clamp(1.5rem,2.5vw,2.3rem)}
 .llw-slide-side .llw-slide-body{font-size:clamp(1rem,1.25vw,1.15rem);gap:12px}
 .llw-slide-main{min-width:0;max-height:calc(100vh - 230px);overflow:auto}
 .llw-slide-main .llv{margin:0 auto;width:min(100%,calc((100vh - 290px) * 16 / 9))}
 .llw-slide-panel.solo{gap:clamp(10px,1.6vh,18px);max-width:none}
 .llw-slide.has-scene:has(.llw-slide-panel.solo){padding:clamp(10px,2vh,24px) clamp(10px,1.6vw,24px)}
-.llw-slide-panel.solo .llw-slide-head{display:flex;align-items:baseline;gap:4px 16px;flex-wrap:wrap}
-.llw-slide-panel.solo .llw-slide-head h2{font-size:clamp(1.4rem,2.4vw,2.1rem)}
 .llw-slide-panel.solo .llw-slide-main{max-height:none;overflow:visible}
-.llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc((100vh - 330px) * 16 / 9))}
+.llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc((100vh - 290px) * 16 / 9))}
 @media(max-width:900px){.llw-slide-panel.split{grid-template-columns:1fr}.llw-slide-side,.llw-slide-main{max-height:none}}
 .llw-cover-copy>span{display:inline-block;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:5px 14px}
 .llw-cover-copy h1{margin:12px 0 10px;font-family:var(--display);font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;font-weight:700;letter-spacing:-.01em;text-shadow:0 4px 24px rgba(0,0,0,.35);text-wrap:balance}
@@ -1026,8 +1029,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             const mainAt = [...(slideOf?.only || only || [])].reverse().find((i) => blocks[i] && SLIDE_MAIN.has(blocks[i].kind) && shown.includes(i))
             if (mainAt === undefined) return (
               <div className="llw-slide-panel">
-                {head}
-                {listen(shown, true, 'Read this page aloud')}
+                <div className="llw-slide-top">{head}{listen(shown, true, 'Read this page aloud')}</div>
                 <div className="llw-slide-body llw-flow">
                   {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
                   {shown.map((i) => blockEl(blocks[i], i))}
@@ -1040,8 +1042,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             const beside = shown.filter((i) => i !== mainAt)
             if (!beside.length) return (
               <div className="llw-slide-panel solo">
-                {head}
-                {listen([mainAt], true, 'Read this page aloud')}
+                <div className="llw-slide-top">{head}{listen([mainAt], true, 'Read this page aloud')}</div>
                 <div className={`llw-slide-main k-${blocks[mainAt].kind}`}>{blockEl(blocks[mainAt], mainAt)}</div>
                 {wordDef}
               </div>
@@ -1049,8 +1050,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             return (
               <div className="llw-slide-panel split">
                 <aside className="llw-slide-side">
-                  {head}
-                  {listen(beside, true, 'Read this side aloud')}
+                  <div className="llw-slide-top">{head}{listen(beside, true, 'Read this side aloud')}</div>
                   <div className="llw-slide-body llw-flow">{beside.map((i) => blockEl(blocks[i], i))}</div>
                   {wordDef}
                 </aside>
@@ -1182,7 +1182,7 @@ export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, as
 .lls-bar button:disabled{opacity:.45;cursor:default}
 .llx-page.lls .llw-slide{min-height:578px}.llx-page.lls .llw-cover{height:578px}
 .llx-page.lls .llw-slide-side,.llx-page.lls .llw-slide-main{max-height:520px}.llx-page.lls .llw-slide-main.k-steps,.llx-page.lls .llw-slide-panel.solo .llw-slide-main{max-height:none}
-.llx-page.lls .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}.llx-page.lls .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc(438px * 16 / 9))}`}</style>
+.llx-page.lls .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}.llx-page.lls .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}`}</style>
       <div className="lls-bar">
         <b>{note}</b>
         {slides.length > 1 && <>

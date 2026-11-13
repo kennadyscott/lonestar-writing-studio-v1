@@ -25,6 +25,8 @@ export const CSS = `
 .llw-canvas-viewport{width:100%;position:relative;overflow:hidden;border-radius:22px}.llw-canvas{position:relative;width:1200px;transform-origin:top left;background:linear-gradient(135deg,#01172d,#035c78 60%,#06aade);border-radius:22px;overflow:hidden;padding:0!important}
 .llw-canvas-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 45%;z-index:0;pointer-events:none}
 .llw-canvas [data-layout-key]{z-index:1}
+/* words never scroll inside their box on an arranged slide: a line too many shows below the box, not behind a scrollbar */
+.llw-canvas .llw-h[data-layout-key].llw-h,.llw-canvas .llw-blk.k-target[data-layout-key],.llw-canvas .llw-blk.k-text[data-layout-key],.llw-canvas .llw-blk.k-callout[data-layout-key]{overflow:visible}
 /* One panel sits behind an arranged slide's pieces, as on every other slide (November 10, 2026: a white box per piece "just looks
    really bad ... At one point, it had a nice darker box that everything was in together"): white on a teaching slide; on the cover,
    the dark box of the designed cover, with the title and opening line in white and the goal in its white pill. It follows the pieces. */
@@ -47,6 +49,18 @@ export const CSS = `
 .llw-canvas .llw-flow,.llw-canvas .llw-blk:has(>.llw-says),.llw-canvas .llw-blk:has(>.llw-cards),.llw-canvas .llw-blk:has(>.llw-flipset),.llw-canvas .llw-says,.llw-canvas .llw-cards{display:contents}
 .llw-canvas [data-layout-key]{position:absolute!important;margin:0!important;max-width:none!important;min-width:0!important;box-sizing:border-box;overflow:auto}
 .llw-canvas img[data-layout-key]{object-fit:contain;overflow:visible}.llw-canvas .llw-blk{flex:none}.llw-canvas .llw-h{display:block!important}
+/* A speech bubble on a freely arranged slide grows to hold its words as far as it has room (down to its character, or the
+   slide's foot; past that the words scroll inside it) and keeps its pointer, which is its own piece on the edge that faces the
+   character: the bubble's ::before sat outside the box, where it made a scrollbar. */
+.llw-canvas .llw-bubble[data-layout-key]{overflow:visible;display:flex;flex-direction:column}.llw-canvas .llw-bubble::before{display:none}
+.llw-canvas .llw-bubble-words{min-height:0;overflow-y:auto}
+.llw-tail{position:absolute;width:16px;height:16px;background:inherit;border:0 solid var(--tone);transform:rotate(45deg);pointer-events:none}
+.llw-tail.right{right:-9.5px;border-top-width:1.5px;border-right-width:1.5px}.llw-tail.left{left:-9.5px;border-bottom-width:1.5px;border-left-width:1.5px}
+.llw-tail.top{top:-9.5px;border-top-width:1.5px;border-left-width:1.5px}.llw-tail.bottom{bottom:-9.5px;border-bottom-width:1.5px;border-right-width:1.5px}
+.llw-canvas.llw-cover-canvas .llw-bubble{background:#fff;color:var(--ink);border:0;border-radius:18px;padding:10px 18px;box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
+.llw-canvas.llw-cover-canvas .llw-bubble b{color:var(--brand-dark)}
+.llw-canvas.llw-cover-canvas .llw-tail{border-width:0}.llw-canvas.llw-cover-canvas .llw-tail.right{right:-8px}.llw-canvas.llw-cover-canvas .llw-tail.left{left:-8px}
+.llw-canvas.llw-cover-canvas .llw-tail.top{top:-8px}.llw-canvas.llw-cover-canvas .llw-tail.bottom{bottom:-8px}
 .llw-canvas .llw-fliphint{display:none}.llw-canvas .llw-card-box{height:100%}.llw-canvas .llw-flip-in{min-height:100%;height:100%}
 .llw-read-button{border:1px solid #087bb8;border-radius:50%;background:#fff;color:#053b55;width:36px;height:36px;cursor:pointer;display:inline-grid;place-items:center;font-size:20px;box-shadow:0 2px 7px #0002;z-index:4}
 .llw-read-button:focus-visible{outline:3px solid #f5b400;outline-offset:2px}.llw-h-row{display:flex;align-items:center;gap:14px}.llw-h-row .llw-h{margin-bottom:0}.llw-can-read,.llw-card-wrap,.llw-cards .llw-card-box,.llw-bubble{position:relative}.llw-can-read{padding-right:46px}.llw-card-wrap{display:grid}.llw-read-corner{position:absolute;top:8px;right:8px;width:32px;height:32px;font-size:16px}.llw-bubble:has(>.llw-read-corner),.llw-card-box:has(>.llw-read-corner){padding-right:48px}.llw-read-button:disabled{opacity:.5;cursor:not-allowed}.llw-next-video{margin:20px 0;display:flex;gap:12px;align-items:center}
@@ -79,7 +93,17 @@ export const CSS = `
 .llw-card-box p{margin:0;text-align:center}
 .llw-card-box .eg{margin-top:4px;padding-top:10px;border-top:2px dashed color-mix(in srgb,var(--c) 35%,transparent)}
 .llw-card-box .eg b{display:block;color:var(--c);font-size:.95rem}
-.llw-flipset .llw-card-box{cursor:pointer;perspective:1100px;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:center}
+.llw-flipset .llw-card-box{cursor:pointer;perspective:1100px;padding:0;border:0;background:none;font:inherit;color:inherit;text-align:center;display:grid}
+/* cards in a row are all as tall as the tallest (November 13, 2026: "adjust the size of the cards so they can all be the same size") */
+.llw-card-wrap>.llw-card-box{height:100%}
+/* Word cards carried into the side column are wide and short, one under another, so the column does not scroll
+   (November 13, 2026: "make the cards wider and then shorter so maybe the scroll bar can disappear"). */
+.llw-slide-side .llw-cards{grid-template-columns:1fr;gap:8px;margin:0}
+.llw-slide-side .llw-card-box:not(button){padding:8px 12px;gap:2px;border-width:2px;border-radius:14px}
+.llw-slide-side .llw-face{padding:8px 12px;gap:2px;border-radius:14px}.llw-slide-side .llw-flip-in{min-height:0}
+.llw-slide-side .llw-card-box h3,.llw-slide-side .llw-face strong{font-size:1rem;text-align:left}
+.llw-slide-side .llw-card-box p,.llw-slide-side .llw-face{text-align:left;font-size:.92rem;line-height:1.3}
+.llw-slide-side .llw-card-box .eg{margin-top:2px;padding-top:4px;font-size:.88rem}.llw-slide-side .llw-card-box .eg b{display:inline;margin-right:4px;font-size:.88rem}
 .llw-flip-in{display:grid;transition:transform .55s cubic-bezier(.3,1.3,.5,1);transform-style:preserve-3d;min-height:150px}
 .llw-flipped .llw-flip-in{transform:rotateY(180deg)}
 .llw-face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:20px;padding:14px 16px;display:grid;align-content:center;gap:8px}
@@ -121,38 +145,53 @@ export const CSS = `
 .llw-says img{height:clamp(96px,11vw,140px);width:auto;max-width:28%;object-fit:contain;flex:none}
 .llw-bubble{position:relative;flex:0 1 auto;min-width:0;max-width:min(100%,44ch);margin-top:10px;background:var(--tone-wash);border:1.5px solid var(--tone);border-radius:14px;padding:10px 16px}
 .llw-bubble::before{content:"";position:absolute;right:-9px;top:18px;width:14px;height:14px;background:var(--tone-wash);border-left:1.5px solid var(--tone);border-bottom:1.5px solid var(--tone);transform:rotate(225deg)}
-.llw-says.noart{flex-direction:row}
+.llw-says.noart{flex-direction:row;justify-content:flex-start}
 .llw-says.noart .llw-bubble{margin-top:0}
 .llw-says.noart .llw-bubble::before{display:none}
 /* a character whose picture looks right stands on the left, looking at the bubble */
 .llw-says.left{flex-direction:row}
 .llw-says.left .llw-bubble::before{right:auto;left:-9px;transform:rotate(45deg)}
 .llw-bubble b{display:block;color:var(--tone-ink);font-size:.85rem}
-.llw-steps{list-style:none;padding:0;margin:0 0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:clamp(10px,1.4vw,18px);align-items:stretch}
+/* Step cards fill their rows evenly (stepColumns): four are two and two, never three and one left over. --cols is the most cards
+   in a row; a card is never under 150px wide, so a narrow column takes fewer, wider cards and words never break mid-word. */
+.llw-steps{list-style:none;padding:0;margin:0 0 20px;display:grid;--gap:clamp(10px,1.4vw,18px);gap:var(--gap);grid-template-columns:repeat(auto-fit,minmax(max(min(100%,150px),calc((100% - (var(--cols,3) - 1)*var(--gap))/var(--cols,3) - 1px)),1fr));align-items:stretch}
+/* an author who chose "Cards in a row" gets exactly that many, however narrow ("or they should be smaller and 4 across") */
+.llw-steps.set{grid-template-columns:repeat(var(--cols),minmax(0,1fr))}
+.llw-steps.stacked li{min-height:clamp(130px,19vh,200px)}
 .llw-steps li{position:relative;border-radius:22px;min-height:clamp(170px,26vh,260px);display:flex;flex-direction:column;scroll-margin:90px 0 120px}
 .llw-steps li.open{background:#fff;border:3px solid var(--c);padding:clamp(14px,1.6vw,22px);gap:10px;box-shadow:0 10px 24px -14px rgba(2,30,60,.45);animation:llw-step-open .45s cubic-bezier(.2,1.2,.4,1) both}
 .llw-step-n{flex:none;display:grid;place-items:center;width:clamp(40px,3.4vw,54px);height:clamp(40px,3.4vw,54px);border-radius:50%;background:var(--c);color:#fff;font-family:var(--display);font-size:clamp(1.3rem,2vw,1.8rem);font-weight:700;box-shadow:0 4px 10px -4px rgba(0,0,0,.4)}
 .llw-step-t{font-size:clamp(1.05rem,1.45vw,1.35rem);font-weight:800;line-height:1.25;color:var(--ink);overflow-wrap:anywhere}
 .llw-steps .llw-why{margin:auto 0 0;background:color-mix(in srgb,var(--c) 12%,#fff);border-radius:14px;padding:10px 12px;font-size:clamp(.95rem,1.2vw,1.1rem);font-weight:600;line-height:1.35;color:var(--ink);overflow-wrap:anywhere}
-.llw-steps li button{all:unset;box-sizing:border-box;flex:1;display:grid;place-items:center;align-content:center;gap:8px;text-align:center;border-radius:22px;padding:16px;font-family:inherit;cursor:pointer;color:#fff;background:var(--c);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18),0 12px 24px -14px rgba(2,30,60,.55);transition:transform .15s}
-.llw-steps li button .llw-step-n{background:rgba(255,255,255,.22);box-shadow:none;width:clamp(52px,4.4vw,70px);height:clamp(52px,4.4vw,70px);font-size:clamp(1.6rem,2.6vw,2.3rem)}
-.llw-steps li button b{font-family:var(--display);font-size:clamp(1.2rem,1.9vw,1.6rem);font-weight:700}
-.llw-steps li button em{font-style:normal;font-size:clamp(.9rem,1.1vw,1.05rem);font-weight:800;background:rgba(0,0,0,.32);border-radius:999px;padding:4px 14px}
-.llw-steps li.next button{animation:llw-step-nudge 1.6s ease-in-out infinite}
-.llw-steps li.next button:hover{transform:translateY(-3px) scale(1.02)}
-.llw-steps li.next button:focus-visible{outline:4px solid #f5b400;outline-offset:3px}
-.llw-steps li.later button{cursor:default;background:#dfe7ee;color:#6b8296;box-shadow:inset 0 -6px 0 rgba(0,0,0,.06)}
-.llw-steps li.later button{color:#41586b}.llw-steps li.later button .llw-step-n,.llw-steps li.later button em{background:rgba(255,255,255,.7);color:#41586b}
+/* only the card's own tap-to-open button: a vocabulary word inside an open step is a button too, and was drawn as a big coloured pill */
+.llw-steps li>button{all:unset;box-sizing:border-box;flex:1;display:grid;place-items:center;align-content:center;gap:8px;text-align:center;border-radius:22px;padding:16px;font-family:inherit;cursor:pointer;color:#fff;background:var(--c);box-shadow:inset 0 -6px 0 rgba(0,0,0,.18),0 12px 24px -14px rgba(2,30,60,.55);transition:transform .15s}
+.llw-steps li>button .llw-step-n{background:rgba(255,255,255,.22);box-shadow:none;width:clamp(52px,4.4vw,70px);height:clamp(52px,4.4vw,70px);font-size:clamp(1.6rem,2.6vw,2.3rem)}
+.llw-steps li>button b{font-family:var(--display);font-size:clamp(1.2rem,1.9vw,1.6rem);font-weight:700}
+.llw-steps li>button em{font-style:normal;font-size:clamp(.9rem,1.1vw,1.05rem);font-weight:800;background:rgba(0,0,0,.32);border-radius:999px;padding:4px 14px}
+.llw-steps li.next>button{animation:llw-step-nudge 1.6s ease-in-out infinite}
+.llw-steps li.next>button:hover{transform:translateY(-3px) scale(1.02)}
+.llw-steps li.next>button:focus-visible{outline:4px solid #f5b400;outline-offset:3px}
+.llw-steps li.later>button{cursor:default;background:#dfe7ee;color:#6b8296;box-shadow:inset 0 -6px 0 rgba(0,0,0,.06)}
+.llw-steps li.later>button{color:#41586b}.llw-steps li.later>button .llw-step-n,.llw-steps li.later>button em{background:rgba(255,255,255,.7);color:#41586b}
 @keyframes llw-step-nudge{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 @keyframes llw-step-open{from{transform:rotateY(70deg) scale(.96);opacity:.2}to{transform:none;opacity:1}}
-@media(max-width:700px){.llw-steps{grid-template-columns:1fr}.llw-steps li{min-height:120px}}
+@media(max-width:700px){.llw-steps,.llw-steps.set{grid-template-columns:1fr}.llw-steps li{min-height:120px}}
 .llw-slide-main.k-steps{max-height:none;overflow:visible}
-.llw-canvas .llw-steps{margin:0;min-height:100%;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.llw-canvas .llw-steps li{min-height:auto}
+/* Moved freely, a set of steps lays its cards out by the width of its box (as slides already saved expect), unless its author
+   chose "Cards in a row" (.set). Both out-rank the phone rule below: the slide is always 1200 wide inside, whatever the window. */
+.llw-canvas .llw-steps{margin:0;min-height:100%;gap:10px;--gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}.llw-canvas .llw-steps.set{grid-template-columns:repeat(var(--cols),minmax(0,1fr))}.llw-canvas .llw-steps li{min-height:auto}
 .llw-canvas .llw-steps li.open{padding:12px;gap:6px}.llw-canvas .llw-step-n{width:36px;height:36px;font-size:18px}.llw-canvas .llw-step-t{font-size:18px}.llw-canvas .llw-steps .llw-why{font-size:14px;padding:6px 10px}
-.llw-canvas .llw-steps li button .llw-step-n{width:44px;height:44px;font-size:22px}.llw-canvas .llw-steps li button b{font-size:18px}.llw-canvas .llw-steps li button em{font-size:13px}
+.llw-canvas .llw-steps li>button .llw-step-n{width:44px;height:44px;font-size:22px}
+/* A set of steps made shorter on a freely arranged slide (November 13, 2026: "If we made the cards shorter ... it just cuts off the
+   cards and gives a scroll"): the cards go compact to fit the box, the number beside the words, before anything scrolls. */
+.llw-canvas .llw-blk.k-steps{container-type:size;container-name:llwsteps}
+@container llwsteps (max-height:260px){.llw-canvas .llw-steps{gap:8px}.llw-canvas .llw-steps li.open{padding:8px 10px;gap:4px 8px;flex-direction:row;flex-wrap:wrap;align-items:center;align-content:center;border-width:2px}
+.llw-canvas .llw-step-n{width:28px;height:28px;font-size:15px}.llw-canvas .llw-step-t{font-size:16px;line-height:1.2;flex:1;min-width:0}.llw-canvas .llw-steps .llw-why{flex-basis:100%;margin:0;font-size:13px;line-height:1.25;padding:4px 8px}
+.llw-canvas .llw-steps li>button{padding:8px;gap:4px;border-radius:16px}.llw-canvas .llw-steps li{border-radius:16px}.llw-canvas .llw-steps li>button .llw-step-n{width:32px;height:32px;font-size:17px}.llw-canvas .llw-steps li>button b{font-size:16px}.llw-canvas .llw-steps li>button em{font-size:12px;padding:2px 10px}}
+@container llwsteps (max-height:150px){.llw-canvas .llw-steps li>button{display:flex;flex-direction:row;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px}.llw-canvas .llw-steps li>button em{display:none}.llw-canvas .llw-steps li.open{padding:5px 8px}.llw-canvas .llw-steps .llw-why{font-size:12px;padding:3px 7px}.llw-canvas .llw-step-t{font-size:15px}}.llw-canvas .llw-steps li>button b{font-size:18px}.llw-canvas .llw-steps li>button em{font-size:13px}
 .llw-slide-side .llw-steps{grid-template-columns:1fr;gap:8px;margin:0}.llw-slide-side .llw-steps li{min-height:0}.llw-slide-side .llw-steps li.open{padding:10px 12px;flex-direction:row;flex-wrap:wrap;align-items:center;border-width:2px}
 .llw-slide-side .llw-step-n{width:32px;height:32px;font-size:1rem}.llw-slide-side .llw-step-t{font-size:1rem;flex:1}.llw-slide-side .llw-steps .llw-why{flex-basis:100%;margin:0;font-size:.9rem;padding:6px 10px}
-@media(prefers-reduced-motion:reduce){.llw-steps li.next button,.llw-steps li.open{animation:none}}
+@media(prefers-reduced-motion:reduce){.llw-steps li.next>button,.llw-steps li.open{animation:none}}
 .llw-why{color:var(--muted);font-size:.9rem;font-weight:600;margin-top:4px}
 .llw-more{font:inherit;font-size:.82em;font-weight:800;border:0;color:var(--brand);background:var(--brand-wash);border-radius:999px;padding:6px 14px;cursor:pointer;margin:-8px 0 20px 52px}
 .llw-more:hover{background:var(--brand);color:#fff}
@@ -309,6 +348,21 @@ export const CSS = `
 .llw-slide.has-scene:has(.llw-slide-panel.split){padding:clamp(12px,2.4vh,28px) clamp(12px,1.8vw,28px)}
 .llw-slide-side{display:grid;gap:16px;align-content:start;max-height:calc(100vh - 230px);overflow:auto;padding-right:4px}
 .llw-slide-side .llw-slide-body{font-size:clamp(1rem,1.25vw,1.15rem);gap:12px}
+/* Only a character beside the main piece (November 11, 2026: "the character just looks tiny and awkward - she should be in the
+   lower left hand corner and bigger if there is not anything else in the sidebar"): they stand at the foot of the column,
+   large, their words above their head. With more in the column (the next slide's steps) they go back to the small pair. */
+@media(min-width:901px){
+/* The panel fills the slide and the column takes the panel's height (height:0 with min-height:100%: the column never makes the
+   slide taller). The character is as tall as the room left under their words, up to 300px, and gives way to a longer line. */
+.llw-slide:has(.llw-slide-side.alone)>.llw-slide-panel{flex:1 1 auto;align-content:stretch}
+.llw-slide-side.alone{align-self:stretch;height:0;min-height:100%;max-height:none;overflow:visible;grid-template-rows:auto minmax(0,1fr);align-content:stretch}
+.llw-slide-side.alone .llw-slide-body{display:flex;flex-direction:column;flex-wrap:nowrap;justify-content:flex-end;min-height:0}
+.llw-slide-side.alone .llw-slide-body>.llw-blk{flex:0 1 auto;width:100%;min-height:0;display:flex;flex-direction:column}
+.llw-slide-side.alone .llw-says{flex:0 1 auto;min-height:0;flex-direction:column-reverse;align-items:flex-start;gap:14px;margin:0}
+.llw-slide-side.alone .llw-says img{flex:0 1 clamp(170px,34vh,300px);height:auto;min-height:90px;max-width:90%}
+.llw-slide-side.alone .llw-says .llw-bubble{flex:none;margin-top:0;max-width:100%;font-size:1.08em}
+.llw-slide-side.alone .llw-says .llw-bubble::before{top:auto;right:auto;bottom:-9px;left:42px;transform:rotate(-45deg)}
+}
 .llw-slide-main{min-width:0;max-height:calc(100vh - 230px);overflow:auto}
 .llw-slide-main .llv{margin:0 auto;width:min(100%,calc((100vh - 290px) * 16 / 9))}
 .llw-slide-panel.solo{gap:clamp(10px,1.6vh,18px);max-width:none}
@@ -374,6 +428,21 @@ const SLIDE_MAIN = new Set(['cards', 'read', 'steps', 'video', 'picture', 'check
  * added to the title page; a piece was added or removed) puts boxes on the wrong pieces: both are ignored, and the page lays itself
  * out as every other slide does until it is arranged again.
  */
+/**
+ * How many step cards sit in a row, so every row is as full as the others (November 11, 2026: "if there is an even number,
+ * they should stack ... it doesn't make sense to have one random one at the bottom"): up to three share one row, four are
+ * two and two, five are three and two, six are three and three, and never more than four across.
+ */
+export const stepColumns = (n) => {
+  const count = Math.max(1, Math.floor(Number(n) || 0))
+  if (count <= 3) return count
+  return Math.ceil(count / Math.max(2, Math.ceil(count / 4)))
+}
+/** A set of steps' cards in a row: the number its author chose (`across`, 1 to 4), else even rows. */
+export const stepsAcross = (b) => {
+  const count = Math.max(1, (b?.steps || []).length)
+  return [1, 2, 3, 4].includes(b?.across) ? Math.min(b.across, count) : stepColumns(count)
+}
 export const SLIDE_HEIGHT = 675
 export function slideArrangement(page) {
   const a = page?.arrangement
@@ -384,6 +453,29 @@ export function slideArrangement(page) {
   const have = Object.keys(a.items)
   // every box sits on a piece the page has, and every piece of the page has its box
   return have.length && have.every((k) => want.has(k)) && [...want].every((k) => a.items[k]) ? a : null
+}
+/**
+ * Where a speech bubble's pointer goes on a freely arranged slide (November 11, 2026, Stacey: "when you 'move pieces freely' and
+ * then save the speech bubble goes away and it is just a text box"). The bubble's own pointer is drawn outside its box, where an
+ * arranged piece clips it (and, on a computer that always shows scrollbars, turns into a scrollbar). So the pointer is its own
+ * piece: on the bubble's edge that faces its character, as near the character as that edge gets. No pointer when the bubble
+ * sits over its character. `x`, `y` are the point on the bubble's box edge, in the slide's 1200-wide units.
+ * @param {{x:number,y:number,w:number,h:number}|undefined} bubble
+ * @param {{x:number,y:number,w:number,h:number}|undefined} character
+ * @returns {{side:'left'|'right'|'top'|'bottom',x:number,y:number}|null}
+ */
+export function bubbleTail(bubble, character) {
+  const ok = (r) => r && [r.x, r.y, r.w, r.h].every(Number.isFinite)
+  if (!ok(bubble) || !ok(character)) return null
+  const cx = character.x + character.w / 2, cy = character.y + character.h / 2
+  const right = bubble.x + bubble.w, bottom = bubble.y + bubble.h
+  const dx = cx < bubble.x ? cx - bubble.x : cx > right ? cx - right : 0
+  const dy = cy < bubble.y ? cy - bubble.y : cy > bottom ? cy - bottom : 0
+  if (!dx && !dy) return null
+  // keep the pointer off the rounded corners; a bubble too small for that has it in the middle
+  const along = (v, from, size) => (size < 56 ? from + size / 2 : Math.max(from + 28, Math.min(from + size - 28, v)))
+  if (Math.abs(dx) >= Math.abs(dy)) return { side: dx < 0 ? 'left' : 'right', x: dx < 0 ? bubble.x : right, y: along(cy, bubble.y, bubble.h) }
+  return { side: dy < 0 ? 'top' : 'bottom', x: along(cx, bubble.x, bubble.w), y: dy < 0 ? bubble.y : bottom }
 }
 export function slidesOf(page) {
   const blocks = page.walk || []
@@ -398,7 +490,9 @@ export function slidesOf(page) {
   let lead = []
   order.forEach((i) => {
     const b = blocks[i]
-    if (!SLIDE_MAIN.has(b.kind)) { lead.push(i); return }
+    // A piece whose own slide was taken away (`joined`, November 13, 2026: "We need a way to delete a slide ... 1 isn't necessary
+    // as it is very similar to slide 2 and 3") opens with the piece after it. Nothing is deleted: the slide after holds both.
+    if (!SLIDE_MAIN.has(b.kind) || (b.joined === true && order.slice(order.indexOf(i) + 1).some((k) => SLIDE_MAIN.has(blocks[k].kind)))) { lead.push(i); return }
     const prev = out[out.length - 1]
     if (b.kind === 'check' && !lead.length && prev && prev.some((k) => blocks[k].kind === 'read' || blocks[k].kind === 'picture') && !prev.some((k) => blocks[k].kind === 'check')) { prev.push(i); return }
     out.push([...lead, i])
@@ -408,6 +502,25 @@ export function slidesOf(page) {
   return out
 }
 /** The lesson as one list of slides: each with its page, the page's place in the lesson, and the pieces it shows. */
+/**
+ * The student's slide for a page of the lesson as the builder lists it (November 11, 2026: "When we are working on a lesson and
+ * are on a specific zone of the lesson and then click student preview, we want it to take us directly to that spot"). `pageIndex`
+ * counts the lesson's own pages; the student's lesson leaves some out (an empty page, an old Warm-Up), so a page students never
+ * see opens at the next one they do. `part` is the part of that page (0 is the first).
+ */
+export function slideForPage(lesson, pageIndex, part = 0) {
+  const all = lesson?.pages || [], pages = all.length ? walkPages(lesson) : []
+  const want = all[Math.floor(Number(pageIndex))]
+  if (!want || !pages.length) return 0
+  // the title page is rebuilt when the old Learning Target page folds into it, so it is found by what it is
+  const shownAt = (p) => { const k = pages.indexOf(p); return k < 0 && p.type === 'breakout_title' ? pages.findIndex((x) => x.type === 'breakout_title') : k }
+  let at = shownAt(want), exact = at >= 0
+  if (!exact) { const later = all.slice(all.indexOf(want) + 1).map(shownAt).find((k) => k >= 0); at = later === undefined ? pages.length - 1 : later }
+  const slides = lessonSlides(pages), first = slides.findIndex((sl) => sl.pageAt === at)
+  if (first < 0) return 0
+  const parts = slides.filter((sl) => sl.pageAt === at).length
+  return first + (exact ? Math.max(0, Math.min(parts - 1, Math.floor(Number(part) || 0))) : 0)
+}
 export function lessonSlides(pages) {
   return pages.flatMap((page, pageAt) => { const all = slidesOf(page); return all.map((only, n) => ({ page, pageAt, only, n, of: all.length })) })
 }
@@ -427,6 +540,28 @@ export function slideGate(slide, mine = {}) {
   return { open, wait }
 }
 
+/**
+ * A short happy sound when a student finishes an activity (November 13, 2026: "It would be a nice addition to add a 'happy
+ * sound' when students submit and get it right"): three rising notes, about half a second, made in the browser (no sound file).
+ * Quiet, and silent where the browser has no sound or will not play it.
+ */
+let cheerAudio = null
+export function cheerSound() {
+  try {
+    const Ctx = typeof window !== 'undefined' && (window.AudioContext || window.webkitAudioContext)
+    if (!Ctx) return
+    cheerAudio = cheerAudio || new Ctx()
+    const ctx = cheerAudio
+    if (ctx.state === 'suspended') ctx.resume()
+    const t0 = ctx.currentTime + 0.02
+    ;[523.25, 659.25, 783.99, 1046.5].forEach((hz, k) => {
+      const osc = ctx.createOscillator(), gain = ctx.createGain(), at = t0 + k * 0.1
+      osc.type = 'triangle'; osc.frequency.value = hz
+      gain.gain.setValueAtTime(0.0001, at); gain.gain.exponentialRampToValueAtTime(0.16, at + 0.02); gain.gain.exponentialRampToValueAtTime(0.0001, at + (k === 3 ? 0.5 : 0.22))
+      osc.connect(gain); gain.connect(ctx.destination); osc.start(at); osc.stop(at + 0.55)
+    })
+  } catch { /* no sound is fine */ }
+}
 /** A video's clips, however it was saved: `clips`, or the one-clip shape (src, times, job) videos were first saved in. */
 const clipsOf = (p) => (p.clips?.length ? p.clips : p.src || p.job ? [{ from: 0, src: p.src, times: p.times, job: p.job }] : [])
 const videoReady = (p) => { const c = clipsOf(p); return c.length > 0 && c.every((k) => !!k.src) }
@@ -435,7 +570,7 @@ const videoReady = (p) => { const c = clipsOf(p); return c.length > 0 && c.every
 // An activity whose directions and first line are the same sentence says it once.
 const said = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
 const onceSaid = (act) => (act && act.brief && said(act.brief) === said(act.directions) ? { ...act, brief: '' } : act)
-const gates = (b) => b.kind === 'check' || (b.kind === 'cards' && b.flip) || (b.kind === 'video' && videoReady(b)) || (b.kind === 'steps' && (b.steps || []).length > 1)
+const gates = (b) => b.kind === 'check' || (b.kind === 'cards' && b.flip) || (b.kind === 'video' && videoReady(b)) || (b.kind === 'steps' && !b.allOpen && ((b.steps || []).length > 1 || !!b.startClosed))
 
 /**
  * A lesson video (October 22, 2026: "they are watching little videos along the way"): the animated clips, played back to
@@ -761,7 +896,8 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
   }, [page.arrangement, slide])
   const boxProps = (key) => {
     const box = page.arrangement?.items?.[key]
-    return { 'data-layout-key': key, ...(box ? { style: { left: box.x, top: box.y, width: box.w, height: box.h } } : {}) }
+    // `z`: how far forward the piece is layered (November 13, 2026: "layer objects and send them forward or backward")
+    return { 'data-layout-key': key, ...(box ? { style: { left: box.x, top: box.y, width: box.w, height: box.h, ...(Number.isFinite(box.z) ? { zIndex: box.z } : {}) } } : {}) }
   }
   const cast = useMemo(() => new Map((lesson.cast || []).map((c) => [c.name.toLowerCase(), c])), [lesson])
   const glossary = useMemo(() => new Map((lesson.glossary || []).map((g) => [g.term.toLowerCase(), g])), [lesson])
@@ -821,7 +957,10 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
   // piece with words gets a listen button. An arranged page places its own (Arrange page, per box).
   const speak = !!lesson.readAloud && !page.arrangement
   // How many of a steps piece's cards are open: all of them for a publisher, and for a student who has opened them all before.
-  const stepsOpen = (b, i) => (!student || done[i] ? b.steps.length : Math.min(b.steps.length, Math.max(1, shown[i] ?? 1)))
+  // Steps carried beside a later part of the page (the "Your turn" slide of an Example) are there to look back at: all open,
+  // whether or not the student opened each one on their own slide (November 13, 2026: "already flipped on the student view").
+  const carried = (i) => !!slideOf && Array.isArray(slideOf.only) && !slideOf.only.includes(i)
+  const stepsOpen = (b, i) => (!student || done[i] || b.allOpen || carried(i) ? b.steps.length : Math.min(b.steps.length, Math.max(b.startClosed ? 0 : 1, shown[i] ?? (b.startClosed ? 0 : 1))))
   const spoken = (b, i = blocks.indexOf(b)) => b.kind === 'read' ? [b.title, b.text].filter(Boolean).join('. ')
     : b.kind === 'steps' ? b.steps.slice(0, stepsOpen(b, i)).map((st, k) => `Step ${k + 1}. ${st.text}${st.why ? ` ${st.why}` : ''}`).join(' ')
     : b.kind === 'connect' ? `${CONNECT_LABEL[b.connect] || 'Talk about it'}. ${b.text}`
@@ -829,11 +968,23 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
   // On a slide one listen button reads a whole chunk (November 10, 2026: "can we have audio buttons that chunk things together? Three
   // audio buttons seems ridiculous"; "They need audio for activities too"): a character's line, the cards and the activity too.
   const chunkSpoken = (b) => spoken(b)
-    || (b.kind === 'say' ? `${b.who} says: ${b.text}`
+    || (b.kind === 'say' ? `${coverSpeaker(b)?.name || b.who} says: ${b.text}`
       : b.kind === 'cards' ? b.cards.map((c) => [c.title, c.text, c.example && `For example: ${c.example}`].filter(Boolean).join('. ')).join('. ')
         : b.kind === 'check' ? spokenActivity(b.activity) : '')
   const speakEach = speak && !slide
   // One piece as the student sees it; the editor (the CMS) draws the same pieces.
+  // Who is on the cover, and what the cover says: worked out before the pieces, which need it on a freely arranged cover.
+  const flat = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
+  // The lesson's I can statement sits on the cover, under the title (November 9, 2026: "include the learning target directly on the title slide").
+  const goal = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'target' && String(b.text || '').trim()) : null
+  const hook = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'text' && flat(b.text) !== flat(page.heading)) || (goal ? null : blocks.find((b) => b.kind === 'target' && flat(b.text) !== flat(page.heading))) : null
+  const line = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'say') : null
+  const lineup = (lesson.cast || []).map((c) => ({ ...c, src: c.art ? picture(c.art) : null })).filter((c) => c.src)
+  const speaker = line ? lineup.findIndex((c) => c.name.toLowerCase() === String(line.who).toLowerCase()) : -1
+  const chosen = lesson.front ? lineup.find((c) => c.name.toLowerCase() === String(lesson.front).toLowerCase()) : null
+  const one = chosen || (speaker >= 0 ? lineup[speaker] : lineup[0] || null)
+  // The cover's opening line is said by the cover's character in either layout. A cover with a conversation keeps each speaker.
+  const coverSpeaker = (b) => (b && b === line && one && blocks.filter((x) => x.kind === 'say').length === 1 ? one : null)
   const piece = (b, i) => {
           if (b.kind === 'target') return <div key={i} className="llw-target"><Rich text={b.text} onTerm={setTerm} /></div>
           if (b.kind === 'text') return paragraphs(b.text).map((p, k) => <p key={`${i}-${k}`}><Rich text={p} onTerm={setTerm} /></p>)
@@ -860,11 +1011,24 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
           )
           if (b.kind === 'read') return <div key={i} className="llw-read">{b.title && <b>{b.title}</b>}<Rich text={b.text} onTerm={setTerm} /></div>
           if (b.kind === 'say') {
-            const who = cast.get(String(b.who).toLowerCase()), src = who?.art ? picture(who.art) : null
+            // The cover's opening line is said by the cover's character, in either layout (the designed cover always did;
+            // moving its pieces freely showed whoever the line was first written for, or nobody).
+            const front = coverSpeaker(b)
+            const who = front || cast.get(String(b.who).toLowerCase()), src = front ? front.src : who?.art ? picture(who.art) : null
+            const name = front ? front.name : b.who
+            const box = page.arrangement?.items?.[`b${i}-bubble`], stands = src && box ? page.arrangement.items[`b${i}-character`] : null
+            const tail = stands ? bubbleTail(box, stands) : null
+            // How far down the bubble may grow: to just above a character standing under it, else to the foot of the slide.
+            const under = stands && stands.y >= box.y + box.h && stands.x < box.x + box.w && stands.x + stands.w > box.x
+            const room = box ? Math.max(box.h, (under ? stands.y - 10 : page.arrangement.height - 8) - box.y) : 0
             return (
               <div key={i} className={'llw-says' + (src ? '' : ' noart') + (who?.faces === 'right' ? ' left' : '')}>
-                {src && <img src={src} alt={b.who} {...boxProps(`b${i}-character`)} />}
-                <div className="llw-bubble" {...boxProps(`b${i}-bubble`)}><b>{b.who}</b><Rich text={b.text} onTerm={setTerm} />{speakEach && <ReadAloud text={b.text} label={`Read aloud: what ${b.who} says`} className="llw-read-button llw-read-corner" />}</div>
+                {src && <img src={src} alt={name} {...boxProps(`b${i}-character`)} />}
+                {/* its box is the least it takes: a bubble with more words than its box grows downward to hold them, as far as it has room */}
+                <div className="llw-bubble" {...boxProps(`b${i}-bubble`)} style={box ? { left: box.x, top: box.y, width: box.w, minHeight: box.h, maxHeight: room, ...(Number.isFinite(box.z) ? { zIndex: box.z } : {}) } : undefined}>
+                  <div className="llw-bubble-words"><b>{name}</b><Rich text={b.text} onTerm={setTerm} /></div>{speakEach && <ReadAloud text={b.text} label={`Read aloud: what ${name} says`} className="llw-read-button llw-read-corner" />}
+                  {tail && <i className={`llw-tail ${tail.side}`} style={tail.side === 'left' || tail.side === 'right' ? { top: tail.y - box.y - 8 } : { left: tail.x - box.x - 8 }} aria-hidden="true" />}
+                </div>
               </div>
             )
           }
@@ -885,15 +1049,15 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
               if (next) setTimeout(() => next.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60)
             }
             return (
-              <ol key={i} className="llw-steps" style={{ '--steps': Math.min(b.steps.length, 4) }}>
+              <ol key={i} className={'llw-steps' + ([1, 2, 3, 4].includes(b.across) ? ' set' : '') + (stepsAcross(b) < b.steps.length ? ' stacked' : '')} style={{ '--cols': stepsAcross(b) }}>
                 {b.steps.map((s, k) => (k < upTo ? (
-                  <li key={k} className="open" style={{ '--c': CARD_INK[k % CARD_INK.length] }}>
+                  <li key={k} className="open" data-edit-key={`b${i}-step${k}`} style={{ '--c': CARD_INK[k % CARD_INK.length] }}>
                     <span className="llw-step-n" aria-hidden="true">{k + 1}</span>
                     <div className="llw-step-t"><Rich text={s.text} onTerm={setTerm} /></div>
                     {s.why && <div className="llw-why"><Rich text={s.why} onTerm={setTerm} /></div>}
                   </li>
                 ) : (
-                  <li key={k} className={k === upTo ? 'next' : 'later'} style={{ '--c': CARD_INK[k % CARD_INK.length] }}>
+                  <li key={k} className={k === upTo ? 'next' : 'later'} data-edit-key={`b${i}-step${k}`} style={{ '--c': CARD_INK[k % CARD_INK.length] }}>
                     <button type="button" disabled={k !== upTo} onClick={(e) => open(k, e.currentTarget)} aria-label={k === upTo ? `Open step ${k + 1}` : `Step ${k + 1} opens after step ${k}`}>
                       <span className="llw-step-n" aria-hidden="true">{k + 1}</span>
                       <b>Step {k + 1}</b>
@@ -919,7 +1083,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             <section key={i} className={'llw-check' + (done[i] ? ' done' : '')} aria-label="Check">
               {student && done[i] && <div className="llw-cheer" role="status"><span aria-hidden="true">⭐</span> Nice work! You finished this one.</div>}
               <div className="llw-check-head">Your turn{done[i] && <span>✓ Done</span>}</div>
-              <div className="prw"><Play act={onceSaid(b.activity)} onDone={() => onCheck && onCheck(i)} doneLabel="Done ✓" /></div>
+              <div className="prw"><Play act={onceSaid(b.activity)} onDone={() => { if (student && !done[i]) cheerSound(); if (onCheck) onCheck(i) }} doneLabel="Done ✓" /></div>
             </section>
           )
           return null
@@ -957,7 +1121,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
           if (b && hiddenBlock(b, Number(match[1]))) return null
           const c = b?.kind === 'cards' && match?.[2] !== undefined ? b.cards[Number(match[2])] : null
           const text = key === 'heading' ? pageTitle(page) : c ? [c.title, c.text, c.example].filter(Boolean).join('. ') : b?.text || b?.caption || ''
-          return text ? <ReadAloud key={key} text={text} label={`Read aloud: ${c?.title || (key === 'heading' ? pageTitle(page) : b?.who || 'text')}`} style={{ position: 'absolute', left: box.x + box.w - 38, top: box.y + 2 }} /> : null
+          return text ? <ReadAloud key={key} text={text} label={`Read aloud: ${c?.title || (key === 'heading' ? pageTitle(page) : coverSpeaker(b)?.name || b?.who || 'text')}`} style={{ position: 'absolute', left: box.x + box.w - 38, top: box.y + 2 }} /> : null
         })}
       </article>
   )
@@ -967,15 +1131,6 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
   // The title page is the lesson's cover (October 21, 2026: "Now the title slide turned out so boring"): the scene across
   // the whole page, the title large on it, and one character with the opening line in a little speech bubble (October 26,
   // 2026: the whole cast lined up with name labels "looks weird"; "just one character with a little dialogue box").
-  const flat = (t) => String(t || '').toLowerCase().replace(/[^a-z0-9]+/g, '')
-  // The lesson's I can statement sits on the cover, under the title (November 9, 2026: "include the learning target directly on the title slide").
-  const goal = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'target' && String(b.text || '').trim()) : null
-  const hook = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'text' && flat(b.text) !== flat(page.heading)) || (goal ? null : blocks.find((b) => b.kind === 'target' && flat(b.text) !== flat(page.heading))) : null
-  const line = page.type === 'breakout_title' ? blocks.find((b) => b.kind === 'say') : null
-  const lineup = (lesson.cast || []).map((c) => ({ ...c, src: c.art ? picture(c.art) : null })).filter((c) => c.src)
-  const speaker = line ? lineup.findIndex((c) => c.name.toLowerCase() === String(line.who).toLowerCase()) : -1
-  const chosen = lesson.front ? lineup.find((c) => c.name.toLowerCase() === String(lesson.front).toLowerCase()) : null
-  const one = chosen || (speaker >= 0 ? lineup[speaker] : lineup[0] || null)
   const cover = (
     <section className="llw-cover" aria-label={page.heading}>
       {scene && <img className="llw-cover-bg" src={scene} alt="" />}
@@ -1013,7 +1168,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
                 <h2 data-edit-key="heading">{slideTitle(page)}</h2>
               </header>
             )
-            const blockEl = (b, i) => <div key={i} data-blk={i} data-edit-key={['say', 'cards'].includes(b.kind) ? undefined : `b${i}`} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}`}>{piece(b, i)}</div>
+            const blockEl = (b, i) => <div key={i} data-blk={i} data-edit-key={['say', 'cards', 'steps'].includes(b.kind) ? undefined : `b${i}`} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}`}>{piece(b, i)}</div>
             // One listen button a chunk: the side column's words together, the main piece on its own.
             const listen = (idx, withTitle, label) => {
               const words = [withTitle ? slideTitle(page) : '', ...idx.map((i) => chunkSpoken(blocks[i]))].filter((t) => String(t || '').trim()).join('. ')
@@ -1040,6 +1195,8 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             // Nothing to keep beside it (November 10, 2026: "If we don't have anything important to say on the side here, better to
             // just use the full space for a video"): the heading sits above, and the piece takes the whole width.
             const beside = shown.filter((i) => i !== mainAt)
+            // a character with a picture, and nothing else, beside the main piece (a word's meaning opened there is something else)
+            const alone = !term && beside.length === 1 && blocks[beside[0]].kind === 'say' && !!cast.get(String(blocks[beside[0]].who).toLowerCase())?.art
             if (!beside.length) return (
               <div className="llw-slide-panel solo">
                 <div className="llw-slide-top">{head}{listen([mainAt], true, 'Read this page aloud')}</div>
@@ -1049,7 +1206,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             )
             return (
               <div className="llw-slide-panel split">
-                <aside className="llw-slide-side">
+                <aside className={'llw-slide-side' + (alone ? ' alone' : '')}>
                   <div className="llw-slide-top">{head}{listen(beside, true, 'Read this side aloud')}</div>
                   <div className="llw-slide-body llw-flow">{beside.map((i) => blockEl(blocks[i], i))}</div>
                   {wordDef}
@@ -1174,13 +1331,15 @@ export const SLIDES_CSS = `.lls{display:grid;gap:10px}
 .lls-bar button[aria-current=true]{background:#02384d;border-color:#02384d;color:#fff}
 .lls-bar button:disabled{opacity:.45;cursor:default}
 .llx-page.lls .llw-slide{min-height:578px}.llx-page.lls .llw-cover{height:578px}
-.llx-page.lls .llw-slide-side,.llx-page.lls .llw-slide-main{max-height:520px}.llx-page.lls .llw-slide-main.k-steps,.llx-page.lls .llw-slide-panel.solo .llw-slide-main{max-height:none}
+.llx-page.lls .llw-slide-side,.llx-page.lls .llw-slide-main{max-height:520px}.llx-page.lls .llw-slide-side.alone{max-height:none}.llx-page.lls .llw-slide-main.k-steps,.llx-page.lls .llw-slide-panel.solo .llw-slide-main{max-height:none}
 .llx-page.lls .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}.llx-page.lls .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}`
-/** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, note?: string }} props */
-export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, assetBase = '/', note = 'As students see it' }) {
+/** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, note?: string, onSlide?: ((part: number) => void) | null }} props */
+export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, assetBase = '/', note = 'As students see it', onSlide = null }) {
   const slides = useMemo(() => slidesOf(page), [page])
   const [at, setAt] = useState(0)
   const n = Math.min(at, slides.length - 1)
+  // which part of the page is showing, for whoever opens the student preview at this spot
+  useEffect(() => { if (onSlide) onSlide(n) }, [n, onSlide])
   const only = slides.slice(0, n + 1).flat()
   return (
     <div className="llx-page lls">

@@ -442,7 +442,7 @@ Todo se vale.`,"Start writing your argument here…":"Empieza a escribir tu argu
 /* Only a character beside the main piece (November 11, 2026: "the character just looks tiny and awkward - she should be in the
    lower left hand corner and bigger if there is not anything else in the sidebar"): they stand at the foot of the column,
    large, their words above their head. With more in the column (the next slide's steps) they go back to the small pair. */
-@media(min-width:901px){
+@media(min-width:901px){@container llwslide (min-width:641px){
 /* The panel fills the slide and the column takes the panel's height (height:0 with min-height:100%: the column never makes the
    slide taller). The character is as tall as the room left under their words, up to 300px, and gives way to a longer line. */
 .llw-slide:has(.llw-slide-side.alone)>.llw-slide-panel{flex:1 1 auto;align-content:stretch}
@@ -453,7 +453,7 @@ Todo se vale.`,"Start writing your argument here…":"Empieza a escribir tu argu
 .llw-slide-side.alone .llw-says img{flex:0 1 clamp(170px,34vh,300px);height:auto;min-height:90px;max-width:90%}
 .llw-slide-side.alone .llw-says .llw-bubble{flex:none;margin-top:0;max-width:100%;font-size:1.08em}
 .llw-slide-side.alone .llw-says .llw-bubble::before{top:auto;right:auto;bottom:-9px;left:42px;transform:rotate(-45deg)}
-}
+}}
 .llw-slide-main{min-width:0;max-height:calc(100vh - 230px);overflow:auto}
 .llw-slide-main .llv{margin:0 auto;width:min(100%,calc((100vh - 290px) * 16 / 9))}
 .llw-slide-panel.solo{gap:clamp(10px,1.6vh,18px);max-width:none}
@@ -461,6 +461,10 @@ Todo se vale.`,"Start writing your argument here…":"Empieza a escribir tu argu
 .llw-slide-panel.solo .llw-slide-main{max-height:none;overflow:visible}
 .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc((100vh - 290px) * 16 / 9))}
 @media(max-width:900px){.llw-slide-panel.split{grid-template-columns:1fr}.llw-slide-side,.llw-slide-main{max-height:none}}
+/* The same when the slide itself is narrow, whatever the window (November 13, 2026: in the builder the menu and the page list
+   leave a 1028px window a 480px slide, and the main piece was squeezed into a 100px column beside the side column). */
+.llw-slide{container:llwslide/inline-size}
+@container llwslide (max-width:640px){.llw-slide-panel.split{grid-template-columns:1fr}.llw-slide .llw-slide-side,.llw-slide .llw-slide-main,.llx-page.lls .llw-slide .llw-slide-side,.llx-page.lls .llw-slide .llw-slide-main{max-height:none}}
 .llw-cover-copy>span{display:inline-block;font-size:.8rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:rgba(255,255,255,.22);backdrop-filter:blur(6px);border-radius:999px;padding:5px 14px}
 .llw-cover-copy h1{margin:12px 0 10px;font-family:var(--display);font-size:clamp(2.4rem,6vw,4.4rem);line-height:1.02;font-weight:700;letter-spacing:-.01em;text-shadow:0 4px 24px rgba(0,0,0,.35);text-wrap:balance}
 .llw-cover-copy p{margin:0;font-size:clamp(1.1rem,2.2vw,1.45rem);font-weight:700;text-shadow:0 2px 12px rgba(0,0,0,.45);max-width:34ch}

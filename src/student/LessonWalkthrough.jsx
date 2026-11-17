@@ -9,7 +9,7 @@
  * ships it as src/student/LessonWalkthrough.jsx, handing in its own activity player
  * (`Play`) and where its ClearConnect icons are served from (`assetBase`). Nothing here saves; `onFinish` and `onCheck` report to whoever mounted it.
  */
-import React, { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react'
 // The CMS imports its activity player here; the student app hands in ProofRoom's ActivityPreview as `Play`.
 const ActivityPreview = () => null
 
@@ -450,13 +450,32 @@ export const stepsAcross = (b) => {
 export const SLIDE_HEIGHT = 675
 export function slideArrangement(page) {
   const a = page?.arrangement
-  if (!a || typeof a !== 'object' || !a.items || typeof a.items !== 'object') return null
+  // a page whose slides are arranged one by one (`parts`) is not one arranged slide: each slide finds its own (slideLayout)
+  if (!a || typeof a !== 'object' || !a.items || typeof a.items !== 'object' || Array.isArray(a.parts)) return null
   if (a.slide !== true && a.height !== SLIDE_HEIGHT) return null
   const walk = page.walk || []
   const want = new Set(['heading', ...walk.flatMap((b, i) => (b.kind === 'say' ? [`b${i}-character`, `b${i}-bubble`] : b.kind === 'cards' ? (b.cards || []).map((_, j) => `b${i}-card${j}`) : [`b${i}`]))])
   const have = Object.keys(a.items)
   // every box sits on a piece the page has, and every piece of the page has its box
   return have.length && have.every((k) => want.has(k)) && [...want].every((k) => a.items[k]) ? a : null
+}
+/**
+ * Slide n's own arrangement on a page whose slides are arranged one by one (November 17, 2026, Stacey: "move pieces freely ... shows
+ * all the objects on all the slides in that section"), when it is one the slide can use; null where that slide keeps its designed
+ * layout. The cover is one slide and keeps one arrangement.
+ */
+/**
+ * The pieces a slide arranged on its own shows: its own, and the characters of the page's earlier slides (who stay on the page as
+ * the designed slide keeps them). `shown` is every piece the slide could show (its own and the earlier slides').
+ */
+export const ownPieces = (walk, shown, own) => (shown || []).filter((i) => (own || []).includes(i) || (walk?.[i]?.kind === 'say' && walk[i].carry !== false))
+export function slideLayout(page, n) {
+  const parts = page?.arrangement?.parts
+  if (!Array.isArray(parts) || page.type === 'breakout_title') return null
+  const items = parts[n]
+  if (!items || typeof items !== 'object') return null
+  const one = { ...page, arrangement: { height: SLIDE_HEIGHT, slide: true, items } }
+  return slideArrangement(one)
 }
 /**
  * Where a speech bubble's pointer goes on a freely arranged slide (November 11, 2026, Stacey: "when you 'move pieces freely' and
@@ -529,7 +548,13 @@ export function lessonSlides(pages) {
   return pages.flatMap((page, pageAt) => { const all = slidesOf(page); return all.map((only, n) => ({ page, pageAt, only, n, of: all.length })) })
 }
 /** The pieces on screen at a slide: every slide of its page up to and including it, so the page builds down as the student goes. */
-export const shownOn = (slides, at) => { const cur = slides[at]; return cur ? slides.filter((sl) => sl.pageAt === cur.pageAt && sl.n <= cur.n).flatMap((sl) => sl.only) : [] }
+export const shownOn = (slides, at) => { const cur = slides[at]; return cur ? slides.filter((sl) => sl.pageAt === cur.pageAt && sl.n <= cur.n).flatMap((sl) => sl.only).filter((i) => cur.only.includes(i) || cur.page.walk?.[i]?.carry !== false) : [] }
+/**
+ * What slide n of a page shows: its own pieces and the earlier slides' (the poster an activity is about), except a piece taken off
+ * the later slides (`carry: false`, November 17, 2026: "When we delete things from one zone, it shouldn't necessarily delete from
+ * previous or other slides"). `slides` is slidesOf(page).
+ */
+export const slideShows = (walk, slides, n) => (slides || []).slice(0, n + 1).flat().filter((i) => (slides[n] || []).includes(i) || walk?.[i]?.carry !== false)
 /** What a slide waits for before Continue: its activity, its cards to turn over, its video to the end. */
 export function slideGate(slide, mine = {}) {
   // The cover draws its title, goal, line and character, never an activity or cards, so nothing on it can hold the student
@@ -722,10 +747,26 @@ export function readAloudParts(words, max = READ_ALOUD_MAX) {
 let playing = null
 let asked = 0
 const stopPlaying = () => { const p = playing; playing = null; if (p) p.stop() }
-const bestVoice = () => {
-  const voices = (window.speechSynthesis?.getVoices() || []).filter((v) => /^en[-_]US/i.test(v.lang))
-  for (const want of [/natural/i, /google us english/i, /samantha/i, /\bava\b/i, /allison/i, /aria/i, /jenny/i]) { const v = voices.find((x) => want.test(x.name)); if (v) return v }
-  return voices.find((v) => v.localService) || voices[0] || null
+// The browser's voice list arrives a moment after the page opens. Asking before it has arrived gives no voices, so the first Listen
+// used the computer's default (on Windows a robotic man's voice) and only the second got the better one (Stacey, November 17, 2026:
+// "the voice always starts as a male and then changes to female on the next play. The female voice sounds much less robotic"). So
+// the list is asked for as soon as this file loads, and a Listen waits (a second and a half at most) for it before speaking.
+const voicesNow = () => (typeof window !== 'undefined' && window.speechSynthesis?.getVoices()) || []
+const voicesReady = () => new Promise((done) => {
+  const synth = typeof window !== 'undefined' ? window.speechSynthesis : null
+  if (!synth || voicesNow().length) { done(); return }
+  const finish = () => { clearTimeout(timer); synth.removeEventListener?.('voiceschanged', finish); done() }
+  const timer = setTimeout(finish, 1500)
+  synth.addEventListener?.('voiceschanged', finish)
+})
+if (typeof window !== 'undefined') voicesNow()
+// The natural-sounding voices first, then the plainer women's voices the same computers have, and a man's voice only when nothing else is there.
+const VOICE_ORDER = [/natural/i, /online/i, /google us english/i, /samantha/i, /\bava\b/i, /allison/i, /aria/i, /jenny/i, /zira/i, /susan/i, /victoria/i]
+export function bestVoice(list = voicesNow()) {
+  const voices = list.filter((v) => /^en[-_]US/i.test(v.lang))
+  for (const want of VOICE_ORDER) { const v = voices.find((x) => want.test(x.name)); if (v) return v }
+  const notMale = voices.filter((v) => !/\b(david|mark|guy|alex|fred|daniel|tom|aaron|eric|ralph|bruce)\b/i.test(v.name))
+  return notMale.find((v) => v.localService) || notMale[0] || voices[0] || null
 }
 const plainWords = (text) => String(text).replace(/\[\[|\]\]|\{\{|\}\}|\*\*|==/g, '').replace(/\s+/g, ' ').trim()
 export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-read-button' }) {
@@ -740,8 +781,10 @@ export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-
   }, [])
   const idle = () => { if (mounted.current) setState('idle') }
   // The browser's own voice, for the words from `from` on. The utterance stays on the handle so the browser cannot drop it mid-speech.
-  function browserVoice(words, me) {
+  async function browserVoice(words, me) {
     if (me !== asked || !mounted.current || !('speechSynthesis' in window)) { idle(); return }
+    if (!voicesNow().length) { setState('loading'); await voicesReady() }
+    if (me !== asked || !mounted.current) { idle(); return }
     stopPlaying()
     const u = new SpeechSynthesisUtterance(words)
     u.lang = 'en-US'; u.rate = .92
@@ -757,7 +800,7 @@ export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-
     stopPlaying()
     const words = plainWords(text)
     if (!words) return
-    if (!voice) { browserVoice(words, me); return }
+    if (!voice) { void browserVoice(words, me); return }
     const parts = readAloudParts(words)
     setState('loading')
     // Each part is asked for as the one before it plays; a newer press, Stop or leaving the page ends the run.
@@ -766,7 +809,7 @@ export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-
       let url = null
       try { url = await voice(parts[k]) } catch { url = null }
       if (!live()) { idle(); return }
-      if (!url) { browserVoice(parts.slice(k).join(' '), me); return }
+      if (!url) { void browserVoice(parts.slice(k).join(' '), me); return }
       const ok = await new Promise((done) => {
         stopPlaying()
         const audio = new Audio(url)
@@ -782,27 +825,23 @@ export function ReadAloud({ text, label = 'Read aloud', style, className = 'llw-
         audio.play().catch((e) => finish(e && e.name === 'AbortError' ? 'stopped' : 'failed'))
       })
       if (ok === 'stopped' || !live()) { idle(); return }
-      if (ok === 'failed') { browserVoice(parts.slice(k).join(' '), me); return }
+      if (ok === 'failed') { void browserVoice(parts.slice(k).join(' '), me); return }
     }
     idle()
   }
   return <button type="button" className={className} style={style} disabled={!supported} aria-label={state === 'idle' ? label : 'Stop reading'} title={supported ? label : 'Read aloud is unavailable in this browser'} onClick={() => void play()}>{state === 'loading' ? '…' : state === 'playing' ? '■' : '🔊'}</button>
 }
-/** What an activity says out loud: its directions, its question and each thing the student works with. */
+/** What an activity's Listen reads: its question and nothing else (Stacey, November 17, 2026: "we need a 'listen' that would just
+ * read the directions: 'Put each animal name in its spot in ABC order' – right now it's the entire 'box' which is too much"; Kennady:
+ * "It should just read the question, not anything else"). So no how-to-use-the-tiles line, no answer choices and no word lists. A
+ * quiz or passage reads its own questions, since each is a question the student answers; one with no question line reads its how-to. */
 export function spokenActivity(act) {
   if (!act) return ''
-  const bits = [act.directions, act.brief]
-  for (const q of act.quiz || []) bits.push(q.q, (q.options || []).length ? `${q.options.slice(0, -1).join(', ')}, or ${q.options.at(-1)}` : '')
-  for (const it of act.items || []) bits.push(it.given || it.prompt || it.text)
-  for (const pr of act.pairs || []) bits.push(pr.a)
-  // an ordering or sorting activity: its things are read in ABC order, since the saved order (and group) is the answer
-  const abc = (list) => [...list].filter((x) => typeof x === 'string' && x.trim()).sort((x, y) => x.localeCompare(y))
-  for (const o of act.order || []) bits.push(o.prompt, abc(o.steps || []).join(', '))
-  if (Array.isArray(act.words) && act.words.length) bits.push(abc(act.words.map((w) => (w && typeof w === 'object' ? w.w : w))).join(', '))
+  const bits = [act.brief]
+  for (const q of act.quiz || []) bits.push(q.q)
   for (const q of act.questions || []) bits.push(q.ask || q.q)
-  if (Array.isArray(act.bank) && act.bank.length) bits.push(`Words: ${act.bank.join(', ')}`)
-  if (Array.isArray(act.groups) && act.groups.length) bits.push(`Groups: ${act.groups.map((g) => g.name || g).join(', ')}`)
-  return bits.filter((b) => typeof b === 'string' && b.trim()).map((b) => b.replace(/_{2,}/g, 'blank')).join('. ').replace(/\.\s*\./g, '.')
+  if (!bits.some((b) => typeof b === 'string' && b.trim())) bits.push(act.directions)
+  return bits.filter((b) => typeof b === 'string' && b.trim()).map((b) => b.trim().replace(/_{2,}/g, 'blank')).join('. ').replace(/([.!?])\s*\./g, '$1')
 }
 
 /** The page's title the way the deck says it: "Instruction 1: Author's Purpose". */
@@ -855,9 +894,13 @@ export function pageTitle(page) {
  * `picture(value)` turns a stored picture (an https address, an art id, a picture still inside the deck) into a URL.
  */
 /** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, student?: boolean, onCheck?: (block: number) => void, done?: Record<number, boolean>, Play?: any, assetBase?: string, wide?: boolean, arranging?: boolean, only?: number[] | null, slideOf?: { n: number, of: number, only: number[] } | null, reveal?: number | null }} props */
-export function LessonPageView({ lesson, page: given, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only = null, slideOf = null, reveal = null }) {
-  // An arrangement the slide cannot use is left out (slideArrangement); the page then lays itself out.
-  const page = useMemo(() => (given.arrangement && !slideArrangement(given) ? { ...given, arrangement: undefined } : given), [given])
+export function LessonPageView({ lesson, page: given, picture, student = false, onCheck, done = {}, Play = ActivityPreview, assetBase = '/', wide = false, arranging = false, only: shownGiven = null, slideOf = null, reveal = null }) {
+  // An arrangement the slide cannot use is left out (slideArrangement); the page then lays itself out. A page arranged slide by
+  // slide shows this slide's own arrangement, with this slide's own pieces only (where they were put), or its designed layout.
+  const n = slideOf?.n ?? 0
+  const own = useMemo(() => slideLayout(given, n), [given, n])
+  const page = useMemo(() => (own ? { ...given, arrangement: own } : given.arrangement && !slideArrangement(given) ? { ...given, arrangement: undefined } : given), [given, own])
+  const only = own && slideOf && Array.isArray(slideOf.only) ? ownPieces(given.walk, shownGiven || slideOf.only, slideOf.only) : shownGiven
   // One slide of the page (slidesOf): only its pieces, none of the page's own in-page stages.
   const slide = Array.isArray(only)
   /*
@@ -1087,7 +1130,7 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             <section key={i} className={'llw-check' + (done[i] ? ' done' : '')} aria-label="Check">
               {student && done[i] && <div className="llw-cheer" role="status"><span aria-hidden="true">⭐</span> Nice work! You finished this one.</div>}
               <div className="llw-check-head">Your turn{done[i] && <span>✓ Done</span>}</div>
-              <div className="prw"><Play act={onceSaid(b.activity)} onDone={() => { if (student && !done[i]) cheerSound(); if (onCheck) onCheck(i) }} doneLabel="Done ✓" /></div>
+              <div className="prw"><Play act={onceSaid(b.activity)} onDone={() => { if (student && !done[i]) cheerSound(); if (onCheck) onCheck(i) }} doneLabel="Done ✓" finishOnCheck /></div>
             </section>
           )
           return null
@@ -1334,9 +1377,46 @@ export const SLIDES_CSS = `.lls{display:grid;gap:10px}
 .lls-bar button{font:inherit;font-weight:800;border:1.5px solid #cfdfe7;background:#fff;color:#14344a;border-radius:999px;min-width:34px;height:30px;padding:0 10px;cursor:pointer}
 .lls-bar button[aria-current=true]{background:#02384d;border-color:#02384d;color:#fff}
 .lls-bar button:disabled{opacity:.45;cursor:default}
-.llx-page.lls .llw-slide{min-height:578px}.llx-page.lls .llw-cover{height:578px}
-.llx-page.lls .llw-slide-side,.llx-page.lls .llw-slide-main{max-height:520px}.llx-page.lls .llw-slide-side.alone{max-height:none}.llx-page.lls .llw-slide-main.k-steps,.llx-page.lls .llw-slide-panel.solo .llw-slide-main{max-height:none}
-.llx-page.lls .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}.llx-page.lls .llw-slide-panel.solo .llw-slide-main .llv{width:min(100%,calc(478px * 16 / 9))}`
+.lls-stage{overflow:hidden;min-width:0}.lls-stage>div{transform-origin:0 0}.lls-stage .llw{font-size:17px}`
+/*
+ * The student's stage width on this screen: the window less the student frame's padding, its rail of pages and the gap beside it
+ * (the numbers .llx-own sets below). The builder draws the slide this wide and shrinks it to fit (November 17, 2026, Stacey: "The
+ * edit looks a lot different than the student preview. It just makes it hard to edit because you don't know how it will look on
+ * the student view").
+ */
+export function studentStageWidth(windowWidth) {
+  const vw = Math.max(320, Number(windowWidth) || 0)
+  const clamp = (lo, v, hi) => Math.max(lo, Math.min(hi, v))
+  const pad = clamp(12, vw * .016, 24)
+  const rail = vw <= 860 ? 0 : clamp(200, vw * .17, 250) + clamp(12, vw * .014, 20)
+  return Math.round(vw - 2 * pad - rail)
+}
+/** A slide drawn exactly as wide (and tall) as the student's, then scaled down to the column it is shown in. */
+export function StudentStage({ children }) {
+  const outer = useRef(null)
+  const inner = useRef(null)
+  const [fit, setFit] = useState({ width: 0, scale: 1, height: 0 })
+  useLayoutEffect(() => {
+    const o = outer.current, i = inner.current
+    if (!o || !i) return
+    const run = () => {
+      const width = studentStageWidth(document.documentElement.clientWidth || window.innerWidth)
+      const scale = Math.min(1, o.clientWidth / Math.max(1, width))
+      const height = Math.ceil(i.offsetHeight * scale)
+      setFit((old) => (old.width === width && Math.abs(old.scale - scale) < 0.0005 && old.height === height ? old : { width, scale, height }))
+    }
+    run()
+    const obs = new ResizeObserver(run)
+    obs.observe(o); obs.observe(i)
+    window.addEventListener('resize', run)
+    return () => { obs.disconnect(); window.removeEventListener('resize', run) }
+  }, [])
+  return (
+    <div ref={outer} className="lls-stage" style={fit.height ? { height: fit.height } : undefined}>
+      <div ref={inner} style={fit.width ? { width: fit.width, transform: `scale(${fit.scale})` } : undefined}>{children}</div>
+    </div>
+  )
+}
 /** @param {{ lesson: any, page: any, picture: (value?: string) => string | null, Play?: any, assetBase?: string, note?: string, onSlide?: ((part: number) => void) | null }} props */
 export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, assetBase = '/', note = 'As students see it', onSlide = null }) {
   const slides = useMemo(() => slidesOf(page), [page])
@@ -1344,7 +1424,7 @@ export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, as
   const n = Math.min(at, slides.length - 1)
   // which part of the page is showing, for whoever opens the student preview at this spot
   useEffect(() => { if (onSlide) onSlide(n) }, [n, onSlide])
-  const only = slides.slice(0, n + 1).flat()
+  const only = slideShows(page.walk, slides, n)
   return (
     <div className="llx-page lls">
       <style>{SLIDES_CSS}</style>
@@ -1357,7 +1437,7 @@ export function PageAsSlides({ lesson, page, picture, Play = ActivityPreview, as
           <span>Slide {n + 1} of {slides.length} on this page. Each part opens beside the one before.</span>
         </>}
       </div>
-      <LessonPageView lesson={lesson} page={page} picture={picture} Play={Play} assetBase={assetBase} wide only={only} slideOf={{ n, of: slides.length, only: slides[n] }} reveal={null} />
+      <StudentStage><LessonPageView lesson={lesson} page={page} picture={picture} Play={Play} assetBase={assetBase} wide only={only} slideOf={{ n, of: slides.length, only: slides[n] }} reveal={null} /></StudentStage>
     </div>
   )
 }

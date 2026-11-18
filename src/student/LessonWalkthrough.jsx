@@ -343,6 +343,8 @@ export const CSS = `
 .llw-cover-copy .llw-cover-listen{display:inline-flex;vertical-align:middle;margin:0 0 0 10px;height:30px;background:#fff;color:var(--navy)}
 .llw-listen::after{content:"Listen";font-size:.85rem;font-weight:800;margin-left:6px;color:var(--navy)}
 .llw-slide-main>.llw-listen{margin:0 0 10px}
+.llw-slide-body>.llw-part-listen{height:30px;margin:0 0 -10px;font-size:.9rem;align-self:flex-start;justify-self:start}
+.llw-slide-body>.llw-part-listen::after{font-size:.78rem}
 .llw-slide-panel.split{display:grid;grid-template-columns:minmax(240px,30%) minmax(0,1fr);gap:clamp(18px,2.4vw,36px);align-items:center}
 .llw-slide.has-scene .llw-slide-panel.split{max-width:1500px}
 .llw-slide.has-scene:has(.llw-slide-panel.split){padding:clamp(12px,2.4vh,28px) clamp(12px,1.8vw,28px)}
@@ -1216,11 +1218,23 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
               </header>
             )
             const blockEl = (b, i) => <div key={i} data-blk={i} data-edit-key={['say', 'cards', 'steps'].includes(b.kind) ? undefined : `b${i}`} className={`llw-blk w-full tone-${b.tone || TONE_OF[b.kind] || 'teal'} k-${b.kind}`}>{piece(b, i)}</div>
-            // One listen button a chunk: the side column's words together, the main piece on its own.
+            // One listen button a chunk: the main piece on its own, and the slide read whole where it has no side column.
             const listen = (idx, withTitle, label) => {
               const words = [withTitle ? slideTitle(page) : '', ...idx.map((i) => chunkSpoken(blocks[i]))].filter((t) => String(t || '').trim()).join('. ')
               return speak && words ? <ReadAloud text={words} label={label} className="llw-read-button llw-listen" /> : null
             }
+            /*
+             * One Listen for each part of the side column (Stacey, November 18, 2026: "No matter which section you click on the left, the
+             * audio button only goes to the 'Identify Antonyms'"; Kennady chose one Listen per part): the title's beside the title, and
+             * one above the teaching text, the "I can", the character's words. It sits outside the piece, so in the builder it is a
+             * button of its own and not part of the piece's selection box.
+             */
+            const partName = (b) => (b.kind === 'say' ? `${coverSpeaker(b)?.name || b.who || 'the character'}'s words` : b.kind === 'target' ? 'the I can statement' : b.kind === 'read' && b.title ? b.title : b.kind === 'steps' ? 'the steps' : 'this part')
+            const part = (i) => {
+              const b = blocks[i], words = speak && b ? chunkSpoken(b) : ''
+              return [words ? <ReadAloud key={`listen-${i}`} text={words} label={`Read aloud: ${partName(b)}`} className="llw-read-button llw-listen llw-part-listen" /> : null, blockEl(b, i)]
+            }
+            const titleListen = speak && slideTitle(page) ? <ReadAloud text={slideTitle(page)} label="Read the title aloud" className="llw-read-button llw-listen" /> : null
             const shown = blocks.map((b, i) => (hiddenBlock(b, i) ? null : i)).filter((i) => i !== null)
             /*
              * The slide's main piece fills the window beside a side column (November 10, 2026: "format a little differently so the
@@ -1231,10 +1245,10 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             const mainAt = [...(slideOf?.only || only || [])].reverse().find((i) => blocks[i] && SLIDE_MAIN.has(blocks[i].kind) && shown.includes(i))
             if (mainAt === undefined) return (
               <div className="llw-slide-panel">
-                <div className="llw-slide-top">{head}{listen(shown, true, 'Read this page aloud')}</div>
+                <div className="llw-slide-top">{head}{shown.length ? titleListen : listen(shown, true, 'Read this page aloud')}</div>
                 <div className="llw-slide-body llw-flow">
                   {!blocks.length && page.body && paragraphs(page.body).map((p, i) => <p key={i} style={{ whiteSpace: 'pre-line' }}>{p}</p>)}
-                  {shown.map((i) => blockEl(blocks[i], i))}
+                  {shown.map((i) => part(i))}
                 </div>
                 {wordDef}
               </div>
@@ -1254,8 +1268,8 @@ export function LessonPageView({ lesson, page: given, picture, student = false, 
             return (
               <div className="llw-slide-panel split">
                 <aside className={'llw-slide-side' + (alone ? ' alone' : '')}>
-                  <div className="llw-slide-top">{head}{listen(beside, true, 'Read this side aloud')}</div>
-                  <div className="llw-slide-body llw-flow">{beside.map((i) => blockEl(blocks[i], i))}</div>
+                  <div className="llw-slide-top">{head}{titleListen}</div>
+                  <div className="llw-slide-body llw-flow">{beside.map((i) => part(i))}</div>
                   {wordDef}
                 </aside>
                 <div className={`llw-slide-main k-${blocks[mainAt].kind}`}>{listen([mainAt], false, blocks[mainAt].kind === 'check' ? 'Read the activity aloud' : 'Read this aloud')}{blockEl(blocks[mainAt], mainAt)}</div>
